@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'dart:ffi' as ffi;
 
 import 'package:flutter/services.dart';
 import 'package:fonnx/fonnx.dart';
@@ -55,7 +56,20 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+          child: Column(
+            children: [
+              Text('Running on: $_platformVersion\n'),
+              ElevatedButton.icon(
+                onPressed: () {
+                  final dylib =
+                      ffi.DynamicLibrary.open('libonnxruntime.1.16.0.dylib');
+                  print('dylib loaded!');
+                },
+                icon: const Icon(Icons.code),
+                label: const Text('Load dylib'),
+              ),
+            ],
+          ),
         ),
       ),
     );

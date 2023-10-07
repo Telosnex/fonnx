@@ -4,4 +4,4 @@ headers:
     - "../onnx_runtime/headers/**.h"
 ffi-native:
 preamble: |
-  // ignore_for_file: type=lint, unused_field
+  // ignore_for_file: type=lint, unused_field, unused_element
