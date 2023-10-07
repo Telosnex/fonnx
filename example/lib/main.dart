@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:ffi' as ffi;
 
+import 'package:ffi/ffi.dart';
+
 import 'package:flutter/services.dart';
 import 'package:fonnx/fonnx.dart';
 
@@ -18,6 +20,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
+  String _onnxVersion = 'Unknown';
   final _fonnxPlugin = Fonnx();
 
   @override
@@ -59,11 +62,17 @@ class _MyAppState extends State<MyApp> {
           child: Column(
             children: [
               Text('Running on: $_platformVersion\n'),
+              Text('Running on ONNX: $_onnxVersion\n'),
               ElevatedButton.icon(
                 onPressed: () {
-                  final dylib =
-                      ffi.DynamicLibrary.open('libonnxruntime.1.16.0.dylib');
-                  print('dylib loaded!');
+                  ffi.DynamicLibrary.open('libonnxruntime.1.16.0.dylib');
+                  final api = OrtGetApiBase().ref;
+                  final versionFn = api.GetVersionString.asFunction<
+                      ffi.Pointer<ffi.Char> Function()>();
+                  final version = versionFn().toDartString();
+                  setState(() {
+                    _onnxVersion = version;
+                  });
                 },
                 icon: const Icon(Icons.code),
                 label: const Text('Load dylib'),
@@ -73,5 +82,11 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
     );
+  }
+}
+
+extension PointerCharExtension on ffi.Pointer<ffi.Char> {
+  String toDartString() {
+    return cast<Utf8>().toDartString();
   }
 }
