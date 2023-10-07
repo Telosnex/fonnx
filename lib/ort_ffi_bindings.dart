@@ -4961,7 +4961,7 @@ final class OrtTrainingApi extends ffi.Struct {
           OrtStatusPtr Function(
               ffi.Pointer<OrtCheckpointState> checkpoint_state,
               ffi.Pointer<ffi.Char> checkpoint_path,
-              ffi.Int include_optimizer_state)>> SaveCheckpoint;
+              ffi.Bool include_optimizer_state)>> SaveCheckpoint;
 
   external ffi.Pointer<
           ffi.NativeFunction<
@@ -5078,21 +5078,21 @@ final class OrtTrainingApi extends ffi.Struct {
           OrtStatusPtr Function(
               ffi.Pointer<OrtTrainingSession> sess,
               ffi.Pointer<ffi.Size> out,
-              ffi.Int trainable_only)>> GetParametersSize;
+              ffi.Bool trainable_only)>> GetParametersSize;
 
   external ffi.Pointer<
       ffi.NativeFunction<
           OrtStatusPtr Function(
               ffi.Pointer<OrtTrainingSession> sess,
               ffi.Pointer<OrtValue> parameters_buffer,
-              ffi.Int trainable_only)>> CopyParametersToBuffer;
+              ffi.Bool trainable_only)>> CopyParametersToBuffer;
 
   external ffi.Pointer<
       ffi.NativeFunction<
           OrtStatusPtr Function(
               ffi.Pointer<OrtTrainingSession> sess,
               ffi.Pointer<OrtValue> parameters_buffer,
-              ffi.Int trainable_only)>> CopyBufferToParameters;
+              ffi.Bool trainable_only)>> CopyBufferToParameters;
 
   external ffi.Pointer<
           ffi.NativeFunction<
@@ -5242,6 +5242,12 @@ abstract class COREMLFlags {
   static const int COREML_FLAG_ONLY_ALLOW_STATIC_INPUT_SHAPES = 8;
   static const int COREML_FLAG_LAST = 8;
 }
+
+const int __bool_true_false_are_defined = 1;
+
+const int true1 = 1;
+
+const int false1 = 0;
 
 const int __API_TO_BE_DEPRECATED = 100000;
 
@@ -6322,4 +6328,4 @@ const int RAND_MAX = 2147483647;
 const int ORT_API_VERSION = 16;
 
 const String ORT_FILE =
-    '/var/folders/v8/cddv063n39799991xj6y4r4m0000gn/T/9SQFx9/temp_for_macros.hpp';
+    '/var/folders/v8/cddv063n39799991xj6y4r4m0000gn/T/R9SfP3/temp_for_macros.hpp';

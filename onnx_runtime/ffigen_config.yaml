@@ -1,4 +1,4 @@
-output: "generated_bindings.dart"
+output: "../lib/ort_ffi_bindings.dart"
 headers:
   entry-points:
     - "../onnx_runtime/headers/**.h"
