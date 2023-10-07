@@ -1,0 +1,7 @@
+output: "generated_bindings.dart"
+headers:
+  entry-points:
+    - "../onnx_runtime/headers/**.h"
+ffi-native:
+preamble: |
+  // ignore_for_file: type=lint, unused_field
