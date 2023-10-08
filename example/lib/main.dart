@@ -98,15 +98,7 @@ class _MyAppState extends State<MyApp> {
       ),
     );
   }
-  // Pointer<OrtStatus> createTensorWithDataAsOrtValue(
-  //   Pointer<Pointer<OrtValue>> value, {
-  //   required Pointer<OrtMemoryInfo> memoryInfo,
-  //   required Pointer<Void> inputData,
-  //   required int inputDataLengthInBytes,
-  //   required Pointer<Int64> inputShape,
-  //   required int inputShapeLengthInBytes,
-  //   required int onnxTensorElementDataType,
-  // }) {
+
   void _loadModel() async {
     final modelPath = await getModelPath('miniLmL6V2.onnx');
     final objects = createOrtSession(modelPath);
@@ -117,34 +109,95 @@ class _MyAppState extends State<MyApp> {
           'Message: ${objects.api.getErrorMessage(status)}';
       throw Exception(error);
     }
+
     final inputIdsValue = calloc<Pointer<OrtValue>>();
     final tokens = WordpieceTokenizer.bert().tokenize('');
     final inputIdsStatus = objects.api.createInt64Tensor(
       inputIdsValue,
       memoryInfo: memoryInfo.value,
       values: tokens,
-
     );
     if (inputIdsStatus.isError) {
       final error = 'Code: ${objects.api.getErrorCodeMessage(inputIdsStatus)}\n'
           'Message: ${objects.api.getErrorMessage(inputIdsStatus)}';
       throw Exception(error);
     }
-    final inputMask = List.generate(256, (index) {
-      if (index < tokens.length) {
-        return 1;
-      } else {
-        return 0;
-      }
-    });
+    calloc.free(inputIdsValue);
+
     final inputMaskValue = calloc<Pointer<OrtValue>>();
     final inputMaskStatus = objects.api.createInt64Tensor(
       inputMaskValue,
       memoryInfo: memoryInfo.value,
-      values: inputMask,
+      values: List.generate(
+        256,
+        (index) => index < tokens.length ? 1 : 0,
+      ),
     );
+    if (inputMaskStatus.isError) {
+      final error =
+          'Code: ${objects.api.getErrorCodeMessage(inputMaskStatus)}\n'
+          'Message: ${objects.api.getErrorMessage(inputMaskStatus)}';
+      throw Exception(error);
+    }
+    calloc.free(inputMaskValue);
 
-    print('did it');
+    final tokenTypeValue = calloc<Pointer<OrtValue>>();
+    final tokenTypeStatus = objects.api.createInt64Tensor(
+      tokenTypeValue,
+      memoryInfo: memoryInfo.value,
+      values: List.generate(
+        256,
+        (index) => index < tokens.length ? 0 : -1,
+      ),
+    );
+    if (tokenTypeStatus.isError) {
+      final error =
+          'Code: ${objects.api.getErrorCodeMessage(inputMaskStatus)}\n'
+          'Message: ${objects.api.getErrorMessage(inputMaskStatus)}';
+      throw Exception(error);
+    }
+    calloc.free(tokenTypeValue);
+
+    calloc.free(memoryInfo);
+
+    final inputNamesPointer = calloc<Pointer<Pointer<Char>>>(3);
+    inputNamesPointer[0] = 'input_ids'.toNativeUtf8().cast();
+    inputNamesPointer[1] = 'token_type_ids'.toNativeUtf8().cast();
+    inputNamesPointer[2] = 'attention_mask'.toNativeUtf8().cast();
+    final inputNames = inputNamesPointer.cast<Pointer<Char>>();
+    final inputValues = calloc<Pointer<OrtValue>>(3);
+    inputValues[0] = inputIdsValue.value;
+    inputValues[1] = tokenTypeValue.value;
+    inputValues[2] = inputMaskValue.value;
+    final outputNamesPointer = calloc<Pointer<Pointer<Char>>>();
+    outputNamesPointer.value = 'last_hidden_state'.toNativeUtf8().cast();
+    final outputNames = outputNamesPointer.cast<Pointer<Char>>();
+    final outputValues = calloc<Pointer<OrtValue>>();
+    final outputCount = 1;
+
+    final runOptionsPtr = calloc<Pointer<OrtRunOptions>>();
+    final runOptionsStatus = objects.api.createRunOptions(runOptionsPtr);
+    if (runOptionsStatus.isError) {
+      final error =
+          'Code: ${objects.api.getErrorCodeMessage(runOptionsStatus)}\n'
+          'Message: ${objects.api.getErrorMessage(runOptionsStatus)}';
+      throw Exception(error);
+    }
+    final runStatus = objects.api.run(
+      session: objects.sessionPtr.value,
+      runOptions: runOptionsPtr.value,
+      inputNames: inputNames,
+      inputValues: inputValues,
+      inputCount: 3,
+      outputNames: outputNames,
+      outputCount: outputCount,
+      outputValues: outputValues,
+    );
+    if (runStatus.isError) {
+      final error = 'Code: ${objects.api.getErrorCodeMessage(runStatus)}\n'
+          'Message: ${objects.api.getErrorMessage(runStatus)}';
+      throw Exception(error);
+    }
   }
 }
 

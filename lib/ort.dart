@@ -50,6 +50,15 @@ extension DartNativeFunctions on OrtApi {
     return status;
   }
 
+  Pointer<OrtStatus> createRunOptions(
+    Pointer<Pointer<OrtRunOptions>> runOptions,
+  ) {
+    final createRunOptionsFn = CreateRunOptions.asFunction<
+        Pointer<OrtStatus> Function(Pointer<Pointer<OrtRunOptions>>)>();
+    final status = createRunOptionsFn(runOptions);
+    return status;
+  }
+
   Pointer<OrtStatus> createTensorWithDataAsOrtValue(
     Pointer<Pointer<OrtValue>> value, {
     required Pointer<OrtMemoryInfo> memoryInfo,
@@ -130,6 +139,39 @@ extension DartNativeFunctions on OrtApi {
         Pointer<OrtStatus> Function(Pointer<Pointer<OrtSessionOptions>>)>();
     final status = createSessionOptionsFn(optionsPtr);
     return status;
+  }
+
+  Pointer<OrtStatus> run({
+    required Pointer<OrtSession> session,
+    required Pointer<OrtRunOptions> runOptions,
+    required Pointer<Pointer<Char>> inputNames,
+    required Pointer<Pointer<OrtValue>> inputValues,
+    required int inputCount,
+    required Pointer<Pointer<Char>> outputNames,
+    required int outputCount,
+    required Pointer<Pointer<OrtValue>> outputValues,
+  }) {
+    final runFn = Run.asFunction<
+        Pointer<OrtStatus> Function(
+          Pointer<OrtSession>,
+          Pointer<OrtRunOptions>,
+          Pointer<Pointer<Char>>,
+          Pointer<Pointer<OrtValue>>,
+          int,
+          Pointer<Pointer<Char>>,
+          int,
+          Pointer<Pointer<OrtValue>>,
+        )>();
+    return runFn(
+      session,
+      runOptions,
+      inputNames,
+      inputValues,
+      inputCount,
+      outputNames,
+      outputCount,
+      outputValues,
+    );
   }
 }
 
