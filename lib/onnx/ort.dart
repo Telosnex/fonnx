@@ -384,6 +384,10 @@ OrtSessionObjects createOrtSession(String modelPath) {
   // 7 threads: ~0.65 ms/embedding
   // Not setting inter/intra op num threads: ~0.65 ms/embedding
 
+  // Adding CoreML support slowed down inference about 10x on M2 Max.
+  // This persisted even when CPU only + only if ANE is available flags were
+  // set, either together or independently.
+
   final sessionStatus = ortApi.createSession(
     env: envPtr.value,
     modelPath: modelPath,
