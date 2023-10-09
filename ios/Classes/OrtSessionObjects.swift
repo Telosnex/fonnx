@@ -1,0 +1,25 @@
+import onnxruntime_objc
+import os
+
+class OrtSessionObjects: NSObject {
+  public private(set) var session: ORTSession
+  private var env: ORTEnv
+
+  // MARK: - Initialization of ModelHandler
+  init?(modelPath: String) {
+    do {
+      // Start the ORT inference environment and specify the options for session
+      env = try ORTEnv(loggingLevel: ORTLoggingLevel.error)
+      let options = try ORTSessionOptions()
+      try options.setLogSeverityLevel(ORTLoggingLevel.error)
+      // Create the ORTSession
+      session = try ORTSession(env: env, modelPath: modelPath, sessionOptions: options)
+      os_log("Created ORTSession.")
+    } catch {
+      os_log("Failed to create ORTSession.")
+      return nil
+    }
+
+    super.init()
+  }
+}

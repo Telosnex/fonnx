@@ -16,14 +16,17 @@ class MethodChannelFonnx extends FonnxPlatform {
     return version;
   }
 
-  /// Create embeddings for [texts].
-  /// https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2
+  /// Create embeddings for [inputs].
+  /// Inputs are BERT tokens. Use [WordpieceTokenizer] to convert a [String].
+  @override
   Future<List<Float32List>?> miniLmL6V2({
     required String modelPath,
-    required List<String> inputs,
+    required List<List<int>> inputs,
   }) async {
-    final result =
-        await methodChannel.invokeMethod<List<Float32List>?>('miniLmL6V2');
+    final result = await methodChannel.invokeListMethod<Float32List>(
+      'miniLmL6V2',
+      [modelPath, inputs],
+    );
     return result;
   }
 }

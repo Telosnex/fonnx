@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:ffi';
-import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
-import 'package:fonnx/onnx/ort.dart';
+import 'package:flutter/foundation.dart';
+import 'package:fonnx/fonnx.dart';
 import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free;
 import 'package:fonnx/tokenizers/wordpiece_tokenizer.dart';
 
@@ -11,18 +11,47 @@ class MiniLmL6V2 {
   String modelPath;
   MiniLmL6V2(this.modelPath);
   OrtSessionObjects? _sessionObjects;
+  Fonnx? _fonnx;
+  WordpieceTokenizer? _wordpieceTokenizer;
 
-  Future<OrtSessionObjects> get sessionObjects async {
+  OrtSessionObjects get sessionObjects {
     _sessionObjects ??= createOrtSession(modelPath);
     return _sessionObjects!;
   }
 
   Future<Float32List> getEmbedding(String text) async {
-    final objects = await sessionObjects;
+    _wordpieceTokenizer ??= WordpieceTokenizer.bert();
+    final tokens = _wordpieceTokenizer!.tokenize(text);
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        throw UnimplementedError();
+      case TargetPlatform.iOS:
+        return _getEmbeddingPlatform(tokens);
+      case TargetPlatform.fuchsia:
+        throw UnimplementedError();
+      case TargetPlatform.linux:
+        throw UnimplementedError();
+      case TargetPlatform.macOS:
+        return _getEmbeddingFfi(tokens);
+      case TargetPlatform.windows:
+        throw UnimplementedError();
+    }
+  }
+
+  Future<Float32List> _getEmbeddingPlatform(List<int> tokens) async {
+    final fonnx = _fonnx ??= Fonnx();
+    final embeddings = await fonnx.miniLmL6V2(
+      modelPath: modelPath,
+      inputs: [tokens],
+    );
+    return embeddings!.first;
+  }
+
+  Future<Float32List> _getEmbeddingFfi(List<int> tokens) async {
+    final objects = sessionObjects;
     final memoryInfo = calloc<Pointer<OrtMemoryInfo>>();
     objects.api.createCpuMemoryInfo(memoryInfo);
     final inputIdsValue = calloc<Pointer<OrtValue>>();
-    final tokens = WordpieceTokenizer.bert().tokenize(text);
     objects.api.createInt64Tensor(
       inputIdsValue,
       memoryInfo: memoryInfo.value,

@@ -15,7 +15,13 @@ A new Flutter plugin project.
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  s.platform = :ios, '11.0'
+  s.dependency 'onnxruntime-objc'
+  # For ONNX runtime: Addresses build error [!] The 'Pods-Runner' target has transitive dependencies that include statically linked binaries: (onnxruntime-objc and onnxruntime-c)
+  s.static_framework = true
+  # Originally: 11.0. 
+  # Upgrade to 13.0 to get Swift async support.
+  # Upgrade to 14.0 to get os_log support.
+  s.platform = :ios, '14.0'
 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }

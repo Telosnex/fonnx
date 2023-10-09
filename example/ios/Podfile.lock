@@ -2,8 +2,14 @@ PODS:
   - Flutter (1.0.0)
   - fonnx (0.0.1):
     - Flutter
+    - onnxruntime-objc
   - integration_test (0.0.1):
     - Flutter
+  - onnxruntime-c (1.15.1)
+  - onnxruntime-objc (1.15.1):
+    - onnxruntime-objc/Core (= 1.15.1)
+  - onnxruntime-objc/Core (1.15.1):
+    - onnxruntime-c (= 1.15.1)
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -13,6 +19,11 @@ DEPENDENCIES:
   - fonnx (from `.symlinks/plugins/fonnx/ios`)
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
+
+SPEC REPOS:
+  trunk:
+    - onnxruntime-c
+    - onnxruntime-objc
 
 EXTERNAL SOURCES:
   Flutter:
@@ -26,8 +37,10 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
-  fonnx: e2c399357709f2ddf77a5a0cb1100d5a2d78233d
+  fonnx: 084e5c63e7a76d72133302e020b18fe161a559de
   integration_test: 13825b8a9334a850581300559b8839134b124670
+  onnxruntime-c: ebdcfd8650bcbd10121c125262f99dea681b92a3
+  onnxruntime-objc: ae7acec7a3d03eaf072d340afed7a35635c1c2a6
   path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943
 
 PODFILE CHECKSUM: 70d9d25280d0dd177a5f637cdb0f0b0b12c6a189

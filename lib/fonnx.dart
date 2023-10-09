@@ -11,7 +11,7 @@ class Fonnx {
 
   Future<List<Float32List>?> miniLmL6V2({
     required String modelPath,
-    required List<String> inputs,
+    required List<List<int>> inputs,
   }) {
     return FonnxPlatform.instance.miniLmL6V2(
       modelPath: modelPath,
