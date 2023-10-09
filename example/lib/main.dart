@@ -3,14 +3,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fonnx/tokenizers/wordpiece_tokenizer.dart';
 import 'dart:async';
-import 'dart:ffi';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:path/path.dart' as path;
 
-import 'package:fonnx/fonnx.dart' hide calloc, free;
-import 'package:ffi/ffi.dart';
+import 'package:fonnx/fonnx.dart';
 
 void main() {
   runApp(const MyApp());
@@ -25,7 +22,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
-  String _onnxVersion = 'Unknown';
+  String _lastStatusText = '';
   final _fonnxPlugin = Fonnx();
 
   @override
@@ -67,137 +64,25 @@ class _MyAppState extends State<MyApp> {
           child: Column(
             children: [
               Text('Running on: $_platformVersion\n'),
-              Text('Running on ONNX: $_onnxVersion\n'),
               ElevatedButton.icon(
-                onPressed: () {
-                  DynamicLibrary.open('libonnxruntime.1.16.0.dylib');
-                  final baseApi = OrtGetApiBase().ref;
-                  final versionFn = baseApi.GetVersionString.asFunction<
-                      Pointer<Char> Function()>();
-                  final version = versionFn().toDartString();
+                onPressed: () async {
+                  final modelPath = await getModelPath('miniLmL6V2.onnx');
+                  final miniLmL6V2 = MiniLmL6V2(modelPath);
+                  final embedding = await miniLmL6V2.getEmbedding('');
                   setState(() {
-                    _onnxVersion = version;
+                    _lastStatusText =
+                        'MiniLM-L6-V2: Success! ${embedding.length} elements.';
                   });
-                  final api = baseApi.GetApi.asFunction<
-                      Pointer<OrtApi> Function(int)>();
-                  final ortApi = api(ORT_API_VERSION).ref;
                 },
                 icon: const Icon(Icons.code),
-                label: const Text('Load ONNX Runtime'),
+                label: const Text('Test MiniLM-L6-V2'),
               ),
-              ElevatedButton.icon(
-                onPressed: () {
-                  _loadModel();
-                },
-                icon: const Icon(Icons.code),
-                label: const Text('Load ONNX Environment'),
-              ),
+              if (_lastStatusText.isNotEmpty) Text(_lastStatusText),
             ],
           ),
         ),
       ),
     );
-  }
-
-  void _loadModel() async {
-    final modelPath = await getModelPath('miniLmL6V2.onnx');
-    final objects = createOrtSession(modelPath);
-    final memoryInfo = calloc<Pointer<OrtMemoryInfo>>();
-    final status = objects.api.createCpuMemoryInfo(memoryInfo);
-    if (status.isError) {
-      final error = 'Code: ${objects.api.getErrorCodeMessage(status)}\n'
-          'Message: ${objects.api.getErrorMessage(status)}';
-      throw Exception(error);
-    }
-
-    final inputIdsValue = calloc<Pointer<OrtValue>>();
-    final tokens = WordpieceTokenizer.bert().tokenize('');
-    final inputIdsStatus = objects.api.createInt64Tensor(
-      inputIdsValue,
-      memoryInfo: memoryInfo.value,
-      values: tokens,
-    );
-    if (inputIdsStatus.isError) {
-      final error = 'Code: ${objects.api.getErrorCodeMessage(inputIdsStatus)}\n'
-          'Message: ${objects.api.getErrorMessage(inputIdsStatus)}';
-      throw Exception(error);
-    }
-    calloc.free(inputIdsValue);
-
-    final inputMaskValue = calloc<Pointer<OrtValue>>();
-    final inputMaskStatus = objects.api.createInt64Tensor(
-      inputMaskValue,
-      memoryInfo: memoryInfo.value,
-      values: List.generate(
-        256,
-        (index) => index < tokens.length ? 1 : 0,
-      ),
-    );
-    if (inputMaskStatus.isError) {
-      final error =
-          'Code: ${objects.api.getErrorCodeMessage(inputMaskStatus)}\n'
-          'Message: ${objects.api.getErrorMessage(inputMaskStatus)}';
-      throw Exception(error);
-    }
-    calloc.free(inputMaskValue);
-
-    final tokenTypeValue = calloc<Pointer<OrtValue>>();
-    final tokenTypeStatus = objects.api.createInt64Tensor(
-      tokenTypeValue,
-      memoryInfo: memoryInfo.value,
-      values: List.generate(
-        256,
-        (index) => index < tokens.length ? 0 : -1,
-      ),
-    );
-    if (tokenTypeStatus.isError) {
-      final error =
-          'Code: ${objects.api.getErrorCodeMessage(inputMaskStatus)}\n'
-          'Message: ${objects.api.getErrorMessage(inputMaskStatus)}';
-      throw Exception(error);
-    }
-    calloc.free(tokenTypeValue);
-
-    calloc.free(memoryInfo);
-
-    final inputNamesPointer = calloc<Pointer<Pointer<Char>>>(3);
-    inputNamesPointer[0] = 'input_ids'.toNativeUtf8().cast();
-    inputNamesPointer[1] = 'token_type_ids'.toNativeUtf8().cast();
-    inputNamesPointer[2] = 'attention_mask'.toNativeUtf8().cast();
-    final inputNames = inputNamesPointer.cast<Pointer<Char>>();
-    final inputValues = calloc<Pointer<OrtValue>>(3);
-    inputValues[0] = inputIdsValue.value;
-    inputValues[1] = tokenTypeValue.value;
-    inputValues[2] = inputMaskValue.value;
-    final outputNamesPointer = calloc<Pointer<Pointer<Char>>>();
-    outputNamesPointer.value = 'last_hidden_state'.toNativeUtf8().cast();
-    final outputNames = outputNamesPointer.cast<Pointer<Char>>();
-    final outputValues = calloc<Pointer<OrtValue>>();
-    final outputCount = 1;
-
-    final runOptionsPtr = calloc<Pointer<OrtRunOptions>>();
-    final runOptionsStatus = objects.api.createRunOptions(runOptionsPtr);
-    if (runOptionsStatus.isError) {
-      final error =
-          'Code: ${objects.api.getErrorCodeMessage(runOptionsStatus)}\n'
-          'Message: ${objects.api.getErrorMessage(runOptionsStatus)}';
-      throw Exception(error);
-    }
-    final runStatus = objects.api.run(
-      session: objects.sessionPtr.value,
-      runOptions: runOptionsPtr.value,
-      inputNames: inputNames,
-      inputValues: inputValues,
-      inputCount: 3,
-      outputNames: outputNames,
-      outputCount: outputCount,
-      outputValues: outputValues,
-    );
-    if (runStatus.isError) {
-      final error = 'Code: ${objects.api.getErrorCodeMessage(runStatus)}\n'
-          'Message: ${objects.api.getErrorMessage(runStatus)}';
-      throw Exception(error);
-    }
   }
 }
 
@@ -209,7 +94,22 @@ Future<String> getModelPath(String modelFilenameWithExtension) async {
 
   File file = File(modelPath);
   bool fileExists = await file.exists();
-  if (!fileExists) {
+  bool fileSameSize = fileExists &&
+      (await file.length()) ==
+          (await rootBundle.load(
+            path.join(
+              "..", // '..' only needed because this example is in a sibling directory of fonnx
+              "models",
+              "miniLmL6V2",
+              path.basename(modelFilenameWithExtension),
+            ),
+          ))
+              .lengthInBytes;
+  if (!fileExists || !fileSameSize) {
+    debugPrint(
+        'Copying model to $modelPath. Why? Either the file does not exist (${!fileExists}), '
+        'or it does exist but is not the same size as the one in the assets '
+        'directory. (${!fileSameSize})');
     ByteData data = await rootBundle.load(
       path.join(
         "..", // '..' only needed because this example is in a sibling directory of fonnx
