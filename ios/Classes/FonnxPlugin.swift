@@ -12,6 +12,8 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
     switch call.method {
     case "getPlatformVersion":
       result("iOS " + UIDevice.current.systemVersion)
+    case "miniLmL6V2":
+      result(FlutterMethodNotImplemented)
     default:
       result(FlutterMethodNotImplemented)
     }

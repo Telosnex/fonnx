@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'fonnx_method_channel.dart';
@@ -25,5 +27,12 @@ abstract class FonnxPlatform extends PlatformInterface {
 
   Future<String?> getPlatformVersion() {
     throw UnimplementedError('platformVersion() has not been implemented.');
+  }
+
+  Future<List<Float32List>?> miniLmL6V2({
+    required String modelPath,
+    required List<String> inputs,
+  }) {
+    throw UnimplementedError('miniLmL6V2() has not been implemented.');
   }
 }

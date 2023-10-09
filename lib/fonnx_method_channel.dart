@@ -18,9 +18,12 @@ class MethodChannelFonnx extends FonnxPlatform {
 
   /// Create embeddings for [texts].
   /// https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2
-  Future<List<List<double>>?> miniLmL6V2(List<String> texts) async {
-    final result = await methodChannel
-        .invokeMethod<List<List<double>>>('miniLmL6V2');
+  Future<List<Float32List>?> miniLmL6V2({
+    required String modelPath,
+    required List<String> inputs,
+  }) async {
+    final result =
+        await methodChannel.invokeMethod<List<Float32List>?>('miniLmL6V2');
     return result;
   }
 }
