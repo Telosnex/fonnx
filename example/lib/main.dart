@@ -88,7 +88,8 @@ class _MyAppState extends State<MyApp> {
                       return doesNotAt5;
                     });
                     setState(() {
-                      _lastStatusText = isNotMatch ? '!!! Not a match !!!' : 'Match';
+                      _lastStatusText =
+                          isNotMatch ? '!!! Not a match !!!' : 'Match';
                     });
                   },
                   icon: const Icon(Icons.code),
@@ -116,9 +117,9 @@ Future<String> getModelPath(String modelFilenameWithExtension) async {
       (await file.length()) ==
           (await rootBundle.load(
             path.join(
-              "..", // '..' only needed because this example is in a sibling directory of fonnx
-              "models",
-              "miniLmL6V2",
+              // "..", // '..' only needed because this example is in a sibling directory of fonnx
+              // "models",
+              "assets",
               path.basename(modelFilenameWithExtension),
             ),
           ))
@@ -128,11 +129,13 @@ Future<String> getModelPath(String modelFilenameWithExtension) async {
         'Copying model to $modelPath. Why? Either the file does not exist (${!fileExists}), '
         'or it does exist but is not the same size as the one in the assets '
         'directory. (${!fileSameSize})');
+    debugAssetPathLocation();
+
     ByteData data = await rootBundle.load(
       path.join(
-        "..", // '..' only needed because this example is in a sibling directory of fonnx
-        "models",
-        "miniLmL6V2",
+        "assets", // '..' only needed because this example is in a sibling directory of fonnx
+        // "models",
+        // "miniLmL6V2",
         path.basename(modelFilenameWithExtension),
       ),
     );

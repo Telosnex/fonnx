@@ -46,10 +46,12 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 19
+        // Upgraded to 21 for ONNX ORT 1.16
+        minSdkVersion 21
     }
 
     dependencies {
+        implementation 'com.microsoft.onnxruntime:onnxruntime-android:latest.release'
         testImplementation 'org.jetbrains.kotlin:kotlin-test'
         testImplementation 'org.mockito:mockito-core:5.0.0'
     }

@@ -25,7 +25,7 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
 
   public func doMiniLmL6V2(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     let path = (call.arguments as! [Any])[0] as! String
-    let tokens = (call.arguments as! [Any])[1] as! [[Int64]]
+    let tokens = (call.arguments as! [Any])[1] as! [Int64]
 
     if cachedMiniLmL6V2Path != path {
       cachedMiniLmL6V2 = try? MiniLmL6V2(modelPath: path)
@@ -39,7 +39,7 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
     
     do {
      model.getEmbedding(
-        tokens: tokens[0],
+        tokens: tokens,
         completion: { (answer, error) in
           if let error = error {
             result(

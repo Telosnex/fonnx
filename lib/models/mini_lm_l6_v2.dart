@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
@@ -24,7 +25,7 @@ class MiniLmL6V2 {
     final tokens = _wordpieceTokenizer!.tokenize(text);
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        throw UnimplementedError();
+        return _getEmbeddingPlatform(tokens);
       case TargetPlatform.iOS:
         return _getEmbeddingPlatform(tokens);
       case TargetPlatform.fuchsia:
@@ -42,9 +43,12 @@ class MiniLmL6V2 {
     final fonnx = _fonnx ??= Fonnx();
     final embeddings = await fonnx.miniLmL6V2(
       modelPath: modelPath,
-      inputs: [tokens],
+      inputs: tokens,
     );
-    return embeddings!.first;
+    if (embeddings == null) {
+      throw Exception('Embeddings returned from platform code are null');
+    }
+    return embeddings; // Before Android, it was just embeddings.first
   }
 
   Future<Float32List> _getEmbeddingFfi(List<int> tokens) async {

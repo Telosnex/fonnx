@@ -11,7 +11,7 @@ class MiniLmL6V2 {
   }
 
   func getEmbedding(
-    tokens: [Int64], completion: @escaping (_ result: [FlutterStandardTypedData]?, _ error: Error?) -> Void
+    tokens: [Int64], completion: @escaping (_ result: FlutterStandardTypedData?, _ error: Error?) -> Void
   ) {
     do {
       let interval: TimeInterval
@@ -53,13 +53,14 @@ class MiniLmL6V2 {
         return
       }
       let rawOutputData = try rawOutputValue.tensorData() as Data
-      // See here for info on type choice:
+      // Model output is 32-bit floats (known from model inspection, see Netron)
+      // See here for info on Swift type choice:
       // https://docs.flutter.dev/platform-integration/platform-channels?tab=type-mappings-swift-tab
       let outputArr = FlutterStandardTypedData(float32: rawOutputData);
       let embeddingDone = Date()
       interval = embeddingDone.timeIntervalSince(startDate) * 1000
       os_log("took \(interval) ms for embedding")
-      completion([outputArr], nil)
+      completion(outputArr, nil)
     } catch {
       completion(nil, error)
     }
