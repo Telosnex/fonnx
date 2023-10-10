@@ -11,6 +11,9 @@ dependencies:
   ffi: ^2.1.0
   flutter:
     sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+  js: ^0.6.7
   plugin_platform_interface: ^2.0.2
 
 dev_dependencies:
@@ -34,3 +37,6 @@ flutter:
         pluginClass: FonnxPlugin
       windows:
         pluginClass: FonnxPluginCApi
+      web:
+        pluginClass: FonnxWeb
+        fileName: fonnx_web.dart

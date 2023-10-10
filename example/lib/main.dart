@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fonnx/models/minilml6v2/mini_lm_l6_v2.dart';
 import 'dart:async';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:path/path.dart' as path;
-
-import 'package:fonnx/fonnx.dart';
 
 void main() {
   runApp(const MyApp());
@@ -21,36 +21,11 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
   String _lastStatusText = '';
-  final _fonnxPlugin = Fonnx();
 
   @override
   void initState() {
     super.initState();
-    initPlatformState();
-  }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
-    try {
-      platformVersion =
-          await _fonnxPlugin.getPlatformVersion() ?? 'Unknown platform version';
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
   }
 
   @override
@@ -64,11 +39,10 @@ class _MyAppState extends State<MyApp> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                Text('Running on: $_platformVersion\n'),
                 ElevatedButton.icon(
                   onPressed: () async {
                     final modelPath = await getModelPath('miniLmL6V2.onnx');
-                    final miniLmL6V2 = MiniLmL6V2(modelPath);
+                    final miniLmL6V2 = MiniLmL6V2.load(modelPath);
                     final embedding = await miniLmL6V2.getEmbedding('');
                     final isNotMatch = embedding.indexed.any((outer) {
                       final doesNot = outer.$2 !=
@@ -106,6 +80,9 @@ class _MyAppState extends State<MyApp> {
 }
 
 Future<String> getModelPath(String modelFilenameWithExtension) async {
+  if (kIsWeb) {
+    return 'assets/$modelFilenameWithExtension';
+  }
   final assetCacheDirectory =
       await path_provider.getApplicationSupportDirectory();
   final modelPath =

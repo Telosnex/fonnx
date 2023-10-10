@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="Demonstrates how to use the fonnx plugin.">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="fonnx_example">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png" />
+
+  <title>fonnx_example</title>
+  <link rel="manifest" href="manifest.json">
+
+  <script>
+    // The value below is injected by flutter build, do not touch.
+    const serviceWorkerVersion = null;
+  </script>
+  <!-- This script adds the flutter initialization JS code -->
+  <script src="flutter.js" defer></script>
+</head>
+
+<body>
+  <script>
+    window.addEventListener('load', function (ev) {
+      // Download main.dart.js
+      _flutter.loader.loadEntrypoint({
+        serviceWorker: {
+          serviceWorkerVersion: serviceWorkerVersion,
+        },
+        onEntrypointLoaded: function (engineInitializer) {
+          engineInitializer.initializeEngine().then(function (appRunner) {
+            appRunner.runApp();
+          });
+        }
+      });
+    });
+  </script>
+  <!-- ONNX implementations start here
+       Patterned after https://github.com/microsoft/onnxruntime-inference-examples/blob/main/js/quick-start_onnxruntime-web-script-tag/index.html
+  -->
+  <!-- REQUIRED FOR: ALL models. -->
+  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.webgpu.min.js"></script>
+  <!-- REQUIRED FOR: Mini LM L6 V2  -->
+  <script>
+    let cachedModelPath = null
+    let session = null
+
+    // use an async context to call onnxruntime functions.
+    window.miniLmL6V2 = async function (modelPath, wordpieces) {
+      try {
+        if (modelPath !== cachedModelPath) {
+          console.time("model loading")
+          const options = {
+            // WebGPU would be good, but it's broken currently as of 2023 10 10 (Chrome 117.0.5938.149)
+            // Generally it seems like ONNX might not support it quite fully, yet.
+            executionProviders: ["wasm", "cpu"],
+          };
+          session = await ort.InferenceSession.create(modelPath, options);
+          cachedModelPath = modelPath
+          console.timeEnd("model loading")
+        }
+
+        console.time("one embedding inference")
+        const bigIntWordpieces = wordpieces.flat().map(x => BigInt(x));
+
+        const shape = [1, bigIntWordpieces.length]
+        const inputsIdsKey = "input_ids";
+        const inputsIdsTensor = new ort.Tensor('int64', bigIntWordpieces, shape);
+        const tokenTypeIdsKey = 'token_type_ids';
+        const tokenTypeIdsTensor = new ort.Tensor('int64', BigInt64Array.from(new Array(shape[0] * shape[1]).fill(0n)), shape);
+        const attentionMaskKey = "attention_mask";
+        const attentionMaskTensor = new ort.Tensor('int64', BigInt64Array.from(new Array(shape[0] * shape[1]).fill(1n)), shape);
+        const inputs = { inputsIdsKey: inputsIdsTensor, attentionMaskKey: attentionMaskTensor, tokenTypeIdsKey: tokenTypeIdsTensor };
+
+        const results = await session.run({ 'input_ids': inputsIdsTensor, 'attention_mask': attentionMaskTensor, 'token_type_ids': tokenTypeIdsTensor });
+
+        const embeddings = results.embeddings.data;
+        console.timeEnd("one embedding inference")
+
+        return embeddings;
+      } catch (e) {
+        console.log(`failed to inference ONNX model: ${e}.`);
+        return null;
+      }
+    }
+  </script>
+</body>
+
+</html>
