@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'fonnx_platform_interface.dart';
 export 'onnx/ort.dart';
-export 'models/mini_lm_l6_v2.dart';
+export 'models/minilml6v2/mini_lm_l6_v2_native.dart';
 
 class Fonnx {
   Future<String?> getPlatformVersion() {

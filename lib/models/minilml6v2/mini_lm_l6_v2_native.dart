@@ -1,25 +1,23 @@
 import 'dart:async';
 import 'dart:ffi';
-import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fonnx/fonnx.dart';
+import 'package:fonnx/models/minilml6v2/mini_lm_l6_v2.dart';
 import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free;
 import 'package:fonnx/tokenizers/wordpiece_tokenizer.dart';
 
-class MiniLmL6V2 {
+MiniLmL6V2 getMiniLmL6V2(String path) => MiniLmL6V2Native(path);
+    
+class MiniLmL6V2Native implements MiniLmL6V2 {
   String modelPath;
-  MiniLmL6V2(this.modelPath);
+  MiniLmL6V2Native(this.modelPath);
   OrtSessionObjects? _sessionObjects;
   Fonnx? _fonnx;
   WordpieceTokenizer? _wordpieceTokenizer;
 
-  OrtSessionObjects get sessionObjects {
-    _sessionObjects ??= createOrtSession(modelPath);
-    return _sessionObjects!;
-  }
-
+  @override
   Future<Float32List> getEmbedding(String text) async {
     _wordpieceTokenizer ??= WordpieceTokenizer.bert();
     final tokens = _wordpieceTokenizer!.tokenize(text);
@@ -39,6 +37,11 @@ class MiniLmL6V2 {
     }
   }
 
+  OrtSessionObjects get _session {
+    _sessionObjects ??= createOrtSession(modelPath);
+    return _sessionObjects!;
+  }
+
   Future<Float32List> _getEmbeddingPlatform(List<int> tokens) async {
     final fonnx = _fonnx ??= Fonnx();
     final embeddings = await fonnx.miniLmL6V2(
@@ -52,7 +55,7 @@ class MiniLmL6V2 {
   }
 
   Future<Float32List> _getEmbeddingFfi(List<int> tokens) async {
-    final objects = sessionObjects;
+    final objects = _session;
     final memoryInfo = calloc<Pointer<OrtMemoryInfo>>();
     objects.api.createCpuMemoryInfo(memoryInfo);
     final inputIdsValue = calloc<Pointer<OrtValue>>();

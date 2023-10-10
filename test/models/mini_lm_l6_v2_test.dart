@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ml_linalg/linalg.dart';
 
-import 'package:fonnx/models/mini_lm_l6_v2.dart';
+import 'package:fonnx/models/minilml6v2/mini_lm_l6_v2_native.dart';
 
 extension Similarity on Vector {
   double similarity(Vector vector) {
@@ -15,7 +15,7 @@ extension Similarity on Vector {
 
 void main() {
   const modelPath = 'models/miniLmL6V2/miniLmL6V2.onnx';
-  final miniLmL6V2 = MiniLmL6V2(modelPath);
+  final miniLmL6V2 = MiniLmL6V2Native(modelPath);
 
   test('Embedding works', () async {
     final answer = await miniLmL6V2.getEmbedding('');
