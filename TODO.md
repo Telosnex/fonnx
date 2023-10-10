@@ -8,3 +8,4 @@
 - [ ] Try iOS device x CoreML
 - [ ] Linux
 - [ ] Windows
+- [ ] macOS Intel - intel vs. arm dylib in assets/.podspec/compile
