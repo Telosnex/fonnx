@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fonnx/fonnx.dart';
 import 'package:fonnx/fonnx_platform_interface.dart';
@@ -9,7 +11,13 @@ class MockFonnxPlatform
     implements FonnxPlatform {
 
   @override
-  Future<String?> getPlatformVersion() => Future.value('42');
+  Future<String?> getPlatformVersion() => throw UnimplementedError();
+
+  @override
+  Future<Float32List?> miniLmL6V2(
+      {required String modelPath, required List<int> inputs}) {
+    throw UnimplementedError();
+  }
 }
 
 void main() {
