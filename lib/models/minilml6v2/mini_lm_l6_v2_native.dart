@@ -23,15 +23,15 @@ class MiniLmL6V2Native implements MiniLmL6V2 {
     final tokens = _wordpieceTokenizer!.tokenize(text);
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        return _getEmbeddingPlatform(tokens);
+        return _getEmbeddingPlatform(tokens.first);
       case TargetPlatform.iOS:
-        return _getEmbeddingPlatform(tokens);
+        return _getEmbeddingPlatform(tokens.first);
       case TargetPlatform.fuchsia:
         throw UnimplementedError();
       case TargetPlatform.linux:
         throw UnimplementedError();
       case TargetPlatform.macOS:
-        return _getEmbeddingFfi(tokens);
+        return _getEmbeddingFfi(tokens.first);
       case TargetPlatform.windows:
         throw UnimplementedError();
     }

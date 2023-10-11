@@ -30,7 +30,7 @@ class MiniLmL6V2Web implements MiniLmL6V2 {
   @override
   Future<Float32List> getEmbedding(String text) async {
     final tokens = tokenizer.tokenize(text);
-    final jsObject = await promiseToFuture(sbertJs(modelPath, [tokens]));
+    final jsObject = await promiseToFuture(sbertJs(modelPath, tokens));
     if (jsObject == null) {
       throw Exception('Embeddings returned from JS code are null');
     }

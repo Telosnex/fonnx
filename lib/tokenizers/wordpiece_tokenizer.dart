@@ -1,3 +1,4 @@
+import 'package:diacritic/diacritic.dart';
 import 'package:fonnx/tokenizers/bert_vocab.dart';
 
 class WordpieceTokenizer {
@@ -36,19 +37,21 @@ class WordpieceTokenizer {
     return _cachedBertTokenizer;
   }
 
-  /// Checks if the given code unit is a Chinese character, meaning, it
-  /// represents a word and the tokenizer should treat it as such.
+  /// Checks if the given code unit represents a word and the tokenizer should
+  /// treat it as such.
   ///
-  /// This defines a "chinese character" as anything in the CJK Unicode block:
-  ///   https://en.wikipedia.org/wiki/CJK_Unified_Ideographs_(Unicode_block)
-  ///
-  /// Note that the CJK Unicode block is NOT all Japanese and Korean characters,
-  /// despite its name. The modern Korean Hangul alphabet is a different block,
-  /// as is Japanese Hiragana and Katakana. Those alphabets are used to write
-  /// space-separated words, so they are not treated specially and handled
-  /// like for all of the other languages.
-  bool _isChineseChar(int codeUnit) {
-    // Comment and implementation patterned after https://github.com/huggingface/tokenizers/blob/0d8c57da48319a91fe9cd3e31a36b9bd29a8292c/tokenizers/src/normalizers/bert.rs#L36
+  /// For example, Chinese and Japanese words are not separated by spaces.
+  bool _isNoSpaceLanguageChar(int codeUnit) {
+    // Comment and implementation imitate https://github.com/huggingface/tokenizers/blob/0d8c57da48319a91fe9cd3e31a36b9bd29a8292c/tokenizers/src/normalizers/bert.rs#L36
+    //
+    // There is an error in the comment and thus the implementation: Japanese
+    // Hiragana and Katakana are _not_ always used to write space-separated
+    // words. In fact, I cannot find evidence that they are ever used to write
+    // space-separated words.
+    //
+    // Therefore, this implementation is slightly different from the original.
+    // It checks Hiragana in the Unicode block from U+3040 to U+309F.
+    // It checks Katakana in the Unicode block from U+30A0 to U+30FF.
     return (0x4E00 <= codeUnit && codeUnit <= 0x9FFF) ||
         (0x3400 <= codeUnit && codeUnit <= 0x4DBF) ||
         (0x20000 <= codeUnit && codeUnit <= 0x2A6DF) ||
@@ -56,26 +59,28 @@ class WordpieceTokenizer {
         (0x2B740 <= codeUnit && codeUnit <= 0x2B81F) ||
         (0x2B920 <= codeUnit && codeUnit <= 0x2CEAF) ||
         (0xF900 <= codeUnit && codeUnit <= 0xFAFF) ||
-        (0x2F800 <= codeUnit && codeUnit <= 0x2FA1F);
+        (0x2F800 <= codeUnit && codeUnit <= 0x2FA1F) ||
+        (0x3040 <= codeUnit && codeUnit <= 0x309F) ||
+        (0x30A0 <= codeUnit && codeUnit <= 0x30FF);
   }
 
-  List<List<int>> _createSubstrings(String text) {
+  (List<String>, List<List<int>>) _createSubstrings(String text) {
     text = text.trim();
     if (text.isEmpty) {
-      return [];
+      return ([], []);
     }
 
     List<List<int>> allOutputTokens = [];
-
+    List<String> allOutputStrings = [];
     List<String> words = text.split(RegExp(r'\s+')); // Split on whitespace
 
     List<int> outputTokens = [startToken];
+    List<String> outputString = [];
     for (final word in words) {
       // Convert to lowercase individual characters. Why lowercase? The BERT
       // vocabulary doesn't have tokens with uppercase English letters.
       List<String> characters = word.toLowerCase().split('');
 
-      // If the word is too long, replace it with UNK token
       if (characters.length > maxInputCharsPerWord) {
         continue;
       }
@@ -83,7 +88,6 @@ class WordpieceTokenizer {
       bool wordUnknown = false;
       int start = 0;
 
-      // This will hold the substrings for the current word.
       List<int> wordTokens = [];
       wordProcess:
       while (start < characters.length) {
@@ -91,12 +95,13 @@ class WordpieceTokenizer {
         String? wordpiece;
         int? wordpieceToken;
 
-        // Loop for finding the largest valid substring starting at the current
-        // position
         wordpieceProcess:
         while (start < end) {
-          String substr = characters.sublist(start, end).join();
-
+          // Ensure e.g. Spanish/French/German don't end up with [UNK] tokens
+          // for every word with a diacritic.
+          var substr = characters.sublist(start, end).join();
+          final originalSubstr = substr;
+          substr = removeDiacritics(substr);
           // Append "##" in front of the substring if it's not at the start of
           // the token
           if (start > 0) {
@@ -106,18 +111,18 @@ class WordpieceTokenizer {
           // Check if the substring exists in the vocabulary
           final token = encoder[substr];
           if (token != null) {
-            // If substring is in vocabulary, store this substring
-            wordpiece = substr;
+            wordpiece = originalSubstr;
             wordpieceToken = token;
             break wordpieceProcess;
-          } else if ((end - start == 1) &&
-              _isChineseChar(characters[start].codeUnitAt(0))) {
-            // Chinese character without token? add UNK token. Essentially,
-            // we are treating each Chinese character as a word. This matches
-            // the character-based tokenization scheme in the original BERT.
-            wordpiece = unkString;
-            wordpieceToken = unkToken;
-            break wordpieceProcess;
+          } else if (end - start == 1) {
+            if (_isNoSpaceLanguageChar(characters[start].codeUnitAt(0))) {
+              // Chinese character without token? add UNK token. Essentially,
+              // we are treating each Chinese character as a word. This matches
+              // the character-based tokenization scheme in the original BERT.
+              wordpiece = unkString;
+              wordpieceToken = unkToken;
+              break wordpieceProcess;
+            }
           }
           end -= 1;
         }
@@ -131,30 +136,37 @@ class WordpieceTokenizer {
 
         // Add current substring to subTokens
         wordTokens.add(wordpieceToken!);
-
         start = end;
       }
+
+      final stringForWord = wordUnknown ? unkString : word;
       final tokensForWord = wordUnknown ? [unkToken] : wordTokens;
       if (outputTokens.length + tokensForWord.length >= maxInputTokens - 1) {
         outputTokens.add(endToken);
+        allOutputStrings.add(outputString.join(' '));
         allOutputTokens.add(outputTokens);
         // This does not account for the event that tokensForWord is longer than
         // maxInputTokens - 1. In that case, we would need to split
         // tokensForWord. This is very unlikely to happen, due to
         // maxInputCharsPerWord being << maxInputTokens. It is also irrelevant
         // because the model will simply truncate the input to maxInputTokens.
+        outputString = [stringForWord];
         outputTokens = [startToken, ...tokensForWord];
       } else {
+        outputString.add(stringForWord);
         outputTokens.addAll(tokensForWord);
       }
     }
     outputTokens.add(endToken);
     allOutputTokens.add(outputTokens);
-    return allOutputTokens;
+    allOutputStrings.add(outputString.join(' '));
+    return (allOutputStrings, allOutputTokens);
   }
 
   List<List<int>> tokenize(String text) {
-    return _createSubstrings(text);
+    final answer = _createSubstrings(text);
+    final tokens = answer.$2;
+    return tokens;
   }
 
   String detokenize(List<int> tokens) {
