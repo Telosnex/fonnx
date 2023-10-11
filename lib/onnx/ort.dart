@@ -368,7 +368,7 @@ String get dylibPath {
     case TargetPlatform.iOS:
       throw 'iOS runs using a platform-specific implementation, not FFI';
     case TargetPlatform.linux:
-      throw UnimplementedError();
+      return 'libonnxruntime.so.1.16.0';
     case TargetPlatform.macOS:
       return 'libonnxruntime.1.16.0.dylib';
     case TargetPlatform.windows:
@@ -380,8 +380,19 @@ String get dylibPath {
 /// It is reasonable to never free it in an app where you would like the model
 /// to be loaded for the lifetime of the app.
 OrtSessionObjects createOrtSession(String modelPath) {
-  DynamicLibrary.open(dylibPath);
-  final baseApi = OrtGetApiBase().ref;
+  // Used to have:
+  //   DynamicLibrary.open(dylibPath);
+  //   final baseApi = OrtGetApiBase().ref;
+  // That led to an error that said:
+  //   
+  // After reading [this Github issue](https://github.com/dart-lang/sdk/issues/50551)
+  //   my instinct was there may be an issue with global static functions and ffi,
+  //   and Linux may be lagging in support. Explicitly looking the function up in
+  //   the explicit library did fix it.
+  final lib = DynamicLibrary.open(dylibPath);
+  final fn = lib.lookupFunction<Pointer<OrtApiBase> Function(), Pointer<OrtApiBase> Function()>('OrtGetApiBase');
+  final answer = fn.call();
+  final baseApi = answer.ref;
   final api = baseApi.GetApi.asFunction<Pointer<OrtApi> Function(int)>();
   final ortApi = api(ORT_API_VERSION).ref;
   final envPtr = calloc<Pointer<OrtEnv>>();
@@ -404,7 +415,6 @@ OrtSessionObjects createOrtSession(String modelPath) {
   // Adding CoreML support slowed down inference about 10x on M2 Max.
   // This persisted even when CPU only + only if ANE is available flags were
   // set, either together or independently.
-
   final sessionStatus = ortApi.createSession(
     env: envPtr.value,
     modelPath: modelPath,

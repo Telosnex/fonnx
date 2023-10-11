@@ -29,7 +29,7 @@ class MiniLmL6V2Native implements MiniLmL6V2 {
       case TargetPlatform.fuchsia:
         throw UnimplementedError();
       case TargetPlatform.linux:
-        throw UnimplementedError();
+        return _getEmbeddingFfi(tokens.first);
       case TargetPlatform.macOS:
         return _getEmbeddingFfi(tokens.first);
       case TargetPlatform.windows:
