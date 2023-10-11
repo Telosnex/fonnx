@@ -10,19 +10,19 @@ void main() {
       final tokenizer = WordpieceTokenizer.bert();
 
       final tokens = tokenizer.tokenize('hello world');
-      expect(tokens, equals([101, 7592, 2088, 102]));
+      expect(tokens.first, equals([101, 7592, 2088, 102]));
     });
 
     test('emoji', () async {
       final tokenizer = WordpieceTokenizer.bert();
       final tokens = tokenizer.tokenize('👍');
-      expect(tokens, equals([101, 100, 102]));
+      expect(tokens.first, equals([101, 100, 102]));
     });
 
     test('text & emoji', () async {
       final tokenizer = WordpieceTokenizer.bert();
       final tokens = tokenizer.tokenize('That looks great 👍');
-      expect(tokens, equals([101, 2008, 3504, 2307, 100, 102]));
+      expect(tokens.first, equals([101, 2008, 3504, 2307, 100, 102]));
     });
 
     test('chinese', () async {
@@ -30,7 +30,7 @@ void main() {
       // String from https://github.com/huggingface/tokenizers/blob/0d8c57da48319a91fe9cd3e31a36b9bd29a8292c/tokenizers/src/pre_tokenizers/bert.rs#L52
       final tokens = tokenizer.tokenize('野口里佳 Noguchi Rika');
       expect(
-          tokens,
+          tokens.first,
           equals(
               [101, 1963, 30314, 30488, 100, 2053, 16918, 15544, 2912, 102]));
     });
@@ -45,14 +45,15 @@ Sententiae adipiscing vim ei. Cum at accusamus similique. Eum no nulla labitur, 
 
 Aliquam feugiat vel ex, vim et simul perfecto singulis, pri ad deseruisse adipiscing. Mea elitr rationibus ex, ad sadipscing persequeris eloquentiam eos. Expetendis quaerendum reformidans ad pri, cibo dissentias pro ne. Vis facer offendit pertinacia et, eu sit rebum appareat, te patrioque evertitur cum. Timeam prompta nam no. Ius ex atqui repudiare, justo mediocrem cum ad, nec utinam erroribus reformidans et.
 
-Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias suscipiantur. Ei has oratio veniam nostro, pri at laudem impedit consulatu. Semper denique te usu, quando epicurei nam cu, ut eleifend temporibus sit. Impetus laoreet mentitum quo in.
-''';
+Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias suscipiantur. Ei has oratio veniam nostro, pri at laudem impedit consulatu. Semper denique te usu, quando epicurei nam cu, ut eleifend temporibus sit. Impetus laoreet mentitum quo in.''';
       final tokenizer = WordpieceTokenizer.bert();
       final tokens = tokenizer.tokenize(lipsum);
-      expect(tokens.length, equals(256));
-      final string = tokenizer.detokenize(tokens);
+      expect(tokens.length, 2);
+      final stringOne = tokenizer.detokenize(tokens.first);
+      final stringTwo = tokenizer.detokenize(tokens.last);
+      expect('$stringOne $stringTwo',
+          equals(lipsum.toLowerCase().replaceAll('\n\n', ' ')));
       // This ensures the input string did exceed the model's max input length.
-      expect(string, isNot(equals(lipsum)));
     });
 
     test('sentence', () async {
@@ -63,28 +64,194 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
       expect(
           tokens,
           equals([
-            101,
-            1996,
-            6077,
-            3303,
-            2172,
-            9530,
-            6238,
-            9323,
-            1996,
-            4542,
-            1999,
-            3577,
-            4212,
-            3701,
-            2006,
-            1996,
-            5810,
-            102
+            [
+              101,
+              1996,
+              6077,
+              3303,
+              2172,
+              9530,
+              6238,
+              9323,
+              1996,
+              4542,
+              1999,
+              3577,
+              4212,
+              3701,
+              2006,
+              1996,
+              5810,
+              102
+            ]
           ]));
     });
   });
 
+  group('languages', () {
+    test('Arabic', () {
+      const string = "الحياة جميلة";
+      final tokenizer = WordpieceTokenizer.bert();
+      final tokens = tokenizer.tokenize(string);
+      expect(
+          tokens.first,
+          equals([
+            101,
+            1270,
+            23673,
+            29820,
+            14498,
+            25573,
+            19433,
+            1275,
+            22192,
+            14498,
+            23673,
+            19433,
+            102
+          ]));
+      final detokenized = tokenizer.detokenize(tokens.first);
+      expect(detokenized, equals("الحياة جميلة"));
+    });
+
+    test('French', () {
+      const string = "L'amour est l'ingrédient principal de la vie.";
+      final tokenizer = WordpieceTokenizer.bert();
+      final tokens = tokenizer.tokenize(string);
+      expect(
+          tokens.first,
+          equals([
+            101,
+            1048,
+            29618,
+            22591,
+            3126,
+            9765,
+            100,
+            4054,
+            2139,
+            2474,
+            20098,
+            29625,
+            102
+          ]));
+      final detokenized = tokenizer.detokenize(tokens.first);
+      expect(detokenized, equals("l'amour est [UNK] principal de la vie."));
+    });
+
+    test('German', () {
+      const string = "Das Leben ist wunderschön, wenn du es liebst.";
+      final tokenizer = WordpieceTokenizer.bert();
+      final tokens = tokenizer.tokenize(string);
+      expect(tokens.first, equals([           101,
+            8695,
+            3393,
+            10609,
+            21541,
+            100,
+            19181,
+            2078,
+            4241,
+            9686,
+            4682,
+            5910,
+            2102,
+            29625,
+            102]));
+      final detokenized = tokenizer.detokenize(tokens.first);
+      expect(detokenized, equals('das leben ist [UNK] wenn du es liebst.'));
+    });
+
+    test('Japanese', () {
+      const string = "私は猫です。";
+      final tokenizer = WordpieceTokenizer.bert();
+      final tokens = tokenizer.tokenize(string);
+      expect(tokens.first, equals([101, 100, 102]));
+      final detokenized = tokenizer.detokenize(tokens.first);
+      expect(detokenized, equals('[UNK]'));
+    });
+
+    test('Portuguese', () {
+      const string = "O céu está cheio de estrelas invisíveis.";
+      final tokenizer = WordpieceTokenizer.bert();
+      final tokens = tokenizer.tokenize(string);
+      expect(
+          tokens.first,
+          equals([
+            101,
+            1051,
+            100,
+            100,
+            18178,
+            3695,
+            2139,
+            9765,
+            16570,
+            3022,
+            100,
+            102
+          ]));
+      final detokenized = tokenizer.detokenize(tokens.first);
+      expect(detokenized, equals('o [UNK] [UNK] cheio de estrelas [UNK]'));
+    });
+
+    test('Spanish', () {
+      const string = 'La felicidad está hecha de pequeños momentos.';
+      final tokenizer = WordpieceTokenizer.bert();
+      final tokens = tokenizer.tokenize(string);
+      expect(
+          tokens.first,
+          equals([
+            101,
+            2474,
+            10768,
+            10415,
+            27893,
+            100,
+            2002,
+            7507,
+            2139,
+            100,
+            2617,
+            2891,
+            29625,
+            102
+          ]));
+      final detokenized = tokenizer.detokenize(tokens.first);
+      expect(
+          detokenized, equals('la felicidad [UNK] hecha de [UNK] momentos.'));
+    });
+
+    test('Russian', () {
+      const string = "Путин споткнулся.";
+      final tokenizer = WordpieceTokenizer.bert();
+      final tokens = tokenizer.tokenize(string);
+      expect(
+          tokens.first,
+          equals([
+            101,
+            1194,
+            29748,
+            22919,
+            10325,
+            18947,
+            1196,
+            29746,
+            14150,
+            22919,
+            23925,
+            18947,
+            29748,
+            29436,
+            29747,
+            17432,
+            29625,
+            102
+          ]));
+      final detokenized = tokenizer.detokenize(tokens.first);
+      expect(detokenized, equals(string.toLowerCase()));
+    });
+  });
   group('detokenize', () {
     test('hello world', () {
       final tokenizer = WordpieceTokenizer.bert();

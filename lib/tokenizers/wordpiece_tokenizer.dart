@@ -59,15 +59,17 @@ class WordpieceTokenizer {
         (0x2F800 <= codeUnit && codeUnit <= 0x2FA1F);
   }
 
-  List<int> _createSubstrings(String text) {
+  List<List<int>> _createSubstrings(String text) {
     text = text.trim();
     if (text.isEmpty) {
       return [];
     }
 
-    List<int> outputTokens = [startToken];
+    List<List<int>> allOutputTokens = [];
 
     List<String> words = text.split(RegExp(r'\s+')); // Split on whitespace
+
+    List<int> outputTokens = [startToken];
     for (final word in words) {
       // Convert to lowercase individual characters. Why lowercase? The BERT
       // vocabulary doesn't have tokens with uppercase English letters.
@@ -78,12 +80,12 @@ class WordpieceTokenizer {
         continue;
       }
 
-      bool isBad = false;
+      bool wordUnknown = false;
       int start = 0;
 
       // This will hold the substrings for the current word.
-      List<String> wordpieces = [];
       List<int> wordTokens = [];
+      wordProcess:
       while (start < characters.length) {
         int end = characters.length;
         String? wordpiece;
@@ -91,6 +93,7 @@ class WordpieceTokenizer {
 
         // Loop for finding the largest valid substring starting at the current
         // position
+        wordpieceProcess:
         while (start < end) {
           String substr = characters.sublist(start, end).join();
 
@@ -106,7 +109,7 @@ class WordpieceTokenizer {
             // If substring is in vocabulary, store this substring
             wordpiece = substr;
             wordpieceToken = token;
-            break;
+            break wordpieceProcess;
           } else if ((end - start == 1) &&
               _isChineseChar(characters[start].codeUnitAt(0))) {
             // Chinese character without token? add UNK token. Essentially,
@@ -114,7 +117,7 @@ class WordpieceTokenizer {
             // the character-based tokenization scheme in the original BERT.
             wordpiece = unkString;
             wordpieceToken = unkToken;
-            break;
+            break wordpieceProcess;
           }
           end -= 1;
         }
@@ -122,39 +125,35 @@ class WordpieceTokenizer {
         if (wordpiece == null) {
           // Couldn't find any valid substring for the remaining characters in
           // the word. Emit UNK token and move on to the next word.
-          isBad = true;
-          break;
+          wordUnknown = true;
+          break wordProcess;
         }
 
         // Add current substring to subTokens
-        wordpieces.add(wordpiece);
         wordTokens.add(wordpieceToken!);
 
         start = end;
       }
-
-      // Add subtoken to outputTokens if the token was valid, otherwise add UNK
-      if (isBad) {
-        outputTokens.add(unkToken);
+      final tokensForWord = wordUnknown ? [unkToken] : wordTokens;
+      if (outputTokens.length + tokensForWord.length >= maxInputTokens - 1) {
+        outputTokens.add(endToken);
+        allOutputTokens.add(outputTokens);
+        // This does not account for the event that tokensForWord is longer than
+        // maxInputTokens - 1. In that case, we would need to split
+        // tokensForWord. This is very unlikely to happen, due to
+        // maxInputCharsPerWord being << maxInputTokens. It is also irrelevant
+        // because the model will simply truncate the input to maxInputTokens.
+        outputTokens = [startToken, ...tokensForWord];
       } else {
-        outputTokens.addAll(wordTokens);
+        outputTokens.addAll(tokensForWord);
       }
-
-      if (outputTokens.length >= maxInputTokens - 1) {
-        break;
-      }
-    }
-
-    if (outputTokens.length >= maxInputTokens - 1) {
-      outputTokens = outputTokens.sublist(0, maxInputTokens - 1);
     }
     outputTokens.add(endToken);
-
-    return outputTokens;
+    allOutputTokens.add(outputTokens);
+    return allOutputTokens;
   }
 
-
-  List<int> tokenize(String text) {
+  List<List<int>> tokenize(String text) {
     return _createSubstrings(text);
   }
 
