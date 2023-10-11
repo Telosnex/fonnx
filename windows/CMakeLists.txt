@@ -52,7 +52,7 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE flutter flutter_wrapper_plugin)
 # This list could contain prebuilt libraries, or libraries created by an
 # external build triggered from this build file.
 set(fonnx_bundled_libraries
-  ""
+  "${CMAKE_CURRENT_SOURCE_DIR}/onnx_runtime/onnxruntime-x64.dll"
   PARENT_SCOPE
 )
 

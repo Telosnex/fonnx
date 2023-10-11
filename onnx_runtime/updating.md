@@ -23,3 +23,9 @@ TL;DR:
 1. Build on Apple Silicon in profile mode.
 2. You can then find the .app in the build/ directory. The easiest way to locate it is to right click on the running app, hover Options, then press Show in Finder. 
 3. Right click on the .app and choose Get Info. At the bottom of the General section, there is a checkbox that says Open using Rosetta. Launch the app again, and verify it works.
+
+## Windows
+Windows x64 is all we need to support currently.
+Flutter is not quite stable for Windows arm64 ([Github issue](https://github.com/flutter/flutter/issues/62597)).
+Neither arm nor arm64 devices are particularly numerous.
+As of October 2023, at most ~0.35% of Windows devices could plausibly be Win32. [source](https://www.pcbenchmarks.net/os-marketshare.html)

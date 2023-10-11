@@ -7,5 +7,5 @@
 - [ ] add example app speed test button  
 - [ ] Try iOS device x CoreML
 - [ ] Linux
-- [ ] Windows
+- [x] Windows
 - [x] macOS Intel

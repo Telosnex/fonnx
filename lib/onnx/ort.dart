@@ -169,9 +169,10 @@ extension DartNativeFunctions on OrtApi {
     final createSessionFn = CreateSession.asFunction<
         Pointer<OrtStatus> Function(Pointer<OrtEnv>, Pointer<Char>,
             Pointer<OrtSessionOptions>, Pointer<Pointer<OrtSession>>)>();
+    final modelPathChars = defaultTargetPlatform == TargetPlatform.windows ? modelPath.toNativeUtf16().cast<Char>() : modelPath.toNativeUtf8().cast<Char>();
     final status = createSessionFn(
       env,
-      modelPath.toNativeUtf8().cast<Char>(),
+      modelPathChars,
       sessionOptions,
       session,
     );
@@ -354,15 +355,31 @@ class OrtSessionObjects {
   });
 }
 
+String get dylibPath {
+  final isTesting = !kIsWeb && Platform.environment['FLUTTER_TEST'] == 'true';
+  if (isTesting) {
+    return 'macos/onnx_runtime/osx/libonnxruntime.1.16.0.dylib';
+  }
+  switch (defaultTargetPlatform) {
+    case TargetPlatform.android:
+      throw 'Android runs using a platform-specific implementation, not FFI';
+    case TargetPlatform.fuchsia:
+      throw UnimplementedError();
+    case TargetPlatform.iOS:
+      throw 'iOS runs using a platform-specific implementation, not FFI';
+    case TargetPlatform.linux:
+      throw UnimplementedError();
+    case TargetPlatform.macOS:
+      return 'libonnxruntime.1.16.0.dylib';
+    case TargetPlatform.windows:
+      return 'onnxruntime-x64.dll';
+  }
+}
 /// You MUST call [calloc.free] on the returned pointer when you are done with it.
 ///
 /// It is reasonable to never free it in an app where you would like the model
 /// to be loaded for the lifetime of the app.
 OrtSessionObjects createOrtSession(String modelPath) {
-  final isTesting = !kIsWeb && Platform.environment['FLUTTER_TEST'] == 'true';
-  final String dylibPath = isTesting
-      ? 'macos/onnx_runtime/osx_arm64/libonnxruntime.1.16.0.dylib'
-      : 'libonnxruntime.1.16.0.dylib';
   DynamicLibrary.open(dylibPath);
   final baseApi = OrtGetApiBase().ref;
   final api = baseApi.GetApi.asFunction<Pointer<OrtApi> Function(int)>();

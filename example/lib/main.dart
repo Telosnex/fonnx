@@ -90,15 +90,14 @@ Future<String> getModelPath(String modelFilenameWithExtension) async {
 
   File file = File(modelPath);
   bool fileExists = await file.exists();
+  // Do not use path package / path.join for paths.
+  // After testing on Windows, it appears that asset paths are _always_ Unix style, i.e.
+  // use /, but path.join uses \ on Windows.
+  final assetPath = 'assets/${path.basename(modelFilenameWithExtension)}';
   bool fileSameSize = fileExists &&
       (await file.length()) ==
           (await rootBundle.load(
-            path.join(
-              // "..", // '..' only needed because this example is in a sibling directory of fonnx
-              // "models",
-              "assets",
-              path.basename(modelFilenameWithExtension),
-            ),
+            assetPath,
           ))
               .lengthInBytes;
   if (!fileExists || !fileSameSize) {
@@ -109,12 +108,7 @@ Future<String> getModelPath(String modelFilenameWithExtension) async {
     debugAssetPathLocation();
 
     ByteData data = await rootBundle.load(
-      path.join(
-        "assets", // '..' only needed because this example is in a sibling directory of fonnx
-        // "models",
-        // "miniLmL6V2",
-        path.basename(modelFilenameWithExtension),
-      ),
+      "assets/${path.basename(modelFilenameWithExtension)}"
     );
     List<int> bytes =
         data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
