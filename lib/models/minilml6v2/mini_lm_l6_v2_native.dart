@@ -9,7 +9,7 @@ import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free;
 import 'package:fonnx/tokenizers/wordpiece_tokenizer.dart';
 
 MiniLmL6V2 getMiniLmL6V2(String path) => MiniLmL6V2Native(path);
-    
+
 class MiniLmL6V2Native implements MiniLmL6V2 {
   String modelPath;
   MiniLmL6V2Native(this.modelPath);

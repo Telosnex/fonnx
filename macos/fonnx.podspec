@@ -21,6 +21,6 @@ A new Flutter plugin project.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
   s.swift_version = '5.0'
 
-  s.vendored_libraries = "onnx_runtime/**/*.dylib"
+  s.vendored_libraries = "onnx_runtime/osx/*.dylib"
   s.static_framework = true
 end

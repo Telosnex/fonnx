@@ -67,7 +67,12 @@ class WordpieceTokenizer {
   (List<String>, List<List<int>>) _createSubstrings(String text) {
     text = text.trim();
     if (text.isEmpty) {
-      return ([], []);
+      return (
+        [''],
+        [
+          [101, 102]
+        ]
+      );
     }
 
     List<List<int>> allOutputTokens = [];
