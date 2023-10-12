@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.jpohhhh.fonnx" "\0"
-            VALUE "FileDescription", "fonnx_example" "\0"
+            VALUE "CompanyName", "Telosnex" "\0"
+            VALUE "FileDescription", "Fonnx" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "fonnx_example" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2023 com.jpohhhh.fonnx. All rights reserved." "\0"
-            VALUE "OriginalFilename", "fonnx_example.exe" "\0"
-            VALUE "ProductName", "fonnx_example" "\0"
+            VALUE "InternalName", "Fonnx" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2023 Telosnex. All rights reserved." "\0"
+            VALUE "OriginalFilename", "fonnx.exe" "\0"
+            VALUE "ProductName", "fonnx" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

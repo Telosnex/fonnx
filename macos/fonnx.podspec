@@ -4,14 +4,16 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'fonnx'
-  s.version          = '0.0.1'
-  s.summary          = 'Flutter plugin for ONNX runtime'
+  s.version          = '1.0.0'
+  s.summary          = 'Flutter macOS plugin implementing ONNX runtime.'
   s.description      = <<-DESC
-A new Flutter plugin project.
+Your model, everywhere.
+
+Fonnx brings the power of ONNX runtime to Flutter. It allows you to run your ONNX models on every platform supported by Flutter.
                        DESC
-  s.homepage         = 'http://example.com'
+  s.homepage         = 'http://telosnex.com'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Telanexus' => 'jpohhhh@gmail.com' }
+  s.author           = { 'Telosnex' => 'info@telosnex.com' }
 
   s.source           = { :path => '.' }
   s.source_files     = 'Classes/**/*'

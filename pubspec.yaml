@@ -28,7 +28,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.jpohhhh.fonnx.fonnx
+        package: com.telosnex.fonnx
         pluginClass: FonnxPlugin
       ios:
         pluginClass: FonnxPlugin

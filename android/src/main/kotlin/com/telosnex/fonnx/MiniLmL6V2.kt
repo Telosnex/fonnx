@@ -1,4 +1,4 @@
-package com.jpohhhh.fonnx.fonnx
+package com.telosnex.fonnx
 
 import ai.onnxruntime.*
 import android.util.Log

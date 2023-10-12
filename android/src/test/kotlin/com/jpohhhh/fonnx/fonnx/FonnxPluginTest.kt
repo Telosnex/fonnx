@@ -1,4 +1,4 @@
-package com.jpohhhh.fonnx.fonnx
+package com.telosnex.fonnx
 
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel

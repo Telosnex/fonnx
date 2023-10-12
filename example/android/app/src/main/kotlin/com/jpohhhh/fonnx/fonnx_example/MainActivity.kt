@@ -1,4 +1,4 @@
-package com.jpohhhh.fonnx.fonnx_example
+package com.telosnex.fonnx.example
 
 import io.flutter.embedding.android.FlutterActivity
 

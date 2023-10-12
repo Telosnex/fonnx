@@ -33,7 +33,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Plugin example app'),
+          title: const Text('Fonnx Example App'),
         ),
         body: Center(
           child: SingleChildScrollView(
@@ -84,7 +84,7 @@ class _MyAppState extends State<MyApp> {
 
 Future<String> getModelPath(String modelFilenameWithExtension) async {
   if (kIsWeb) {
-    return 'assets/$modelFilenameWithExtension';
+    return 'assets/models/miniLmL6V2/$modelFilenameWithExtension';
   }
   final assetCacheDirectory =
       await path_provider.getApplicationSupportDirectory();
@@ -98,7 +98,8 @@ Future<String> getModelPath(String modelFilenameWithExtension) async {
   // Do not use path package / path.join for paths.
   // After testing on Windows, it appears that asset paths are _always_ Unix style, i.e.
   // use /, but path.join uses \ on Windows.
-  final assetPath = 'assets/${path.basename(modelFilenameWithExtension)}';
+  final assetPath =
+      'assets/models/miniLmL6V2/${path.basename(modelFilenameWithExtension)}';
   final assetByteData = await rootBundle.load(assetPath);
   final assetLength = assetByteData.lengthInBytes;
   final fileSameSize = fileExists && fileLength == assetLength;
@@ -109,11 +110,12 @@ Future<String> getModelPath(String modelFilenameWithExtension) async {
         'directory. (${!fileSameSize})');
     debugAssetPathLocation();
 
-    ByteData data = await rootBundle
-        .load("assets/${path.basename(modelFilenameWithExtension)}");
     List<int> bytes =
-        data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-    await file.writeAsBytes(bytes);
+        assetByteData.buffer.asUint8List(
+      assetByteData.offsetInBytes,
+      assetByteData.lengthInBytes,
+    );
+    await file.writeAsBytes(bytes, flush: true);
   }
 
   return modelPath;
