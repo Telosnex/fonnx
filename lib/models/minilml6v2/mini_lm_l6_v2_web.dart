@@ -30,9 +30,9 @@ class MiniLmL6V2Web implements MiniLmL6V2 {
   MiniLmL6V2Web(this.modelPath);
 
   @override
-  Future<List<TextAndEmbedding>> getEmbedding(String text) async {
+  Future<List<TextAndVector>> embed(String text) async {
     final allTextAndTokens = tokenizer.tokenize(text);
-    final allTextAndEmbeddings = <TextAndEmbedding>[];
+    final allTextAndEmbeddings = <TextAndVector>[];
     for (var i = 0; i < allTextAndTokens.length; i++) {
       final textAndTokens = allTextAndTokens[i];
       final tokens = textAndTokens.tokens;
@@ -47,10 +47,25 @@ class MiniLmL6V2Web implements MiniLmL6V2 {
               dtype: DType.float32)
           .normalize();
       // final vector = Vector.fromList(jsList, dtype: DType.float32).normalize();
-      allTextAndEmbeddings.add(TextAndEmbedding(text: text, embedding: vector));
+      allTextAndEmbeddings.add(TextAndVector(text: text, embedding: vector));
     }
 
     // return vector;
     return allTextAndEmbeddings;
+  }
+
+  @override
+  Future<Vector> getVectorForTokens(List<int> tokens) async {
+    final jsObject = await promiseToFuture(sbertJs(modelPath, tokens));
+
+    if (jsObject == null) {
+      throw Exception('Embeddings returned from JS code are null');
+    }
+    // final jsList = (jsObject as List<num>);
+    final jsList = (jsObject as List<dynamic>);
+    final vector = Vector.fromList(Float32List.fromList(jsList.cast()),
+            dtype: DType.float32)
+        .normalize();
+    return vector;
   }
 }

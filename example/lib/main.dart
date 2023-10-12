@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fonnx/models/minilml6v2/mini_lm_l6_v2.dart';
+import 'package:fonnx/tokenizers/wordpiece_tokenizer.dart';
 import 'dart:async';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:path/path.dart' as path;
@@ -20,8 +21,17 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
+const padding = 8.0;
+const heightPadding = SizedBox(
+  height: 8,
+);
+const widthPadding = SizedBox(
+  width: 8,
+);
+
 class _MyAppState extends State<MyApp> {
-  String _lastStatusText = '';
+  bool? _miniLmL6V2VerificationTestPassed;
+  String? _miniLmL6V2SpeedTestResult;
 
   @override
   void initState() {
@@ -35,50 +45,109 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Fonnx Example App'),
         ),
-        body: Center(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () async {
-                    final modelPath = await getModelPath('miniLmL6V2.onnx');
-                    final miniLmL6V2 = MiniLmL6V2.load(modelPath);
-                    final result = await miniLmL6V2.getEmbedding('');
-                    final embedding = result.first.embedding;
-                    final isNotMatch =
-                        embedding.indexed.any((outer) {
-                      final doesNot = outer.$2 !=
-                          miniLmL6V2ExpectedForEmptyString[outer.$1];
-                      // Use 4 significant figures.
-                      // Slight mismatch between iOS and macOS. For example:
-                      // "0.36081504821777344 but got 0.3608149588108063"
-                      final doesNotAt5 = doesNot &&
-                          outer.$2.toStringAsFixed(4) !=
-                              miniLmL6V2ExpectedForEmptyString[outer.$1]
-                                  .toStringAsFixed(4);
-                      if (doesNotAt5) {
-                        debugPrint(
-                            'Expected ${miniLmL6V2ExpectedForEmptyString[outer.$1]} '
-                            'but got ${outer.$2} at index ${outer.$1}');
-                      }
-                      return doesNotAt5;
-                    });
-                    setState(() {
-                      _lastStatusText = isNotMatch
-                          ? '!!! Not a match !!!\n${result.first.embedding.map((e) => e.toString()).join(',\n')}'
-                          : 'Match';
-                    });
-                  },
-                  icon: const Icon(Icons.code),
-                  label: const Text('Test MiniLM-L6-V2'),
-                ),
-                if (_lastStatusText.isNotEmpty) SelectableText(_lastStatusText),
-              ],
-            ),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              heightPadding,
+              Text(
+                'MiniLM-L6-V2',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              heightPadding,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: _runMiniLmL6V2VerificationTest,
+                    child: const Text('Test Correctness'),
+                  ),
+                  widthPadding,
+                  if (_miniLmL6V2VerificationTestPassed == true)
+                    const Icon(
+                      Icons.check,
+                      color: Colors.green,
+                    ),
+                  if (_miniLmL6V2VerificationTestPassed == false)
+                    const Icon(
+                      Icons.close,
+                      color: Colors.red,
+                    ),
+                ],
+              ),
+              heightPadding,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: _runMiniLmL6V2SpeedTest,
+                    child: const Text('Test Speed'),
+                  ),
+                  widthPadding,
+                  if (_miniLmL6V2SpeedTestResult != null)
+                    Text(_miniLmL6V2SpeedTestResult!),
+                ],
+              ),
+            ],
           ),
         ),
       ),
     );
+  }
+
+  void _runMiniLmL6V2VerificationTest() async {
+    final modelPath = await getModelPath('miniLmL6V2.onnx');
+    final miniLmL6V2 = MiniLmL6V2.load(modelPath);
+    final result = await miniLmL6V2.embed('');
+    final embedding = result.first.embedding;
+    final isNotMatch = embedding.indexed.any((outer) {
+      final doesNot = outer.$2 != miniLmL6V2ExpectedForEmptyString[outer.$1];
+      // Use 4 significant figures.
+      // Slight mismatch between iOS and macOS. For example:
+      // "0.36081504821777344 but got 0.3608149588108063"
+      final doesNotAt5 = doesNot &&
+          outer.$2.toStringAsFixed(4) !=
+              miniLmL6V2ExpectedForEmptyString[outer.$1].toStringAsFixed(4);
+      if (doesNotAt5) {
+        debugPrint('Expected ${miniLmL6V2ExpectedForEmptyString[outer.$1]} '
+            'but got ${outer.$2} at index ${outer.$1}');
+      }
+      return doesNotAt5;
+    });
+    setState(() {
+      _miniLmL6V2VerificationTestPassed = !isNotMatch;
+    });
+  }
+
+  void _runMiniLmL6V2SpeedTest() async {
+    final string = await rootBundle.loadString('assets/text_sample.txt');
+    final textAndTokens = WordpieceTokenizer.bert().tokenize(string);
+    final path = await getModelPath('miniLmL6V2.onnx');
+    final miniLmL6V2 = MiniLmL6V2.load(path);
+    debugPrint('Loaded model');
+    // Warm up. This is not necessary, but it's nice to do. Only the first call
+    // to a model is slow.
+    for (var i = 0; i < 10; i++) {
+      await miniLmL6V2.getVectorForTokens(
+        textAndTokens[i % textAndTokens.length].tokens,
+      );
+    }
+    debugPrint('Warmed up');
+
+    // Now test speed. Run 100 embeddings, looping over the instances of
+    // TextAndTokens.
+    final stopwatch = Stopwatch()..start();
+    var completed = 0;
+    while (completed < 100) {
+      await miniLmL6V2.getVectorForTokens(
+          textAndTokens[completed % textAndTokens.length].tokens);
+      completed++;
+    }
+    stopwatch.stop();
+    final elapsed = stopwatch.elapsedMilliseconds;
+    final speed = (elapsed / completed.toDouble()).toStringAsFixed(3);
+    setState(() {
+      _miniLmL6V2SpeedTestResult = 'Speed: $speed ms per embedding';
+    });
   }
 }
 
@@ -110,8 +179,7 @@ Future<String> getModelPath(String modelFilenameWithExtension) async {
         'directory. (${!fileSameSize})');
     debugAssetPathLocation();
 
-    List<int> bytes =
-        assetByteData.buffer.asUint8List(
+    List<int> bytes = assetByteData.buffer.asUint8List(
       assetByteData.offsetInBytes,
       assetByteData.lengthInBytes,
     );

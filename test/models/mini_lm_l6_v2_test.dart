@@ -18,7 +18,7 @@ void main() {
   final miniLmL6V2 = MiniLmL6V2Native(modelPath);
 
   Future<Vector> vec(String text) async {
-    return (await miniLmL6V2.getEmbedding(text)).first.embedding;
+    return (await miniLmL6V2.embed(text)).first.embedding;
   }
 
   test('Embedding works', () async {
@@ -45,7 +45,7 @@ void main() {
 
     List<Future> futures = [];
     for (var i = 0; i < count; i++) {
-      final future = miniLmL6V2.getEmbedding(randomStrings[i]);
+      final future = miniLmL6V2.embed(randomStrings[i]);
       futures.add(future);
     }
     final sw = Stopwatch()..start();

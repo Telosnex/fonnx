@@ -21,33 +21,40 @@ class MiniLmL6V2Native implements MiniLmL6V2 {
   WordpieceTokenizer? _wordpieceTokenizer;
 
   @override
-  Future<List<TextAndEmbedding>> getEmbedding(String text) async {
+  Future<List<TextAndVector>> embed(String text) async {
     _wordpieceTokenizer ??= WordpieceTokenizer.bert();
     final textAndTokens = _wordpieceTokenizer!.tokenize(text);
-    final allTextAndEmbeddings = <TextAndEmbedding>[];
+    final allTextAndEmbeddings = <TextAndVector>[];
     for (var i = 0; i < textAndTokens.length; i++) {
       final textAndToken = textAndTokens[i];
       final tokens = textAndToken.tokens;
-      final embeddings = await truncateAndGetEmbeddingForTokens(tokens);
-      final vector =
-          Vector.fromList(embeddings, dtype: DType.float32).normalize();
-      allTextAndEmbeddings.add(TextAndEmbedding(text: text, embedding: vector));
+      final vector = await getVectorForTokens(tokens);
+      allTextAndEmbeddings.add(TextAndVector(text: text, embedding: vector));
     }
     return allTextAndEmbeddings;
   }
 
-  Future<TextAndEmbedding> truncateAndGetEmbeddingForString(
+  @override
+  Future<Vector> getVectorForTokens(List<int> tokens) async {
+    final embeddings = await _truncateAndGetEmbeddingForTokens(tokens);
+    final vector =
+        Vector.fromList(embeddings, dtype: DType.float32).normalize();
+    return vector;
+  }
+
+  Future<TextAndVector> truncateAndGetEmbeddingForString(
       String string) async {
     _wordpieceTokenizer ??= WordpieceTokenizer.bert();
     final textAndTokens = _wordpieceTokenizer!.tokenize(string);
     final tokens = textAndTokens[0].tokens;
-    final embeddings = await truncateAndGetEmbeddingForTokens(tokens);
+    final embeddings = await _truncateAndGetEmbeddingForTokens(tokens);
     final vector =
         Vector.fromList(embeddings, dtype: DType.float32).normalize();
-    return TextAndEmbedding(text: string, embedding: vector);
+    return TextAndVector(text: string, embedding: vector);
   }
 
-  Future<Float32List> truncateAndGetEmbeddingForTokens(List<int> tokens) async {
+  Future<Float32List> _truncateAndGetEmbeddingForTokens(
+      List<int> tokens) async {
     if (!kIsWeb && Platform.environment['FLUTTER_TEST'] == 'true') {
       return _getEmbeddingFfi(tokens);
     }

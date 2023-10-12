@@ -1,4 +1,5 @@
 import 'package:fonnx/tokenizers/embedding.dart';
+import 'package:ml_linalg/linalg.dart';
 
 import 'mini_lm_l6_v2_stub.dart'
     if (dart.library.io) 'mini_lm_l6_v2_native.dart'
@@ -12,5 +13,6 @@ abstract class MiniLmL6V2 {
     return _instance!;
   }
 
-  Future<List<TextAndEmbedding>> getEmbedding(String text);
+  Future<List<TextAndVector>> embed(String text);
+  Future<Vector> getVectorForTokens(List<int> tokens);
 }

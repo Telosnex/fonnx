@@ -101,6 +101,7 @@
         const inputs = { inputsIdsKey: inputsIdsTensor, attentionMaskKey: attentionMaskTensor, tokenTypeIdsKey: tokenTypeIdsTensor };
         const results = await session.run({ 'input_ids': inputsIdsTensor, 'attention_mask': attentionMaskTensor, 'token_type_ids': tokenTypeIdsTensor });
         const embeddings = results.embeddings.data;
+        console.timeEnd("one embedding inference")
 
         return embeddings;
       } catch (e) {

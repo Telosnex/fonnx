@@ -28,13 +28,13 @@ class TextAndTokens {
 /// A class that represents a text and its corresponding embedding.
 ///
 /// Note that equality is only based on the text, not the embedding.
-/// Two [TextAndEmbedding] objects could compare as equal even if the embeddings
+/// Two [TextAndVector] objects could compare as equal even if the embeddings
 /// are from different models.
-/// 
+///
 /// This is chosen to avoid expensive deep equals checks.
-class TextAndEmbedding {
+class TextAndVector {
   final String text;
   final Vector embedding;
 
-  TextAndEmbedding({required this.text, required this.embedding});
+  TextAndVector({required this.text, required this.embedding});
 }
