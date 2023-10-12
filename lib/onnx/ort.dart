@@ -21,7 +21,9 @@ extension DartNativeFunctions on OrtApi {
     return message.toDartString();
   }
 
-  Pointer<OrtStatus> createInt64Tensor(
+  /// You MUST call [calloc.free] on the returned pointer when you are done with
+  /// it, i.e. once inference is complete.
+  Pointer<Int64> createInt64Tensor(
     Pointer<Pointer<OrtValue>> inputTensorPointer, {
     required Pointer<OrtMemoryInfo> memoryInfo,
     required List<int> values,
@@ -48,16 +50,19 @@ extension DartNativeFunctions on OrtApi {
       onnxTensorElementDataType:
           ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64,
     );
-    // calloc.free(inputTensorNative);
     if (status.isError) {
       final error = 'Code: ${getErrorCodeMessage(status)}\n'
           'Message: ${getErrorMessage(status)}';
+      calloc.free(inputTensorNative);
+      calloc.free(inputShape);
       throw Exception(error);
     }
-    return status;
+    calloc.free(inputShape);
+    return inputTensorNative;
   }
 
-  Pointer<OrtStatus> sessionGetOutputCount(Pointer<OrtSession> session) {
+  /// You MUST call [calloc.free] on the returned pointer.
+  Pointer<Size> sessionGetOutputCount(Pointer<OrtSession> session) {
     final getOutputCountFn = SessionGetOutputCount.asFunction<
         Pointer<OrtStatus> Function(
           Pointer<OrtSession>,
@@ -65,7 +70,12 @@ extension DartNativeFunctions on OrtApi {
         )>();
     final outputCount = calloc<Size>();
     final status = getOutputCountFn(session, outputCount);
-    return status;
+    if (status.isError) {
+      final error = 'Code: ${getErrorCodeMessage(status)}\n'
+          'Message: ${getErrorMessage(status)}';
+      throw Exception(error);
+    }
+    return outputCount;
   }
 
   Pointer<OrtStatus> sessionGetOutputName(
@@ -83,6 +93,12 @@ extension DartNativeFunctions on OrtApi {
     final allocator = calloc<Pointer<OrtAllocator>>();
     getAllocatorWithDefaultOptions(allocator);
     final status = getFn(session, index, allocator.value, out);
+    calloc.free(allocator);
+    if (status.isError) {
+      final error = 'Code: ${getErrorCodeMessage(status)}\n'
+          'Message: ${getErrorMessage(status)}';
+      throw Exception(error);
+    }
     return status;
   }
 
@@ -169,7 +185,9 @@ extension DartNativeFunctions on OrtApi {
     final createSessionFn = CreateSession.asFunction<
         Pointer<OrtStatus> Function(Pointer<OrtEnv>, Pointer<Char>,
             Pointer<OrtSessionOptions>, Pointer<Pointer<OrtSession>>)>();
-    final modelPathChars = defaultTargetPlatform == TargetPlatform.windows ? modelPath.toNativeUtf16().cast<Char>() : modelPath.toNativeUtf8().cast<Char>();
+    final modelPathChars = defaultTargetPlatform == TargetPlatform.windows
+        ? modelPath.toNativeUtf16().cast<Char>()
+        : modelPath.toNativeUtf8().cast<Char>();
     final status = createSessionFn(
       env,
       modelPathChars,
@@ -343,6 +361,10 @@ extension DartNativeFunctions on OrtApi {
   }
 }
 
+/// This is a wrapper for FFI bindings that define a running model.
+///
+/// The sessionPtr is live. If you free it, you will not be able to use the
+/// model anymore. Conversely, you must free it when you are done with it.
 class OrtSessionObjects {
   final Pointer<Pointer<OrtSession>> sessionPtr;
   final OrtApiBase apiBase;
@@ -375,6 +397,7 @@ String get dylibPath {
       return 'onnxruntime-x64.dll';
   }
 }
+
 /// You MUST call [calloc.free] on the returned pointer when you are done with it.
 ///
 /// It is reasonable to never free it in an app where you would like the model
@@ -384,13 +407,14 @@ OrtSessionObjects createOrtSession(String modelPath) {
   //   DynamicLibrary.open(dylibPath);
   //   final baseApi = OrtGetApiBase().ref;
   // That led to an error that said:
-  //   
+  //
   // After reading [this Github issue](https://github.com/dart-lang/sdk/issues/50551)
   //   my instinct was there may be an issue with global static functions and ffi,
   //   and Linux may be lagging in support. Explicitly looking the function up in
   //   the explicit library did fix it.
   final lib = DynamicLibrary.open(dylibPath);
-  final fn = lib.lookupFunction<Pointer<OrtApiBase> Function(), Pointer<OrtApiBase> Function()>('OrtGetApiBase');
+  final fn = lib.lookupFunction<Pointer<OrtApiBase> Function(),
+      Pointer<OrtApiBase> Function()>('OrtGetApiBase');
   final answer = fn.call();
   final baseApi = answer.ref;
   final api = baseApi.GetApi.asFunction<Pointer<OrtApi> Function(int)>();
@@ -427,10 +451,8 @@ OrtSessionObjects createOrtSession(String modelPath) {
     throw Exception(error);
   }
 
-
-
-  // calloc.free(sessionOptionsPtr);
-  // calloc.free(envPtr);
+  calloc.free(sessionOptionsPtr);
+  calloc.free(envPtr);
   return OrtSessionObjects(
     sessionPtr: sessionPtr,
     apiBase: baseApi,
