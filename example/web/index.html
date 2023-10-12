@@ -61,7 +61,7 @@
        Patterned after https://github.com/microsoft/onnxruntime-inference-examples/blob/main/js/quick-start_onnxruntime-web-script-tag/index.html
   -->
   <!-- REQUIRED FOR: ALL models. -->
-  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.webgpu.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
   <!-- REQUIRED FOR: Mini LM L6 V2  -->
   <script>
     let cachedModelPath = null
@@ -83,7 +83,13 @@
         }
 
         console.time("one embedding inference")
-        const bigIntWordpieces = wordpieces.flat().map(x => BigInt(x));
+        // Check if wordpieces is a single array or array of arrays
+        let bigIntWordpieces;
+        if (Array.isArray(wordpieces[0])) {
+          bigIntWordpieces = wordpieces.flat().map(x => BigInt(x));
+        } else {
+          bigIntWordpieces = wordpieces.map(x => BigInt(x));
+        }
 
         const shape = [1, bigIntWordpieces.length]
         const inputsIdsKey = "input_ids";
@@ -93,11 +99,8 @@
         const attentionMaskKey = "attention_mask";
         const attentionMaskTensor = new ort.Tensor('int64', BigInt64Array.from(new Array(shape[0] * shape[1]).fill(1n)), shape);
         const inputs = { inputsIdsKey: inputsIdsTensor, attentionMaskKey: attentionMaskTensor, tokenTypeIdsKey: tokenTypeIdsTensor };
-
         const results = await session.run({ 'input_ids': inputsIdsTensor, 'attention_mask': attentionMaskTensor, 'token_type_ids': tokenTypeIdsTensor });
-
         const embeddings = results.embeddings.data;
-        console.timeEnd("one embedding inference")
 
         return embeddings;
       } catch (e) {

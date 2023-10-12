@@ -1,11 +1,13 @@
 import 'dart:typed_data';
 
+import 'package:fonnx/tokenizers/embedding.dart';
 import 'package:fonnx/tokenizers/wordpiece_tokenizer.dart';
 import 'package:js/js_util.dart';
 
 import 'package:js/js.dart';
 
 import 'package:fonnx/models/minilml6v2/mini_lm_l6_v2.dart';
+import 'package:ml_linalg/linalg.dart';
 
 MiniLmL6V2 getMiniLmL6V2(String path) => MiniLmL6V2Web(path);
 
@@ -19,7 +21,7 @@ class Promise<T> {
 
 @JS('window.miniLmL6V2')
 external Promise<List<List<double>>> sbertJs(
-    String modelPath, List<List<int>> wordpieces);
+    String modelPath, List<int> wordpieces);
 
 class MiniLmL6V2Web implements MiniLmL6V2 {
   final String modelPath;
@@ -28,13 +30,27 @@ class MiniLmL6V2Web implements MiniLmL6V2 {
   MiniLmL6V2Web(this.modelPath);
 
   @override
-  Future<Float32List> getEmbedding(String text) async {
-    final tokens = tokenizer.tokenize(text);
-    final jsObject = await promiseToFuture(sbertJs(modelPath, tokens));
-    if (jsObject == null) {
-      throw Exception('Embeddings returned from JS code are null');
+  Future<List<TextAndEmbedding>> getEmbedding(String text) async {
+    final allTextAndTokens = tokenizer.tokenize(text);
+    final allTextAndEmbeddings = <TextAndEmbedding>[];
+    for (var i = 0; i < allTextAndTokens.length; i++) {
+      final textAndTokens = allTextAndTokens[i];
+      final tokens = textAndTokens.tokens;
+      final jsObject = await promiseToFuture(sbertJs(modelPath, tokens));
+
+      if (jsObject == null) {
+        throw Exception('Embeddings returned from JS code are null');
+      }
+      // final jsList = (jsObject as List<num>);
+      final jsList = (jsObject as List<dynamic>);
+      final vector = Vector.fromList(Float32List.fromList(jsList.cast()),
+              dtype: DType.float32)
+          .normalize();
+      // final vector = Vector.fromList(jsList, dtype: DType.float32).normalize();
+      allTextAndEmbeddings.add(TextAndEmbedding(text: text, embedding: vector));
     }
-    final jsList = (jsObject as List<dynamic>);
-    return Float32List.fromList(jsList.cast());
+
+    // return vector;
+    return allTextAndEmbeddings;
   }
 }

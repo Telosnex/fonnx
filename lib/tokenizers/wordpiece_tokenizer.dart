@@ -1,5 +1,6 @@
 import 'package:diacritic/diacritic.dart';
 import 'package:fonnx/tokenizers/bert_vocab.dart';
+import 'package:fonnx/tokenizers/embedding.dart';
 
 class WordpieceTokenizer {
   final Map<String, int> encoder;
@@ -64,15 +65,12 @@ class WordpieceTokenizer {
         (0x30A0 <= codeUnit && codeUnit <= 0x30FF);
   }
 
-  (List<String>, List<List<int>>) _createSubstrings(String text) {
+  List<TextAndTokens> _createSubstrings(String text) {
     text = text.trim();
     if (text.isEmpty) {
-      return (
-        [''],
-        [
-          [101, 102]
-        ]
-      );
+      return [
+        TextAndTokens(text: '', tokens: [101, 102])
+      ];
     }
 
     List<List<int>> allOutputTokens = [];
@@ -165,13 +163,17 @@ class WordpieceTokenizer {
     outputTokens.add(endToken);
     allOutputTokens.add(outputTokens);
     allOutputStrings.add(outputString.join(' '));
-    return (allOutputStrings, allOutputTokens);
+    assert(allOutputStrings.length == allOutputTokens.length);
+    return List<TextAndTokens>.generate(allOutputStrings.length, (index) {
+      return TextAndTokens(
+        text: allOutputStrings[index],
+        tokens: allOutputTokens[index],
+      );
+    });
   }
 
-  List<List<int>> tokenize(String text) {
-    final answer = _createSubstrings(text);
-    final tokens = answer.$2;
-    return tokens;
+  List<TextAndTokens> tokenize(String text) {
+    return _createSubstrings(text);
   }
 
   String detokenize(List<int> tokens) {

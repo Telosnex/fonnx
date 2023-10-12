@@ -1,12 +1,15 @@
 import 'dart:async';
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fonnx/fonnx.dart';
 import 'package:fonnx/models/minilml6v2/mini_lm_l6_v2.dart';
 import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free;
+import 'package:fonnx/tokenizers/embedding.dart';
 import 'package:fonnx/tokenizers/wordpiece_tokenizer.dart';
+import 'package:ml_linalg/linalg.dart';
 
 MiniLmL6V2 getMiniLmL6V2(String path) => MiniLmL6V2Native(path);
 
@@ -18,22 +21,50 @@ class MiniLmL6V2Native implements MiniLmL6V2 {
   WordpieceTokenizer? _wordpieceTokenizer;
 
   @override
-  Future<Float32List> getEmbedding(String text) async {
+  Future<List<TextAndEmbedding>> getEmbedding(String text) async {
     _wordpieceTokenizer ??= WordpieceTokenizer.bert();
-    final tokens = _wordpieceTokenizer!.tokenize(text);
+    final textAndTokens = _wordpieceTokenizer!.tokenize(text);
+    final allTextAndEmbeddings = <TextAndEmbedding>[];
+    for (var i = 0; i < textAndTokens.length; i++) {
+      final textAndToken = textAndTokens[i];
+      final tokens = textAndToken.tokens;
+      final embeddings = await truncateAndGetEmbeddingForTokens(tokens);
+      final vector =
+          Vector.fromList(embeddings, dtype: DType.float32).normalize();
+      allTextAndEmbeddings.add(TextAndEmbedding(text: text, embedding: vector));
+    }
+    return allTextAndEmbeddings;
+  }
+
+  Future<TextAndEmbedding> truncateAndGetEmbeddingForString(
+      String string) async {
+    _wordpieceTokenizer ??= WordpieceTokenizer.bert();
+    final textAndTokens = _wordpieceTokenizer!.tokenize(string);
+    final tokens = textAndTokens[0].tokens;
+    final embeddings = await truncateAndGetEmbeddingForTokens(tokens);
+    final vector =
+        Vector.fromList(embeddings, dtype: DType.float32).normalize();
+    return TextAndEmbedding(text: string, embedding: vector);
+  }
+
+  Future<Float32List> truncateAndGetEmbeddingForTokens(List<int> tokens) async {
+    if (!kIsWeb && Platform.environment['FLUTTER_TEST'] == 'true') {
+      return _getEmbeddingFfi(tokens);
+    }
+
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        return _getEmbeddingPlatform(tokens.first);
+        return _getEmbeddingPlatform(tokens);
       case TargetPlatform.iOS:
-        return _getEmbeddingPlatform(tokens.first);
+        return _getEmbeddingPlatform(tokens);
       case TargetPlatform.fuchsia:
         throw UnimplementedError();
       case TargetPlatform.linux:
-        return _getEmbeddingFfi(tokens.first);
+        return _getEmbeddingFfi(tokens);
       case TargetPlatform.macOS:
-        return _getEmbeddingFfi(tokens.first);
+        return _getEmbeddingFfi(tokens);
       case TargetPlatform.windows:
-        return _getEmbeddingFfi(tokens.first);
+        return _getEmbeddingFfi(tokens);
     }
   }
 
@@ -51,7 +82,7 @@ class MiniLmL6V2Native implements MiniLmL6V2 {
     if (embeddings == null) {
       throw Exception('Embeddings returned from platform code are null');
     }
-    return embeddings; // Before Android, it was just embeddings.first
+    return embeddings;
   }
 
   Future<Float32List> _getEmbeddingFfi(List<int> tokens) async {

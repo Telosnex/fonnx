@@ -17,16 +17,18 @@ void main() {
   const modelPath = 'models/miniLmL6V2/miniLmL6V2.onnx';
   final miniLmL6V2 = MiniLmL6V2Native(modelPath);
 
+  Future<Vector> vec(String text) async {
+    return (await miniLmL6V2.getEmbedding(text)).first.embedding;
+  }
+
   test('Embedding works', () async {
-    final answer = await miniLmL6V2.getEmbedding('');
+    final answer = await vec('');
     expect(answer, hasLength(384));
   });
 
   test('Normalize works', () async {
-    final embedding = await miniLmL6V2.getEmbedding('');
-    final vector = Vector.fromList(embedding);
-    final normalized = vector.normalize();
-    expect(normalized, hasLength(384));
+    final result = await miniLmL6V2.truncateAndGetEmbeddingForString('');
+    expect(result.embedding, hasLength(384));
   });
 
   test('Performance test', () async {
@@ -55,36 +57,22 @@ void main() {
   });
 
   test('Similarity', () async {
-    final vector1 = Vector.fromList(
-      await miniLmL6V2.getEmbedding('Hello world'),
-    ).normalize();
-    final vector2 = Vector.fromList(
-      await miniLmL6V2.getEmbedding('Ni hao'),
-    ).normalize();
-    final result = vector1.similarity(vector2);
-    expect(result, closeTo(0.521, 0.001));
+    final result1 = await miniLmL6V2.truncateAndGetEmbeddingForString('Bonjour');
+    final result2 = await miniLmL6V2.truncateAndGetEmbeddingForString('Ni hao');
+    final result = result1.embedding.similarity(result2.embedding);
+    expect(result, closeTo(0.261, 0.001));
   });
 
   test('Similarity: weather', () async {
-    final vSF = Vector.fromList(
-      await miniLmL6V2.getEmbedding('shipping forecast'),
-    ).normalize();
-    final vAnswer = Vector.fromList(
-      await miniLmL6V2
-          .getEmbedding('WeatherChannel Spain the weather is sunny and warm'),
-    ).normalize();
-    final vWF = Vector.fromList(
-      await miniLmL6V2.getEmbedding('weather forecast'),
-    ).normalize();
-    final vSpainWF = Vector.fromList(
-      await miniLmL6V2.getEmbedding('spain weather forecast'),
-    ).normalize();
-    final vWFInSpain = Vector.fromList(
-      await miniLmL6V2.getEmbedding('weather forecast in Spain'),
-    ).normalize();
-    final vBuffaloWeatherForecast = Vector.fromList(
-      await miniLmL6V2.getEmbedding('buffalo weather forecast'),
-    ).normalize();
+    final vSF =
+        (await miniLmL6V2.truncateAndGetEmbeddingForString('shipping forecast'))
+            .embedding;
+    final vAnswer =
+        await vec('WeatherChannel Spain the weather is sunny and warm');
+    final vWF = await vec('weather forecast');
+    final vSpainWF = await vec('spain weather forecast');
+    final vWFInSpain = await vec('weather forecast in Spain');
+    final vBuffaloWeatherForecast = await vec('buffalo weather forecast');
 
     final sSFToAnswer = vSF.similarity(vAnswer);
     final sWFToAnswer = vWF.similarity(vAnswer);
@@ -92,21 +80,18 @@ void main() {
     final sWFInSpainToAnswer = vWFInSpain.similarity(vAnswer);
     final sWFInBuffaloToAnswer = vBuffaloWeatherForecast.similarity(vAnswer);
 
-    expect(sSFToAnswer, closeTo(0.114, 0.001));
-    expect(sWFInBuffaloToAnswer, closeTo(0.210, 0.001));
-    expect(sSpainWFToAnswer, closeTo(0.275, 0.001));
-    expect(sWFToAnswer, closeTo(0.448, 0.001));
-    expect(sWFInSpainToAnswer, closeTo(0.635, 0.001));
+    expect(sSFToAnswer, closeTo(0.189, 0.001));
+    expect(sWFInBuffaloToAnswer, closeTo(0.278, 0.001));
+    expect(sWFToAnswer, closeTo(0.470, 0.001));
+    expect(sSpainWFToAnswer, closeTo(0.730, 0.001));
+    expect(sWFInSpainToAnswer, closeTo(0.744, 0.001));
   });
 
   test('Similarity: password', () async {
-    final vQuery =
-        Vector.fromList(await miniLmL6V2.getEmbedding('whats my jewelry pin'));
-    final vAnswer = Vector.fromList(
-        await miniLmL6V2.getEmbedding('My safe passcode is 1234'));
-    expect(vQuery.similarity(vAnswer), closeTo(0.361, 0.001));
-    final vRandom = Vector.fromList(await miniLmL6V2
-        .getEmbedding('Rain in Spain falls mainly on the plain'));
-    expect(vQuery.similarity(vRandom), closeTo(0.125, 0.001));
+    final vQuery = await vec('whats my jewelry pin');
+    final vAnswer = await vec('My safe passcode is 1234');
+    expect(vQuery.similarity(vAnswer), closeTo(0.386, 0.001));
+    final vRandom = await vec('Rain in Spain falls mainly on the plain');
+    expect(vQuery.similarity(vRandom), closeTo(0.008, 0.001));
   });
 }

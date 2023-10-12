@@ -10,27 +10,27 @@ void main() {
       final tokenizer = WordpieceTokenizer.bert();
 
       final tokens = tokenizer.tokenize('hello world');
-      expect(tokens.first, equals([101, 7592, 2088, 102]));
+      expect(tokens.first.tokens, equals([101, 7592, 2088, 102]));
     });
 
     test('emoji', () async {
       final tokenizer = WordpieceTokenizer.bert();
-      final tokens = tokenizer.tokenize('👍');
-      expect(tokens.first, equals([101, 100, 102]));
+      final result = tokenizer.tokenize('👍');
+      expect(result.first.tokens, equals([101, 100, 102]));
     });
 
     test('text & emoji', () async {
       final tokenizer = WordpieceTokenizer.bert();
-      final tokens = tokenizer.tokenize('That looks great 👍');
-      expect(tokens.first, equals([101, 2008, 3504, 2307, 100, 102]));
+      final result = tokenizer.tokenize('That looks great 👍');
+      expect(result.first.tokens, equals([101, 2008, 3504, 2307, 100, 102]));
     });
 
     test('chinese', () async {
       final tokenizer = WordpieceTokenizer.bert();
       // String from https://github.com/huggingface/tokenizers/blob/0d8c57da48319a91fe9cd3e31a36b9bd29a8292c/tokenizers/src/pre_tokenizers/bert.rs#L52
-      final tokens = tokenizer.tokenize('野口里佳 Noguchi Rika');
+      final result = tokenizer.tokenize('野口里佳 Noguchi Rika');
       expect(
-          tokens.first,
+          result.first.tokens,
           equals(
               [101, 1963, 30314, 30488, 100, 2053, 16918, 15544, 2912, 102]));
     });
@@ -47,10 +47,10 @@ Aliquam feugiat vel ex, vim et simul perfecto singulis, pri ad deseruisse adipis
 
 Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias suscipiantur. Ei has oratio veniam nostro, pri at laudem impedit consulatu. Semper denique te usu, quando epicurei nam cu, ut eleifend temporibus sit. Impetus laoreet mentitum quo in.''';
       final tokenizer = WordpieceTokenizer.bert();
-      final tokens = tokenizer.tokenize(lipsum);
-      expect(tokens.length, 2);
-      final stringOne = tokenizer.detokenize(tokens.first);
-      final stringTwo = tokenizer.detokenize(tokens.last);
+      final result = tokenizer.tokenize(lipsum);
+      expect(result.length, 2);
+      final stringOne = tokenizer.detokenize(result.first.tokens);
+      final stringTwo = tokenizer.detokenize(result.last.tokens);
       expect('$stringOne $stringTwo',
           equals(lipsum.toLowerCase().replaceAll('\n\n', ' ')));
       // This ensures the input string did exceed the model's max input length.
@@ -59,31 +59,29 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
     test('sentence', () async {
       final tokenizer = WordpieceTokenizer.bert();
 
-      final tokens = tokenizer.tokenize(
+      final result = tokenizer.tokenize(
           'the dogs caused much consternation the rain in spain falls mainly on the plain');
       expect(
-          tokens,
+          result.first.tokens,
           equals([
-            [
-              101,
-              1996,
-              6077,
-              3303,
-              2172,
-              9530,
-              6238,
-              9323,
-              1996,
-              4542,
-              1999,
-              3577,
-              4212,
-              3701,
-              2006,
-              1996,
-              5810,
-              102
-            ]
+            101,
+            1996,
+            6077,
+            3303,
+            2172,
+            9530,
+            6238,
+            9323,
+            1996,
+            4542,
+            1999,
+            3577,
+            4212,
+            3701,
+            2006,
+            1996,
+            5810,
+            102
           ]));
     });
   });
@@ -92,9 +90,9 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
     test('Arabic', () {
       const string = "الحياة جميلة";
       final tokenizer = WordpieceTokenizer.bert();
-      final tokens = tokenizer.tokenize(string);
+      final result = tokenizer.tokenize(string);
       expect(
-          tokens.first,
+          result.first.tokens,
           equals([
             101,
             1270,
@@ -110,16 +108,16 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
             19433,
             102
           ]));
-      final detokenized = tokenizer.detokenize(tokens.first);
+      final detokenized = tokenizer.detokenize(result.first.tokens);
       expect(detokenized, equals("الحياة جميلة"));
     });
 
     test('French', () {
       const string = "L'amour est l'ingrédient principal de la vie.";
       final tokenizer = WordpieceTokenizer.bert();
-      final tokens = tokenizer.tokenize(string);
+      final result = tokenizer.tokenize(string);
       expect(
-          tokens.first,
+          result.first.tokens,
           equals([
             101,
             1048,
@@ -139,18 +137,18 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
             29625,
             102
           ]));
-      final detokenized = tokenizer.detokenize(tokens.first);
+      final detokenized = tokenizer.detokenize(result.first.tokens);
       expect(
           detokenized, equals("l'amour est l'ingredient principal de la vie."));
     });
 
     test('German', () {
       const string = "Das Leben ist wunderschön, wenn du es liebst.";
-      
+
       final tokenizer = WordpieceTokenizer.bert();
-      final tokens = tokenizer.tokenize(string);
+      final result = tokenizer.tokenize(string);
       expect(
-          tokens.first,
+          result.first.tokens,
           equals([
             101,
             8695,
@@ -172,7 +170,7 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
             29625,
             102
           ]));
-      final detokenized = tokenizer.detokenize(tokens.first);
+      final detokenized = tokenizer.detokenize(result.first.tokens);
       expect(
           detokenized, equals('das leben ist wunderschon, wenn du es liebst.'));
     });
@@ -180,21 +178,21 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
     test('Japanese', () {
       const string = "アメリカ人です。";
       final tokenizer = WordpieceTokenizer.bert();
-      final tokens = tokenizer.tokenize(string);
+      final result = tokenizer.tokenize(string);
       expect(
-          tokens.first,
+          result.first.tokens,
           equals(
               [101, 1693, 30252, 30258, 30226, 30282, 100, 30184, 30162, 102]));
-      final detokenized = tokenizer.detokenize(tokens.first);
+      final detokenized = tokenizer.detokenize(result.first.tokens);
       expect(detokenized, equals('アメリカ人 [UNK]す。'));
     });
 
     test('Portuguese', () {
       const string = "O céu está cheio de estrelas invisíveis.";
       final tokenizer = WordpieceTokenizer.bert();
-      final tokens = tokenizer.tokenize(string);
+      final result = tokenizer.tokenize(string);
       expect(
-          tokens.first,
+          result.first.tokens,
           equals([
             101,
             1051,
@@ -215,16 +213,16 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
             29625,
             102
           ]));
-      final detokenized = tokenizer.detokenize(tokens.first);
+      final detokenized = tokenizer.detokenize(result.first.tokens);
       expect(detokenized, equals('o ceu esta cheio de estrelas invisiveis.'));
     });
 
     test('Spanish', () {
       const string = 'La felicidad está hecha de pequeños momentos.';
       final tokenizer = WordpieceTokenizer.bert();
-      final tokens = tokenizer.tokenize(string);
+      final result = tokenizer.tokenize(string);
       expect(
-          tokens.first,
+          result.first.tokens,
           equals([
             101,
             2474,
@@ -244,7 +242,7 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
             29625,
             102
           ]));
-      final detokenized = tokenizer.detokenize(tokens.first);
+      final detokenized = tokenizer.detokenize(result.first.tokens);
       expect(
           detokenized, equals('la felicidad esta hecha de pequenos momentos.'));
     });
@@ -252,9 +250,9 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
     test('Russian', () {
       const string = "Путин споткнулся.";
       final tokenizer = WordpieceTokenizer.bert();
-      final tokens = tokenizer.tokenize(string);
+      final result = tokenizer.tokenize(string);
       expect(
-          tokens.first,
+          result.first.tokens,
           equals([
             101,
             1194,
@@ -275,7 +273,7 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
             29625,
             102
           ]));
-      final detokenized = tokenizer.detokenize(tokens.first);
+      final detokenized = tokenizer.detokenize(result.first.tokens);
       // Note 3rd to last letter changes: this only happened after stripping
       // accents in order to support ex. French/German/Spanish examples.
       // Before that, it was exactly equal. This is worth following up on,
