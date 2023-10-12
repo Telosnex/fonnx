@@ -45,9 +45,8 @@ class _MyAppState extends State<MyApp> {
                     final miniLmL6V2 = MiniLmL6V2.load(modelPath);
                     final result = await miniLmL6V2.getEmbedding('');
                     final embedding = result.first.embedding;
-                    debugPrint(embedding.toString());
                     final isNotMatch =
-                        result.first.embedding.indexed.any((outer) {
+                        embedding.indexed.any((outer) {
                       final doesNot = outer.$2 !=
                           miniLmL6V2ExpectedForEmptyString[outer.$1];
                       // Use 4 significant figures.
@@ -94,16 +93,15 @@ Future<String> getModelPath(String modelFilenameWithExtension) async {
 
   File file = File(modelPath);
   bool fileExists = await file.exists();
+  final fileLength = fileExists ? await file.length() : 0;
+
   // Do not use path package / path.join for paths.
   // After testing on Windows, it appears that asset paths are _always_ Unix style, i.e.
   // use /, but path.join uses \ on Windows.
   final assetPath = 'assets/${path.basename(modelFilenameWithExtension)}';
-  bool fileSameSize = fileExists &&
-      (await file.length()) ==
-          (await rootBundle.load(
-            assetPath,
-          ))
-              .lengthInBytes;
+  final assetByteData = await rootBundle.load(assetPath);
+  final assetLength = assetByteData.lengthInBytes;
+  final fileSameSize = fileExists && fileLength == assetLength;
   if (!fileExists || !fileSameSize) {
     debugPrint(
         'Copying model to $modelPath. Why? Either the file does not exist (${!fileExists}), '
