@@ -11,6 +11,10 @@ class OrtSessionObjects: NSObject {
       // Start the ORT inference environment and specify the options for session
       env = try ORTEnv(loggingLevel: ORTLoggingLevel.error)
       let options = try ORTSessionOptions()
+      // Using CoreMLExecutionProvider did not improve performance of MiniLmL6V2.
+      // This matches macOS.
+      // Disabling it for consistency, but, leaving it in code because it may be useful in the future.
+      // try options.appendCoreMLExecutionProvider(with: ORTCoreMLExecutionProviderOptions())
       try options.setLogSeverityLevel(ORTLoggingLevel.error)
       // Create the ORTSession
       session = try ORTSession(env: env, modelPath: modelPath, sessionOptions: options)

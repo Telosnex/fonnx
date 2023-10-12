@@ -1,6 +1,6 @@
 PODS:
   - Flutter (1.0.0)
-  - fonnx (0.0.1):
+  - fonnx (1.0.0):
     - Flutter
     - onnxruntime-objc
   - integration_test (0.0.1):
@@ -37,7 +37,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
-  fonnx: 084e5c63e7a76d72133302e020b18fe161a559de
+  fonnx: 7c7eb5e0adfa4f8e848ed35d2fd2bd431b8ce105
   integration_test: 13825b8a9334a850581300559b8839134b124670
   onnxruntime-c: ebdcfd8650bcbd10121c125262f99dea681b92a3
   onnxruntime-objc: ae7acec7a3d03eaf072d340afed7a35635c1c2a6

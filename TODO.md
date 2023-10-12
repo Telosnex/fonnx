@@ -5,7 +5,7 @@
 - [x] Add decoder
 - [x] Add convenience function to split String into substrings of <= 256 tokens
 - [x] add example app speed test button  
-- [ ] Try iOS device x CoreML
+- [x] Try iOS device x CoreML
 - [x] Linux
 - [x] Windows
 - [x] macOS Intel
