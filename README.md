@@ -33,9 +33,10 @@ Another tool that automates conversion to ONNX is [HFOnnx](https://neuml.github.
 ### Text Embeddings
 These models generate embeddings for text.
 An embedding is a vector of floating point numbers that represents the meaning of the text.  
-Embeddings are the foundation of a vector database, as well as retrieval augmented generation - deciding which text snippets to provide in the limited context window of an LLM like GPT. 
-Running locally provides significant privacy benefits, as well as latency benefits.
-For example, rather than having to store the embedding and text of each chunk of a document on a server, they can be stored locally.
+Embeddings are the foundation of a vector database, as well as retrieval augmented generation - deciding which text snippets to provide in the limited context window of an LLM like GPT.  
+
+Running locally using FONNX provides significant privacy benefits, as well as latency benefits.
+For example, rather than having to store the embedding and text of each chunk of a document on a server, they can be stored on-device.
 Both MiniLM L6 V2 and MSMARCO MiniLM L6 V3 are both the product of the Sentence Transformers project. Their website has excellent documentation explaining, for instance, [semantic search](https://www.sbert.net/examples/applications/semantic-search/README.html)
 
 #### MiniLM L6 V2
