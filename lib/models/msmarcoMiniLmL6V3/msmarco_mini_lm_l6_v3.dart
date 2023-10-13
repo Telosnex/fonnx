@@ -22,7 +22,7 @@ abstract class MsmarcoMiniLmL6V3 {
     unkToken: 100,
     startToken: 101,
     endToken: 102,
-    maxInputTokens: 256,
+    maxInputTokens: 512,
     maxInputCharsPerWord: 100,
   );
 
