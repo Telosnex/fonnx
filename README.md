@@ -15,7 +15,7 @@ FONNX leverages [ONNX](https://onnx.ai/) to provide native acceleration capabili
 Most models can be easily converted to ONNX format, including models from Pytorch, Tensorflow, and more.
 
 ## Getting ONNX Models
-### HuggingFace
+### HuggingFace 🤗
 [HuggingFace](https://huggingface.co/models) has a large collection of models, including many that are ONNX format. 90% of the models are Pytorch, which can be converted to ONNX.
 
 Here is a search for [ONNX models](https://huggingface.co/models?sort=trending&search=onnx). 
@@ -40,12 +40,16 @@ For example, rather than having to store the embedding and text of each chunk of
 Both MiniLM L6 V2 and MSMARCO MiniLM L6 V3 are both the product of the Sentence Transformers project. Their website has excellent documentation explaining, for instance, [semantic search](https://www.sbert.net/examples/applications/semantic-search/README.html)
 
 #### MiniLM L6 V2
+[🤗](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)  
+
 Trained on a billion sentence pairs from diverse sources, from Reddit to WikiAnswers to StackExchange.
 MiniLM L6 V2 is well-suited for numerous tasks, from text classification to semantic search.
 It is optimized for [symmetric search](https://www.sbert.net/examples/applications/semantic-search/README.html#symmetric-vs-asymmetric-semantic-search), where text is roughly of the same length and meaning.
 Input text is divided into approximately 200 words, and an embedding is generated for each.
 
 #### MSMARCO MiniLM L6 V3
+[🤗](https://huggingface.co/sentence-transformers/msmarco-MiniLM-L-6-v3/tree/main)  
+
 Trained on pairs of Bing search queries to web pages that contained answers for the query. 
 It is optimized for [asymmetric semantic search](https://www.sbert.net/examples/applications/semantic-search/README.html#symmetric-vs-asymmetric-semantic-search), matching a search query to an answer.
 Additionally, it has 2x the input size of MiniLM L6 V2: it can accept up to 400 words as input for one embedding.
