@@ -5,22 +5,23 @@ import 'dart:io';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fonnx/fonnx.dart';
-import 'package:fonnx/models/minilml6v2/mini_lm_l6_v2.dart';
+import 'package:fonnx/models/msmarcoMiniLmL6V3/msmarco_mini_lm_l6_v3.dart';
 import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free;
 import 'package:fonnx/tokenizers/embedding.dart';
 import 'package:ml_linalg/linalg.dart';
 
-MiniLmL6V2 getMiniLmL6V2(String path) => MiniLmL6V2Native(path);
+MsmarcoMiniLmL6V3 getMsmarcoMiniLmL6V3(String path) =>
+    MsmarcoMiniLmL6V3Native(path);
 
-class MiniLmL6V2Native implements MiniLmL6V2 {
+class MsmarcoMiniLmL6V3Native implements MsmarcoMiniLmL6V3 {
   String modelPath;
-  MiniLmL6V2Native(this.modelPath);
+  MsmarcoMiniLmL6V3Native(this.modelPath);
   OrtSessionObjects? _sessionObjects;
   Fonnx? _fonnx;
 
   @override
   Future<List<TextAndVector>> embed(String text) async {
-    final textAndTokens = MiniLmL6V2.tokenizer.tokenize(text);
+    final textAndTokens = MsmarcoMiniLmL6V3.tokenizer.tokenize(text);
     final allTextAndEmbeddings = <TextAndVector>[];
     for (var i = 0; i < textAndTokens.length; i++) {
       final textAndToken = textAndTokens[i];
@@ -39,9 +40,8 @@ class MiniLmL6V2Native implements MiniLmL6V2 {
     return vector;
   }
 
-  Future<TextAndVector> truncateAndGetEmbeddingForString(
-      String string) async {
-    final textAndTokens = MiniLmL6V2.tokenizer.tokenize(string);
+  Future<TextAndVector> truncateAndGetEmbeddingForString(String string) async {
+    final textAndTokens = MsmarcoMiniLmL6V3.tokenizer.tokenize(string);
     final tokens = textAndTokens[0].tokens;
     final embeddings = await _truncateAndGetEmbeddingForTokens(tokens);
     final vector =

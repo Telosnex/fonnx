@@ -1,5 +1,4 @@
 import 'package:diacritic/diacritic.dart';
-import 'package:fonnx/tokenizers/bert_vocab.dart';
 import 'package:fonnx/tokenizers/embedding.dart';
 
 class WordpieceTokenizer {
@@ -22,21 +21,6 @@ class WordpieceTokenizer {
     required this.maxInputTokens,
     required this.maxInputCharsPerWord,
   });
-
-  static const WordpieceTokenizer _cachedBertTokenizer = WordpieceTokenizer(
-    encoder: bertEncoder,
-    decoder: bertDecoder,
-    unkString: '[UNK]',
-    unkToken: 100,
-    startToken: 101,
-    endToken: 102,
-    maxInputTokens: 256,
-    maxInputCharsPerWord: 100,
-  );
-
-  factory WordpieceTokenizer.bert() {
-    return _cachedBertTokenizer;
-  }
 
   /// Checks if the given code unit represents a word and the tokenizer should
   /// treat it as such.

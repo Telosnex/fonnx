@@ -23,9 +23,10 @@ This is expected.
 
 To confirm the model was still working as expected, we compared test results from the Phil Schmid model to the quantized model.
 
-#### Test Results
+## Testing versus MSMARCO-MiniLM-L6-V3
 ##### Inputs
 __Answer__: WeatherChannel Spain the weather is sunny and warm  
+__Random__: jabberwocky awaits: lets not be late lest the lillies bloom in the garden of eden
 __SF__: shipping forecast  
 __WF__: weather forecast  
 __SpainWF__: spain weather forecast  
@@ -35,25 +36,16 @@ __BuffaloWF__: buffalo weather forecast
 ##### Data
 
 ###### Similarity
-| phrase  |no-quantize|quantize|
-|---------|-----------|--------|
-|SF       |0.123      |0.115   |
-|WF       |0.444      |0.448   |
-|SpainWF  |0.278      |0.276   |
-|WFInSpain|0.621      |0.635   |
-|BuffaloWF|0.226      |0.211   |
+Compared with __Answer__
 
-_All phrases compared with answer_  
-
-###### Speed
-0.506 ms no quantize  
-0.674 ms quantize  
-
-_MacBook Pro 14", Apple M2 Max, on CPU. 2023 10 08._  
-_256 character random strings_  
-_Steps: Load model. Run 1000 embeddings. Start timing, run another 1000. Stop timing, take average_
-
-
+|phrase   |L6V2 |MSMARCO |
+|---------|-----|--------|
+|Random   |0.055|0.054   |
+|SF       |0.189|0.313   |
+|BuffaloWF|0.278|0.344   |
+|WF       |0.470|0.493   |
+|SpainWF  |0.730|0.778   |
+|WFInSpain|0.744|0.787   |
 
 
 

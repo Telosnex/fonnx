@@ -3,15 +3,15 @@ import 'package:fonnx/tokenizers/embedding.dart';
 import 'package:fonnx/tokenizers/wordpiece_tokenizer.dart';
 import 'package:ml_linalg/linalg.dart';
 
-import 'mini_lm_l6_v2_abstract.dart'
-    if (dart.library.io) 'mini_lm_l6_v2_native.dart'
-    if (dart.library.js) 'mini_lm_l6_v2_web.dart';
+import 'msmarco_mini_lm_l6_v3_abstract.dart'
+    if (dart.library.io) 'msmarco_mini_lm_l6_v3_native.dart'
+    if (dart.library.js) 'msmarco_mini_lm_l6_v3_web.dart';
 
-abstract class MiniLmL6V2 {
-  static MiniLmL6V2? _instance;
+abstract class MsmarcoMiniLmL6V3 {
+  static MsmarcoMiniLmL6V3? _instance;
 
-  static MiniLmL6V2 load(String path) {
-    _instance ??= getMiniLmL6V2(path);
+  static MsmarcoMiniLmL6V3 load(String path) {
+    _instance ??= getMsmarcoMiniLmL6V3(path);
     return _instance!;
   }
 

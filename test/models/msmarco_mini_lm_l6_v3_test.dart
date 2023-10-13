@@ -1,9 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fonnx/models/minilml6v2/mini_lm_l6_v2.dart';
+import 'package:fonnx/models/msmarcoMiniLmL6V3/msmarco_mini_lm_l6_v3.dart';
+import 'package:fonnx/models/msmarcoMiniLmL6V3/msmarco_mini_lm_l6_v3_native.dart';
 import 'package:ml_linalg/linalg.dart';
-
-import 'package:fonnx/models/minilml6v2/mini_lm_l6_v2_native.dart';
 
 extension Similarity on Vector {
   double similarity(Vector vector) {
@@ -13,11 +12,12 @@ extension Similarity on Vector {
 }
 
 void main() {
-  const modelPath = 'example/assets/models/miniLmL6V2/miniLmL6V2.onnx';
-  final miniLmL6V2 = MiniLmL6V2Native(modelPath);
+  const modelPath =
+      'example/assets/models/msmarcoMiniLmL6V3/msmarcoMiniLmL6V3.onnx';
+  final miniLm = MsmarcoMiniLmL6V3Native(modelPath);
 
   Future<Vector> vec(String text) async {
-    return (await miniLmL6V2.embed(text)).first.embedding;
+    return (await miniLm.embed(text)).first.embedding;
   }
 
   test('Embedding works', () async {
@@ -26,18 +26,18 @@ void main() {
   });
 
   test('Normalize works', () async {
-    final result = await miniLmL6V2.truncateAndGetEmbeddingForString('');
+    final result = await miniLm.truncateAndGetEmbeddingForString('');
     expect(result.embedding, hasLength(384));
   });
 
   test('Performance test', () async {
     final List<String> randomStrings =
-        MiniLmL6V2.tokenizer.tokenize(data).map((e) => e.text).toList();
+        MsmarcoMiniLmL6V3.tokenizer.tokenize(data).map((e) => e.text).toList();
     const count = 100;
     List<Future> futures = [];
     final sw = Stopwatch()..start();
     for (var i = 0; i < count; i++) {
-      final future = miniLmL6V2.embed(randomStrings[i % randomStrings.length]);
+      final future = miniLm.embed(randomStrings[i % randomStrings.length]);
       futures.add(future);
     }
     await Future.wait(futures);
@@ -48,11 +48,10 @@ void main() {
   });
 
   test('Similarity', () async {
-    final result1 =
-        await miniLmL6V2.truncateAndGetEmbeddingForString('Bonjour');
-    final result2 = await miniLmL6V2.truncateAndGetEmbeddingForString('Ni hao');
+    final result1 = await miniLm.truncateAndGetEmbeddingForString('Bonjour');
+    final result2 = await miniLm.truncateAndGetEmbeddingForString('Ni hao');
     final result = result1.embedding.similarity(result2.embedding);
-    expect(result, closeTo(0.261, 0.001));
+    expect(result, closeTo(0.166, 0.001));
   });
 
   test('Similarity: weather', () async {
@@ -73,27 +72,27 @@ void main() {
     final sWFInSpainToAnswer = vWFInSpain.similarity(vAnswer);
     final sWFInBuffaloToAnswer = vBuffaloWeatherForecast.similarity(vAnswer);
 
-    expect(sRandomToAnswer, closeTo(0.055, 0.001));
-    expect(sSFToAnswer, closeTo(0.189, 0.001));
-    expect(sWFInBuffaloToAnswer, closeTo(0.278, 0.001));
-    expect(sWFToAnswer, closeTo(0.470, 0.001));
-    expect(sSpainWFToAnswer, closeTo(0.730, 0.001));
-    expect(sWFInSpainToAnswer, closeTo(0.744, 0.001));
+    expect(sRandomToAnswer, closeTo(0.054, 0.001));
+    expect(sSFToAnswer, closeTo(0.313, 0.001));
+    expect(sWFInBuffaloToAnswer, closeTo(0.344, 0.001));
+    expect(sWFToAnswer, closeTo(0.493, 0.001));
+    expect(sSpainWFToAnswer, closeTo(0.778, 0.001));
+    expect(sWFInSpainToAnswer, closeTo(0.787, 0.001));
   });
 
   test('Similarity: password', () async {
     final vQuery = await vec('whats my jewelry pin');
     final vAnswer = await vec('My safe passcode is 1234');
-    expect(vQuery.similarity(vAnswer), closeTo(0.386, 0.001));
+    expect(vQuery.similarity(vAnswer), closeTo(0.234, 0.001));
     final vRandom = await vec('Rain in Spain falls mainly on the plain');
-    expect(vQuery.similarity(vRandom), closeTo(0.008, 0.001));
+    expect(vQuery.similarity(vRandom), closeTo(0.017, 0.001));
   });
 
   test('Similarity: London', () async {
     final vQuery = await vec('How big is London');
     final vAnswer =
         await vec('UK capital has 9,787,426 inhabitants at the 2011 census');
-    expect(vQuery.similarity(vAnswer), closeTo(0.400, 0.001));
+    expect(vQuery.similarity(vAnswer), closeTo(0.347, 0.001));
   });
 }
 

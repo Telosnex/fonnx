@@ -2,31 +2,28 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fonnx/tokenizers/wordpiece_tokenizer.dart';
+import 'package:fonnx/models/minilml6v2/mini_lm_l6_v2.dart';
 
 void main() {
+  const tokenizer = MiniLmL6V2.tokenizer;
+
   group('tokenize', () {
     test('hello world tokens', () async {
-      final tokenizer = WordpieceTokenizer.bert();
-
       final tokens = tokenizer.tokenize('hello world');
       expect(tokens.first.tokens, equals([101, 7592, 2088, 102]));
     });
 
     test('emoji', () async {
-      final tokenizer = WordpieceTokenizer.bert();
       final result = tokenizer.tokenize('👍');
       expect(result.first.tokens, equals([101, 100, 102]));
     });
 
     test('text & emoji', () async {
-      final tokenizer = WordpieceTokenizer.bert();
       final result = tokenizer.tokenize('That looks great 👍');
       expect(result.first.tokens, equals([101, 2008, 3504, 2307, 100, 102]));
     });
 
     test('chinese', () async {
-      final tokenizer = WordpieceTokenizer.bert();
       // String from https://github.com/huggingface/tokenizers/blob/0d8c57da48319a91fe9cd3e31a36b9bd29a8292c/tokenizers/src/pre_tokenizers/bert.rs#L52
       final result = tokenizer.tokenize('野口里佳 Noguchi Rika');
       expect(
@@ -46,7 +43,6 @@ Sententiae adipiscing vim ei. Cum at accusamus similique. Eum no nulla labitur, 
 Aliquam feugiat vel ex, vim et simul perfecto singulis, pri ad deseruisse adipiscing. Mea elitr rationibus ex, ad sadipscing persequeris eloquentiam eos. Expetendis quaerendum reformidans ad pri, cibo dissentias pro ne. Vis facer offendit pertinacia et, eu sit rebum appareat, te patrioque evertitur cum. Timeam prompta nam no. Ius ex atqui repudiare, justo mediocrem cum ad, nec utinam erroribus reformidans et.
 
 Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias suscipiantur. Ei has oratio veniam nostro, pri at laudem impedit consulatu. Semper denique te usu, quando epicurei nam cu, ut eleifend temporibus sit. Impetus laoreet mentitum quo in.''';
-      final tokenizer = WordpieceTokenizer.bert();
       final result = tokenizer.tokenize(lipsum);
       expect(result.length, 2);
       final stringOne = tokenizer.detokenize(result.first.tokens);
@@ -57,8 +53,6 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
     });
 
     test('sentence', () async {
-      final tokenizer = WordpieceTokenizer.bert();
-
       final result = tokenizer.tokenize(
           'the dogs caused much consternation the rain in spain falls mainly on the plain');
       expect(
@@ -89,7 +83,6 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
   group('languages', () {
     test('Arabic', () {
       const string = "الحياة جميلة";
-      final tokenizer = WordpieceTokenizer.bert();
       final result = tokenizer.tokenize(string);
       expect(
           result.first.tokens,
@@ -114,7 +107,6 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
 
     test('French', () {
       const string = "L'amour est l'ingrédient principal de la vie.";
-      final tokenizer = WordpieceTokenizer.bert();
       final result = tokenizer.tokenize(string);
       expect(
           result.first.tokens,
@@ -144,8 +136,6 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
 
     test('German', () {
       const string = "Das Leben ist wunderschön, wenn du es liebst.";
-
-      final tokenizer = WordpieceTokenizer.bert();
       final result = tokenizer.tokenize(string);
       expect(
           result.first.tokens,
@@ -177,7 +167,6 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
 
     test('Japanese', () {
       const string = "アメリカ人です。";
-      final tokenizer = WordpieceTokenizer.bert();
       final result = tokenizer.tokenize(string);
       expect(
           result.first.tokens,
@@ -189,7 +178,6 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
 
     test('Portuguese', () {
       const string = "O céu está cheio de estrelas invisíveis.";
-      final tokenizer = WordpieceTokenizer.bert();
       final result = tokenizer.tokenize(string);
       expect(
           result.first.tokens,
@@ -219,7 +207,6 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
 
     test('Spanish', () {
       const string = 'La felicidad está hecha de pequeños momentos.';
-      final tokenizer = WordpieceTokenizer.bert();
       final result = tokenizer.tokenize(string);
       expect(
           result.first.tokens,
@@ -249,7 +236,6 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
 
     test('Russian', () {
       const string = "Путин споткнулся.";
-      final tokenizer = WordpieceTokenizer.bert();
       final result = tokenizer.tokenize(string);
       expect(
           result.first.tokens,
@@ -283,32 +269,27 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
   });
   group('detokenize', () {
     test('hello world', () {
-      final tokenizer = WordpieceTokenizer.bert();
       final string = tokenizer.detokenize([101, 7592, 2088, 102]);
       expect(string, equals('hello world'));
     });
 
     test('emoji', () async {
-      final tokenizer = WordpieceTokenizer.bert();
       final string = tokenizer.detokenize([101, 100, 102]);
       expect(string, equals('[UNK]'));
     });
 
     test('text & emoji', () async {
-      final tokenizer = WordpieceTokenizer.bert();
       final string = tokenizer.detokenize([101, 2008, 3504, 2307, 100, 102]);
       expect(string, equals('that looks great [UNK]'));
     });
 
     test('chinese', () async {
-      final tokenizer = WordpieceTokenizer.bert();
       final tokens = tokenizer.detokenize(
           [101, 1963, 30314, 30488, 100, 2053, 16918, 15544, 2912, 102]);
       expect(tokens, equals('野口里 [UNK] noguchi rika'));
     });
 
     test('sentence', () async {
-      final tokenizer = WordpieceTokenizer.bert();
       final string = tokenizer.detokenize([
         101,
         1996,

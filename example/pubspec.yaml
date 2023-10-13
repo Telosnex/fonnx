@@ -30,4 +30,5 @@ flutter:
   uses-material-design: true
   assets:
     - assets/models/miniLmL6V2/miniLmL6V2.onnx
+    - assets/models/msmarcoMiniLmL6V3/msmarcoMiniLmL6V3.onnx
     - assets/text_sample.txt

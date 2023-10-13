@@ -1,14 +1,15 @@
 import 'dart:typed_data';
 
+import 'package:fonnx/models/msmarcoMiniLmL6V3/msmarco_mini_lm_l6_v3.dart';
 import 'package:fonnx/tokenizers/embedding.dart';
 import 'package:js/js_util.dart';
 
 import 'package:js/js.dart';
 
-import 'package:fonnx/models/minilml6v2/mini_lm_l6_v2.dart';
 import 'package:ml_linalg/linalg.dart';
 
-MiniLmL6V2 getMiniLmL6V2(String path) => MiniLmL6V2Web(path);
+MsmarcoMiniLmL6V3 getMsmarcoMiniLmL6V3(String path) =>
+    MsmarcoMiniLmL6V3Web(path);
 
 @JS()
 class Promise<T> {
@@ -22,14 +23,14 @@ class Promise<T> {
 external Promise<List<List<double>>> sbertJs(
     String modelPath, List<int> wordpieces);
 
-class MiniLmL6V2Web implements MiniLmL6V2 {
+class MsmarcoMiniLmL6V3Web implements MsmarcoMiniLmL6V3 {
   final String modelPath;
 
-  MiniLmL6V2Web(this.modelPath);
+  MsmarcoMiniLmL6V3Web(this.modelPath);
 
   @override
   Future<List<TextAndVector>> embed(String text) async {
-    final allTextAndTokens = MiniLmL6V2.tokenizer.tokenize(text);
+    final allTextAndTokens = MsmarcoMiniLmL6V3.tokenizer.tokenize(text);
     final allTextAndEmbeddings = <TextAndVector>[];
     for (var i = 0; i < allTextAndTokens.length; i++) {
       final textAndTokens = allTextAndTokens[i];
@@ -58,7 +59,7 @@ class MiniLmL6V2Web implements MiniLmL6V2 {
       throw Exception('Embeddings returned from JS code are null');
     }
 
-    final jsList = jsObject as List<dynamic>;
+    final jsList = (jsObject as List<dynamic>);
     final vector = Vector.fromList(
       Float32List.fromList(jsList.cast()),
       dtype: DType.float32,
