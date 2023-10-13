@@ -11,8 +11,8 @@ Run ML models natively on any platform. ONNX models can be run on iOS, Android, 
 ## What is FONNX?
 FONNX is a Flutter library for running ONNX models.
 Flutter, and FONNX, run natively on iOS, Android, Web, Linux, Windows, and macOS. 
-FONNX leverages ONNX to provide native acceleration capabilities, from CoreML on iOS, to Android Neural Networks API on Android, to WASM SIMD on Web.
-A wide variety of models can be easily converted to ONNX format, including modesl from Pytorch, Tensorflow, and more.
+FONNX leverages [ONNX](https://onnx.ai/) to provide native acceleration capabilities, from CoreML on iOS, to Android Neural Networks API on Android, to WASM SIMD on Web.
+Most models can be easily converted to ONNX format, including models from Pytorch, Tensorflow, and more.
 
 ## Getting ONNX Models
 ### HuggingFace
@@ -25,38 +25,29 @@ A command-line tool called `optimum-cli` from HuggingFace converts Pytorch and T
 
 See [official documentation](https://huggingface.co/docs/optimum/exporters/onnx/usage_guides/export_a_model) or the 
 quick start [snippet on GitHub](https://github.com/huggingface/optimum#run-the-exported-model-using-onnx-runtime).  
-Another tool that automates conversion to ONNX is [HFOnnx](https://neuml.github.io/txtai/pipeline/train/hfonnx/).
+Another tool that automates conversion to ONNX is [HFOnnx](https://neuml.github.io/txtai/pipeline/train/hfonnx/). It was used to export the text embeddings models in this repo. Its advantages included a significantly smaller model size, and incorporating post-processing (pooling) into the model itself.
 
-- Brief intro on how ONNX model format & runtime work [huggingface.com](https://huggingface.co/docs/optimum/onnxruntime/concept_guides/onnx)
+- Brief intro to how ONNX model format & runtime work [huggingface.com](https://huggingface.co/docs/optimum/onnxruntime/concept_guides/onnx)
 - [Netron](https://netron.app/) allows you to view ONNX models, inspect their runtime graph, and export them to other formats
-- [ONNX](https://onnx.ai/) is a model format that allows you to run models on any platform
 
-## Models
-### MiniLM-L6-V2
-The example app uses the MiniLM-L6-V2 model, a small, fast, and accurate language model.  
+### Text Embeddings
+These models generate embeddings for text.
+An embedding is a vector of floating point numbers that represents the meaning of the text.  
+Embeddings are the foundation of a vector database, as well as retrieval augmented generation - deciding which text snippets to provide in the limited context window of an LLM like GPT. 
+Running locally provides significant privacy benefits, as well as latency benefits.
+For example, rather than having to store the embedding and text of each chunk of a document on a server, they can be stored locally.
+Both MiniLM L6 V2 and MSMARCO MiniLM L6 V3 are both the product of the Sentence Transformers project. Their website has excellent documentation explaining, for instance, [semantic search](https://www.sbert.net/examples/applications/semantic-search/README.html)
 
-It can generate embeddings for text, which can be used for semantic search, clustering, and more.  
+#### MiniLM L6 V2
+Trained on a billion sentence pairs from diverse sources, from Reddit to WikiAnswers to StackExchange.
+MiniLM L6 V2 is well-suited for numerous tasks, from text classification to semantic search.
+It is optimized for [symmetric search](https://www.sbert.net/examples/applications/semantic-search/README.html#symmetric-vs-asymmetric-semantic-search), where text is roughly of the same length and meaning.
+Input text is divided into approximately 200 words, and an embedding is generated for each.
 
-This forms the basis of a vector database: a vector for a chunk of text from a document. Many popular vector databases are built on top of MiniLM.
-
-Running the model locally provides significant privacy benefits, as well as latency benefits.  
-
-It allows knowledge to be stored locally, without having to be stored on a server for eventual retrieval.
-
-The speed of running the model locally is significantly faster than the speed of a network request to a server. (60 ms vs. 500 ms)  
-
-The model came from [HuggingFace](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2). and was converted to ONNX format using [HFOnnx](https://neuml.github.io/txtai/pipeline/train/hfonnx/)
-At 22 MB, it improved on `optimum-cli`'s 66 MB. The original Pytorch model was 90 MB.
-
-
-#### Benefits
-Semantic search allows you to find documents that are similar to a query, even if they don't contain the query.
-For example, "whats my jewelry pin" and "my safe passcode is 1234" has a high similarity score, almost as much 
-as "weather forecast" and 'WeatherChannel Spain: the weather is sunny and warm'.
-
-MiniLM-V6-V2 is a product of the sentence-transformers library, which is a great resource for semantic search and clustering.
-- [https://www.sbert.net/examples/applications/semantic-search/README.html](https://www.sbert.net/examples/applications/semantic-search/README.html)
-
+#### MSMARCO MiniLM L6 V3
+Trained on pairs of Bing search queries to web pages that contained answers for the query. 
+It is optimized for [asymmetric semantic search](https://www.sbert.net/examples/applications/semantic-search/README.html#symmetric-vs-asymmetric-semantic-search), matching a search query to an answer.
+Additionally, it has 2x the input size of MiniLM L6 V2: it can accept up to 400 words as input for one embedding.
 
 #### Benchmarks
 **iPhone 14**: 67 ms  
@@ -64,7 +55,7 @@ MiniLM-V6-V2 is a product of the sentence-transformers library, which is a great
 **macOS**: 13 ms  
 **WASM SIMD**: 41 ms  
 
-Avg. ms for 1 embedding / 200 words.
+Avg. ms for 1 Mini LM L6 V2 embedding / 200 words.
 
 * Run on Thurs Oct 12th 2023.  
 * macOS and WASM-SIMD on MacBook Pro M2 Max.  
