@@ -1,11 +1,7 @@
 # TODO
-- [x] iOS
-- [x] Android
-- [x] Web
-- [x] Add decoder
-- [x] Add convenience function to split String into substrings of <= 256 tokens
-- [x] add example app speed test button  
-- [x] Try iOS device x CoreML
-- [x] Linux
-- [x] Windows
-- [x] macOS Intel
+- [ ] ONNX Runtime Extensions for Linux/Windows/macOS Intel/iOS/Android
+- [ ] Whisper iOS
+- [ ] Whisper Android
+- [ ] Share Olive instructions for Whisper
+- [ ] Share whisper_base and whisper_small via HF
+- [ ] Convert whisper_large_v2 and share via HF

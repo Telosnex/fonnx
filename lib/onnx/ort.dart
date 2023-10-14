@@ -21,6 +21,41 @@ extension DartNativeFunctions on OrtApi {
     return message.toDartString();
   }
 
+  Pointer<Float> createFloat32Tensor(
+    Pointer<Pointer<OrtValue>> inputTensorPointer, {
+    required Pointer<OrtMemoryInfo> memoryInfo,
+    required List<double> values,
+  }) {
+    final sizeOfFloat32 = sizeOf<Float>();
+    final inputTensorNative = calloc<Float>(values.length * sizeOfFloat32);
+    final float32List = Float32List.fromList(values);
+    for (var i = 0; i < values.length; i++) {
+      inputTensorNative[i] = float32List[i];
+    }
+    final inputShape = calloc<Int64>(sizeOf<Int64>());
+    inputShape[0] = values.length;
+    final ptrVoid = inputTensorNative.cast<Void>();
+    final status = createTensorWithDataAsOrtValue(
+      inputTensorPointer,
+      memoryInfo: memoryInfo,
+      inputData: ptrVoid,
+      inputDataLengthInBytes: values.length * sizeOfFloat32,
+      inputShape: inputShape,
+      inputShapeLengthInBytes: 1,
+      onnxTensorElementDataType:
+          ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT,
+    );
+    if (status.isError) {
+      final error = 'Code: ${getErrorCodeMessage(status)}\n'
+          'Message: ${getErrorMessage(status)}';
+      calloc.free(inputTensorNative);
+      calloc.free(inputShape);
+      throw Exception(error);
+    }
+    calloc.free(inputShape);
+    return inputTensorNative;
+  }
+
   /// You MUST call [calloc.free] on the returned pointer when you are done with
   /// it, i.e. once inference is complete.
   Pointer<Int64> createInt64Tensor(
@@ -49,6 +84,77 @@ extension DartNativeFunctions on OrtApi {
       inputShapeLengthInBytes: 2,
       onnxTensorElementDataType:
           ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64,
+    );
+    if (status.isError) {
+      final error = 'Code: ${getErrorCodeMessage(status)}\n'
+          'Message: ${getErrorMessage(status)}';
+      calloc.free(inputTensorNative);
+      calloc.free(inputShape);
+      throw Exception(error);
+    }
+    calloc.free(inputShape);
+    return inputTensorNative;
+  }
+
+  /// You MUST call [calloc.free] on the returned pointer when you are done with
+  /// it, i.e. once inference is complete.
+  Pointer<Int32> createInt32Tensor(
+    Pointer<Pointer<OrtValue>> inputTensorPointer, {
+    required Pointer<OrtMemoryInfo> memoryInfo,
+    required List<int> values,
+  }) {
+    final sizeOfInt32 = sizeOf<Int32>();
+    final inputTensorNative = calloc<Int32>(values.length * sizeOfInt32);
+    for (var i = 0; i < values.length; i++) {
+      inputTensorNative[i] = values[i];
+    }
+    final inputShape = calloc<Int64>(1 * sizeOf<Int64>());
+    inputShape[0] = values.length;
+    final ptrVoid = inputTensorNative.cast<Void>();
+    final status = createTensorWithDataAsOrtValue(
+      inputTensorPointer,
+      memoryInfo: memoryInfo,
+      inputData: ptrVoid,
+      inputDataLengthInBytes: values.length * sizeOfInt32,
+      inputShape: inputShape,
+      inputShapeLengthInBytes: 1,
+      onnxTensorElementDataType:
+          ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_INT32,
+    );
+    if (status.isError) {
+      final error = 'Code: ${getErrorCodeMessage(status)}\n'
+          'Message: ${getErrorMessage(status)}';
+      calloc.free(inputTensorNative);
+      calloc.free(inputShape);
+      throw Exception(error);
+    }
+    calloc.free(inputShape);
+    return inputTensorNative;
+  }
+
+  /// You MUST call [calloc.free] on the returned pointer when you are done with
+  /// it, i.e. once inference is complete.
+  Pointer<Uint8> createUint8Tensor(
+      Pointer<Pointer<OrtValue>> inputTensorPointer,
+      {required Pointer<OrtMemoryInfo> memoryInfo,
+      required List<int> values}) {
+    final sizeOfUint8 = sizeOf<Uint8>();
+    final inputTensorNative = calloc<Uint8>(values.length * sizeOfUint8);
+    for (var i = 0; i < values.length; i++) {
+      inputTensorNative[i] = values[i];
+    }
+    final inputShape = calloc<Int64>(2 * sizeOf<Int64>());
+    inputShape[0] = 1;
+    inputShape[1] = values.length;
+    final status = createTensorWithDataAsOrtValue(
+      inputTensorPointer,
+      memoryInfo: memoryInfo,
+      inputData: inputTensorNative.cast<Void>(),
+      inputDataLengthInBytes: values.length * sizeOfUint8,
+      inputShape: inputShape,
+      inputShapeLengthInBytes: 2,
+      onnxTensorElementDataType:
+          ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT8,
     );
     if (status.isError) {
       final error = 'Code: ${getErrorCodeMessage(status)}\n'
@@ -211,6 +317,54 @@ extension DartNativeFunctions on OrtApi {
     return status;
   }
 
+  // external ffi.Pointer<
+  //   ffi.NativeFunction<
+  //       OrtStatusPtr Function(ffi.Pointer<OrtValue> value, ffi.Size index,
+  //           ffi.Pointer<ffi.Size> out)>> GetStringTensorElementLength;
+
+  Pointer<OrtStatus> getStringTensorElementLength(
+    Pointer<OrtValue> value,
+    int index,
+    Pointer<Size> out,
+  ) {
+    final getStringTensorElementLengthFn =
+        GetStringTensorElementLength.asFunction<
+            Pointer<OrtStatus> Function(
+                Pointer<OrtValue>, int, Pointer<Size>)>();
+    final status = getStringTensorElementLengthFn(value, index, out);
+    if (status.isError) {
+      final error =
+          'Get string tensor element length failed. Code: ${getErrorCodeMessage(status)}\n'
+          'Message: ${getErrorMessage(status)}';
+      throw Exception(error);
+    }
+    return status;
+  }
+
+  // external ffi.Pointer<
+  //     ffi.NativeFunction<
+  //         OrtStatusPtr Function(ffi.Pointer<OrtValue> value, ffi.Size s_len,
+  //             ffi.Size index, ffi.Pointer<ffi.Void> s)>> GetStringTensorElement;
+
+  Pointer<OrtStatus> getStringTensorElement(
+    Pointer<OrtValue> value,
+    int stringLength,
+    int index,
+    Pointer<Void> s,
+  ) {
+    final getStringTensorElementFn = GetStringTensorElement.asFunction<
+        Pointer<OrtStatus> Function(
+            Pointer<OrtValue>, int, int, Pointer<Void>)>();
+    final status = getStringTensorElementFn(value, stringLength, index, s);
+    if (status.isError) {
+      final error =
+          'Get string tensor element failed. Code: ${getErrorCodeMessage(status)}\n'
+          'Message: ${getErrorMessage(status)}';
+      throw Exception(error);
+    }
+    return status;
+  }
+
   Pointer<OrtStatus> getAllocatorWithDefaultOptions(
       Pointer<Pointer<OrtAllocator>> out) {
     final getAllocatorWithDefaultOptionsFn =
@@ -254,6 +408,23 @@ extension DartNativeFunctions on OrtApi {
     return status;
   }
 
+  Pointer<OrtStatus> getTensorElementType(
+    Pointer<OrtTensorTypeAndShapeInfo> info,
+    Pointer<Int32> out,
+  ) {
+    final getTensorElementTypeFn = GetTensorElementType.asFunction<
+        Pointer<OrtStatus> Function(
+            Pointer<OrtTensorTypeAndShapeInfo>, Pointer<Int32>)>();
+    final status = getTensorElementTypeFn(info, out);
+    if (status.isError) {
+      final error =
+          'Get tensor element type failed. Code: ${getErrorCodeMessage(status)}\n'
+          'Message: ${getErrorMessage(status)}';
+      throw Exception(error);
+    }
+    return status;
+  }
+
   Pointer<OrtStatus> getTensorShapeElementCount(
     Pointer<OrtTensorTypeAndShapeInfo> info,
     Pointer<Size> out,
@@ -265,6 +436,28 @@ extension DartNativeFunctions on OrtApi {
     if (status.isError) {
       final error =
           'Get tensor shape element count failed. Code: ${getErrorCodeMessage(status)}\n'
+          'Message: ${getErrorMessage(status)}';
+      throw Exception(error);
+    }
+    return status;
+  }
+
+  Pointer<OrtStatus> registerCustomOpsLibrary(
+    Pointer<OrtSessionOptions> options,
+    Pointer<Char> libraryPath,
+    Pointer<Pointer<Void>> libraryHandle,
+  ) {
+    final registerCustomOpsLibraryFn = RegisterCustomOpsLibrary.asFunction<
+        Pointer<OrtStatus> Function(Pointer<OrtSessionOptions>, Pointer<Char>,
+            Pointer<Pointer<Void>> libraryHandle)>();
+    final status = registerCustomOpsLibraryFn(
+      options,
+      libraryPath,
+      libraryHandle,
+    );
+    if (status.isError) {
+      final error =
+          'Register custom ops library failed. Code: ${getErrorCodeMessage(status)}\n'
           'Message: ${getErrorMessage(status)}';
       throw Exception(error);
     }
@@ -377,10 +570,10 @@ class OrtSessionObjects {
   });
 }
 
-String get dylibPath {
+String get ortDylibPath {
   final isTesting = !kIsWeb && Platform.environment['FLUTTER_TEST'] == 'true';
   if (isTesting) {
-    return 'macos/onnx_runtime/osx/libonnxruntime.1.16.0.dylib';
+    return 'macos/onnx_runtime/osx/libonnxruntime.1.16.1.dylib';
   }
   switch (defaultTargetPlatform) {
     case TargetPlatform.android:
@@ -392,9 +585,30 @@ String get dylibPath {
     case TargetPlatform.linux:
       return 'libonnxruntime.so.1.16.0';
     case TargetPlatform.macOS:
-      return 'libonnxruntime.1.16.0.dylib';
+      return 'libonnxruntime.1.16.1.dylib';
     case TargetPlatform.windows:
       return 'onnxruntime-x64.dll';
+  }
+}
+
+String get ortExtensionsDylibPath {
+  final isTesting = !kIsWeb && Platform.environment['FLUTTER_TEST'] == 'true';
+  if (isTesting) {
+    return 'macos/onnx_runtime/osx/libortextensions.0.9.0.dylib';
+  }
+  switch (defaultTargetPlatform) {
+    case TargetPlatform.android:
+      throw UnimplementedError();
+    case TargetPlatform.fuchsia:
+      throw UnimplementedError();
+    case TargetPlatform.iOS:
+      throw UnimplementedError();
+    case TargetPlatform.linux:
+      throw UnimplementedError();
+    case TargetPlatform.macOS:
+      return 'libortextensions.0.9.0.dylib';
+    case TargetPlatform.windows:
+      throw UnimplementedError();
   }
 }
 
@@ -412,7 +626,8 @@ OrtSessionObjects createOrtSession(String modelPath) {
   //   my instinct was there may be an issue with global static functions and ffi,
   //   and Linux may be lagging in support. Explicitly looking the function up in
   //   the explicit library did fix it.
-  final lib = DynamicLibrary.open(dylibPath);
+  final lib = DynamicLibrary.open(ortDylibPath);
+
   final fn = lib.lookupFunction<Pointer<OrtApiBase> Function(),
       Pointer<OrtApiBase> Function()>('OrtGetApiBase');
   final answer = fn.call();
@@ -428,8 +643,19 @@ OrtSessionObjects createOrtSession(String modelPath) {
   }
 
   final sessionOptionsPtr = calloc<Pointer<OrtSessionOptions>>();
-  final sessionPtr = calloc<Pointer<OrtSession>>();
   ortApi.createSessionOptions(sessionOptionsPtr);
+
+  try {
+    DynamicLibrary.open(ortExtensionsDylibPath);
+    final libraryHandle = calloc<Pointer<Void>>();
+    final utf8Path = ortExtensionsDylibPath.toNativeUtf8().cast<Char>();
+    ortApi.registerCustomOpsLibrary(
+        sessionOptionsPtr.value, utf8Path, libraryHandle);
+  } catch (e) {
+    debugPrint('Error loading ORT Extensions: $e');
+    rethrow;
+  }
+
   // Avoiding setting inter/intra op num threads at all seems to get the best performance.
   // 128 threads: ~5.00 ms/embedding
   // 1 thread: ~0.85 ms/embedding
@@ -439,6 +665,7 @@ OrtSessionObjects createOrtSession(String modelPath) {
   // Adding CoreML support slowed down inference about 10x on M2 Max.
   // This persisted even when CPU only + only if ANE is available flags were
   // set, either together or independently.
+  final sessionPtr = calloc<Pointer<OrtSession>>();
   final sessionStatus = ortApi.createSession(
     env: envPtr.value,
     modelPath: modelPath,
@@ -453,6 +680,7 @@ OrtSessionObjects createOrtSession(String modelPath) {
 
   calloc.free(sessionOptionsPtr);
   calloc.free(envPtr);
+  debugPrint('ORT Session created');
   return OrtSessionObjects(
     sessionPtr: sessionPtr,
     apiBase: baseApi,
