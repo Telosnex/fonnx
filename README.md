@@ -3,7 +3,8 @@
 on any edge. Run ONNX model & runtime, with platform-specific acceleration,  inside Flutter, a modern, beautiful, cross-platform development
 framework."
      style="float: left; margin-right: 0px;" />
-[![Codemagic build status](https://api.codemagic.io/apps/652897766ee3f7af8490a79f/652897766ee3f7af8490a79e/status_badge.svg)](https://codemagic.io/apps/652897766ee3f7af8490a79f/652897766ee3f7af8490a79e/latest_build)
+__macOS arm64__ [![Codemagic build status](https://api.codemagic.io/apps/652897766ee3f7af8490a79f/652897766ee3f7af8490a79e/status_badge.svg)](https://codemagic.io/apps/652897766ee3f7af8490a79f/652897766ee3f7af8490a79e/latest_build)  
+__Linux__ `       `[![Codemagic build status](https://api.codemagic.io/apps/652897766ee3f7af8490a79f/6529e7751eac22d544044175/status_badge.svg)](https://codemagic.io/apps/652897766ee3f7af8490a79f/6529e7751eac22d544044175/latest_build)
 # FONNX
 ## Any model on any edge
 Run ML models natively on any platform. ONNX models can be run on iOS, Android, Web, Linux, Windows, and macOS.
