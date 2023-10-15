@@ -5,7 +5,7 @@ framework."
      style="float: left; margin-right: 0px;" />
 __Linux__ `       `[![Codemagic build status](https://api.codemagic.io/apps/652897766ee3f7af8490a79f/6529e7751eac22d544044175/status_badge.svg)](https://codemagic.io/apps/652897766ee3f7af8490a79f/6529e7751eac22d544044175/latest_build)  
 __macOS arm64__ [![Codemagic build status](https://api.codemagic.io/apps/652897766ee3f7af8490a79f/652897766ee3f7af8490a79e/status_badge.svg)](https://codemagic.io/apps/652897766ee3f7af8490a79f/652897766ee3f7af8490a79e/latest_build)  
-__Windows__`      `[![Codemagic build status](https://api.codemagic.io/apps/652897766ee3f7af8490a79f/652b298fe7e0c7e9e4cb275f/status_badge.svg)](https://codemagic.io/apps/652897766ee3f7af8490a79f/652b298fe7e0c7e9e4cb275f/latest_build)
+__Windows__`    `[![Codemagic build status](https://api.codemagic.io/apps/652897766ee3f7af8490a79f/652b298fe7e0c7e9e4cb275f/status_badge.svg)](https://codemagic.io/apps/652897766ee3f7af8490a79f/652b298fe7e0c7e9e4cb275f/latest_build)
 # FONNX
 ## Any model on any edge
 Run ML models natively on any platform. ONNX models can be run on iOS, Android, Web, Linux, Windows, and macOS.
