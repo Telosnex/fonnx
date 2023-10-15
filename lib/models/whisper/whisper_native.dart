@@ -11,6 +11,7 @@ import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free;
 Whisper getWhisper(String path) => WhisperNative(path);
 
 class WhisperNative implements Whisper {
+  @override
   final String modelPath;
   OrtSessionObjects? _sessionObjects;
   WhisperNative(this.modelPath);

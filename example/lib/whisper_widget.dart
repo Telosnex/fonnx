@@ -97,7 +97,6 @@ class _WhisperWidgetState extends State<WhisperWidget> {
   }
 
   static Future<String> testPerformance(Whisper whisper) async {
-    String testFilePath = 'assets/audio_sample.wav';
     final wavFile = await rootBundle.load('assets/audio_sample.wav');
     final bytes = wavFile.buffer.asUint8List();
     const iterations = 3;
