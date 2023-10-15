@@ -22,7 +22,7 @@ class WhisperNative implements Whisper {
   }
 
   OrtSessionObjects get _session {
-    _sessionObjects ??= createOrtSession(modelPath);
+    _sessionObjects ??= createOrtSession(modelPath, includeOnnxExtensionsOps: true);
 
     return _sessionObjects!;
   }

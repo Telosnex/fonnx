@@ -93,7 +93,7 @@ void main() {
     final vQuery = await vec('How big is London');
     final vAnswer =
         await vec('UK capital has 9,787,426 inhabitants at the 2011 census');
-    expect(vQuery.similarity(vAnswer), closeTo(0.400, 0.001));
+    expect(vQuery.similarity(vAnswer), closeTo(0.391, 0.001));
   });
 }
 

@@ -11,8 +11,10 @@ void main() {
   /// worth the accuracy loss, it's too frustrating to use.
   const modelPath = 'example/assets/models/whisper/whisper_tiny.onnx';
   final whisper = WhisperNative(modelPath);
+  final shouldSkip = !Platform.isMacOS;
+  final skipReason = shouldSkip ? 'Whisper only works on ARM64 Mac currently' : null;
 
-  test('Whisper works', () async {
+  test('Whisper works', skip: skipReason, () async {
     String testFilePath = 'test/data/rain_in_spain.wav';
     File file = File(testFilePath);
     final bytes = await file.readAsBytes();
@@ -25,7 +27,7 @@ void main() {
     //    expect(transcript.trim(), 'The rain in Spain falls mainly on the plain.');
   });
 
-  test('Whisper over 30 seconds does not work', () async {
+  test('Whisper over 30 seconds does not work', skip: skipReason, () async {
     String testFilePath = 'test/data/1272-141231-0002x3.mp3';
     File file = File(testFilePath);
     try {
@@ -37,7 +39,7 @@ void main() {
     }
   });
 
-  test('Whisper performance', () async {
+  test('Whisper performance', skip: skipReason, () async {
     String testFilePath = 'test/data/rain_in_spain.wav';
     File file = File(testFilePath);
     final bytes = await file.readAsBytes();

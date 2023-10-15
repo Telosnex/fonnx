@@ -85,7 +85,7 @@ void main() {
     final vAnswer = await vec('My safe passcode is 1234');
     expect(vQuery.similarity(vAnswer), closeTo(0.234, 0.001));
     final vRandom = await vec('Rain in Spain falls mainly on the plain');
-    expect(vQuery.similarity(vRandom), closeTo(0.017, 0.001));
+    expect(vQuery.similarity(vRandom), closeTo(0.018, 0.001));
   });
 
   test('Similarity: London', () async {

@@ -291,7 +291,7 @@ extension DartNativeFunctions on OrtApi {
     final createSessionFn = CreateSession.asFunction<
         Pointer<OrtStatus> Function(Pointer<OrtEnv>, Pointer<Char>,
             Pointer<OrtSessionOptions>, Pointer<Pointer<OrtSession>>)>();
-    final modelPathChars = defaultTargetPlatform == TargetPlatform.windows
+    final modelPathChars = defaultTargetPlatform == TargetPlatform.windows || Platform.isWindows
         ? modelPath.toNativeUtf16().cast<Char>()
         : modelPath.toNativeUtf8().cast<Char>();
     final status = createSessionFn(
@@ -573,7 +573,24 @@ class OrtSessionObjects {
 String get ortDylibPath {
   final isTesting = !kIsWeb && Platform.environment['FLUTTER_TEST'] == 'true';
   if (isTesting) {
-    return 'macos/onnx_runtime/osx/libonnxruntime.1.16.1.dylib';
+    if (Platform.isWindows) {
+      return 'windows/onnx_runtime/onnxruntime-x64.dll';
+    }
+    print('platform env is ${Platform.isWindows}');
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        throw 'Android runs using a platform-specific implementation, not FFI';
+      case TargetPlatform.fuchsia:
+        throw UnimplementedError();
+      case TargetPlatform.iOS:
+        throw 'iOS runs using a platform-specific implementation, not FFI';
+      case TargetPlatform.linux:
+        return 'libonnxruntime.so.1.16.0';
+      case TargetPlatform.macOS:
+        return 'macos/onnx_runtime/osx/libonnxruntime.1.16.1.dylib';
+      case TargetPlatform.windows:
+        return 'onnxruntime-x64.dll';
+    }
   }
   switch (defaultTargetPlatform) {
     case TargetPlatform.android:
@@ -616,7 +633,8 @@ String get ortExtensionsDylibPath {
 ///
 /// It is reasonable to never free it in an app where you would like the model
 /// to be loaded for the lifetime of the app.
-OrtSessionObjects createOrtSession(String modelPath) {
+OrtSessionObjects createOrtSession(String modelPath,
+    {bool includeOnnxExtensionsOps = false}) {
   // Used to have:
   //   DynamicLibrary.open(dylibPath);
   //   final baseApi = OrtGetApiBase().ref;
@@ -644,16 +662,17 @@ OrtSessionObjects createOrtSession(String modelPath) {
 
   final sessionOptionsPtr = calloc<Pointer<OrtSessionOptions>>();
   ortApi.createSessionOptions(sessionOptionsPtr);
-
-  try {
-    DynamicLibrary.open(ortExtensionsDylibPath);
-    final libraryHandle = calloc<Pointer<Void>>();
-    final utf8Path = ortExtensionsDylibPath.toNativeUtf8().cast<Char>();
-    ortApi.registerCustomOpsLibrary(
-        sessionOptionsPtr.value, utf8Path, libraryHandle);
-  } catch (e) {
-    debugPrint('Error loading ORT Extensions: $e');
-    rethrow;
+  if (includeOnnxExtensionsOps) {
+    try {
+      DynamicLibrary.open(ortExtensionsDylibPath);
+      final libraryHandle = calloc<Pointer<Void>>();
+      final utf8Path = ortExtensionsDylibPath.toNativeUtf8().cast<Char>();
+      ortApi.registerCustomOpsLibrary(
+          sessionOptionsPtr.value, utf8Path, libraryHandle);
+    } catch (e) {
+      debugPrint('Error loading ORT Extensions: $e');
+      rethrow;
+    }
   }
 
   // Avoiding setting inter/intra op num threads at all seems to get the best performance.
