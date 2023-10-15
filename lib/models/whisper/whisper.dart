@@ -6,6 +6,7 @@ import 'whisper_none.dart'
 
 abstract class Whisper {
   static Whisper? _instance;
+  String get modelPath;
 
   static Whisper load(String path) {
     _instance ??= getWhisper(path);

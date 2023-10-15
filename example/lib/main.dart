@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fonnx_example/minilml6v2_widget.dart';
 import 'package:fonnx_example/msmarco_minilm_l6v3_widget.dart';
+import 'package:fonnx_example/whisper_widget.dart';
 
 void main() {
   runApp(const MyApp());
@@ -33,6 +34,7 @@ class _MyAppState extends State<MyApp> {
             children: [
               MiniLmL6V2Widget(),
               MsmarcoMiniLmL6V3Widget(),
+              WhisperWidget(),
             ],
           ),
         ),

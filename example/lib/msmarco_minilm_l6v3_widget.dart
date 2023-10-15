@@ -121,7 +121,7 @@ class _MsmarcoMiniLmL6V3WidgetState extends State<MsmarcoMiniLmL6V3Widget> {
     final elapsed = stopwatch.elapsedMilliseconds;
     final speed = (elapsed / completed.toDouble()).toStringAsFixed(3);
     setState(() {
-      _speedTestResult = 'Speed: $speed ms per embedding';
+      _speedTestResult = '$speed ms per ~400 words';
     });
   }
 }

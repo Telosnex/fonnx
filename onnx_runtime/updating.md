@@ -1,5 +1,10 @@
 # Updating
-1. https://onnxruntime.ai/docs/reference/releases-servicing.html
+1. 
+For macOS/Linux/Windows:
+- Find latest release on [Github](https://github.com/microsoft/onnxruntime/releases). 
+[Official ONNX page][https://onnxruntime.ai/docs/reference/releases-servicing.html] is behind but has more info.
+For iOS:
+- Use latest pod.
 2. Download and extract ex. onnxruntime-osx-arm64-1.16.0.tgz
 3. From lib folder, take dylib and dsym put in ex. macOS/onnx_runtime/osx 
 - platform subfolder because ex. for macOS, podspec needs to be altered

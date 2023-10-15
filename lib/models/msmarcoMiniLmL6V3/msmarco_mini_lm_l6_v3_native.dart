@@ -59,7 +59,7 @@ class MsmarcoMiniLmL6V3Native implements MsmarcoMiniLmL6V3 {
       case TargetPlatform.android:
         return _getEmbeddingPlatform(tokens);
       case TargetPlatform.iOS:
-        return _getEmbeddingPlatform(tokens);
+        return _getEmbeddingFfi(tokens);
       case TargetPlatform.fuchsia:
         throw UnimplementedError();
       case TargetPlatform.linux:
