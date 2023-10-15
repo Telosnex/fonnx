@@ -291,9 +291,10 @@ extension DartNativeFunctions on OrtApi {
     final createSessionFn = CreateSession.asFunction<
         Pointer<OrtStatus> Function(Pointer<OrtEnv>, Pointer<Char>,
             Pointer<OrtSessionOptions>, Pointer<Pointer<OrtSession>>)>();
-    final modelPathChars = defaultTargetPlatform == TargetPlatform.windows || Platform.isWindows
-        ? modelPath.toNativeUtf16().cast<Char>()
-        : modelPath.toNativeUtf8().cast<Char>();
+    final modelPathChars =
+        defaultTargetPlatform == TargetPlatform.windows || Platform.isWindows
+            ? modelPath.toNativeUtf16().cast<Char>()
+            : modelPath.toNativeUtf8().cast<Char>();
     final status = createSessionFn(
       env,
       modelPathChars,
@@ -340,11 +341,6 @@ extension DartNativeFunctions on OrtApi {
     }
     return status;
   }
-
-  // external ffi.Pointer<
-  //     ffi.NativeFunction<
-  //         OrtStatusPtr Function(ffi.Pointer<OrtValue> value, ffi.Size s_len,
-  //             ffi.Size index, ffi.Pointer<ffi.Void> s)>> GetStringTensorElement;
 
   Pointer<OrtStatus> getStringTensorElement(
     Pointer<OrtValue> value,
@@ -575,21 +571,10 @@ String get ortDylibPath {
   if (isTesting) {
     if (Platform.isWindows) {
       return 'windows/onnx_runtime/onnxruntime-x64.dll';
-    }
-    print('platform env is ${Platform.isWindows}');
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-        throw 'Android runs using a platform-specific implementation, not FFI';
-      case TargetPlatform.fuchsia:
-        throw UnimplementedError();
-      case TargetPlatform.iOS:
-        throw 'iOS runs using a platform-specific implementation, not FFI';
-      case TargetPlatform.linux:
-        return 'libonnxruntime.so.1.16.0';
-      case TargetPlatform.macOS:
-        return 'macos/onnx_runtime/osx/libonnxruntime.1.16.1.dylib';
-      case TargetPlatform.windows:
-        return 'onnxruntime-x64.dll';
+    } else if (Platform.isMacOS) {
+      return 'macos/onnx_runtime/osx/libonnxruntime.1.16.1.dylib';
+    } else {
+      throw 'Unsure how to load ORT during testing for this platform (${Platform.operatingSystem})';
     }
   }
   switch (defaultTargetPlatform) {
