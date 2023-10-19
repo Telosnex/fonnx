@@ -569,10 +569,14 @@ class OrtSessionObjects {
 String get ortDylibPath {
   final isTesting = !kIsWeb && Platform.environment['FLUTTER_TEST'] == 'true';
   if (isTesting) {
+    // defaultTargetPlatform is _always_ Android when running tests, so we need
+    // to query the "actual" platform
     if (Platform.isWindows) {
       return 'windows/onnx_runtime/onnxruntime-x64.dll';
     } else if (Platform.isMacOS) {
       return 'macos/onnx_runtime/osx/libonnxruntime.1.16.1.dylib';
+    } else if (Platform.isLinux) {
+      return 'linux/onnx_runtime/libonnxruntime.so.1.16.0';
     } else {
       throw 'Unsure how to load ORT during testing for this platform (${Platform.operatingSystem})';
     }
