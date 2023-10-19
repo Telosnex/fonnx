@@ -46,6 +46,7 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE PkgConfig::GTK)
 # external build triggered from this build file.
 set(fonnx_bundled_libraries
   "${CMAKE_CURRENT_SOURCE_DIR}/onnx_runtime/libonnxruntime.so.1.16.1"
+  "${CMAKE_CURRENT_SOURCE_DIR}/onnx_runtime/libortextensions.so.0.9.0"
   PARENT_SCOPE
 )
 

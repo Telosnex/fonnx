@@ -600,7 +600,13 @@ String get ortDylibPath {
 String get ortExtensionsDylibPath {
   final isTesting = !kIsWeb && Platform.environment['FLUTTER_TEST'] == 'true';
   if (isTesting) {
-    return 'macos/onnx_runtime/osx/libortextensions.0.9.0.dylib';
+    if (Platform.isMacOS) {
+      return 'macos/onnx_runtime/osx/libortextensions.0.9.0.dylib';
+    } else if (Platform.isLinux) {
+      return 'linux/onnx_runtime/libortextensions.so.0.9.0';
+    } else {
+      throw 'Unsure how to load ORT during testing for this platform (${Platform.operatingSystem})';
+    }
   }
   switch (defaultTargetPlatform) {
     case TargetPlatform.android:
@@ -610,7 +616,7 @@ String get ortExtensionsDylibPath {
     case TargetPlatform.iOS:
       throw UnimplementedError();
     case TargetPlatform.linux:
-      throw UnimplementedError();
+      return 'libortextensions.so.0.9.0';
     case TargetPlatform.macOS:
       return 'libortextensions.0.9.0.dylib';
     case TargetPlatform.windows:
