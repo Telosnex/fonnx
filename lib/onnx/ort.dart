@@ -576,7 +576,7 @@ String get ortDylibPath {
     } else if (Platform.isMacOS) {
       return 'macos/onnx_runtime/osx/libonnxruntime.1.16.1.dylib';
     } else if (Platform.isLinux) {
-      return 'linux/onnx_runtime/libonnxruntime.so.1.16.0';
+      return 'linux/onnx_runtime/libonnxruntime.so.1.16.1';
     } else {
       throw 'Unsure how to load ORT during testing for this platform (${Platform.operatingSystem})';
     }
@@ -589,7 +589,7 @@ String get ortDylibPath {
     case TargetPlatform.iOS:
       throw 'iOS runs using a platform-specific implementation, not FFI';
     case TargetPlatform.linux:
-      return 'libonnxruntime.so.1.16.0';
+      return 'libonnxruntime.so.1.16.1';
     case TargetPlatform.macOS:
       return 'libonnxruntime.1.16.1.dylib';
     case TargetPlatform.windows:
