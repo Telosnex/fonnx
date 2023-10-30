@@ -23,19 +23,20 @@ class _WhisperWidgetState extends State<WhisperWidget> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         heightPadding,
         Text(
           'Whisper',
-          style: Theme.of(context).textTheme.headlineSmall,
+          style: Theme.of(context).textTheme.headlineLarge,
         ),
         Text(
-          'macOS ARM and Linux 64 only, currently',
+          'macOS ARM and Linux x64',
           style: Theme.of(context).textTheme.bodySmall,
         ),
         heightPadding,
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             ElevatedButton(
               onPressed: _runVerificationTest,
@@ -56,7 +57,7 @@ class _WhisperWidgetState extends State<WhisperWidget> {
         ),
         heightPadding,
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             ElevatedButton(
               onPressed: _runPerformanceTest,

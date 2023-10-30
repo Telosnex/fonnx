@@ -24,15 +24,16 @@ class _MsmarcoMiniLmL6V3WidgetState extends State<MsmarcoMiniLmL6V3Widget> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         heightPadding,
         Text(
           'MSMARCO MiniLM L6 V3',
-          style: Theme.of(context).textTheme.headlineSmall,
+          style: Theme.of(context).textTheme.headlineLarge,
         ),
         heightPadding,
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             ElevatedButton(
               onPressed: _runVerificationTest,
@@ -53,15 +54,14 @@ class _MsmarcoMiniLmL6V3WidgetState extends State<MsmarcoMiniLmL6V3Widget> {
         ),
         heightPadding,
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             ElevatedButton(
               onPressed: _runSpeedTest,
               child: const Text('Test Speed'),
             ),
             widthPadding,
-            if (_speedTestResult != null)
-              Text(_speedTestResult!),
+            if (_speedTestResult != null) Text(_speedTestResult!),
           ],
         ),
       ],
@@ -119,9 +119,9 @@ class _MsmarcoMiniLmL6V3WidgetState extends State<MsmarcoMiniLmL6V3Widget> {
     }
     stopwatch.stop();
     final elapsed = stopwatch.elapsedMilliseconds;
-    final speed = (elapsed / completed.toDouble()).toStringAsFixed(3);
+    final speed = (elapsed / completed.toDouble()).round();
     setState(() {
-      _speedTestResult = '$speed ms per ~400 words';
+      _speedTestResult = '$speed ms for 400 words';
     });
   }
 }

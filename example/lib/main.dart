@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:fonnx_example/minilml6v2_widget.dart';
 import 'package:fonnx_example/msmarco_minilm_l6v3_widget.dart';
 import 'package:fonnx_example/whisper_widget.dart';
+import 'package:libmonet/libmonet.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,8 +17,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-
-
   @override
   void initState() {
     super.initState();
@@ -24,18 +24,38 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    final brightness =
+        MediaQuery.maybePlatformBrightnessOf(context) ?? Brightness.dark;
+    final surfaceLstar = brightness == Brightness.dark ? 10.0 : 93.0;
+
+
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Fonnx Example App'),
-        ),
-        body: const SingleChildScrollView(
-          child: Column(
-            children: [
-              MiniLmL6V2Widget(),
-              MsmarcoMiniLmL6V3Widget(),
-              WhisperWidget(),
-            ],
+      home: MonetTheme.fromColor(
+        color: const Color(0xffF93081),
+        brightness: brightness,
+        surfaceLstar: surfaceLstar,
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Fonnx'),
+          ),
+          body: const SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  MiniLmL6V2Widget(),
+                  SizedBox(
+                    height: 16,
+                  ),
+                  MsmarcoMiniLmL6V3Widget(),
+                  SizedBox(
+                    height: 16,
+                  ),
+                  WhisperWidget(),
+                ],
+              ),
+            ),
           ),
         ),
       ),

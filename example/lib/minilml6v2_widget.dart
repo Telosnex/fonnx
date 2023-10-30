@@ -23,15 +23,16 @@ class _MiniLmL6V2WidgetState extends State<MiniLmL6V2Widget> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         heightPadding,
         Text(
-          'MiniLM-L6-V2',
-          style: Theme.of(context).textTheme.headlineSmall,
+          'MiniLM L6 V2',
+          style: Theme.of(context).textTheme.headlineLarge,
         ),
         heightPadding,
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             ElevatedButton(
               onPressed: _runMiniLmL6V2VerificationTest,
@@ -52,7 +53,7 @@ class _MiniLmL6V2WidgetState extends State<MiniLmL6V2Widget> {
         ),
         heightPadding,
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             ElevatedButton(
               onPressed: _runMiniLmL6V2SpeedTest,
@@ -116,9 +117,9 @@ class _MiniLmL6V2WidgetState extends State<MiniLmL6V2Widget> {
     }
     stopwatch.stop();
     final elapsed = stopwatch.elapsedMilliseconds;
-    final speed = (elapsed / completed.toDouble()).toStringAsFixed(3);
+    final speed = (elapsed / completed.toDouble()).round();
     setState(() {
-      _speedTestResult = '$speed ms per ~200 words';
+      _speedTestResult = '$speed ms for 200 words';
     });
   }
 }
