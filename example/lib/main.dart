@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:fonnx_example/minilml6v2_widget.dart';
 import 'package:fonnx_example/msmarco_minilm_l6v3_widget.dart';
 import 'package:fonnx_example/whisper_widget.dart';
@@ -27,8 +26,6 @@ class _MyAppState extends State<MyApp> {
     final brightness =
         MediaQuery.maybePlatformBrightnessOf(context) ?? Brightness.dark;
     final surfaceLstar = brightness == Brightness.dark ? 10.0 : 93.0;
-
-
     return MaterialApp(
       home: MonetTheme.fromColor(
         color: const Color(0xffF93081),
