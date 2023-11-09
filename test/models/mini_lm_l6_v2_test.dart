@@ -1,16 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fonnx/extensions/vector.dart';
 import 'package:fonnx/models/minilml6v2/mini_lm_l6_v2.dart';
-import 'package:ml_linalg/linalg.dart';
-
 import 'package:fonnx/models/minilml6v2/mini_lm_l6_v2_native.dart';
-
-extension Similarity on Vector {
-  double similarity(Vector vector) {
-    final distance = distanceTo(vector, distance: Distance.cosine);
-    return 1.0 - distance;
-  }
-}
+import 'package:ml_linalg/linalg.dart';
 
 void main() {
   const modelPath = 'example/assets/models/miniLmL6V2/miniLmL6V2.onnx';
@@ -28,6 +21,14 @@ void main() {
   test('Normalize works', () async {
     final result = await miniLmL6V2.truncateAndGetEmbeddingForString('');
     expect(result.embedding, hasLength(384));
+  });
+
+  test('Divided long text into chunks', () async {
+    final allEmbeddings = await miniLmL6V2.embed(data);
+    expect(allEmbeddings, hasLength(27));
+    expect(allEmbeddings[0].text, hasLength(767));
+    expect(allEmbeddings[1].text, hasLength(728));
+    expect(allEmbeddings[26].text, hasLength(324));
   });
 
   test('Performance test', () async {
@@ -51,7 +52,7 @@ void main() {
     final result1 =
         await miniLmL6V2.truncateAndGetEmbeddingForString('Bonjour');
     final result2 = await miniLmL6V2.truncateAndGetEmbeddingForString('Ni hao');
-    final result = result1.embedding.similarity(result2.embedding);
+    final result = result1.embedding.cosineSimilarity(result2.embedding);
     expect(result, closeTo(0.261, 0.001));
   });
 
@@ -66,12 +67,13 @@ void main() {
     final vWFInSpain = await vec('weather forecast in Spain');
     final vBuffaloWeatherForecast = await vec('buffalo weather forecast');
 
-    final sRandomToAnswer = vRandom.similarity(vAnswer);
-    final sSFToAnswer = vSF.similarity(vAnswer);
-    final sWFToAnswer = vWF.similarity(vAnswer);
-    final sSpainWFToAnswer = vSpainWF.similarity(vAnswer);
-    final sWFInSpainToAnswer = vWFInSpain.similarity(vAnswer);
-    final sWFInBuffaloToAnswer = vBuffaloWeatherForecast.similarity(vAnswer);
+    final sRandomToAnswer = vRandom.cosineSimilarity(vAnswer);
+    final sSFToAnswer = vSF.cosineSimilarity(vAnswer);
+    final sWFToAnswer = vWF.cosineSimilarity(vAnswer);
+    final sSpainWFToAnswer = vSpainWF.cosineSimilarity(vAnswer);
+    final sWFInSpainToAnswer = vWFInSpain.cosineSimilarity(vAnswer);
+    final sWFInBuffaloToAnswer =
+        vBuffaloWeatherForecast.cosineSimilarity(vAnswer);
 
     expect(sRandomToAnswer, closeTo(0.055, 0.001));
     expect(sSFToAnswer, closeTo(0.189, 0.001));
@@ -84,9 +86,9 @@ void main() {
   test('Similarity: password', () async {
     final vQuery = await vec('whats my jewelry pin');
     final vAnswer = await vec('My safe passcode is 1234');
-    expect(vQuery.similarity(vAnswer), closeTo(0.386, 0.001));
+    expect(vQuery.cosineSimilarity(vAnswer), closeTo(0.386, 0.001));
     final vRandom = await vec('Rain in Spain falls mainly on the plain');
-    expect(vQuery.similarity(vRandom), closeTo(0.008, 0.001));
+    expect(vQuery.cosineSimilarity(vRandom), closeTo(0.008, 0.001));
   });
 
   test('Similarity: London', () async {
@@ -95,7 +97,7 @@ void main() {
         await vec('UK capital has 9,787,426 inhabitants at the 2011 census');
     // For some reason this value is 0.400 on macOS arm, 0.391 on Windows.
     // Using a lower tolerance than other tests to ensure it passes on both.
-    expect(vQuery.similarity(vAnswer), closeTo(0.391, 0.01));
+    expect(vQuery.cosineSimilarity(vAnswer), closeTo(0.391, 0.01));
   });
 }
 

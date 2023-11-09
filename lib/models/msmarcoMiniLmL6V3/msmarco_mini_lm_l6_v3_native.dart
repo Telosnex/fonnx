@@ -27,7 +27,10 @@ class MsmarcoMiniLmL6V3Native implements MsmarcoMiniLmL6V3 {
       final textAndToken = textAndTokens[i];
       final tokens = textAndToken.tokens;
       final vector = await getVectorForTokens(tokens);
-      allTextAndEmbeddings.add(TextAndVector(text: text, embedding: vector));
+      allTextAndEmbeddings.add(TextAndVector(
+        text: MsmarcoMiniLmL6V3.tokenizer.detokenize(tokens),
+        embedding: vector,
+      ));
     }
     return allTextAndEmbeddings;
   }

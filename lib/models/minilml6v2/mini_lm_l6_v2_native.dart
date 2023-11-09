@@ -26,7 +26,10 @@ class MiniLmL6V2Native implements MiniLmL6V2 {
       final textAndToken = textAndTokens[i];
       final tokens = textAndToken.tokens;
       final vector = await getVectorForTokens(tokens);
-      allTextAndEmbeddings.add(TextAndVector(text: text, embedding: vector));
+      allTextAndEmbeddings.add(TextAndVector(
+        text: MiniLmL6V2.tokenizer.detokenize(tokens),
+        embedding: vector,
+      ));
     }
     return allTextAndEmbeddings;
   }
