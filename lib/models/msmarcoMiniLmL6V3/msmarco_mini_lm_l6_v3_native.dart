@@ -17,6 +17,7 @@ class MsmarcoMiniLmL6V3Native implements MsmarcoMiniLmL6V3 {
   String modelPath;
   MsmarcoMiniLmL6V3Native(this.modelPath);
   OrtSessionObjects? _sessionObjects;
+  bool _creatingSession = false;
   Fonnx? _fonnx;
 
   @override
@@ -75,7 +76,14 @@ class MsmarcoMiniLmL6V3Native implements MsmarcoMiniLmL6V3 {
   }
 
   OrtSessionObjects get _session {
-    _sessionObjects ??= createOrtSession(modelPath);
+    while (_creatingSession && _sessionObjects == null) {
+      sleep(const Duration(milliseconds: 8));
+    }
+    if (_sessionObjects != null) {
+      return _sessionObjects!;
+    }
+    _creatingSession = true;
+    _sessionObjects = createOrtSession(modelPath);
     return _sessionObjects!;
   }
 
