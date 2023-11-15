@@ -29,30 +29,7 @@ class MsmarcoMiniLmL6V3Web implements MsmarcoMiniLmL6V3 {
   MsmarcoMiniLmL6V3Web(this.modelPath);
 
   @override
-  Future<List<TextAndVector>> embed(String text) async {
-    final allTextAndTokens = MsmarcoMiniLmL6V3.tokenizer.tokenize(text);
-    final allTextAndEmbeddings = <TextAndVector>[];
-    for (var i = 0; i < allTextAndTokens.length; i++) {
-      final textAndTokens = allTextAndTokens[i];
-      final tokens = textAndTokens.tokens;
-      final jsObject = await promiseToFuture(sbertJs(modelPath, tokens));
-
-      if (jsObject == null) {
-        throw Exception('Embeddings returned from JS code are null');
-      }
-      final jsList = (jsObject as List<dynamic>);
-      final vector = Vector.fromList(Float32List.fromList(jsList.cast()),
-              dtype: DType.float32)
-          .normalize();
-      allTextAndEmbeddings.add(TextAndVector(text: text, embedding: vector));
-    }
-
-    // return vector;
-    return allTextAndEmbeddings;
-  }
-
-  @override
-  Future<Vector> getVectorForTokens(List<int> tokens) async {
+  Future<Vector> getEmbeddingAsVector(List<int> tokens) async {
     final jsObject = await promiseToFuture(sbertJs(modelPath, tokens));
 
     if (jsObject == null) {

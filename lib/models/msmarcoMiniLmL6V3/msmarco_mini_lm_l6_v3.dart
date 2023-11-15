@@ -1,5 +1,4 @@
 import 'package:fonnx/tokenizers/bert_vocab.dart';
-import 'package:fonnx/tokenizers/embedding.dart';
 import 'package:fonnx/tokenizers/wordpiece_tokenizer.dart';
 import 'package:ml_linalg/linalg.dart';
 
@@ -26,6 +25,5 @@ abstract class MsmarcoMiniLmL6V3 {
     maxInputCharsPerWord: 100,
   );
 
-  Future<List<TextAndVector>> embed(String text);
-  Future<Vector> getVectorForTokens(List<int> tokens);
+  Future<Vector> getEmbeddingAsVector(List<int> tokens);
 }

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fonnx/models/minilml6v2/mini_lm_l6_v2.dart';
 import 'package:fonnx/models/msmarcoMiniLmL6V3/msmarco_mini_lm_l6_v3.dart';
 import 'package:fonnx_example/padding.dart';
 import 'dart:async';
@@ -71,8 +72,9 @@ class _MsmarcoMiniLmL6V3WidgetState extends State<MsmarcoMiniLmL6V3Widget> {
   void _runVerificationTest() async {
     final modelPath = await getModelPath('msmarcoMiniLmL6V3.onnx');
     final miniLmL6V2 = MsmarcoMiniLmL6V3.load(modelPath);
-    final result = await miniLmL6V2.embed('');
-    final embedding = result.first.embedding;
+    final result = await miniLmL6V2.getEmbeddingAsVector(
+        MsmarcoMiniLmL6V3.tokenizer.tokenize('').first.tokens);
+    final embedding = result;
     const expected = _msmarcoMiniLmL6V3ExpectedForEmptyString;
     final isNotMatch = embedding.indexed.any((outer) {
       final doesNot = outer.$2 != expected[outer.$1];
@@ -102,7 +104,7 @@ class _MsmarcoMiniLmL6V3WidgetState extends State<MsmarcoMiniLmL6V3Widget> {
     // Warm up. This is not necessary, but it's nice to do. Only the first call
     // to a model is slow.
     for (var i = 0; i < 10; i++) {
-      await miniLmL6V3.getVectorForTokens(
+      await miniLmL6V3.getEmbeddingAsVector(
         textAndTokens[i % textAndTokens.length].tokens,
       );
     }
@@ -113,7 +115,7 @@ class _MsmarcoMiniLmL6V3WidgetState extends State<MsmarcoMiniLmL6V3Widget> {
     final stopwatch = Stopwatch()..start();
     var completed = 0;
     while (completed < 100) {
-      await miniLmL6V3.getVectorForTokens(
+      await miniLmL6V3.getEmbeddingAsVector(
           textAndTokens[completed % textAndTokens.length].tokens);
       completed++;
     }
