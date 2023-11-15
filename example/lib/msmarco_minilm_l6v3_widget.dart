@@ -97,12 +97,12 @@ class _MsmarcoMiniLmL6V3WidgetState extends State<MsmarcoMiniLmL6V3Widget> {
     final string = await rootBundle.loadString('assets/text_sample.txt');
     final textAndTokens = MsmarcoMiniLmL6V3.tokenizer.tokenize(string);
     final path = await getModelPath('msmarcoMiniLmL6V3.onnx');
-    final miniLmL6V2 = MsmarcoMiniLmL6V3.load(path);
+    final miniLmL6V3 = MsmarcoMiniLmL6V3.load(path);
     debugPrint('Loaded model');
     // Warm up. This is not necessary, but it's nice to do. Only the first call
     // to a model is slow.
     for (var i = 0; i < 10; i++) {
-      await miniLmL6V2.getVectorForTokens(
+      await miniLmL6V3.getVectorForTokens(
         textAndTokens[i % textAndTokens.length].tokens,
       );
     }
@@ -113,7 +113,7 @@ class _MsmarcoMiniLmL6V3WidgetState extends State<MsmarcoMiniLmL6V3Widget> {
     final stopwatch = Stopwatch()..start();
     var completed = 0;
     while (completed < 100) {
-      await miniLmL6V2.getVectorForTokens(
+      await miniLmL6V3.getVectorForTokens(
           textAndTokens[completed % textAndTokens.length].tokens);
       completed++;
     }
