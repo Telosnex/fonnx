@@ -1,10 +1,7 @@
 import 'dart:typed_data';
-
 import 'package:fonnx/models/msmarcoMiniLmL6V3/msmarco_mini_lm_l6_v3.dart';
-import 'package:js/js_util.dart';
-
 import 'package:js/js.dart';
-
+import 'package:js/js_util.dart';
 import 'package:ml_linalg/linalg.dart';
 
 MsmarcoMiniLmL6V3 getMsmarcoMiniLmL6V3(String path) =>

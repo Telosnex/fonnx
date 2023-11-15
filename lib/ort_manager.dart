@@ -54,7 +54,9 @@ void cleanupOrtSession(OrtSessionObjects? ortSessionObjects) {
   if (ortSessionObjects == null) {
     return;
   }
-  // TODO: Cleanup the Ort session.
+  // Cleanup the Ort session? Currently we assume that the session is desired
+  // for the lifetime of the application. Makes sense for embeddings models.
+  // _Maybe_ Whisper. Definitely not an LLM.
 }
 
 class OnnxIsolateManager {

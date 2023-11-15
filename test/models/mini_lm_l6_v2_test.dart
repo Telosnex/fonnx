@@ -7,10 +7,16 @@ import 'package:ml_linalg/linalg.dart';
 
 void main() {
   const modelPath = 'example/assets/models/miniLmL6V2/miniLmL6V2.onnx';
-  final miniLmL6V2 = MiniLmL6V2Native(modelPath);
+  final miniLm = MiniLmL6V2Native(modelPath);
+  const tokenizer = MiniLmL6V2.tokenizer;
+
+  List<int> tokenize(String text) {
+    return tokenizer.tokenize(text).first.tokens;
+  }
 
   Future<Vector> vec(String text) async {
-    return (await miniLmL6V2.embed(text)).first.embedding;
+    final tokens = tokenize(text);
+    return miniLm.getEmbeddingAsVector(tokens);
   }
 
   test('Embedding works', () async {
@@ -18,13 +24,8 @@ void main() {
     expect(answer, hasLength(384));
   });
 
-  test('Normalize works', () async {
-    final result = await miniLmL6V2.truncateAndGetEmbeddingForString('');
-    expect(result.embedding, hasLength(384));
-  });
-
   test('Divided long text into chunks', () async {
-    final allEmbeddings = await miniLmL6V2.embed(data);
+    final allEmbeddings = tokenizer.tokenize(data);
     expect(allEmbeddings, hasLength(27));
     expect(allEmbeddings[0].text, hasLength(767));
     expect(allEmbeddings[1].text, hasLength(728));
@@ -32,13 +33,13 @@ void main() {
   });
 
   test('Performance test', () async {
-    final List<String> randomStrings =
-        MiniLmL6V2.tokenizer.tokenize(data).map((e) => e.text).toList();
+    final List<List<int>> tokens =
+        MiniLmL6V2.tokenizer.tokenize(data).map((e) => e.tokens).toList();
     const count = 100;
     List<Future> futures = [];
     final sw = Stopwatch()..start();
     for (var i = 0; i < count; i++) {
-      final future = miniLmL6V2.embed(randomStrings[i % randomStrings.length]);
+      final future = miniLm.getEmbeddingAsVector(tokens[i % tokens.length]);
       futures.add(future);
     }
     await Future.wait(futures);
@@ -49,10 +50,9 @@ void main() {
   });
 
   test('Similarity', () async {
-    final result1 =
-        await miniLmL6V2.truncateAndGetEmbeddingForString('Bonjour');
-    final result2 = await miniLmL6V2.truncateAndGetEmbeddingForString('Ni hao');
-    final result = result1.embedding.cosineSimilarity(result2.embedding);
+    final result1 = await miniLm.getEmbeddingAsVector(tokenize('Bonjour'));
+    final result2 = await miniLm.getEmbeddingAsVector(tokenize('Ni hao'));
+    final result = result1.cosineSimilarity(result2);
     expect(result, closeTo(0.261, 0.001));
   });
 

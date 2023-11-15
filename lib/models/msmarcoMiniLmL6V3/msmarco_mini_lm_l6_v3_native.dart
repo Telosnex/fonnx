@@ -13,7 +13,9 @@ MsmarcoMiniLmL6V3 getMsmarcoMiniLmL6V3(String path) =>
 class MsmarcoMiniLmL6V3Native implements MsmarcoMiniLmL6V3 {
   final String modelPath;
   final OnnxIsolateManager _onnxIsolateManager = OnnxIsolateManager();
+
   MsmarcoMiniLmL6V3Native(this.modelPath);
+  
   Fonnx? _fonnx;
 
   @override

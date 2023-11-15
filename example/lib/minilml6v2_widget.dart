@@ -69,9 +69,10 @@ class _MiniLmL6V2WidgetState extends State<MiniLmL6V2Widget> {
 
   void _runMiniLmL6V2VerificationTest() async {
     final modelPath = await getModelPath('miniLmL6V2.onnx');
-    final miniLmL6V2 = MiniLmL6V2.load(modelPath);
-    final result = await miniLmL6V2.embed('');
-    final embedding = result.first.embedding;
+    final model = MiniLmL6V2.load(modelPath);
+    final result = await model
+        .getEmbeddingAsVector(MiniLmL6V2.tokenizer.tokenize('').first.tokens);
+    final embedding = result;
     final isNotMatch = embedding.indexed.any((outer) {
       final doesNot = outer.$2 != miniLmL6V2ExpectedForEmptyString[outer.$1];
       // Use 4 significant figures.
@@ -95,23 +96,21 @@ class _MiniLmL6V2WidgetState extends State<MiniLmL6V2Widget> {
     final string = await rootBundle.loadString('assets/text_sample.txt');
     final textAndTokens = MiniLmL6V2.tokenizer.tokenize(string);
     final path = await getModelPath('miniLmL6V2.onnx');
-    final miniLmL6V2 = MiniLmL6V2.load(path);
+    final model = MiniLmL6V2.load(path);
     debugPrint('Loaded model');
     // Warm up. This is not necessary, but it's nice to do. Only the first call
     // to a model is slow.
     for (var i = 0; i < 10; i++) {
-      await miniLmL6V2.getVectorForTokens(
+      await model.getEmbeddingAsVector(
         textAndTokens[i % textAndTokens.length].tokens,
       );
     }
     debugPrint('Warmed up');
 
-    // Now test speed. Run 100 embeddings, looping over the instances of
-    // TextAndTokens.
     final stopwatch = Stopwatch()..start();
     var completed = 0;
     while (completed < 100) {
-      await miniLmL6V2.getVectorForTokens(
+      await model.getEmbeddingAsVector(
           textAndTokens[completed % textAndTokens.length].tokens);
       completed++;
     }

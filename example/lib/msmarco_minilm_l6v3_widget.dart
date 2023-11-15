@@ -70,8 +70,8 @@ class _MsmarcoMiniLmL6V3WidgetState extends State<MsmarcoMiniLmL6V3Widget> {
 
   void _runVerificationTest() async {
     final modelPath = await getModelPath('msmarcoMiniLmL6V3.onnx');
-    final miniLmL6V2 = MsmarcoMiniLmL6V3.load(modelPath);
-    final result = await miniLmL6V2.getEmbeddingAsVector(
+    final model = MsmarcoMiniLmL6V3.load(modelPath);
+    final result = await model.getEmbeddingAsVector(
         MsmarcoMiniLmL6V3.tokenizer.tokenize('').first.tokens);
     final embedding = result;
     const expected = _msmarcoMiniLmL6V3ExpectedForEmptyString;
@@ -98,23 +98,21 @@ class _MsmarcoMiniLmL6V3WidgetState extends State<MsmarcoMiniLmL6V3Widget> {
     final string = await rootBundle.loadString('assets/text_sample.txt');
     final textAndTokens = MsmarcoMiniLmL6V3.tokenizer.tokenize(string);
     final path = await getModelPath('msmarcoMiniLmL6V3.onnx');
-    final miniLmL6V3 = MsmarcoMiniLmL6V3.load(path);
+    final model = MsmarcoMiniLmL6V3.load(path);
     debugPrint('Loaded model');
     // Warm up. This is not necessary, but it's nice to do. Only the first call
     // to a model is slow.
     for (var i = 0; i < 10; i++) {
-      await miniLmL6V3.getEmbeddingAsVector(
+      await model.getEmbeddingAsVector(
         textAndTokens[i % textAndTokens.length].tokens,
       );
     }
     debugPrint('Warmed up');
 
-    // Now test speed. Run 100 embeddings, looping over the instances of
-    // TextAndTokens.
     final stopwatch = Stopwatch()..start();
     var completed = 0;
     while (completed < 100) {
-      await miniLmL6V3.getEmbeddingAsVector(
+      await model.getEmbeddingAsVector(
           textAndTokens[completed % textAndTokens.length].tokens);
       completed++;
     }
