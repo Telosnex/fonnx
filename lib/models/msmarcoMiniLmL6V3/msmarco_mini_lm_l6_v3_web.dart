@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import 'package:fonnx/models/msmarcoMiniLmL6V3/msmarco_mini_lm_l6_v3.dart';
-import 'package:fonnx/tokenizers/embedding.dart';
 import 'package:js/js_util.dart';
 
 import 'package:js/js.dart';

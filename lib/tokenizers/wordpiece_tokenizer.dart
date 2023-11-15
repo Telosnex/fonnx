@@ -157,10 +157,7 @@ class WordpieceTokenizer {
   }
 
   List<TextAndTokens> tokenize(String text) {
-    final sw = Stopwatch()..start();
-    final answer = _createSubstrings(text);
-    print('Tokenization of ${text.length} took ${sw.elapsedMilliseconds} ms');
-    return answer;
+    return _createSubstrings(text);
   }
 
   String detokenize(List<int> tokens) {

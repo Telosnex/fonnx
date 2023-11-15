@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fonnx/models/minilml6v2/mini_lm_l6_v2.dart';
 import 'package:fonnx/models/msmarcoMiniLmL6V3/msmarco_mini_lm_l6_v3.dart';
 import 'package:fonnx_example/padding.dart';
 import 'dart:async';
