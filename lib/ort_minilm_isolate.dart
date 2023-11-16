@@ -28,10 +28,12 @@ void ortMiniLmIsolateEntryPoint(SendPort mainSendPort) {
 
   receivePort.listen((dynamic message) async {
     if (message is OnnxIsolateMessage) {
-      debugPrint('isolate got message with token count ${message.tokens}');
+      debugPrint('isolate got message with token count ${message.tokens.length}');
       try {
         // Lazily create the Ort session if it's not already done.
         ortSessionObjects ??= createOrtSession(message.modelPath);
+        print(
+            'got ort session objects, calling _getEmbeddingFfi with token count ${message.tokens.length}');
         // Perform the inference here using ortSessionObjects and message.tokens, retrieve result.
         final result =
             await _getEmbeddingFfi(ortSessionObjects!, message.tokens);
@@ -97,7 +99,7 @@ class OnnxIsolateManager {
       tokens: tokens,
     );
 
-    _sendPort?.send(message);
+    _sendPort!.send(message);
     print('sent inference to isolate for ${tokens.length} tokens. now waiting');
 
     // This will wait for a response from the isolate.
