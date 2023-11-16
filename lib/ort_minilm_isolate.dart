@@ -69,6 +69,7 @@ class OnnxIsolateManager {
 
   // Start the isolate and store its SendPort.
   Future<void> start() async {
+    debugPrint('start called');
     if (_isolate != null) {
       return;
     }
@@ -78,6 +79,8 @@ class OnnxIsolateManager {
       receivePort.sendPort,
       onError: receivePort.sendPort, // Handle isolate errors.
     );
+    debugPrint('created isolate');
+
 
     final sendPort = await receivePort.first as SendPort;
     _sendPort = sendPort;
