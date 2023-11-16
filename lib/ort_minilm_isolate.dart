@@ -4,6 +4,7 @@ import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
+import 'package:flutter/foundation.dart';
 import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free;
 import 'package:fonnx/onnx/ort.dart';
 
@@ -27,6 +28,7 @@ void ortMiniLmIsolateEntryPoint(SendPort mainSendPort) {
 
   receivePort.listen((dynamic message) async {
     if (message is OnnxIsolateMessage) {
+      debugPrint('isolate got message with token count ${message.tokens}');
       try {
         // Lazily create the Ort session if it's not already done.
         ortSessionObjects ??= createOrtSession(message.modelPath);
@@ -35,6 +37,7 @@ void ortMiniLmIsolateEntryPoint(SendPort mainSendPort) {
             await _getEmbeddingFfi(ortSessionObjects!, message.tokens);
         message.replyPort.send(result);
       } catch (e) {
+        debugPrint('error in isolate: $e');
         // Send the error message back to the main isolate.
         message.replyPort.send(e);
       }
@@ -45,6 +48,7 @@ void ortMiniLmIsolateEntryPoint(SendPort mainSendPort) {
       }
       Isolate.exit();
     } else {
+      debugPrint('Unknown message received in the ONNX isolate.');
       throw Exception('Unknown message received in the ONNX isolate.');
     }
   });
@@ -111,6 +115,7 @@ class OnnxIsolateManager {
 
 Future<Float32List> _getEmbeddingFfi(
     OrtSessionObjects session, List<int> tokens) async {
+  debugPrint('getting embedding for ${tokens.length} tokens');
   final memoryInfo = calloc<Pointer<OrtMemoryInfo>>();
   session.api.createCpuMemoryInfo(memoryInfo);
   final inputIdsValue = calloc<Pointer<OrtValue>>();
@@ -188,5 +193,6 @@ Future<Float32List> _getEmbeddingFfi(
   calloc.free(tensorTypeAndShape);
   calloc.free(tensorShapeElementCount);
 
+  debugPrint('got embedding for ${tokens.length} tokens');
   return floatList;
 }
