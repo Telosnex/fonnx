@@ -71,9 +71,11 @@ class OnnxIsolateManager {
   Future<void> start() async {
     debugPrint('start called');
     if (_isolate != null) {
+      debugPrint('start already has isolate, will not start another');
       return;
     }
     final receivePort = ReceivePort();
+    debugPrint('creating isolate');
     _isolate = await Isolate.spawn(
       ortMiniLmIsolateEntryPoint,
       receivePort.sendPort,
@@ -81,13 +83,13 @@ class OnnxIsolateManager {
     );
     debugPrint('created isolate');
 
-
     final sendPort = await receivePort.first as SendPort;
     _sendPort = sendPort;
   }
 
   // Send data to the isolate and get a result.
   Future<Float32List> sendInference(String modelPath, List<int> tokens) async {
+    print('sending inference to isolate for ${tokens.length} tokens');
     final response = ReceivePort();
     final message = OnnxIsolateMessage(
       replyPort: response.sendPort,
@@ -96,6 +98,7 @@ class OnnxIsolateManager {
     );
 
     _sendPort?.send(message);
+    print('sent inference to isolate for ${tokens.length} tokens. now waiting');
 
     // This will wait for a response from the isolate.
     final dynamic result = await response.first;
