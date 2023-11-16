@@ -68,25 +68,44 @@ void cleanupOrtSession(OrtSessionObjects? ortSessionObjects) {
 class OnnxIsolateManager {
   SendPort? _sendPort;
   Isolate? _isolate;
+  Future<void>? _starting;
+
 
   // Start the isolate and store its SendPort.
   Future<void> start() async {
     debugPrint('start called');
-    if (_isolate != null) {
-      debugPrint('start already has isolate, will not start another');
+    if (_starting != null) {
+      debugPrint(
+          'An isolate start is already in progress. Waiting for it to complete.');
+      await _starting; // Wait for the pending start to finish.
+      debugPrint('Isolate start completed.');
       return;
     }
+    if (_isolate != null) {
+      debugPrint('An isolate is already running. No need to start another.');
+      return;
+    }
+    // The _starting flag is set with a completer which will complete when
+    // the isolate start up is fully finished (including setting the _sendPort).
+    final Completer<void> completer = Completer<void>();
+    _starting = completer.future;
+
     final receivePort = ReceivePort();
-    debugPrint('creating isolate');
+    debugPrint('Creating isolate');
     _isolate = await Isolate.spawn(
       ortMiniLmIsolateEntryPoint,
       receivePort.sendPort,
       onError: receivePort.sendPort, // Handle isolate errors.
     );
-    debugPrint('created isolate');
+    debugPrint('Created isolate');
 
+    // Wait for the SendPort from the new isolate.
     final sendPort = await receivePort.first as SendPort;
     _sendPort = sendPort;
+    
+    // Mark the start process as complete.
+    completer.complete();
+    _starting = null;
   }
 
   // Send data to the isolate and get a result.
