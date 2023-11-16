@@ -3,6 +3,7 @@ import 'package:fonnx_example/minilml6v2_widget.dart';
 import 'package:fonnx_example/msmarco_minilm_l6v3_widget.dart';
 import 'package:fonnx_example/whisper_widget.dart';
 import 'package:libmonet/libmonet.dart';
+import 'package:libmonet/theming/monet_theme_data.dart';
 
 void main() {
   runApp(const MyApp());
@@ -27,10 +28,12 @@ class _MyAppState extends State<MyApp> {
         MediaQuery.maybePlatformBrightnessOf(context) ?? Brightness.dark;
     final surfaceLstar = brightness == Brightness.dark ? 10.0 : 93.0;
     return MaterialApp(
-      home: MonetTheme.fromColor(
-        color: const Color(0xffF93081),
-        brightness: brightness,
-        surfaceLstar: surfaceLstar,
+      home: MonetTheme(
+        monetThemeData: MonetThemeData.fromColor(
+          color: const Color(0xffF93081),
+          brightness: brightness,
+          backgroundTone: surfaceLstar,
+        ),
         child: Scaffold(
           appBar: AppBar(
             title: const Text('Fonnx'),
