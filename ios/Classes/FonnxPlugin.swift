@@ -3,8 +3,8 @@ import UIKit
 import os
 
 public class FonnxPlugin: NSObject, FlutterPlugin {
-  private var cachedMiniLmL6V2Path: String?
-  private var cachedMiniLmL6V2: MiniLmL6V2?
+  private var cachedMiniLmModelPath: String?
+  private var cachedMiniLm: OrtMiniLm?
 
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "fonnx", binaryMessenger: registrar.messenger())
@@ -16,24 +16,24 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
     switch call.method {
     case "getPlatformVersion":
       result("iOS " + UIDevice.current.systemVersion)
-    case "miniLmL6V2":
-      doMiniLmL6V2(call, result: result)
+    case "miniLm":
+      doMiniLm(call, result: result)
     default:
       result(FlutterMethodNotImplemented)
     }
   }
 
-  public func doMiniLmL6V2(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+  public func doMiniLm(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     let path = (call.arguments as! [Any])[0] as! String
     let tokens = (call.arguments as! [Any])[1] as! [Int64]
 
-    if cachedMiniLmL6V2Path != path {
-      cachedMiniLmL6V2 = try? MiniLmL6V2(modelPath: path)
-      cachedMiniLmL6V2Path = path
+    if cachedMiniLmModelPath != path {
+      cachedMiniLm = try? OrtMiniLm(modelPath: path)
+      cachedMiniLmModelPath = path
     }
 
-    guard let model = cachedMiniLmL6V2 else {
-      result(FlutterError(code: "MiniLmL6V2", message: "Could not instantiate model", details: nil))
+    guard let model = cachedMiniLm else {
+      result(FlutterError(code: "MiniLm", message: "Could not instantiate model", details: nil))
       return
     }
     
@@ -43,14 +43,14 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
         completion: { (answer, error) in
           if let error = error {
             result(
-              FlutterError(code: "MiniLmL6V2", message: "Failed to get embedding", details: error)
+              FlutterError(code: "MiniLm", message: "Failed to get embedding", details: error)
             )
           } else {
             result(answer)
           }
         })
     } catch {
-      result(FlutterError(code: "MiniLmL6V2", message: "Failed to get embedding", details: error))
+      result(FlutterError(code: "MiniLm", message: "Failed to get embedding", details: error))
     }
   }
 }

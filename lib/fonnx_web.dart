@@ -20,7 +20,7 @@ class FonnxWeb extends FonnxPlatform {
   }
 
   @override
-  Future<Float32List?> miniLmL6V2({
+  Future<Float32List?> miniLm({
     required String modelPath,
     required List<int> inputs,
   }) async {

@@ -29,10 +29,10 @@ abstract class FonnxPlatform extends PlatformInterface {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
   
-  Future<Float32List?> miniLmL6V2({
+  Future<Float32List?> miniLm({
     required String modelPath,
     required List<int> inputs,
   }) {
-    throw UnimplementedError('miniLmL6V2() has not been implemented.');
+    throw UnimplementedError('miniLm() has not been implemented.');
   }
 }

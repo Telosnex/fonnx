@@ -19,7 +19,7 @@ class OnnxIsolateMessage {
   });
 }
 
-void onnxIsolateEntryPoint(SendPort mainSendPort) {
+void ortMiniLmIsolateEntryPoint(SendPort mainSendPort) {
   final receivePort = ReceivePort();
   mainSendPort.send(receivePort.sendPort);
 
@@ -70,7 +70,7 @@ class OnnxIsolateManager {
     }
     final receivePort = ReceivePort();
     _isolate = await Isolate.spawn(
-      onnxIsolateEntryPoint,
+      ortMiniLmIsolateEntryPoint,
       receivePort.sendPort,
       onError: receivePort.sendPort, // Handle isolate errors.
     );

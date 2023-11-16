@@ -11,7 +11,7 @@ import kotlinx.coroutines.*
 import java.nio.LongBuffer
 import java.util.*
 
-class MiniLmL6V2(private val modelPath: String) {
+class OrtMiniLm(private val modelPath: String) {
     private val model: OrtSessionObjects by lazy {
         OrtSessionObjects(modelPath)
     }
@@ -66,7 +66,6 @@ class MiniLmL6V2(private val modelPath: String) {
 
                     val stopTime = System.nanoTime()
 
-                    Log.v("MiniLmL6V2", "Time taken: ${(stopTime - startTime) / 1_000_000.0} ms")
                     return wrappedResult
                 }
             } 

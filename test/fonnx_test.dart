@@ -13,7 +13,7 @@ class MockFonnxPlatform
   Future<String?> getPlatformVersion() => throw UnimplementedError();
 
   @override
-  Future<Float32List?> miniLmL6V2(
+  Future<Float32List?> miniLm(
       {required String modelPath, required List<int> inputs}) {
     throw UnimplementedError();
   }

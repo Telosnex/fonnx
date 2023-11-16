@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:fonnx/fonnx.dart';
 import 'package:fonnx/models/minilml6v2/mini_lm_l6_v2.dart';
-import 'package:fonnx/ort_manager.dart';
+import 'package:fonnx/ort_minilm_isolate.dart';
 import 'package:ml_linalg/linalg.dart';
 
 MiniLmL6V2 getMiniLmL6V2(String path) => MiniLmL6V2Native(path);
@@ -51,7 +51,7 @@ class MiniLmL6V2Native implements MiniLmL6V2 {
 
   Future<Float32List> getEmbeddingViaPlatformChannel(List<int> tokens) async {
     final fonnx = _fonnx ??= Fonnx();
-    final embeddings = await fonnx.miniLmL6V2(
+    final embeddings = await fonnx.miniLm(
       modelPath: modelPath,
       inputs: tokens,
     );

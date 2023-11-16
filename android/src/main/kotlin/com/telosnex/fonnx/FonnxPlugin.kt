@@ -7,8 +7,8 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 
 class FonnxPlugin : FlutterPlugin, MethodCallHandler {
-    var cachedMiniLmL6V2Path: String? = null
-    var cachedMiniLmL6V2: MiniLmL6V2? = null
+    var cachedMiniLmPath: String? = null
+    var cachedMiniLm: OrtMiniLm? = null
 
     private lateinit var channel: MethodChannel
 
@@ -23,22 +23,22 @@ class FonnxPlugin : FlutterPlugin, MethodCallHandler {
     ) {
         if (call.method == "getPlatformVersion") {
             result.success("Android ${android.os.Build.VERSION.RELEASE}")
-        } else if (call.method == "miniLmL6V2") {
+        } else if (call.method == "miniLm") {
             val list = call.arguments as List<Any>
             val modelPath = list[0] as String
             val wordpieces = list[1] as List<Int>
 
-            if (cachedMiniLmL6V2Path != modelPath) {
-                cachedMiniLmL6V2 = MiniLmL6V2(modelPath)
-                cachedMiniLmL6V2Path = modelPath
+            if (cachedMiniLmPath != modelPath) {
+                cachedMiniLm = OrtMiniLm(modelPath)
+                cachedMiniLmPath = modelPath
             }
 
-            val miniLmL6V2 = cachedMiniLmL6V2
-            if (miniLmL6V2 != null) {
-                val embedding = miniLmL6V2.getEmbedding(wordpieces.map { it.toLong() }.toLongArray())
+            val miniLm = cachedMiniLm
+            if (miniLm != null) {
+                val embedding = miniLm.getEmbedding(wordpieces.map { it.toLong() }.toLongArray())
                 result.success(embedding.first())
             } else {
-                result.error("MiniLmL6V2", "Could not instantiate model", null)
+                result.error("MiniLm", "Could not instantiate model", null)
             }
         } else {
             result.notImplemented()

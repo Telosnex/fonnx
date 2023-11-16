@@ -2,7 +2,7 @@ import Flutter
 import onnxruntime_objc
 import os
 
-class MiniLmL6V2 {
+class OrtMiniLm {
   var modelPath: String
   lazy var sessionObjects: OrtSessionObjects = { OrtSessionObjects(modelPath: modelPath)! }()
 

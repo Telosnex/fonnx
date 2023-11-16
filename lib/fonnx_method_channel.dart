@@ -19,12 +19,12 @@ class MethodChannelFonnx extends FonnxPlatform {
   /// Create embeddings for [inputs].
   /// Inputs are BERT tokens. Use [WordpieceTokenizer] to convert a [String].
   @override
-  Future<Float32List?> miniLmL6V2({
+  Future<Float32List?> miniLm({
     required String modelPath,
     required List<int> inputs,
   }) async {
     final result = await methodChannel.invokeMethod<Float32List>(
-      'miniLmL6V2',
+      'miniLm',
       [modelPath, inputs],
     );
     return result;

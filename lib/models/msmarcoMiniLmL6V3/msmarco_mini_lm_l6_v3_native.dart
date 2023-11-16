@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:fonnx/fonnx.dart';
 import 'package:fonnx/models/msmarcoMiniLmL6V3/msmarco_mini_lm_l6_v3.dart';
-import 'package:fonnx/ort_manager.dart';
+import 'package:fonnx/ort_minilm_isolate.dart';
 import 'package:ml_linalg/linalg.dart';
 
 MsmarcoMiniLmL6V3 getMsmarcoMiniLmL6V3(String path) =>
@@ -52,7 +52,7 @@ class MsmarcoMiniLmL6V3Native implements MsmarcoMiniLmL6V3 {
 
   Future<Float32List> getEmbeddingViaPlatformChannel(List<int> tokens) async {
     final fonnx = _fonnx ??= Fonnx();
-    final embeddings = await fonnx.miniLmL6V2(
+    final embeddings = await fonnx.miniLm(
       modelPath: modelPath,
       inputs: tokens,
     );

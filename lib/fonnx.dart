@@ -11,11 +11,11 @@ class Fonnx {
     return FonnxPlatform.instance.getPlatformVersion();
   }
 
-  Future<Float32List?> miniLmL6V2({
+  Future<Float32List?> miniLm({
     required String modelPath,
     required List<int> inputs,
   }) {
-    return FonnxPlatform.instance.miniLmL6V2(
+    return FonnxPlatform.instance.miniLm(
       modelPath: modelPath,
       inputs: inputs,
     );

@@ -22,7 +22,6 @@ internal class OrtSessionObjects(private val modelPath: String) {
 
     init {
         val sessionOptions: OrtSession.SessionOptions = OrtSession.SessionOptions()
-        Log.v("OrtSessionObjects", "Loading model from $modelPath")
         _ortSession = ortEnv.createSession(modelPath, sessionOptions)
     }
 }
