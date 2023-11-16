@@ -1,7 +1,6 @@
 import 'dart:isolate';
 import 'dart:async';
 import 'dart:ffi';
-import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
@@ -28,18 +27,14 @@ void ortMiniLmIsolateEntryPoint(SendPort mainSendPort) {
 
   receivePort.listen((dynamic message) async {
     if (message is OnnxIsolateMessage) {
-      debugPrint('isolate got message with token count ${message.tokens.length}');
       try {
         // Lazily create the Ort session if it's not already done.
         ortSessionObjects ??= createOrtSession(message.modelPath);
-        print(
-            'got ort session objects, calling _getEmbeddingFfi with token count ${message.tokens.length}');
         // Perform the inference here using ortSessionObjects and message.tokens, retrieve result.
         final result =
             await _getEmbeddingFfi(ortSessionObjects!, message.tokens);
         message.replyPort.send(result);
       } catch (e) {
-        debugPrint('error in isolate: $e');
         // Send the error message back to the main isolate.
         message.replyPort.send(e);
       }
@@ -73,16 +68,11 @@ class OnnxIsolateManager {
 
   // Start the isolate and store its SendPort.
   Future<void> start() async {
-    debugPrint('start called');
     if (_starting != null) {
-      debugPrint(
-          'An isolate start is already in progress. Waiting for it to complete.');
       await _starting; // Wait for the pending start to finish.
-      debugPrint('Isolate start completed.');
       return;
     }
     if (_isolate != null) {
-      debugPrint('An isolate is already running. No need to start another.');
       return;
     }
     // The _starting flag is set with a completer which will complete when
@@ -91,13 +81,11 @@ class OnnxIsolateManager {
     _starting = completer.future;
 
     final receivePort = ReceivePort();
-    debugPrint('Creating isolate');
     _isolate = await Isolate.spawn(
       ortMiniLmIsolateEntryPoint,
       receivePort.sendPort,
       onError: receivePort.sendPort, // Handle isolate errors.
     );
-    debugPrint('Created isolate');
 
     // Wait for the SendPort from the new isolate.
     final sendPort = await receivePort.first as SendPort;
@@ -110,7 +98,6 @@ class OnnxIsolateManager {
 
   // Send data to the isolate and get a result.
   Future<Float32List> sendInference(String modelPath, List<int> tokens) async {
-    print('sending inference to isolate for ${tokens.length} tokens');
     final response = ReceivePort();
     final message = OnnxIsolateMessage(
       replyPort: response.sendPort,
@@ -119,7 +106,6 @@ class OnnxIsolateManager {
     );
 
     _sendPort!.send(message);
-    print('sent inference to isolate for ${tokens.length} tokens. now waiting');
 
     // This will wait for a response from the isolate.
     final dynamic result = await response.first;
@@ -142,7 +128,6 @@ class OnnxIsolateManager {
 
 Future<Float32List> _getEmbeddingFfi(
     OrtSessionObjects session, List<int> tokens) async {
-  debugPrint('getting embedding for ${tokens.length} tokens');
   final memoryInfo = calloc<Pointer<OrtMemoryInfo>>();
   session.api.createCpuMemoryInfo(memoryInfo);
   final inputIdsValue = calloc<Pointer<OrtValue>>();
@@ -220,6 +205,5 @@ Future<Float32List> _getEmbeddingFfi(
   calloc.free(tensorTypeAndShape);
   calloc.free(tensorShapeElementCount);
 
-  debugPrint('got embedding for ${tokens.length} tokens');
   return floatList;
 }
