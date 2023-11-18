@@ -36,5 +36,7 @@ flutter:
     - assets/models/miniLmL6V2/miniLmL6V2.onnx
     - assets/models/msmarcoMiniLmL6V3/msmarcoMiniLmL6V3.onnx
     - assets/models/whisper/whisper_tiny.onnx
+    - assets/models/piper/en_US-libritts_r-medium.json
+    - assets/models/piper/en_US-libritts_r-medium.onnx
     - assets/text_sample.txt
     - assets/audio_sample.wav

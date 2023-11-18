@@ -1,0 +1,1 @@
+Inspired by [Piper](https://github.com/rhasspy/piper) - WIP

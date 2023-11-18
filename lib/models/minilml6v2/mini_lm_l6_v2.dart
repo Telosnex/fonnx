@@ -1,5 +1,5 @@
-import 'package:fonnx/tokenizers/bert_vocab.dart';
-import 'package:fonnx/tokenizers/wordpiece_tokenizer.dart';
+import 'package:fonnx/minilm/bert_vocab.dart';
+import 'package:fonnx/minilm/wordpiece_tokenizer.dart';
 import 'package:ml_linalg/linalg.dart';
 
 import 'mini_lm_l6_v2_abstract.dart'

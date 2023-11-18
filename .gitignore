@@ -28,3 +28,4 @@ doc/api/
 
 .flutter-plugins
 .flutter-plugins-dependencies
+test/ephemeral/*

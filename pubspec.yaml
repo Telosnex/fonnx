@@ -14,7 +14,9 @@ dependencies:
     sdk: flutter
   flutter_web_plugins:
     sdk: flutter
+  freezed_annotation: ^2.4.1
   js: ^0.6.7
+  json_annotation: ^4.8.1
   ml_linalg: ^13.11.31
   plugin_platform_interface: ^2.0.2
 
@@ -23,6 +25,9 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^2.0.0
   ffigen: ^9.0.1
+  build_runner: ^2.4.6
+  freezed: ^2.4.5
+  json_serializable: ^6.7.1
 
 flutter:
   plugin:

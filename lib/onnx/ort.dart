@@ -96,6 +96,46 @@ extension DartNativeFunctions on OrtApi {
     return inputTensorNative;
   }
 
+
+  /// You MUST call [calloc.free] on the returned pointer when you are done with
+  /// it, i.e. once inference is complete.
+  Pointer<Int64> createSingleRankInt64Tensor(
+    Pointer<Pointer<OrtValue>> inputTensorPointer, {
+    required Pointer<OrtMemoryInfo> memoryInfo,
+    required List<int> values,
+  }) {
+    final sizeOfInt64 = sizeOf<Int64>();
+    final inputTensorNative = calloc<Int64>(values.length * sizeOfInt64);
+
+    for (var i = 0; i < values.length; i++) {
+      inputTensorNative[i] = values[i];
+    }
+
+    final inputShape = calloc<Int64>(1 * sizeOfInt64);
+    inputShape[0] = 1;
+
+    final ptrVoid = inputTensorNative.cast<Void>();
+    final status = createTensorWithDataAsOrtValue(
+      inputTensorPointer,
+      memoryInfo: memoryInfo,
+      inputData: ptrVoid,
+      inputDataLengthInBytes: values.length * sizeOfInt64,
+      inputShape: inputShape,
+      inputShapeLengthInBytes: 1,
+      onnxTensorElementDataType:
+          ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64,
+    );
+    if (status.isError) {
+      final error = 'Code: ${getErrorCodeMessage(status)}\n'
+          'Message: ${getErrorMessage(status)}';
+      calloc.free(inputTensorNative);
+      calloc.free(inputShape);
+      throw Exception(error);
+    }
+    calloc.free(inputShape);
+    return inputTensorNative;
+  }
+
   /// You MUST call [calloc.free] on the returned pointer when you are done with
   /// it, i.e. once inference is complete.
   Pointer<Int32> createInt32Tensor(
