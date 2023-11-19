@@ -4,6 +4,15 @@ import 'package:fonnx/piper/phonemizer/encoding_h.dart';
 import 'package:fonnx/piper/phonemizer/speak_lib_h.dart';
 import 'package:fonnx/piper/phonemizer/wcslen.dart';
 
+bool text_decoder_eof(EspeakNgTextDecoder decoder)
+{
+	return decoder.current == decoder.end;
+}
+int text_decoder_getc(EspeakNgTextDecoder decoder)
+{
+	return decoder.getter!(decoder);
+}
+
 bool /* status */ textDecoderDecodeStringMultibyte(EspeakNgTextDecoder decoder,
     String text, EspeakNgEncoding encoding, int flags) {
   final rawValue = flags & 7;

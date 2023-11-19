@@ -1,8 +1,52 @@
+// ignore_for_file: non_constant_identifier_names
+
+import 'package:fonnx/piper/phonemizer/encoding_c.dart';
+import 'package:fonnx/piper/phonemizer/encoding_h.dart';
+import 'package:fonnx/piper/phonemizer/translate_c.dart';
+import 'package:fonnx/piper/phonemizer/translate_h.dart';
+
+EspeakNgTextDecoder? p_decoder;
+
 int countCharacters = 0;
 
+const  N_XML_BUF =  500;
+const N_XML_BUF2 = 20;
+	 String ungot_string =  List<String>.filled(N_XML_BUF2 + 4, ' ').join('');
+int ungot_string_ix = -1;
+bool clear_skipping_text = false;
+int ungot_char2 = 0;
+int ungot_char = 0;
 
-int ReadClause(Translator t, char *buf, short *charix, int *charix_top, int n_buf, int *tone_type, char *voice_change)
+bool Eof() {
+	if (ungot_char != 0) {
+return false;
+  }
+	
+	return text_decoder_eof(p_decoder!);
+}
+
+ int GetC()
 {
+	int c1;
+
+	if ((c1 = ungot_char) != 0) {
+		ungot_char = 0;
+		return c1;
+	}
+
+	countCharacters++;
+	return text_decoder_getc(p_decoder!);
+}
+
+
+int ReadClause(Translator tr)
+{
+   int resultToneType = 0;
+
+    int resultCharixTop = 0;
+    int resultCharix = 0;
+    String resultBuf = '';
+    String resultVoiceChange = '';
 	/* Find the end of the current clause.
 	    Write the clause into  buf
 
@@ -15,9 +59,9 @@ int ReadClause(Translator t, char *buf, short *charix, int *charix_top, int n_bu
 	        repeated punctuation, eg.   ...   !!!
 	 */
 
-	int c1 = ' '; // current character
+	String c1 = ' '; // current character
 	int c2; // next character
-	int cprev = ' '; // previous character
+	String cprev = ' '; // previous character
 	int c_next;
 	int parag;
 	int ix = 0;
@@ -34,23 +78,24 @@ int ReadClause(Translator t, char *buf, short *charix, int *charix_top, int n_bu
 	bool stressed_word = false;
 	int end_clause_after_tag = 0;
 	int end_clause_index = 0;
-	wchar_t xml_buf[N_XML_BUF+1];
+  final String xml_buf =  List<String>.filled(N_XML_BUF + 1, ' ').join('');
+   // for &<name> and &<number> sequences
+  final String xml_buf2 =  List<String>.filled(N_XML_BUF2 + 2, ' ').join('');
 
-	#define N_XML_BUF2 20
-	char xml_buf2[N_XML_BUF2+2]; // for &<name> and &<number> sequences
-	static char ungot_string[N_XML_BUF2+4];
-	static int ungot_string_ix = -1;
+
+	// static char ungot_string[N_XML_BUF2+4];
+	// static int ungot_string_ix = -1;
 
 	if (clear_skipping_text) {
-		skipping_text = false;
+		skippingText = false;
 		clear_skipping_text = false;
 	}
+  tr.phonemesRepeatCount = 0;
+  tr.clauseUpperCount = 0;
+  tr.clauseLowerCount = 0;
 
-	tr->phonemes_repeat_count = 0;
-	tr->clause_upper_count = 0;
-	tr->clause_lower_count = 0;
-	*tone_type = 0;
-	*voice_change = 0;
+	resultToneType = 0;
+	resultVoiceChange = '';
 
 	if (ungot_char2 != 0) {
 		c2 = ungot_char2;

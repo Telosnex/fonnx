@@ -60,6 +60,47 @@ void main() {
     //        audioFile);
   });
 
+  test('prephonemized?', () async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    final config = await Piper.loadConfig(modelJson);
+    expect(config, isNotNull);
+    print('config: $config');
+
+    print('=== phonemeIdMap ===');
+
+    print(config?.phonemeIdMap);
+
+    final string = 'foʊnmaɪzɚ';
+
+    final characters = string.split('');
+    final phonemes = characters
+        .map((e) => config?.phonemeIdMap?[e])
+        .expand((e) => e == null ? <int>[0] : <int>[0, ...e])
+        .toList(growable: false);
+    expect(phonemes.length, 15);
+    final bytes = await piper.getTts(
+      config: config!,
+      phonemes: [1, 0, ...phonemes,0,2],
+    );
+    final synthesisConfig = PiperSynthesisConfig(
+      noiseScale: config.inference!.noiseScale!,
+      lengthScale: config.inference!.lengthScale!,
+      noiseW: config.inference!.noiseW!,
+      speakerId: 0,
+    );
+    expect(bytes.length, greaterThan(4000));
+    expect(bytes.length, lessThan(100000));
+    final signedInts = convertFloat32ToInt16(bytes);
+    final header = WavHeader(
+      sampleWidth: synthesisConfig.sampleWidth,
+      numSamples: signedInts.length ~/ synthesisConfig.sampleWidth,
+      numChannels: synthesisConfig.channels,
+      sampleRate: synthesisConfig.sampleRate,
+    );
+    final writeFile = File('test/ephemeral/hello_world.wav');
+    await writeWavFile(writeFile.path, header, signedInts);
+  });
+
   test('Piper Phonemize Test', () async {
     // https://github.com/rhasspy/piper-phonemize/blob/fccd4f335aa68ac0b72600822f34d84363daa2bf/README.md?plain=1#L16
     final ids = [

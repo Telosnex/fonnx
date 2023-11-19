@@ -10,6 +10,7 @@ Future<bool> LoadPhData(int srate) async {
 
   bool status;
   final pathHome = '';
+  // TODO: Actually load
   final phonemeTabData = await readPhFile(pathHome, 'phontab');
   final phonemeIndex = await readPhFile(pathHome, 'phonindex');
   final phondata = await readPhFile(pathHome, 'phondata');

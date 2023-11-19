@@ -23,7 +23,7 @@ class TextToPhonemesResult {
 EspeakNgTextDecoder? textDecoder;
 TextToPhonemesResult espeakTextToPhonemesWithTerminator(
     String textptr, int textmode, int phonememode) {
-  // https://github.com/rhasspy/espeak-ng/blob/0f65aa301e0d6bae5e172cc74197d32a6182200f/src/libespeak-ng/speech.c#L855
+  // https://github.com/rhassy/espeak-ng/blob/0f65aa301e0d6bae5e172cc74197d32a6182200f/src/libespeak-ng/speech.c#L855
   /* phoneme_mode
       bit 1:   0=eSpeak's ascii phoneme names, 1= International Phonetic
      Alphabet (as UTF-8 characters). bit 7:   use (bits 8-23) as a tie within

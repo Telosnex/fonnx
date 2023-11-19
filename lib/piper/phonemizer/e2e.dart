@@ -1,11 +1,13 @@
+// ignore_for_file: constant_identifier_names
+
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:fonnx/piper/phonemizer/espeak_api_c.dart';
 import 'package:fonnx/piper/phonemizer/speech_c.dart';
 
-final espeakPHONEMES_IPA = 0x02;
-final espeakCHARS_AUTO = 0;
+const espeakPHONEMES_IPA = 0x02;
+const espeakCHARS_AUTO = 0;
 
 // Intonation constants
 const int CLAUSE_INTONATION_FULL_STOP = 0x00000000;
@@ -45,11 +47,14 @@ const String EXPECTED_PHONEMES = """ðˈɪs, ˌaɪˌɛsˈeɪ; ɡˈʊd: tˈɛst!
 void e2e() {
   espeakInitialize('${Directory.current.path}/lib/piper/espeak-ng-data');
 
-  final voice = 'en-us';
+  const voice = 'en-us';
   espeakSetVoiceByName(voice);
 
   // Should split into 3 sentences, highlighting each punctuation type.
-  final text = 'this, I.S. a; good: test! ok?';
+  const text = 'this, I.S. a; good: test! ok?';
+  const String EXPECTED_PHONEMES = """ðˈɪs, ˌaɪˌɛsˈeɪ; ɡˈʊd: tˈɛst!
+ˌoʊkˈeɪ?
+""";
   final textBytes = utf8.encode(text);
   final phonemeFlags = espeakPHONEMES_IPA;
   final textFlags = espeakCHARS_AUTO;
