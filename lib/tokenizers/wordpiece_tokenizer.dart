@@ -49,7 +49,8 @@ class WordpieceTokenizer {
         (0x30A0 <= codeUnit && codeUnit <= 0x30FF);
   }
 
-  List<TextAndTokens> _createSubstrings(String text) {
+  List<TextAndTokens> _createSubstrings(String text, {int? maxTokens}) {
+    final max = maxTokens ?? maxInputTokens;
     text = text.trim();
     if (text.isEmpty) {
       return [
@@ -128,7 +129,7 @@ class WordpieceTokenizer {
 
       final stringForWord = wordUnknown ? unkString : word;
       final tokensForWord = wordUnknown ? [unkToken] : wordTokens;
-      if (outputTokens.length + tokensForWord.length >= maxInputTokens - 1) {
+      if (outputTokens.length + tokensForWord.length >= max - 1) {
         outputTokens.add(endToken);
         allOutputStrings.add(outputString.join(' '));
         allOutputTokens.add(outputTokens);
@@ -156,8 +157,8 @@ class WordpieceTokenizer {
     });
   }
 
-  List<TextAndTokens> tokenize(String text) {
-    return _createSubstrings(text);
+  List<TextAndTokens> tokenize(String text, {int? maxTokens}) {
+    return _createSubstrings(text, maxTokens: maxTokens);
   }
 
   String detokenize(List<int> tokens) {
