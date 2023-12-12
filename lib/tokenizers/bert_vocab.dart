@@ -30523,7 +30523,6 @@ const Map<String, int> bertEncoder = {
   r"""##～""": 30521,
 };
 
-
 const List<String> bertDecoder = [
   r"""[PAD]""",
   r"""[unused0]""",

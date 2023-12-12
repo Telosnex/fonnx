@@ -15,7 +15,7 @@ class MsmarcoMiniLmL6V3Native implements MsmarcoMiniLmL6V3 {
   final OnnxIsolateManager _onnxIsolateManager = OnnxIsolateManager();
 
   MsmarcoMiniLmL6V3Native(this.modelPath);
-  
+
   Fonnx? _fonnx;
 
   @override
@@ -26,8 +26,7 @@ class MsmarcoMiniLmL6V3Native implements MsmarcoMiniLmL6V3 {
     return vector;
   }
 
-  Future<Float32List> getEmbedding(
-      List<int> tokens) async {
+  Future<Float32List> getEmbedding(List<int> tokens) async {
     await _onnxIsolateManager.start();
     if (!kIsWeb && Platform.environment['FLUTTER_TEST'] == 'true') {
       return _onnxIsolateManager.sendInference(modelPath, tokens);

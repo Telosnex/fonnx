@@ -34,8 +34,10 @@ void main() {
   });
 
   test('Performance test', () async {
-    final List<List<int>> tokens =
-        MsmarcoMiniLmL6V3.tokenizer.tokenize(data).map((e) => e.tokens).toList();
+    final List<List<int>> tokens = MsmarcoMiniLmL6V3.tokenizer
+        .tokenize(data)
+        .map((e) => e.tokens)
+        .toList();
     const count = 100;
     List<Future> futures = [];
     final sw = Stopwatch()..start();

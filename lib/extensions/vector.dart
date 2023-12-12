@@ -13,10 +13,9 @@ extension Average on Iterable<Vector> {
     if (isEmpty) {
       return null;
     }
-    
+
     final length = this.length;
-    final sum =
-        fold(Vector.zero(first.length), (previousValue, element) {
+    final sum = fold(Vector.zero(first.length), (previousValue, element) {
       return previousValue + element;
     });
 

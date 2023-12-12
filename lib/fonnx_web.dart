@@ -16,7 +16,7 @@ class FonnxWeb extends FonnxPlatform {
   /// Returns a [String] containing the version of the platform.
   @override
   Future<String?> getPlatformVersion() async {
-      throw UnimplementedError();
+    throw UnimplementedError();
   }
 
   @override
@@ -24,6 +24,6 @@ class FonnxWeb extends FonnxPlatform {
     required String modelPath,
     required List<int> inputs,
   }) async {
-      throw UnimplementedError();
+    throw UnimplementedError();
   }
 }

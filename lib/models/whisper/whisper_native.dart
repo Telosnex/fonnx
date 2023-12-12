@@ -1,6 +1,5 @@
 import 'dart:ffi';
 
-
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 
@@ -22,7 +21,8 @@ class WhisperNative implements Whisper {
   }
 
   OrtSessionObjects get _session {
-    _sessionObjects ??= createOrtSession(modelPath, includeOnnxExtensionsOps: true);
+    _sessionObjects ??=
+        createOrtSession(modelPath, includeOnnxExtensionsOps: true);
 
     return _sessionObjects!;
   }
@@ -139,7 +139,6 @@ class WhisperNative implements Whisper {
     objects.api.getStringTensorElement(
         outputValues.value, stringLength, 0, stringPtr.cast<Void>());
     final string = stringPtr.cast<Utf8>().toDartString(length: stringLength);
-
 
     sw.stop();
     sw.reset();

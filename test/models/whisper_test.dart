@@ -12,7 +12,9 @@ void main() {
   const modelPath = 'example/assets/models/whisper/whisper_tiny.onnx';
   final whisper = WhisperNative(modelPath);
   final shouldSkip = !Platform.isMacOS && !Platform.isLinux;
-  final skipReason = shouldSkip ? 'Whisper only works on ARM64 Mac and X64 Linux currently' : null;
+  final skipReason = shouldSkip
+      ? 'Whisper only works on ARM64 Mac and X64 Linux currently'
+      : null;
 
   test('Whisper works', skip: skipReason, () async {
     String testFilePath = 'test/data/rain_in_spain.wav';

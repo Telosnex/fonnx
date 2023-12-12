@@ -8,7 +8,6 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 class MockFonnxPlatform
     with MockPlatformInterfaceMixin
     implements FonnxPlatform {
-
   @override
   Future<String?> getPlatformVersion() => throw UnimplementedError();
 

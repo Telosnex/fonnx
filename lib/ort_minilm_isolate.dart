@@ -65,7 +65,6 @@ class OnnxIsolateManager {
   Isolate? _isolate;
   Future<void>? _starting;
 
-
   // Start the isolate and store its SendPort.
   Future<void> start() async {
     if (_starting != null) {
@@ -90,7 +89,7 @@ class OnnxIsolateManager {
     // Wait for the SendPort from the new isolate.
     final sendPort = await receivePort.first as SendPort;
     _sendPort = sendPort;
-    
+
     // Mark the start process as complete.
     completer.complete();
     _starting = null;
