@@ -62,52 +62,83 @@
   -->
   <!-- REQUIRED FOR: ALL models. -->
   <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
-  <!-- REQUIRED FOR: Mini LM L6 V2  -->
+  <!-- REQUIRED FOR: MiniLM models. -->
   <script>
-    let cachedModelPath = null
-    let session = null
+    // Get the number of logical processors available.
+    const cores = navigator.hardwareConcurrency;
 
-    // use an async context to call onnxruntime functions.
-    window.miniLmL6V2 = async function (modelPath, wordpieces) {
-      try {
-        if (modelPath !== cachedModelPath) {
-          console.time("model loading")
-          const options = {
-            // WebGPU would be good, but it's broken currently as of 2023 10 10 (Chrome 117.0.5938.149)
-            // Generally it seems like ONNX might not support it quite fully, yet.
-            executionProviders: ["wasm", "cpu"],
-          };
-          session = await ort.InferenceSession.create(modelPath, options);
-          cachedModelPath = modelPath
-          console.timeEnd("model loading")
-        }
+    // Ensure at least 1 and at most half the number of hardwareConcurrency.
+    // Testing showed using all cores was 10% slower than using half.
+    // Tested on MBA M2 with a natural value of 8 for navigator.hardwareConcurrency.
+    ort.env.wasm.numThreads = Math.max(1, Math.min(Math.floor(cores / 2), cores));
+    let cachedModelPath = null;
+    let modelPromise = null;
 
-        console.time("one embedding inference")
-        // Check if wordpieces is a single array or array of arrays
-        let bigIntWordpieces;
-        if (Array.isArray(wordpieces[0])) {
-          bigIntWordpieces = wordpieces.flat().map(x => BigInt(x));
-        } else {
-          bigIntWordpieces = wordpieces.map(x => BigInt(x));
-        }
+    const worker = new Worker('worker.js');
 
-        const shape = [1, bigIntWordpieces.length]
-        const inputsIdsKey = "input_ids";
-        const inputsIdsTensor = new ort.Tensor('int64', bigIntWordpieces, shape);
-        const tokenTypeIdsKey = 'token_type_ids';
-        const tokenTypeIdsTensor = new ort.Tensor('int64', BigInt64Array.from(new Array(shape[0] * shape[1]).fill(0n)), shape);
-        const attentionMaskKey = "attention_mask";
-        const attentionMaskTensor = new ort.Tensor('int64', BigInt64Array.from(new Array(shape[0] * shape[1]).fill(1n)), shape);
-        const inputs = { inputsIdsKey: inputsIdsTensor, attentionMaskKey: attentionMaskTensor, tokenTypeIdsKey: tokenTypeIdsTensor };
-        const results = await session.run({ 'input_ids': inputsIdsTensor, 'attention_mask': attentionMaskTensor, 'token_type_ids': tokenTypeIdsTensor });
-        const embeddings = results.embeddings.data;
-        console.timeEnd("one embedding inference")
-
-        return embeddings;
-      } catch (e) {
-        console.log(`failed to inference ONNX model: ${e}.`);
-        return null;
+    // Simplified logs for brevity; can be extended to log each property if required.
+    worker.onmessage = function (e) {
+      const { messageId, action, embeddings, error } = e.data;
+      if (action === "inferenceResult" && messageIdToResolve.has(messageId)) {
+        messageIdToResolve.get(messageId)(embeddings);
+        cleanup(messageId);
+      } else if (action === "error" && messageIdToReject.has(messageId)) {
+        messageIdToReject.get(messageId)(new Error(error));
+        cleanup(messageId);
       }
+    };
+
+    const messageIdToResolve = new Map();
+    const messageIdToReject = new Map();
+
+    function cleanup(messageId) {
+      messageIdToResolve.delete(messageId);
+      messageIdToReject.delete(messageId);
+    }
+
+    function miniLmL6V2(modelPath, wordpieces) {
+      return new Promise((resolve, reject) => {
+        const messageId = Math.random().toString(36).substring(2);
+
+        messageIdToResolve.set(messageId, resolve);
+        messageIdToReject.set(messageId, reject);
+
+        // If model path has changed or model is not yet loaded, fetch and load the model.
+        if (cachedModelPath !== modelPath || !modelPromise) {
+          cachedModelPath = modelPath;
+          modelPromise = fetch(modelPath)
+            .then(response => response.arrayBuffer())
+            .then(modelArrayBuffer => {
+              return new Promise((resolveLoad) => {
+                // Post the load model message to the worker.
+                worker.postMessage({
+                  action: 'loadModel',
+                  modelArrayBuffer,
+                  messageId
+                }, [modelArrayBuffer]);
+
+                // Setup a one-time message listener for the "modelLoaded" message.
+                const onModelLoaded = (e) => {
+                  if (e.data.action === 'modelLoaded' && e.data.messageId === messageId) {
+                    worker.removeEventListener('message', onModelLoaded);
+                    resolveLoad();
+                  }
+                };
+                worker.addEventListener('message', onModelLoaded);
+              });
+            })
+            .catch(reject);
+        }
+
+        modelPromise.then(() => {
+          // Once the model is loaded, send the run inference message to the worker.
+          worker.postMessage({
+            action: 'runInference',
+            wordpieces,
+            messageId
+          });
+        }).catch(reject);
+      });
     }
   </script>
 </body>
