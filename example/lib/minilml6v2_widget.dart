@@ -100,7 +100,7 @@ class _MiniLmL6V2WidgetState extends State<MiniLmL6V2Widget> {
     debugPrint('Loaded model');
     // Warm up. This is not necessary, but it's nice to do. Only the first call
     // to a model is slow.
-    for (var i = 0; i < 10; i++) {
+    for (var i = 0; i < 5; i++) {
       await model.getEmbeddingAsVector(
         textAndTokens[i % textAndTokens.length].tokens,
       );
@@ -109,7 +109,7 @@ class _MiniLmL6V2WidgetState extends State<MiniLmL6V2Widget> {
 
     final stopwatch = Stopwatch()..start();
     var completed = 0;
-    while (completed < 100) {
+    while (completed < 20) {
       await model.getEmbeddingAsVector(
           textAndTokens[completed % textAndTokens.length].tokens);
       completed++;
