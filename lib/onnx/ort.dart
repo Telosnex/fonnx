@@ -566,7 +566,11 @@ class OrtSessionObjects {
   });
 }
 
+String? fonnxOrtDylibPathOverride;
 String get ortDylibPath {
+  if (fonnxOrtDylibPathOverride != null) {
+    return fonnxOrtDylibPathOverride!;
+  }
   final isTesting = !kIsWeb && Platform.environment['FLUTTER_TEST'] == 'true';
   if (isTesting) {
     // defaultTargetPlatform is _always_ Android when running tests, so we need
@@ -597,7 +601,11 @@ String get ortDylibPath {
   }
 }
 
+String? ortExtensionsDylibPathOverride;
 String get ortExtensionsDylibPath {
+  if (ortExtensionsDylibPathOverride != null) {
+    return ortExtensionsDylibPathOverride!;
+  }
   final isTesting = !kIsWeb && Platform.environment['FLUTTER_TEST'] == 'true';
   if (isTesting) {
     if (Platform.isMacOS) {
