@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:fonnx/dylib_path_overrides.dart';
 import 'package:fonnx/fonnx.dart';
 import 'package:fonnx/models/msmarcoMiniLmL6V3/msmarco_mini_lm_l6_v3.dart';
 import 'package:fonnx/ort_minilm_isolate.dart';
@@ -27,26 +28,27 @@ class MsmarcoMiniLmL6V3Native implements MsmarcoMiniLmL6V3 {
   }
 
   Future<Float32List> getEmbedding(List<int> tokens) async {
-    await _onnxIsolateManager.start();
-    if (!kIsWeb && Platform.environment['FLUTTER_TEST'] == 'true') {
-      return _onnxIsolateManager.sendInference(modelPath, tokens);
-    }
-
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-        return getEmbeddingViaPlatformChannel(tokens);
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        return getEmbeddingViaFfi(tokens);
-      case TargetPlatform.fuchsia:
-        throw UnimplementedError();
+    final ffiPlatform =
+        !kIsWeb && Platform.isLinux || Platform.isMacOS || Platform.isWindows;
+    final platformChannelPlatform =
+        !kIsWeb && Platform.isAndroid || Platform.isIOS;
+    if (ffiPlatform) {
+      await _onnxIsolateManager.start();
+      return getEmbeddingViaFfi(tokens);
+    } else if (platformChannelPlatform) {
+      return getEmbeddingViaPlatformChannel(tokens);
+    } else {
+      throw UnimplementedError(
+          'Unsupported platform: ${Platform.operatingSystem}');
     }
   }
 
   Future<Float32List> getEmbeddingViaFfi(List<int> tokens) {
-    return _onnxIsolateManager.sendInference(modelPath, tokens);
+    return _onnxIsolateManager.sendInference(
+      modelPath,
+      tokens,
+      ortDylibPathOverride: fonnxOrtDylibPathOverride,
+    );
   }
 
   Future<Float32List> getEmbeddingViaPlatformChannel(List<int> tokens) async {

@@ -4,18 +4,21 @@ import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
+import 'package:fonnx/dylib_path_overrides.dart';
 import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free;
 import 'package:fonnx/onnx/ort.dart';
 
 class OnnxIsolateMessage {
   final SendPort replyPort;
   final String modelPath;
+  final String? ortDylibPathOverride;
   final List<int> tokens;
 
   OnnxIsolateMessage({
     required this.replyPort,
     required this.modelPath,
     required this.tokens,
+    this.ortDylibPathOverride,
   });
 }
 
@@ -28,6 +31,11 @@ void ortMiniLmIsolateEntryPoint(SendPort mainSendPort) {
   receivePort.listen((dynamic message) async {
     if (message is OnnxIsolateMessage) {
       try {
+        // Set the global constant because its a different global on the 
+        // isolate.
+        if (message.ortDylibPathOverride != null) {
+          fonnxOrtDylibPathOverride = message.ortDylibPathOverride;
+        }
         // Lazily create the Ort session if it's not already done.
         ortSessionObjects ??= createOrtSession(message.modelPath);
         // Perform the inference here using ortSessionObjects and message.tokens, retrieve result.
@@ -96,12 +104,14 @@ class OnnxIsolateManager {
   }
 
   // Send data to the isolate and get a result.
-  Future<Float32List> sendInference(String modelPath, List<int> tokens) async {
+  Future<Float32List> sendInference(String modelPath, List<int> tokens,
+      {String? ortDylibPathOverride}) async {
     final response = ReceivePort();
     final message = OnnxIsolateMessage(
       replyPort: response.sendPort,
       modelPath: modelPath,
       tokens: tokens,
+      ortDylibPathOverride: ortDylibPathOverride,
     );
 
     _sendPort!.send(message);

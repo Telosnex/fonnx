@@ -2,6 +2,7 @@ import 'dart:ffi';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:fonnx/dylib_path_overrides.dart';
 import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free;
 import 'package:ffi/ffi.dart';
 
@@ -566,7 +567,6 @@ class OrtSessionObjects {
   });
 }
 
-String? fonnxOrtDylibPathOverride;
 String get ortDylibPath {
   if (fonnxOrtDylibPathOverride != null) {
     return fonnxOrtDylibPathOverride!;
@@ -601,10 +601,9 @@ String get ortDylibPath {
   }
 }
 
-String? ortExtensionsDylibPathOverride;
 String get ortExtensionsDylibPath {
-  if (ortExtensionsDylibPathOverride != null) {
-    return ortExtensionsDylibPathOverride!;
+  if (fonnxOrtExtensionsDylibPathOverride != null) {
+    return fonnxOrtExtensionsDylibPathOverride!;
   }
   final isTesting = !kIsWeb && Platform.environment['FLUTTER_TEST'] == 'true';
   if (isTesting) {
