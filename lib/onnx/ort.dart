@@ -209,6 +209,7 @@ extension DartNativeFunctions on OrtApi {
     return status;
   }
 
+  /// Must be freed [releaseRunOptions].
   Pointer<OrtStatus> createRunOptions(
     Pointer<Pointer<OrtRunOptions>> runOptions,
   ) {
@@ -223,6 +224,13 @@ extension DartNativeFunctions on OrtApi {
     return status;
   }
 
+  void releaseRunOptions(Pointer<OrtRunOptions> runOptions) {
+    final releaseRunOptionsFn =
+        ReleaseRunOptions.asFunction<void Function(Pointer<OrtRunOptions>)>();
+    releaseRunOptionsFn(runOptions);
+  }
+
+  // [value] must be freed with [releaseValue].
   Pointer<OrtStatus> createTensorWithDataAsOrtValue(
     Pointer<Pointer<OrtValue>> value, {
     required Pointer<OrtMemoryInfo> memoryInfo,
@@ -247,6 +255,13 @@ extension DartNativeFunctions on OrtApi {
     return status;
   }
 
+  void releaseValue(Pointer<OrtValue> value) {
+    final releaseValueFn =
+        ReleaseValue.asFunction<void Function(Pointer<OrtValue>)>();
+    releaseValueFn(value);
+  }
+
+  /// Must be freed with [releaseMemoryInfo].
   Pointer<OrtStatus> createCpuMemoryInfo(
     Pointer<Pointer<OrtMemoryInfo>> memoryInfo, {
     int ortAllocator = OrtAllocatorType.OrtArenaAllocator,
@@ -266,6 +281,13 @@ extension DartNativeFunctions on OrtApi {
       throw Exception(error);
     }
     return status;
+  }
+
+  
+  void releaseMemoryInfo(Pointer<OrtMemoryInfo> memoryInfo) {
+    final releaseCpuMemoryInfoFn =
+        ReleaseMemoryInfo.asFunction<void Function(Pointer<OrtMemoryInfo>)>();
+    releaseCpuMemoryInfoFn(memoryInfo);
   }
 
   Pointer<OrtStatus> createEnv(
@@ -388,6 +410,8 @@ extension DartNativeFunctions on OrtApi {
     return status;
   }
 
+  /// Call [releaseTensorTypeAndShapeInfo] on the returned pointer when you are
+  /// done with it.
   Pointer<OrtStatus> getTensorTypeAndShape(
     Pointer<OrtValue> value,
     Pointer<Pointer<OrtTensorTypeAndShapeInfo>> out,
@@ -403,6 +427,14 @@ extension DartNativeFunctions on OrtApi {
       throw Exception(error);
     }
     return status;
+  }
+
+  void releaseTensorTypeAndShapeInfo(
+    Pointer<OrtTensorTypeAndShapeInfo> info,
+  ) {
+    final releaseTensorTypeAndShapeInfoFn = ReleaseTensorTypeAndShapeInfo
+        .asFunction<void Function(Pointer<OrtTensorTypeAndShapeInfo>)>();
+    releaseTensorTypeAndShapeInfoFn(info);
   }
 
   Pointer<OrtStatus> getTensorElementType(

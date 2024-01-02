@@ -31,7 +31,7 @@ void ortMiniLmIsolateEntryPoint(SendPort mainSendPort) {
   receivePort.listen((dynamic message) async {
     if (message is OnnxIsolateMessage) {
       try {
-        // Set the global constant because its a different global on the 
+        // Set the global constant because its a different global on the
         // isolate.
         if (message.ortDylibPathOverride != null) {
           fonnxOrtDylibPathOverride = message.ortDylibPathOverride;
@@ -104,8 +104,11 @@ class OnnxIsolateManager {
   }
 
   // Send data to the isolate and get a result.
-  Future<Float32List> sendInference(String modelPath, List<int> tokens,
-      {String? ortDylibPathOverride}) async {
+  Future<Float32List> sendInference(
+    String modelPath,
+    List<int> tokens, {
+    String? ortDylibPathOverride,
+  }) async {
     final response = ReceivePort();
     final message = OnnxIsolateMessage(
       replyPort: response.sendPort,
@@ -158,9 +161,12 @@ Future<Float32List> _getEmbeddingFfi(
     values: List.generate(tokens.length, (index) => 0, growable: false),
   );
   final inputNamesPointer = calloc<Pointer<Pointer<Char>>>(3);
-  inputNamesPointer[0] = 'input_ids'.toNativeUtf8().cast();
-  inputNamesPointer[1] = 'token_type_ids'.toNativeUtf8().cast();
-  inputNamesPointer[2] = 'attention_mask'.toNativeUtf8().cast();
+  final inputIdName = 'input_ids'.toNativeUtf8();
+  inputNamesPointer[0] = inputIdName.cast();
+  final tokenTypeName = 'token_type_ids'.toNativeUtf8();
+  inputNamesPointer[1] = tokenTypeName.cast();
+  final attentionMaskName = 'attention_mask'.toNativeUtf8();
+  inputNamesPointer[2] = attentionMaskName.cast();
   final inputNames = inputNamesPointer.cast<Pointer<Char>>();
   final inputValues = calloc<Pointer<OrtValue>>(3);
   inputValues[0] = inputIdsValue.value;
@@ -168,7 +174,8 @@ Future<Float32List> _getEmbeddingFfi(
   inputValues[2] = inputMaskValue.value;
 
   final outputNamesPointer = calloc<Pointer<Char>>();
-  outputNamesPointer[0] = 'embeddings'.toNativeUtf8().cast();
+  final embeddingsName = 'embeddings'.toNativeUtf8();
+  outputNamesPointer[0] = embeddingsName.cast();
 
   final outputValuesPtr = calloc<Pointer<OrtValue>>();
   final outputValues = outputValuesPtr.cast<Pointer<OrtValue>>();
@@ -201,16 +208,26 @@ Future<Float32List> _getEmbeddingFfi(
   final elementCount = tensorShapeElementCount.value;
   final floatList = floats.asTypedList(elementCount);
 
+  session.api.releaseMemoryInfo(memoryInfo.value);
   calloc.free(memoryInfo);
+  session.api.releaseValue(inputIdsValue.value);
   calloc.free(inputIdsValue);
+  session.api.releaseValue(inputMaskValue.value);
   calloc.free(inputMaskValue);
+  session.api.releaseValue(tokenTypeValue.value);
   calloc.free(tokenTypeValue);
   calloc.free(inputNamesPointer);
   calloc.free(inputValues);
   calloc.free(outputNamesPointer);
   calloc.free(outputValuesPtr);
+  calloc.free(inputIdName);
+  calloc.free(tokenTypeName);
+  calloc.free(attentionMaskName);
+  calloc.free(embeddingsName);
+  session.api.releaseRunOptions(runOptionsPtr.value);
   calloc.free(runOptionsPtr);
   calloc.free(outputTensorDataPointer);
+  session.api.releaseTensorTypeAndShapeInfo(tensorTypeAndShape.value);
   calloc.free(tensorTypeAndShape);
   calloc.free(tensorShapeElementCount);
 
