@@ -117,6 +117,7 @@ class _MiniLmL6V2WidgetState extends State<MiniLmL6V2Widget> {
     stopwatch.stop();
     final elapsed = stopwatch.elapsedMilliseconds;
     final speed = (elapsed / completed.toDouble()).round();
+    debugPrint('done');
     setState(() {
       _speedTestResult = '$speed ms for 200 words';
     });

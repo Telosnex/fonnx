@@ -2,19 +2,6 @@
 <html>
 
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
@@ -63,6 +50,12 @@
   <!-- REQUIRED FOR: ALL models. -->
   <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
   <!-- REQUIRED FOR: MiniLM models. -->
+  <!-- This script: -->
+  <!-- 1. Sets up a web worker for inference to avoid blocking UI. -->
+  <!-- 2. Loads the model into an array buffer. -->
+  <!-- 3. Sends the array buffer to the worker. (ONNX can't load from a file in a worker) -->
+  <!-- 4. Sends inference calls to the worker and returns a Promise. -->
+  <!-- 5. When inference is complete, the Promise is resolved. -->
   <script>
     // Get the number of logical processors available.
     const cores = navigator.hardwareConcurrency;

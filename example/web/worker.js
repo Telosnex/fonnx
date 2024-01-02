@@ -2,15 +2,6 @@ importScripts("https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js");
 
 let session = null;
 
-// Loading them locally preserves the mime-type. Flutter Web, at least in
-// debug mode running locally, complains that the WASM was actually text/html
-// and falls back to plain old CPU, which is very slow.
-//
-// However, in production, this requires hosting a 10 MB file.
-// Therefore the default is to load from CDN, and the commented-out line
-// is left in so there is a signal when developing.
-// ort.env.wasm.wasmPaths = "";
-
 // Ensure at least 1 and at most half the number of hardwareConcurrency.
 // Testing showed using all cores was 15% slower than using half.
 // Tested on MBA M2 with a value of 8 for navigator.hardwareConcurrency.
