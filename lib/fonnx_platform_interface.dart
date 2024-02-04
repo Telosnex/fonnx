@@ -35,4 +35,11 @@ abstract class FonnxPlatform extends PlatformInterface {
   }) {
     throw UnimplementedError('miniLm() has not been implemented.');
   }
+
+  Future<String?> whisper({
+    required String modelPath,
+    required List<int> audioBytes,
+  }) async {
+    throw UnimplementedError('whisper() has not been implemented.');
+  }
 }

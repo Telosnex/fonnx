@@ -6,11 +6,15 @@ class OrtSessionObjects: NSObject {
   private var env: ORTEnv
 
   // MARK: - Initialization of ModelHandler
-  init?(modelPath: String) {
+    init?(modelPath: String, includeOrtExtensions: Bool) {
     do {
       // Start the ORT inference environment and specify the options for session
       env = try ORTEnv(loggingLevel: ORTLoggingLevel.error)
       let options = try ORTSessionOptions()
+        if includeOrtExtensions {
+            let ortCustomOpsFnPtr = OrtExt.getRegisterCustomOpsFunctionPointer()
+            try options.registerCustomOps(functionPointer: ortCustomOpsFnPtr)
+        }
       // Using CoreMLExecutionProvider did not improve performance of MiniLmL6V2.
       // This matches macOS.
       // Disabling it for consistency, but, leaving it in code because it may be useful in the future.

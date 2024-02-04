@@ -4,7 +4,7 @@ import os
 
 class OrtMiniLm {
   var modelPath: String
-  lazy var sessionObjects: OrtSessionObjects = { OrtSessionObjects(modelPath: modelPath)! }()
+  lazy var sessionObjects: OrtSessionObjects = { OrtSessionObjects(modelPath: modelPath, includeOrtExtensions: true)! }()
 
   init(modelPath: String) {
     self.modelPath = modelPath

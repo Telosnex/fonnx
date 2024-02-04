@@ -16,6 +16,13 @@ class MockFonnxPlatform
       {required String modelPath, required List<int> inputs}) {
     throw UnimplementedError();
   }
+  
+  @override
+  Future<String?> whisper(
+      {required String modelPath, required List<int> audioBytes}) {
+    // TODO: implement whisper
+    throw UnimplementedError();
+  }
 }
 
 void main() {

@@ -29,4 +29,16 @@ class MethodChannelFonnx extends FonnxPlatform {
     );
     return result;
   }
+
+  @override
+  Future<String?> whisper({
+    required String modelPath,
+    required List<int> audioBytes,
+  }) async {
+    final result = await methodChannel.invokeMethod<String>(
+      'whisper',
+      [modelPath, audioBytes],
+    );
+    return result;
+  }
 }

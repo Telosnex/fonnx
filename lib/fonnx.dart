@@ -20,4 +20,14 @@ class Fonnx {
       inputs: inputs,
     );
   }
+
+  Future<String?> whisper({
+    required String modelPath,
+    required List<int> audioBytes,
+  }) {
+    return FonnxPlatform.instance.whisper(
+      modelPath: modelPath,
+      audioBytes: audioBytes,
+    );
+  }
 }

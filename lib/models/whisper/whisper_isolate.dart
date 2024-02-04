@@ -215,7 +215,6 @@ Future<String> _getTranscriptFfi(
   final runOptionsPtr = calloc<Pointer<OrtRunOptions>>();
   objects.api.createRunOptions(runOptionsPtr);
   sw.stop();
-  debugPrint('preparation took ${sw.elapsedMilliseconds}ms');
   sw.reset();
   sw.start();
   objects.api.run(
@@ -228,11 +227,8 @@ Future<String> _getTranscriptFfi(
     outputCount: 1,
     outputValues: outputValues,
   );
-  sw.stop();
-  debugPrint('inference took ${sw.elapsedMilliseconds}ms');
 
-  sw.reset();
-  sw.start();
+
   final outputTensorDataPointer = calloc<Pointer<Void>>();
   objects.api.getTensorMutableData(outputValues.value, outputTensorDataPointer);
 
@@ -269,7 +265,5 @@ Future<String> _getTranscriptFfi(
   calloc.free(outputValues);
   calloc.free(runOptionsPtr);
   calloc.free(outputTensorDataPointer);
-  sw.stop();
-  debugPrint('cleanup took ${sw.elapsedMilliseconds}ms');
   return string;
 }

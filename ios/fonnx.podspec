@@ -18,6 +18,7 @@ Fonnx brings the power of ONNX runtime to Flutter. It allows you to run your ONN
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
   s.dependency 'onnxruntime-objc'
+  s.dependency 'onnxruntime-extensions-c'
   # For ONNX runtime: Addresses build error [!] The 'Pods-Runner' target has transitive dependencies that include statically linked binaries: (onnxruntime-objc and onnxruntime-c)
   s.static_framework = true
   # Originally: 11.0. 
