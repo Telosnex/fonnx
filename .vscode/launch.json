@@ -5,7 +5,11 @@
             "program": "lib/main.dart",
             "cwd": "example",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "args": [
+                "--web-browser-flag=--disable-web-security",
+                "--web-port=28684"
+            ]
         }
     ]
 }
