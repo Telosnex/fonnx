@@ -53,6 +53,7 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE flutter flutter_wrapper_plugin)
 # external build triggered from this build file.
 set(fonnx_bundled_libraries
   "${CMAKE_CURRENT_SOURCE_DIR}/onnx_runtime/onnxruntime-x64.dll"
+  "${CMAKE_CURRENT_SOURCE_DIR}/onnx_runtime/ortextensions-x64.dll"
   PARENT_SCOPE
 )
 

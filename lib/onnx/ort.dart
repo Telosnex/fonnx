@@ -659,8 +659,7 @@ String get ortExtensionsDylibPath {
     case TargetPlatform.macOS:
       return 'libortextensions.0.9.0.dylib';
     case TargetPlatform.windows:
-      throw UnimplementedError();
-  }
+      return 'ortextensions-x64.dll';  }
 }
 
 /// You MUST call [calloc.free] on the returned pointer when you are done with it.
