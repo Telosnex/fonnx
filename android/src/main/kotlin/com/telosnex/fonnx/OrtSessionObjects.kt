@@ -2,6 +2,7 @@ package com.telosnex.fonnx
 
 import android.util.Log
 import ai.onnxruntime.*
+import ai.onnxruntime.extensions.OrtxPackage;
 import androidx.annotation.NonNull
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
@@ -11,7 +12,7 @@ import kotlinx.coroutines.*
 import java.nio.LongBuffer
 import java.util.*
 
-internal class OrtSessionObjects(private val modelPath: String) {
+internal class OrtSessionObjects(private val modelPath: String, private val isOrtExtensionsEnabled: Boolean = false) {
     private var _ortSession: OrtSession? = null
     public val ortSession: OrtSession
         get() = _ortSession ?: throw UninitializedPropertyAccessException("OrtSession has not been initialized")
@@ -22,6 +23,9 @@ internal class OrtSessionObjects(private val modelPath: String) {
 
     init {
         val sessionOptions: OrtSession.SessionOptions = OrtSession.SessionOptions()
+        if (isOrtExtensionsEnabled) {
+            sessionOptions.registerCustomOpLibrary(OrtxPackage.getLibraryPath());
+        }
         _ortSession = ortEnv.createSession(modelPath, sessionOptions)
     }
 }

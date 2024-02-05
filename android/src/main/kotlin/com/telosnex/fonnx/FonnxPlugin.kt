@@ -9,6 +9,8 @@ import io.flutter.plugin.common.MethodChannel.Result
 class FonnxPlugin : FlutterPlugin, MethodCallHandler {
     var cachedMiniLmPath: String? = null
     var cachedMiniLm: OrtMiniLm? = null
+    var cachedWhisperPath: String? = null
+    var cachedWhisper: OrtWhisper? = null
 
     private lateinit var channel: MethodChannel
 
@@ -39,6 +41,22 @@ class FonnxPlugin : FlutterPlugin, MethodCallHandler {
                 result.success(embedding.first())
             } else {
                 result.error("MiniLm", "Could not instantiate model", null)
+            }
+        } else if (call.method == "whisper") {
+            val list = call.arguments as List<Any>
+            val modelPath = list[0] as String
+            val audioBytes = list[1] as ByteArray
+            if (cachedWhisperPath != modelPath) {
+                cachedWhisper = OrtWhisper(modelPath)
+                cachedWhisperPath = modelPath
+            }
+            val whisper = cachedWhisper
+            if (whisper != null) {
+                val audio = audioBytes.map { it.toByte() }.toByteArray()
+                val resultBytes = whisper.getTranscription(audio)
+                result.success(resultBytes)
+            } else {
+                result.error("Whisper", "Could not instantiate model", null)
             }
         } else {
             result.notImplemented()
