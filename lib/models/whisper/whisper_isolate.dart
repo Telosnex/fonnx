@@ -12,6 +12,7 @@ class WhisperIsolateMessage {
   final SendPort replyPort;
   final String modelPath;
   final String? ortDylibPathOverride;
+  final String? ortExtensionsDylibPathOverride;
   final List<int> audioBytes;
 
   WhisperIsolateMessage({
@@ -19,6 +20,7 @@ class WhisperIsolateMessage {
     required this.modelPath,
     required this.audioBytes,
     this.ortDylibPathOverride,
+    this.ortExtensionsDylibPathOverride,
   });
 }
 
@@ -35,6 +37,10 @@ void whisperIsolateEntryPoint(SendPort mainSendPort) {
         // isolate.
         if (message.ortDylibPathOverride != null) {
           fonnxOrtDylibPathOverride = message.ortDylibPathOverride;
+        }
+        if (message.ortExtensionsDylibPathOverride != null) {
+          fonnxOrtExtensionsDylibPathOverride =
+              message.ortExtensionsDylibPathOverride;
         }
         // Lazily create the Ort session if it's not already done.
         ortSessionObjects ??=
@@ -109,6 +115,7 @@ class WhisperIsolateManager {
     String modelPath,
     List<int> audioBytes, {
     String? ortDylibPathOverride,
+    String? ortExtensionsDylibPathOverride,
   }) async {
     await start();
     final response = ReceivePort();
@@ -117,6 +124,7 @@ class WhisperIsolateManager {
       modelPath: modelPath,
       audioBytes: audioBytes,
       ortDylibPathOverride: ortDylibPathOverride,
+      ortExtensionsDylibPathOverride: ortExtensionsDylibPathOverride,
     );
 
     _sendPort!.send(message);

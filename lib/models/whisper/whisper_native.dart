@@ -20,7 +20,12 @@ class WhisperNative implements Whisper {
   Future<String> doInference(List<int> bytes) async {
     await _whisperIsolateManager.start();
     if (!kIsWeb && Platform.environment['FLUTTER_TEST'] == 'true') {
-      return _whisperIsolateManager.sendInference(modelPath, bytes);
+      return _whisperIsolateManager.sendInference(
+        modelPath,
+        bytes,
+        ortDylibPathOverride: fonnxOrtDylibPathOverride,
+        ortExtensionsDylibPathOverride: fonnxOrtExtensionsDylibPathOverride,
+      );
     }
 
     switch (defaultTargetPlatform) {
