@@ -15,8 +15,8 @@ class OrtSessionObjects: NSObject {
             let ortCustomOpsFnPtr = OrtExt.getRegisterCustomOpsFunctionPointer()
             try options.registerCustomOps(functionPointer: ortCustomOpsFnPtr)
         }
-      // Using CoreMLExecutionProvider did not improve performance of MiniLmL6V2.
-      // This matches macOS.
+      // Using CoreMLExecutionProvider did not improve performance of MiniLmL6V2 in Q3 2023.
+      // It did not improve performance of Whisper Base on 8 Feb 2024.
       // Disabling it for consistency, but, leaving it in code because it may be useful in the future.
       // try options.appendCoreMLExecutionProvider(with: ORTCoreMLExecutionProviderOptions())
       try options.setLogSeverityLevel(ORTLoggingLevel.error)
