@@ -31,7 +31,7 @@ class _WhisperWidgetState extends State<WhisperWidget> {
           style: Theme.of(context).textTheme.headlineLarge,
         ),
         Text(
-          'macOS ARM and Linux x64',
+          'Not supported on web.',
           style: Theme.of(context).textTheme.bodySmall,
         ),
         heightPadding,
