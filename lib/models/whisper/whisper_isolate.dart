@@ -177,7 +177,7 @@ Future<String> _getTranscriptFfi(
   objects.api.createInt32Tensor(
     numBeamsValue,
     memoryInfo: memoryInfo.value,
-    values: [2],
+    values: [1],
   );
   final numReturnSequencesValue = calloc<Pointer<OrtValue>>();
   objects.api.createInt32Tensor(
@@ -197,8 +197,15 @@ Future<String> _getTranscriptFfi(
     memoryInfo: memoryInfo.value,
     values: [1.0],
   );
+  // 1 for include timestamps, 0 for not.
+  final logitsProcessorValue = calloc<Pointer<OrtValue>>();
+  objects.api.createInt32Tensor(
+    logitsProcessorValue,
+    memoryInfo: memoryInfo.value,
+    values: [0],
+  );
 
-  const kInputCount = 7;
+  const kInputCount = 8;
   final inputNamesPointer = calloc<Pointer<Pointer<Char>>>(kInputCount);
   inputNamesPointer[0] = 'audio_stream'.toNativeUtf8().cast();
   inputNamesPointer[1] = 'max_length'.toNativeUtf8().cast();
@@ -207,6 +214,7 @@ Future<String> _getTranscriptFfi(
   inputNamesPointer[4] = 'num_return_sequences'.toNativeUtf8().cast();
   inputNamesPointer[5] = 'length_penalty'.toNativeUtf8().cast();
   inputNamesPointer[6] = 'repetition_penalty'.toNativeUtf8().cast();
+  inputNamesPointer[7] = 'logits_processor'.toNativeUtf8().cast();
   final inputNames = inputNamesPointer.cast<Pointer<Char>>();
   final inputValues = calloc<Pointer<OrtValue>>(kInputCount);
   inputValues[0] = audioStreamValue.value;
@@ -216,6 +224,7 @@ Future<String> _getTranscriptFfi(
   inputValues[4] = numReturnSequencesValue.value;
   inputValues[5] = lengthPenaltyValue.value;
   inputValues[6] = repetitionPenaltyValue.value;
+  inputValues[7] = logitsProcessorValue.value;
   final outputNamesPointer = calloc<Pointer<Char>>();
   outputNamesPointer[0] = 'str'.toNativeUtf8().cast();
   final outputNames = outputNamesPointer.cast<Pointer<Char>>();
@@ -267,6 +276,7 @@ Future<String> _getTranscriptFfi(
   calloc.free(numReturnSequencesValue);
   calloc.free(lengthPenaltyValue);
   calloc.free(repetitionPenaltyValue);
+  calloc.free(logitsProcessorValue);
   calloc.free(inputNamesPointer);
   calloc.free(inputValues);
   calloc.free(outputNamesPointer);
