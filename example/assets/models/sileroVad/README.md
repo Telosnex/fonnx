@@ -1,0 +1,1 @@
+Obtained from https://github.com/snakers4/silero-vad/blob/master/files/silero_vad.onnx
