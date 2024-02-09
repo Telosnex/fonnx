@@ -57,6 +57,105 @@ extension DartNativeFunctions on OrtApi {
     return inputTensorNative;
   }
 
+  Pointer<Float> createFloat32Tensor2D(
+    Pointer<Pointer<OrtValue>> inputTensorPointer, {
+    required Pointer<OrtMemoryInfo> memoryInfo,
+    required List<List<double>> values,
+  }) {
+    // Determine the size of a float in bytes
+    final sizeOfFloat32 = sizeOf<Float>();
+
+    // Flatten the 2D array and get total number of elements
+    final allValues = values.expand((i) => i).toList();
+    final totalElements = allValues.length;
+
+    // Allocate native memory for the flattened array
+    final inputTensorNative = calloc<Float>(totalElements);
+    final float32List = Float32List.fromList(allValues);
+    for (var i = 0; i < totalElements; i++) {
+      inputTensorNative[i] = float32List[i];
+    }
+
+    // Allocate memory for the shape (2 dimensions)
+    final inputShape = calloc<Int64>(2);
+    inputShape[0] = values.length; // Number of rows
+    inputShape[1] = values.first.length; // Number of columns
+
+    final ptrVoid = inputTensorNative.cast<Void>();
+    final status = createTensorWithDataAsOrtValue(
+      inputTensorPointer,
+      memoryInfo: memoryInfo,
+      inputData: ptrVoid,
+      inputDataLengthInBytes: totalElements * sizeOfFloat32,
+      inputShape: inputShape,
+      inputShapeLengthInBytes: 2, // We now have two dimensions
+      onnxTensorElementDataType:
+          ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT,
+    );
+
+    if (status.isError) {
+      final error = 'Code: ${getErrorCodeMessage(status)}\n'
+          'Message: ${getErrorMessage(status)}';
+      calloc.free(inputTensorNative);
+      calloc.free(inputShape);
+      throw Exception(error);
+    }
+
+    calloc.free(inputShape);
+    return inputTensorNative;
+  }
+
+  Pointer<Float> createFloat32Tensor3D(
+    Pointer<Pointer<OrtValue>> inputTensorPointer, {
+    required Pointer<OrtMemoryInfo> memoryInfo,
+    required List<List<List<double>>> values,
+  }) {
+    // Determine the size of a float in bytes
+    final sizeOfFloat32 = sizeOf<Float>();
+
+    // Flatten the 3D array to a 1D array and get total number of elements
+    final allValues = values.expand((i) => i.expand((j) => j)).toList();
+    final totalElements = allValues.length;
+
+    // Allocate native memory for the flattened array
+    final inputTensorNative = calloc<Float>(totalElements);
+    final float32List = Float32List.fromList(allValues);
+    for (var i = 0; i < totalElements; i++) {
+      inputTensorNative[i] = float32List[i];
+    }
+
+    // Allocate memory for the shape (3 dimensions)
+    final inputShape = calloc<Int64>(3);
+    inputShape[0] = values.length; // Depth: Number of 2D arrays
+    inputShape[1] =
+        values.first.length; // Rows: Number of rows in the first 2D array
+    inputShape[2] = values
+        .first.first.length; // Columns: Number of columns in the first row
+
+    final ptrVoid = inputTensorNative.cast<Void>();
+    final status = createTensorWithDataAsOrtValue(
+      inputTensorPointer,
+      memoryInfo: memoryInfo,
+      inputData: ptrVoid,
+      inputDataLengthInBytes: totalElements * sizeOfFloat32,
+      inputShape: inputShape,
+      inputShapeLengthInBytes: 3, // We now have three dimensions
+      onnxTensorElementDataType:
+          ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT,
+    );
+
+    if (status.isError) {
+      final error = 'Code: ${getErrorCodeMessage(status)}\n'
+          'Message: ${getErrorMessage(status)}';
+      calloc.free(inputTensorNative);
+      calloc.free(inputShape);
+      throw Exception(error);
+    }
+
+    calloc.free(inputShape);
+    return inputTensorNative;
+  }
+
   /// You MUST call [calloc.free] on the returned pointer when you are done with
   /// it, i.e. once inference is complete.
   Pointer<Int64> createInt64Tensor(

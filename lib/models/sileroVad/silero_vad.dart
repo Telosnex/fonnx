@@ -13,5 +13,5 @@ abstract class SileroVad {
     return _instance!;
   }
 
-  Future<String> doInference(Uint8List bytes);
+  Future<Float32List> doInference(Uint8List bytes);
 }

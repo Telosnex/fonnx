@@ -9,15 +9,15 @@ import 'package:fonnx/models/sileroVad/silero_vad_isolate.dart';
 SileroVad getSileroVad(String path) => SileroVadNative(path);
 
 class SileroVadNative implements SileroVad {
-  final SileroVadIsolateManager _sileroVadIsolateManager = SileroVadIsolateManager();
-  Fonnx? _fonnx;
+  final SileroVadIsolateManager _sileroVadIsolateManager =
+      SileroVadIsolateManager();
 
   @override
   final String modelPath;
   SileroVadNative(this.modelPath);
 
   @override
-  Future<String> doInference(List<int> bytes) async {
+  Future<Float32List> doInference(List<int> bytes) async {
     await _sileroVadIsolateManager.start();
     if (!kIsWeb && Platform.environment['FLUTTER_TEST'] == 'true') {
       return _sileroVadIsolateManager.sendInference(
@@ -42,7 +42,7 @@ class SileroVadNative implements SileroVad {
   }
 
 
-  Future<String> _getTranscriptFfi(List<int> audio) async {
+  Future<Float32List> _getTranscriptFfi(List<int> audio) async {
     return _sileroVadIsolateManager.sendInference(
       modelPath,
       audio,
@@ -50,15 +50,8 @@ class SileroVadNative implements SileroVad {
     );
   }
 
-  Future<String> _getTranscriptPlatformChannel(List<int> audioBytes) async {
-    final fonnx = _fonnx ??= Fonnx();
-    final transcript = await fonnx.whisper(
-      modelPath: modelPath,
-      audioBytes: audioBytes,
-    );
-    if (transcript == null) {
-      throw Exception('Transcript returned from platform code is null');
-    }
-    return transcript;
+  Future<Float32List> _getTranscriptPlatformChannel(
+      List<int> audioBytes) async {
+    throw UnimplementedError();
   }
 }

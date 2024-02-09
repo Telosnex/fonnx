@@ -35,6 +35,9 @@ flutter:
   assets:
     - assets/models/miniLmL6V2/miniLmL6V2.onnx
     - assets/models/msmarcoMiniLmL6V3/msmarcoMiniLmL6V3.onnx
+    - assets/models/sileroVad/silero_vad.onnx
     - assets/models/whisper/whisper_tiny.onnx
     - assets/text_sample.txt
     - assets/audio_sample.wav
+    - assets/audio_sample_16khz.wav
+    - assets/silence_16khz.wav

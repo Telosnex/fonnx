@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fonnx_example/minilml6v2_widget.dart';
 import 'package:fonnx_example/msmarco_minilm_l6v3_widget.dart';
+import 'package:fonnx_example/silero_vad_widget.dart';
 import 'package:fonnx_example/whisper_widget.dart';
 import 'package:libmonet/libmonet.dart';
 import 'package:libmonet/theming/monet_theme_data.dart';
@@ -53,6 +54,10 @@ class _MyAppState extends State<MyApp> {
                     height: 16,
                   ),
                   WhisperWidget(),
+                  SizedBox(
+                    height: 16,
+                  ),
+                  SileroVadWidget(),
                 ],
               ),
             ),
