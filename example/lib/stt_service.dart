@@ -75,14 +75,10 @@ class SttService {
   /// the frame contains speech. >= this value is considered speech when
   /// deciding which frames to keep and when to stop recording.
   final double voiceThreshold;
-
-  // Used for normalization. Start with 1 to avoid division by zero.
-  int maxObservedAmplitude = 1;
   String transcription = '';
   var lastVadState = <String, dynamic>{};
   bool stopped = false;
   Timer? stopForMaxDurationTimer;
-  bool normalizeMicAudio;
   var _detectedSpeech = false;
 
   SttService({
@@ -91,7 +87,6 @@ class SttService {
     this.maxDuration = const Duration(seconds: 10),
     this.maxSilenceDuration = const Duration(seconds: 1),
     this.voiceThreshold = kVadPIsVoiceThreshold,
-    this.normalizeMicAudio = true,
   });
 
   Stream<SttServiceResponse> transcribe() {
@@ -149,20 +144,6 @@ class SttService {
     );
   }
 
-  Uint8List normalizeBuffer(Uint8List buffer) {
-    final Int16List samples = buffer.buffer.asInt16List();
-    for (int i = 0; i < samples.length; i++) {
-      // Update maxObservedAmplitude
-      maxObservedAmplitude = math.max(maxObservedAmplitude, samples[i].abs());
-
-      // Apply normalization
-      final normalizedSample = (samples[i] / maxObservedAmplitude) * 32767;
-      samples[i] = normalizedSample.toInt().clamp(-32768, 32767);
-    }
-    // You need to convert back from Int16List to Uint8List
-    return Uint8List.view(samples.buffer);
-  }
-
   void _processBufferAndVad(
       SileroVad vad,
       Uint8List buffer,
@@ -175,25 +156,8 @@ class SttService {
             1000;
     int index = 0;
     while ((index + 1) * frameSizeInBytes <= buffer.length) {
-      final micBytes = buffer.sublist(
+      final frameBytes = buffer.sublist(
           index * frameSizeInBytes, (index + 1) * frameSizeInBytes);
-      final Uint8List frameBytes;
-      if (normalizeMicAudio) {
-        // Normalize the buffer
-        final normalizedBytes = normalizeBuffer(micBytes);
-        if (_detectedSpeech) {
-          print('Detected speech @ ${frames.length - 1}, normalizing buffer.');
-          frameBytes = normalizedBytes;
-        } else {
-          // If no speech has been detected yet, don't normalize the buffer.
-          // Otherwise, things get screwy because the VAD is only seeing 30 ms
-          // chunks and the initial silence sounds really loud to it, and
-          // its less confident in subsequent speech.
-          frameBytes = micBytes;
-        }
-      } else {
-        frameBytes = micBytes;
-      }
       final frame = AudioFrame(bytes: frameBytes);
       frames.add(frame);
       final idx = frames.length - 1;
@@ -201,9 +165,6 @@ class SttService {
         lastVadState = value;
         final p = (value['output'] as Float32List).first;
         frames[idx].vadP = p;
-        if (p >= voiceThreshold) {
-          _detectedSpeech = true;
-        }
         streamController.add(SttServiceResponse(
           transcription: transcription,
           audioFrames: frames,
@@ -316,7 +277,6 @@ class SttService {
         transcription: transcription,
         audioFrames: frames,
       ));
-      print('Final transcription: $transcription');
       streamController.close();
       return;
     } else {
@@ -346,25 +306,16 @@ Uint8List generateWavFile(
   required int bitsPerSample,
   required int numChannels,
   required int sampleRate,
-  bool normalize = true,
 }) {
-  List<int> dataToUse = pcmData;
-  if (normalize && bitsPerSample == 16) {
-    // Normalization only for 16-bit samples here.
-    dataToUse = normalizePcmData(pcmData,
-        bitsPerSample: bitsPerSample,
-        numChannels: numChannels,
-        sampleRate: sampleRate);
-  }
   final header = generateWavHeader(
-    dataToUse.length,
+    pcmData.length,
     sampleRate: sampleRate,
     numChannels: numChannels,
     bitsPerSample: bitsPerSample,
   );
-  final wavFile = Uint8List(header.length + dataToUse.length);
+  final wavFile = Uint8List(header.length + pcmData.length);
   wavFile.setAll(0, header);
-  wavFile.setAll(header.length, dataToUse);
+  wavFile.setAll(header.length, pcmData);
   return wavFile;
 }
 
@@ -404,43 +355,4 @@ Uint8List generateWavHeader(
       40, pcmDataLength, Endian.little); // Subchunk2 size (PCM data size)
 
   return header;
-}
-
-List<int> normalizePcmData(
-  List<int> pcmData, {
-  required int bitsPerSample,
-  required int numChannels,
-  required int sampleRate,
-}) {
-  // Assuming pcmData is in the format of `List<int>` with 16 bits per sample.
-  // Note: For simplicity, handling only 16 bits per sample. Adjust logic for other bit depths.
-  assert(bitsPerSample == 16);
-
-  // Step 1: Convert List<int> to a suitable List of samples.
-  Int16List samples = Int16List(pcmData.length ~/ 2);
-  for (int i = 0; i < samples.length; i++) {
-    samples[i] = (pcmData[2 * i + 1] << 8) | pcmData[2 * i];
-  }
-
-  // Step 2: Finding the peak sample value.
-  int peak = samples.fold(0, (int prev, elem) => math.max(prev, elem.abs()));
-
-  // Step 3: Calculate normalization factor.
-  final normalizationFactor = peak != 0 ? 32767 / peak : 0.0;
-  print('Normalization factor: $normalizationFactor');
-
-  // Step 4: Normalize samples.
-  for (int i = 0; i < samples.length; i++) {
-    samples[i] =
-        (samples[i] * normalizationFactor).round().clamp(-32768, 32767);
-  }
-
-  // Step 5: Convert samples back to List<int> format.
-  List<int> normalizedData = [];
-  for (int i = 0; i < samples.length; i++) {
-    normalizedData.add(samples[i] & 0xFF);
-    normalizedData.add((samples[i] >> 8) & 0xFF);
-  }
-
-  return normalizedData;
 }
