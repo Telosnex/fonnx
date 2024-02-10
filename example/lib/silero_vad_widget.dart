@@ -26,7 +26,7 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
   SttServiceResponse? _sttServiceResponse;
   StreamSubscription? _sttStreamSubscription;
   SttService? _sttService;
-  var _sttIsVoiceThreshold = 0.05;
+  var _sttIsVoiceThreshold = SttService.kVadPIsVoiceThreshold;
 
   @override
   Widget build(BuildContext context) {

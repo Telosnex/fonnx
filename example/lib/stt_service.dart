@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:fonnx/models/sileroVad/silero_vad.dart';
 import 'package:fonnx/models/whisper/whisper.dart';
 import 'package:record/record.dart';
@@ -53,17 +55,38 @@ class SttService {
   /// Maximum VAD frame duration in milliseconds
   static const int kMaxVadFrameMs = 30;
 
+  /// Recommended VAD probability threshold for speech.
+  /// Tuned to accept whispering.
+  static const double kVadPIsVoiceThreshold = 0.1;
+
   final Duration maxDuration;
+
+  /// If and only if:
+  /// - There was at least one frame of speech, and
+  /// - The last N frames were silent and their duration is >= this value,
+  /// then the recording will stop.
+  final Duration maxSilenceDuration;
   final String vadModelPath;
   final String whisperModelPath;
+
+  /// Values >= this are considered speech.
+  ///
+  /// The VAD outputs a float from 0 to 1, representing the probability that
+  /// the frame contains speech. >= this value is considered speech when
+  /// deciding which frames to keep and when to stop recording.
+  final double voiceThreshold;
   String transcription = '';
   var lastVadState = <String, dynamic>{};
   bool stopped = false;
+  Timer? stopForMaxDurationTimer;
+  var _detectedSpeech = false;
 
   SttService({
     required this.vadModelPath,
     required this.whisperModelPath,
     this.maxDuration = const Duration(seconds: 10),
+    this.maxSilenceDuration = const Duration(seconds: 1),
+    this.voiceThreshold = kVadPIsVoiceThreshold,
   });
 
   Stream<SttServiceResponse> transcribe() {
@@ -74,6 +97,7 @@ class SttService {
   }
 
   void stop() {
+    stopForMaxDurationTimer?.cancel();
     stopped = true;
   }
 
@@ -95,6 +119,12 @@ class SttService {
       numChannels: kChannels,
       sampleRate: kSampleRate,
     ));
+
+    stopForMaxDurationTimer = Timer(maxDuration, () {
+      stop();
+      stopForMaxDurationTimer = null;
+    });
+
     final vad = SileroVad.load(vadModelPath);
     var stoppedAudioRecorderForStoppedStream = false;
     audioStream.listen((event) {
@@ -139,9 +169,51 @@ class SttService {
           transcription: transcription,
           audioFrames: frames,
         ));
+        if (_shouldStopForSilence(frames)) {
+          if (kDebugMode) {
+            print('[SttService] Stopping due to silence.');
+          }
+          stop();
+        }
       });
       index++;
     }
+  }
+
+  bool _shouldStopForSilence(List<AudioFrame> frames) {
+    if (frames.isEmpty) {
+      return false;
+    }
+    final frameThatIsSpeech = frames.any((frame) {
+      return frame.vadP != null && frame.vadP! >= voiceThreshold;
+    });
+    if (!frameThatIsSpeech) {
+      return false;
+    }
+    final maxVadP = frames.map((frame) => frame.vadP ?? 0).reduce((a, b) {
+      return a > b ? a : b;
+    });
+    // There's an asymmetry with voiceThreshold due to VAD behavior.
+    //
+    // At start speech, it behooves voiceThreshold to be low enough to capture
+    // a whisper.
+    //
+    // At end speech, the VAD tends to exponentially decay its output in the
+    // presence of pure silence. This can take ~3 seconds and tends to increase
+    // with query volume.
+    //
+    // We can't rely on the exponential decay being strictly monotonic: there's
+    // small fluctuations in the output. Smoothing could be an option.
+    //
+    // A simpler approach of using a threshold that's a fraction of the max
+    // VAD output is used here. That works astonishingly well across test cases
+    // of whispering, speaking, and speaking strongly.
+    final isSilenceThreshold = math.max(voiceThreshold, maxVadP * 0.25);
+    final lastNFrames = frames.reversed.takeWhile((frame) {
+      return frame.vadP != null && frame.vadP! < isSilenceThreshold;
+    }).toList();
+    final lastNSilenceDuration = lastNFrames.length * kMaxVadFrameMs;
+    return lastNSilenceDuration >= maxSilenceDuration.inMilliseconds;
   }
 
   // Recursively run whisper inference on collected frames
@@ -192,6 +264,19 @@ class SttService {
     }
 
     if (stopped) {
+      // Do one last inference and close the stream.
+      final wav = wavFromFrames(
+        frames: frames,
+        minVadP: voiceThreshold,
+      );
+      final result = await whisper.doInference(wav);
+      if (result.length > transcription.length) {
+        transcription = result;
+      }
+      streamController.add(SttServiceResponse(
+        transcription: transcription,
+        audioFrames: frames,
+      ));
       streamController.close();
       return;
     } else {
