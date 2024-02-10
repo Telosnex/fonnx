@@ -56,6 +56,8 @@ class SttService {
   final double vadOutputIsSpeechFloor;
   final String whisperModelPath;
 
+  var lastVadState = <String, dynamic>{};
+
   SttService({
     required this.vadModelPath,
     required this.whisperModelPath,
@@ -200,11 +202,15 @@ class SttService {
       final frame = AudioFrame(bytes: frameBytes);
       frames.add(frame);
       final idx = frames.length - 1;
-      vad.doInference(frameBytes).then((value) {
-        final isSpeech = value.first >= vadOutputIsSpeechFloor;
+      vad.doInference(frameBytes, previousState: lastVadState).then((value) {
+        lastVadState = value;
+        final isSpeech =
+            (value['output'] as Float32List).first >= vadOutputIsSpeechFloor;
         frames[idx].isSilent = !isSpeech;
         streamController.add(SttServiceResponse(
-            transcription: transcription, audioFrames: frames));
+          transcription: transcription,
+          audioFrames: frames,
+        ));
       });
       index++;
     }
@@ -213,18 +219,46 @@ class SttService {
   // Recursively run whisper inference on collected frames
   void _whisperInferenceLoop(Whisper whisper, List<AudioFrame> frames,
       StreamController<SttServiceResponse> streamController) async {
+    // Using isSilent == false caused too many trancription errors.
+    // The best technique is to keep _some_ silence.
+    // For now, we'll simply send all audio. It doesn't make a huge difference
+    // in inference budget for intended use case (voice assistant-like, audio
+    // is short and designed to terminate quickly, where short and quickly is
+    // < 30 seconds).
     final notSilentFrames =
-        frames.where((frame) => frame.isSilent == false).toList();
+        frames.where((frame) => frame.isSilent != null).toList();
     // Make sure we have non-silent frames to process
     if (notSilentFrames.isNotEmpty) {
       final bytesToInfer = Uint8List.fromList(notSilentFrames
           .map((e) => e.bytes)
           .expand((element) => element)
           .toList());
-      final result = await whisper.doInference(bytesToInfer);
-      transcription += result; // Assuming the result is properly formatted.
+      final wav = generateWavFile(
+        bytesToInfer,
+        bitsPerSample: kBitsPerSample,
+        numChannels: kChannels,
+        sampleRate: kSampleRate,
+      );
+      final result = await whisper.doInference(wav);
+
+      // The if statement here is an interesting choice.
+      // Whisper output tends to fluctuate, especially in the presence of
+      // extended silence following speech, ex.
+      // 1. "what time is it in beijing"
+      // 2. "What time is it in Beijing?"
+      // 3. "what time is it in beijing"
+      // This is a nice heuristic that reduces fluctuation and 'rewards' the
+      // lengthier version that's more likely to have diacritical marks, or will
+      // advance past the length of the version with diagritical marks due to
+      // more speech following silence.
+      if (result.length > transcription.length) {
+        transcription = result;
+      }
+      
       streamController.add(SttServiceResponse(
-          transcription: transcription, audioFrames: frames));
+        transcription: transcription,
+        audioFrames: frames,
+      ));
     }
     // Re-run the loop
     Future.delayed(Duration.zero,
@@ -242,4 +276,60 @@ class AudioFrame {
   bool? isSilent;
 
   AudioFrame({required this.bytes});
+}
+
+Uint8List generateWavFile(
+  List<int> pcmData, {
+  required int bitsPerSample,
+  required int numChannels,
+  required int sampleRate,
+}) {
+  final header = generateWavHeader(
+    pcmData.length,
+    sampleRate: sampleRate,
+    numChannels: numChannels,
+    bitsPerSample: bitsPerSample,
+  );
+  final wavFile = Uint8List(header.length + pcmData.length);
+  wavFile.setAll(0, header);
+  wavFile.setAll(header.length, pcmData);
+  return wavFile;
+}
+
+Uint8List generateWavHeader(
+  int pcmDataLength, {
+  required int bitsPerSample,
+  required int numChannels,
+  required int sampleRate,
+}) {
+  int fileSize = pcmDataLength +
+      44 -
+      8; // Add WAV header size except for 'RIFF' and its size field
+  int byteRate = sampleRate * numChannels * bitsPerSample ~/ 8;
+  int blockAlign = numChannels * bitsPerSample ~/ 8;
+
+  var header = Uint8List(44);
+  var buffer = ByteData.view(header.buffer);
+
+  // RIFF header
+  buffer.setUint32(0, 0x52494646, Endian.big); // 'RIFF'
+  buffer.setUint32(4, fileSize, Endian.little);
+  buffer.setUint32(8, 0x57415645, Endian.big); // 'WAVE'
+
+  // fmt subchunk
+  buffer.setUint32(12, 0x666d7420, Endian.big); // 'fmt '
+  buffer.setUint32(16, 16, Endian.little); // Subchunk1 size (16 for PCM)
+  buffer.setUint16(20, 1, Endian.little); // Audio format (1 for PCM)
+  buffer.setUint16(22, numChannels, Endian.little); // Number of channels
+  buffer.setUint32(24, sampleRate, Endian.little); // Sample rate
+  buffer.setUint32(28, byteRate, Endian.little); // Byte rate
+  buffer.setUint16(32, blockAlign, Endian.little); // Block align
+  buffer.setUint16(34, bitsPerSample, Endian.little); // Bits per sample
+
+  // data subchunk
+  buffer.setUint32(36, 0x64617461, Endian.big); // 'data'
+  buffer.setUint32(
+      40, pcmDataLength, Endian.little); // Subchunk2 size (PCM data size)
+
+  return header;
 }

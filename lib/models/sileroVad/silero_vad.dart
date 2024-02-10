@@ -13,5 +13,13 @@ abstract class SileroVad {
     return _instance!;
   }
 
-  Future<Float32List> doInference(Uint8List bytes);
+  /// Return value is a Map<String, dynamic> with keys 'output', 'hn', 'cn'.
+  /// 'output' is a Float32List, 'hn' and 'cn' are List<List<Float32List>>.
+  /// The 'hn' and 'cn' are reshaped to [2, 1, 64] from [2, 64].
+  /// This allows them to be passed to the next inference.
+  /// 
+  /// [previousState] is a Map<String, dynamic> with keys 'hn' and 'cn'.
+  /// It will not be used if those keys are not present.
+  Future<Map<String, dynamic>> doInference(Uint8List bytes,
+      {Map<String, dynamic> previousState = const {}});
 }

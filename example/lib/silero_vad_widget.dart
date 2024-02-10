@@ -118,7 +118,8 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
     final result = await silero.doInference(wavFile.buffer.asUint8List());
     setState(() {
       // obtained on macOS M2 9 Feb 2024.
-      _verifyPassed = result.length == 1 && result.first == 0.4739372134208679;
+      _verifyPassed = result.length == 3 &&
+          (result['output'] as Float32List).first == 0.4739372134208679;
     });
   }
 

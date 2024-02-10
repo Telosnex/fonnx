@@ -11,7 +11,8 @@ class SileroVadWeb implements SileroVad {
   SileroVadWeb(this.modelPath);
 
   @override
-  Future<Float32List> doInference(Uint8List bytes) {
+  Future<Map<String, dynamic>> doInference(Uint8List bytes,
+      {Map<String, dynamic> previousState = const {}}) {
     throw UnimplementedError();
   }
 }

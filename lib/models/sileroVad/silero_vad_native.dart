@@ -16,12 +16,14 @@ class SileroVadNative implements SileroVad {
   SileroVadNative(this.modelPath);
 
   @override
-  Future<Float32List> doInference(List<int> bytes) async {
+  Future<Map<String, dynamic>> doInference(Uint8List bytes,
+      {Map<String, dynamic> previousState = const {}}) async {
     await _sileroVadIsolateManager.start();
     if (!kIsWeb && Platform.environment['FLUTTER_TEST'] == 'true') {
       return _sileroVadIsolateManager.sendInference(
         modelPath,
         bytes,
+        previousState,
         ortDylibPathOverride: fonnxOrtDylibPathOverride,
         ortExtensionsDylibPathOverride: fonnxOrtExtensionsDylibPathOverride,
       );
@@ -30,27 +32,33 @@ class SileroVadNative implements SileroVad {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
-        return _getTranscriptPlatformChannel(bytes);
+        return _getTranscriptPlatformChannel(bytes, previousState);
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-        return _getTranscriptFfi(bytes);
+        return _getTranscriptFfi(bytes, previousState);
       case TargetPlatform.fuchsia:
         throw UnimplementedError();
     }
   }
 
 
-  Future<Float32List> _getTranscriptFfi(List<int> audio) async {
+  Future<Map<String, dynamic>> _getTranscriptFfi(
+    List<int> audio,
+    Map<String, dynamic> previousState,
+  ) async {
     return _sileroVadIsolateManager.sendInference(
       modelPath,
       audio,
+      previousState,
       ortDylibPathOverride: fonnxOrtDylibPathOverride,
     );
   }
 
-  Future<Float32List> _getTranscriptPlatformChannel(
-      List<int> audioBytes) async {
+  Future<Map<String, dynamic>> _getTranscriptPlatformChannel(
+    List<int> audioBytes,
+    Map<String, dynamic> previousState,
+  ) async {
     throw UnimplementedError();
   }
 }

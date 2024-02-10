@@ -177,7 +177,7 @@ Future<String> _getTranscriptFfi(
   objects.api.createInt32Tensor(
     numBeamsValue,
     memoryInfo: memoryInfo.value,
-    values: [1],
+    values: [2],
   );
   final numReturnSequencesValue = calloc<Pointer<OrtValue>>();
   objects.api.createInt32Tensor(
