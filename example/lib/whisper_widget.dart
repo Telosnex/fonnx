@@ -77,7 +77,7 @@ class _WhisperWidgetState extends State<WhisperWidget> {
 
   void _runVerificationTest() async {
     final modelPath =
-        await getModelPath('assets/models/whisper/whisper_tiny.onnx');
+        await getWhisperModelPath('assets/models/whisper/whisper_tiny.onnx');
     final whisper = Whisper.load(modelPath);
     final wavFile = await rootBundle.load('assets/audio_sample.wav');
     final result = await whisper.doInference(wavFile.buffer.asUint8List());
@@ -89,7 +89,7 @@ class _WhisperWidgetState extends State<WhisperWidget> {
 
   void _runPerformanceTest() async {
     final modelPath =
-        await getModelPath('assets/models/whisper/whisper_tiny.onnx');
+        await getWhisperModelPath('assets/models/whisper/whisper_tiny.onnx');
     final whisper = Whisper.load(modelPath);
     final result = await testPerformance(whisper);
     setState(() {
@@ -121,7 +121,11 @@ class _WhisperWidgetState extends State<WhisperWidget> {
     return speedMultilper.toStringAsFixed(2);
   }
 
-  Future<String> getModelPath(String modelFilenameWithExtension) async {
+}
+
+
+
+  Future<String> getWhisperModelPath(String modelFilenameWithExtension) async {
     if (kIsWeb) {
       return 'assets/models/whisper/$modelFilenameWithExtension';
     }
@@ -168,4 +172,3 @@ class _WhisperWidgetState extends State<WhisperWidget> {
 
     return modelPath;
   }
-}

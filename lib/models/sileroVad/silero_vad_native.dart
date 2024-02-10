@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:fonnx/dylib_path_overrides.dart';
-import 'package:fonnx/fonnx.dart';
 import 'package:fonnx/models/sileroVad/silero_vad.dart';
 import 'package:fonnx/models/sileroVad/silero_vad_isolate.dart';
 

@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fonnx/models/sileroVad/silero_vad.dart';
 import 'package:fonnx_example/padding.dart';
+import 'package:fonnx_example/stt_service.dart';
+import 'package:fonnx_example/whisper_widget.dart';
 import 'dart:async';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:path/path.dart' as path;
@@ -19,6 +21,7 @@ class SileroVadWidget extends StatefulWidget {
 class _SileroVadWidgetState extends State<SileroVadWidget> {
   bool? _verifyPassed;
   String? _speedTestResult;
+  SttServiceResponse? _sttServiceResponse;
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +69,43 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
           ],
-        )
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            ElevatedButton(
+              onPressed: _runVadDemo,
+              child: const Text('Demo'),
+            ),
+            widthPadding,
+          ],
+        ),
+        if (_sttServiceResponse != null) ...[
+          heightPadding,
+          Text(
+            _sttServiceResponse!.transcription,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          heightPadding,
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: _sttServiceResponse!.audioFrames.map((e) {
+                return Container(
+                  width: 10,
+                  height: 100,
+                  color: e == null
+                      ? Colors.transparent
+                      : (e.isSilent == null)
+                          ? const Color(0xff777777)
+                          : e.isSilent == true
+                              ? Colors.red
+                              : Colors.green,
+                );
+              }).toList(),
+            ),
+          ),
+        ]
       ],
     );
   }
@@ -80,6 +119,21 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
     setState(() {
       // obtained on macOS M2 9 Feb 2024.
       _verifyPassed = result.length == 1 && result.first == 0.4739372134208679;
+    });
+  }
+
+  void _runVadDemo() async {
+    final vadModelPath =
+        await getModelPath('assets/models/sileroVad/silero_vad.onnx');
+    final whisperModelPath =
+        await getWhisperModelPath('assets/models/whisper/whisper_tiny.onnx');
+    final stream = SttService(
+            vadModelPath: vadModelPath, whisperModelPath: whisperModelPath)
+        .transcribe();
+    stream.listen((event) {
+      setState(() {
+        _sttServiceResponse = event;
+      });
     });
   }
 
