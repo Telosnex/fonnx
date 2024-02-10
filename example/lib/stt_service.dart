@@ -5,6 +5,24 @@ import 'package:fonnx/models/sileroVad/silero_vad.dart';
 import 'package:fonnx/models/whisper/whisper.dart';
 import 'package:record/record.dart';
 
+/// A single frame of audio data.
+///
+/// Added to allow memoization of the VAD inference and subsequent clipping out
+/// audio frames that are not speech. e.g. getting silence clipped out amounts
+/// to frames.where(!isSilent).map(bytes).toList().
+class AudioFrame {
+  final Uint8List bytes;
+
+  /// Probability that the frame contains speech.
+  ///
+  /// The VAD outputs a float from 0 to 1, representing the probability that
+  /// the frame contains speech. >= this value is considered speech when
+  /// deciding which frames to keep and when to stop recording, and also
+  /// the value of the [AudioFrame.isSilent].
+  double? vadP;
+  AudioFrame({required this.bytes});
+}
+
 class SttServiceResponse {
   final String transcription;
   final List<AudioFrame?> audioFrames;
@@ -13,7 +31,6 @@ class SttServiceResponse {
 }
 
 class SttService {
-  /// Format of audio bytes from microphone.
   // Rationale for PCM:
   // - PCM streaming is universally supported on all platforms.
   // - Streaming is not supported for all other codecs.
@@ -21,6 +38,7 @@ class SttService {
   // - Whisper input expects at least WAV/MP3, and PCM is trival to convert
   //   to WAV. (only requires adding header)
   // - Observed when using `record` package on 2024 Feb 2.
+  /// Format of audio bytes from microphone.
   static const kEncoder = AudioEncoder.pcm16bits;
 
   /// Sample rate in Hz
@@ -35,123 +53,28 @@ class SttService {
   /// Maximum VAD frame duration in milliseconds
   static const int kMaxVadFrameMs = 30;
 
-  // Calculate frame size in bytes
-  int calculateFrameSize() {
-    return ((kSampleRate / 1000) *
-            kMaxVadFrameMs *
-            kChannels *
-            (kBitsPerSample ~/ 8))
-        .toInt();
-  }
-
   final Duration maxDuration;
   final String vadModelPath;
-
-  /// The floor value for VAD output to be considered speech.
-  ///
-  /// The VAD outputs a float from 0 to 1, representing the probability that
-  /// the frame contains speech. >= this value is considered speech when
-  /// deciding which frames to keep and when to stop recording, and also
-  /// the value of the [AudioFrame.isSilent].
-  final double vadOutputIsSpeechFloor;
   final String whisperModelPath;
-
+  String transcription = '';
   var lastVadState = <String, dynamic>{};
+  bool stopped = false;
 
   SttService({
     required this.vadModelPath,
     required this.whisperModelPath,
-    this.vadOutputIsSpeechFloor = 0.1,
     this.maxDuration = const Duration(seconds: 10),
   });
-
-  // Stream<SttServiceResponse> transcribe() {
-  //   final StreamController<SttServiceResponse> controller =
-  //       StreamController<SttServiceResponse>();
-  //   _start(controller);
-  //   return controller.stream;
-  // }
-
-  // void _start(StreamController<SttServiceResponse> streamController) async {
-  //   // 1. Initialize models.
-  //   final vad = SileroVad.load(vadModelPath);
-  //   final whisper = Whisper.load(whisperModelPath);
-  //   final audioRecorder = AudioRecorder();
-
-  //   final hasPermission = await audioRecorder.hasPermission();
-  //   if (!hasPermission) {
-  //     streamController.addError('Denied permission to record audio.');
-  //     streamController.close();
-  //     return;
-  //   }
-
-  //   // Calculate frame size in bytes.
-  //   const bytesPerSample = 2; // 16-bit PCM.
-  //   const frameSizeInBytes =
-  //       kSampleRate * kMaxVadFrameMs * kChannels * bytesPerSample ~/ 1000;
-
-  //   // Buffer to collect bytes.
-  //   Uint8List buffer = Uint8List(0);
-
-  //   final numberOfFrames = (maxDuration.inMilliseconds / kMaxVadFrameMs).ceil();
-  //   final frames = List<AudioFrame?>.filled(numberOfFrames, null);
-  //   var nextFrameIndex = 0;
-
-  //   const config = RecordConfig(
-  //     encoder: AudioEncoder.pcm16bits,
-  //     numChannels: kChannels,
-  //     sampleRate: kSampleRate, // VAD natively supports 8kHz and 16kHz.
-  //   );
-
-  //   final audioStream = await audioRecorder.startStream(config);
-  //   audioStream.listen((event) {
-  //     // Append incoming bytes to the buffer.
-  //     buffer = Uint8List.fromList(buffer + event); // Concatenate buffers.
-  //     var receivedFrameCount = 0;
-  //     var startedWhisperRunLoop = false;
-  //     var whisperLoopTimer;
-  //     // Process complete frames within the buffer.
-  //     while (buffer.length >= frameSizeInBytes) {
-  //       // Remove from from buffer.
-  //       Uint8List frameBytes = buffer.sublist(0, frameSizeInBytes.toInt());
-  //       buffer = Uint8List.fromList(buffer.sublist(frameSizeInBytes.toInt()));
-  //       // Use bytes to create frame, start VAD async.
-  //       final audioFrame = AudioFrame(bytes: frameBytes);
-  //       final audioFrameIndex = nextFrameIndex;
-  //       frames[nextFrameIndex] = audioFrame;
-  //       if (nextFrameIndex == numberOfFrames - 1) {
-  //         // All frames have been collected.
-  //         _stop();
-  //         break;
-  //       }
-  //       nextFrameIndex++;
-  //       vad.doInference(frameBytes).then((value) {
-  //         frames[audioFrameIndex]!.isSilent = value.first > 0.4;
-  //         streamController.add(SttServiceResponse(
-  //           transcription: '',
-  //           audioFrames: frames,
-  //         ));
-  //       });
-  //       receivedFrameCount++;
-  //       // Intent: 90 ms,
-  //       if (receivedFrameCount == (90 / kMaxVadFrameMs).floor() &&
-  //           !startedWhisperRunLoop) {
-  //         whisperLoopTimer ??=
-  //             Timer.periodic(const Duration(milliseconds: 400), (timer) {
-  //           _doWhisperInference(whisper, frames, streamController);
-  //         });
-  //       }
-  //     }
-  //   });
-  // }
-
-  String transcription = "";
 
   Stream<SttServiceResponse> transcribe() {
     final StreamController<SttServiceResponse> controller =
         StreamController<SttServiceResponse>();
     _start(controller);
     return controller.stream;
+  }
+
+  void stop() {
+    stopped = true;
   }
 
   void _start(StreamController<SttServiceResponse> streamController) async {
@@ -173,7 +96,13 @@ class SttService {
       sampleRate: kSampleRate,
     ));
     final vad = SileroVad.load(vadModelPath);
+    var stoppedAudioRecorderForStoppedStream = false;
     audioStream.listen((event) {
+      if (stopped && !stoppedAudioRecorderForStoppedStream) {
+        stoppedAudioRecorderForStoppedStream = true;
+        audioRecorder.stop();
+        return;
+      }
       buffer = Uint8List.fromList(buffer + event);
       _processBufferAndVad(vad, buffer, frames, streamController);
       buffer = Uint8List(0); // Clear the buffer after processing.
@@ -204,9 +133,8 @@ class SttService {
       final idx = frames.length - 1;
       vad.doInference(frameBytes, previousState: lastVadState).then((value) {
         lastVadState = value;
-        final isSpeech =
-            (value['output'] as Float32List).first >= vadOutputIsSpeechFloor;
-        frames[idx].isSilent = !isSpeech;
+        final p = (value['output'] as Float32List).first;
+        frames[idx].vadP = p;
         streamController.add(SttServiceResponse(
           transcription: transcription,
           audioFrames: frames,
@@ -217,8 +145,11 @@ class SttService {
   }
 
   // Recursively run whisper inference on collected frames
-  void _whisperInferenceLoop(Whisper whisper, List<AudioFrame> frames,
-      StreamController<SttServiceResponse> streamController) async {
+  void _whisperInferenceLoop(
+    Whisper whisper,
+    List<AudioFrame> frames,
+    StreamController<SttServiceResponse> streamController,
+  ) async {
     // Using isSilent == false caused too many trancription errors.
     // The best technique is to keep _some_ silence.
     // For now, we'll simply send all audio. It doesn't make a huge difference
@@ -226,7 +157,7 @@ class SttService {
     // is short and designed to terminate quickly, where short and quickly is
     // < 30 seconds).
     final notSilentFrames =
-        frames.where((frame) => frame.isSilent != null).toList();
+        frames.where((frame) => frame.vadP != null).toList();
     // Make sure we have non-silent frames to process
     if (notSilentFrames.isNotEmpty) {
       final bytesToInfer = Uint8List.fromList(notSilentFrames
@@ -240,7 +171,6 @@ class SttService {
         sampleRate: kSampleRate,
       );
       final result = await whisper.doInference(wav);
-
       // The if statement here is an interesting choice.
       // Whisper output tends to fluctuate, especially in the presence of
       // extended silence following speech, ex.
@@ -254,28 +184,36 @@ class SttService {
       if (result.length > transcription.length) {
         transcription = result;
       }
-      
+
       streamController.add(SttServiceResponse(
         transcription: transcription,
         audioFrames: frames,
       ));
     }
-    // Re-run the loop
-    Future.delayed(Duration.zero,
-        () => _whisperInferenceLoop(whisper, frames, streamController));
+
+    if (stopped) {
+      streamController.close();
+      return;
+    } else {
+      // Re-run the loop
+      Future.delayed(Duration.zero,
+          () => _whisperInferenceLoop(whisper, frames, streamController));
+    }
   }
 }
 
-/// A single frame of audio data.
-///
-/// Added to allow memoization of the VAD inference and subsequent clipping out
-/// audio frames that are not speech. e.g. getting silence clipped out amounts
-/// to frames.where(!isSilent).map(bytes).toList().
-class AudioFrame {
-  final Uint8List bytes;
-  bool? isSilent;
-
-  AudioFrame({required this.bytes});
+Uint8List wavFromFrames(
+    {required List<AudioFrame> frames, required double minVadP}) {
+  final bytes = frames
+      .where((e) => e.vadP != null && e.vadP! >= minVadP)
+      .map((e) => e.bytes)
+      .expand((element) => element);
+  return generateWavFile(
+    Uint8List.fromList(bytes.toList()),
+    bitsPerSample: SttService.kBitsPerSample,
+    numChannels: SttService.kChannels,
+    sampleRate: SttService.kSampleRate,
+  );
 }
 
 Uint8List generateWavFile(

@@ -1,4 +1,6 @@
 PODS:
+  - audioplayers_darwin (0.0.1):
+    - FlutterMacOS
   - FlutterMacOS (1.0.0)
   - fonnx (1.0.0):
     - FlutterMacOS
@@ -10,12 +12,15 @@ PODS:
     - FlutterMacOS
 
 DEPENDENCIES:
+  - audioplayers_darwin (from `Flutter/ephemeral/.symlinks/plugins/audioplayers_darwin/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - fonnx (from `Flutter/ephemeral/.symlinks/plugins/fonnx/macos`)
   - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
   - record_darwin (from `Flutter/ephemeral/.symlinks/plugins/record_darwin/macos`)
 
 EXTERNAL SOURCES:
+  audioplayers_darwin:
+    :path: Flutter/ephemeral/.symlinks/plugins/audioplayers_darwin/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
   fonnx:
@@ -26,6 +31,7 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/record_darwin/macos
 
 SPEC CHECKSUMS:
+  audioplayers_darwin: dcad41de4fbd0099cb3749f7ab3b0cb8f70b810c
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   fonnx: e8af51c8a0554da8883ff7087b00906cebc9b3e5
   path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943

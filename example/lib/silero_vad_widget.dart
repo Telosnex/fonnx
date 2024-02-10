@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'dart:math' as math;
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -22,6 +24,9 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
   bool? _verifyPassed;
   String? _speedTestResult;
   SttServiceResponse? _sttServiceResponse;
+  StreamSubscription? _sttStreamSubscription;
+  SttService? _sttService;
+  var _sttIsVoiceThreshold = 0.05;
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +75,7 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
               ),
           ],
         ),
+        heightPadding,
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
@@ -77,7 +83,6 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
               onPressed: _runVadDemo,
               child: const Text('Demo'),
             ),
-            widthPadding,
           ],
         ),
         if (_sttServiceResponse != null) ...[
@@ -87,23 +92,98 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           heightPadding,
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: _sttServiceResponse!.audioFrames.map((e) {
-                return Container(
-                  width: 10,
-                  height: 100,
-                  color: e == null
-                      ? Colors.transparent
-                      : (e.isSilent == null)
-                          ? const Color(0xff777777)
-                          : e.isSilent == true
-                              ? Colors.red
-                              : Colors.green,
-                );
-              }).toList(),
+          SizedBox(
+            height: 100,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: _sttServiceResponse!.audioFrames.map((e) {
+                  final Color color;
+                  if (e?.vadP == null) {
+                    color = Colors.transparent;
+                  } else if (e!.vadP! > _sttIsVoiceThreshold) {
+                    color = Colors.green;
+                  } else {
+                    color = Colors.red;
+                  }
+                  return Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Tooltip(
+                      showDuration: Duration.zero,
+                      waitDuration: Duration.zero,
+                      message: e?.vadP == null
+                          ? 'not recorded yet'
+                          : '${(e!.vadP! * 100).toStringAsFixed(0)}%',
+                      child: Container(
+                        width: 10,
+                        height: 100 * (e?.vadP == null ? 1 : e!.vadP!),
+                        color: color,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
             ),
+          ),
+          heightPadding,
+          Text(
+              'Voice threshold: ${(_sttIsVoiceThreshold * 100).toStringAsFixed(0)}%'),
+          Slider(
+            label: '${(_sttIsVoiceThreshold * 100).toStringAsFixed(0)}%',
+            value: _sttIsVoiceThreshold,
+            onChanged: (value) {
+              setState(
+                () {
+                  _sttIsVoiceThreshold = value;
+                },
+              );
+            },
+          ),
+          ElevatedButton.icon(
+            onPressed: () async {
+              final frames = _sttServiceResponse!.audioFrames;
+              int? firstFrameIndex;
+              int? lastFrameIndex;
+              for (var i = 0; i < frames.length; i++) {
+                final frame = frames[i];
+                if (frame?.vadP == null) {
+                  // Audio hasn't been processed.
+                  continue; // Continues to next iteration if audio hasn't been processed, instead of breaking.
+                }
+                // Check for the first non-silent frame
+                if (firstFrameIndex == null &&
+                    frame!.vadP! > _sttIsVoiceThreshold) {
+                  firstFrameIndex = i;
+                }
+                // Update the last non-silent frame index whenever a non-silent frame is encountered
+                if (frame!.vadP! > _sttIsVoiceThreshold) {
+                  lastFrameIndex = i;
+                }
+              }
+// Return or perform further actions only if both first and last non-silent frames are found
+              if (firstFrameIndex == null || lastFrameIndex == null) {
+                return;
+              }
+              final framesToProcess = frames.sublist(
+                math.max(firstFrameIndex - 3, 0),
+                math.min(lastFrameIndex + 10, frames.length),
+              );
+              debugPrint(
+                  'Detected ${framesToProcess.length} frames of voice (from ${frames.whereType<AudioFrame>().toList().length} of audio @ threshold $_sttIsVoiceThreshold)');
+              final wav = wavFromFrames(
+                frames: framesToProcess.whereType<AudioFrame>().toList(),
+                minVadP: 0,
+              );
+              final tempDir = await path_provider.getTemporaryDirectory();
+              final wavPath = path.join(tempDir.path, 'voice.wav');
+              final wavFile = File(wavPath);
+              await wavFile.writeAsBytes(wav);
+              final player = AudioPlayer();
+              player.play(DeviceFileSource(wavPath));
+            },
+            icon: const Icon(Icons.play_arrow),
+            label: const Text("Play"),
           ),
         ]
       ],
@@ -124,17 +204,30 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
   }
 
   void _runVadDemo() async {
+    if (_sttStreamSubscription != null) {
+      setState(() {
+        _sttStreamSubscription?.cancel();
+        _sttStreamSubscription = null;
+        _sttService?.stop();
+        _sttService = null;
+      });
+      return;
+    }
     final vadModelPath =
         await getModelPath('assets/models/sileroVad/silero_vad.onnx');
     final whisperModelPath =
         await getWhisperModelPath('assets/models/whisper/whisper_tiny.onnx');
-    final stream = SttService(
-            vadModelPath: vadModelPath, whisperModelPath: whisperModelPath)
-        .transcribe();
-    stream.listen((event) {
+    final service = SttService(
+        vadModelPath: vadModelPath, whisperModelPath: whisperModelPath);
+    _sttService = service;
+    final subscription = service.transcribe().listen((event) {
       setState(() {
         _sttServiceResponse = event;
       });
+    });
+
+    setState(() {
+      _sttStreamSubscription = subscription;
     });
   }
 

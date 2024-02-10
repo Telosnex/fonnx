@@ -23,6 +23,7 @@ dependencies:
       url: https://github.com/Telosnex/libmonet.git
       ref: main
   record: ^5.0.4
+  audioplayers: ^5.2.1
 
 dev_dependencies:
   integration_test:
