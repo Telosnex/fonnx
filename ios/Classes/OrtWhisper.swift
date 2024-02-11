@@ -23,7 +23,7 @@ class OrtWhisper {
       let numBeamsData = try createORTValue(from: [2], elementType: .int32, shape: [1])
       let numReturnSequencesData = try createORTValue(from: [1], elementType: .int32, shape: [1])
       let lengthPenaltyData = try createORTValue(from: [1.0], elementType: .float, shape: [1])
-
+      let logitsProcessorData = try createORTValue(from: [0], elementType: .int32, shape: [1])
       // The more exact construction here allows avoiding an error of "Repetition penalty must be > 0.0"
       var repetitionPenaltyBytes = [Float]()
       repetitionPenaltyBytes += Array(repeating: 1, count: 1)
@@ -51,6 +51,7 @@ class OrtWhisper {
           "num_return_sequences": numReturnSequencesData,
           "length_penalty": lengthPenaltyData,
           "repetition_penalty": repetitionPenaltyTensor,
+          "logits_processor": logitsProcessorData,
         ],
         outputNames: [outputName],
         runOptions: nil)
@@ -65,7 +66,6 @@ class OrtWhisper {
       // Assuming model outputs a string tensor
       let outputString = try rawOutputValue.tensorStringData()
       let interval = Date().timeIntervalSince(startDate) * 1000
-      os_log("Model inference took \(interval) ms")
       completion(outputString.first, nil)
     } catch {
 

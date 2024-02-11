@@ -198,10 +198,15 @@ class SttService {
       lastVadStateIndex = idx;
       final p = (nextVdState['output'] as Float32List).first;
       frames[idx].vadP = p;
-      streamController.add(SttServiceResponse(
-        transcription: transcription,
-        audioFrames: frames,
-      ));
+      if (!stopped) {
+        streamController.add(SttServiceResponse(
+          transcription: transcription,
+          audioFrames: frames,
+        ));
+      } else {
+        break;
+      }
+
       if (_shouldStopForSilence(frames)) {
         if (kDebugMode) {
           print('[SttService] Stopping due to silence.');

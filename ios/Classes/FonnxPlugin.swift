@@ -7,6 +7,8 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
   private var cachedMiniLm: OrtMiniLm?
   private var cachedWhisperModelPath: String?
   private var cachedWhisper: OrtWhisper?
+  private var cachedSileroVadModelPath: String?
+  private var cachedSileroVad: OrtVad?
 
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "fonnx", binaryMessenger: registrar.messenger())
@@ -64,7 +66,16 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
     let path = (call.arguments as! [Any])[0] as! String
     let audioData = (call.arguments as! [Any])[1] as! FlutterStandardTypedData
     let previousState = (call.arguments as! [Any])[2] as! [String: Any]
-    let vad = OrtVad(modelPath: path)
+
+    if cachedSileroVadModelPath != path {
+      cachedSileroVad = try? OrtVad(modelPath: path)
+      cachedSileroVadModelPath = path
+    }
+
+    guard let model = cachedSileroVad else {
+      result(FlutterError(code: "SileroVad", message: "Could not instantiate model", details: nil))
+      return
+    }
 
     // Process the FlutterStandardTypedData to create an NSArray of Ints
     // Simplified and corrected code block for handling audio bytes
@@ -99,7 +110,7 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
     }
 
     do {
-      let answer = vad.doInference(audioBytes: audioBytes, previousState: previousState)
+      let answer = model.doInference(audioBytes: audioBytes, previousState: previousState)
       result(answer)
     } catch {
       result(FlutterError(code: "SileroVad", message: "Failed to get inference", details: error))
@@ -112,7 +123,7 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
 
     if cachedWhisperModelPath != path {
       cachedWhisper = try? OrtWhisper(modelPath: path)
-      cachedMiniLmModelPath = path
+      cachedWhisperModelPath = path
     }
 
     guard let model = cachedWhisper else {

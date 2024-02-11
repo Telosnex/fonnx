@@ -1,3 +1,4 @@
+import Flutter
 import Foundation
 import onnxruntime_objc
 import os.log
@@ -29,63 +30,80 @@ class OrtVad {
       let audioData = convertAudioBytesToFloats(audioBytes: audioBytes)
       let sampleRate: Int64 = 16000
       let batchSize = 1
-      var h = transformToFloatArray3D(previousState["hn"])
-      var c = transformToFloatArray3D(previousState["cn"])
 
-      if h == nil || c == nil {
-        os_log("Previous LSTM state is null, initializing them to zero arrays.")
-        h = Array(
-          repeating: Array(repeating: [Float](repeating: 0.0, count: 64), count: batchSize),
-          count: 2)
-        c = h
+      var h: [Float]?
+      var c: [Float]?
+
+      if let hData = previousState["hn"] as? FlutterStandardTypedData {
+        let myData = Data(hData.data)
+        h = myData.toArray(type: Float.self)
+      } else {
+        os_log(
+          "Previous LSTM state 'hn' is null or not FlutterStandardTypedData, initializing it to zero arrays."
+        )
+        h = Array(repeating: 0, count: 2 * batchSize * 64)
       }
 
-      let inputData = try createORTValue(
+      if let cData = previousState["cn"] as? FlutterStandardTypedData {
+        let myData = Data(cData.data)
+        c = myData.toArray(type: Float.self)
+      } else {
+        os_log(
+          "Previous LSTM state 'cn' is null or not FlutterStandardTypedData, initializing it to zero arrays."
+        )
+        c = Array(repeating: 0, count: 2 * batchSize * 64)
+      }
+
+      let inputTensor = try createORTValue(
         from: audioData, elementType: .float,
         shape: [NSNumber(value: 1), NSNumber(value: audioData.count)])
-      let sampleRateData = try createORTValue(
+      let sampleRateTensor = try createORTValue(
         from: [sampleRate], elementType: .int64, shape: [NSNumber(value: 1)])
-      let hData = try createORTValue(
-        from: h!, elementType: .float,
-        shape: [NSNumber(value: 2), NSNumber(value: batchSize), NSNumber(value: 64)])
-      let cData = try createORTValue(
-        from: c!, elementType: .float,
-        shape: [NSNumber(value: 2), NSNumber(value: batchSize), NSNumber(value: 64)])
+      let hData = NSMutableData(bytes: h, length: h!.count * MemoryLayout<Float>.size)
+      let cData = NSMutableData(bytes: c, length: c!.count * MemoryLayout<Float>.size)
+      let hTensor = try ORTValue(
+        tensorData: hData, elementType: .float,
+        shape: [NSNumber(value: 2), NSNumber(value: 1), NSNumber(value: 64)])
+      let cTensor = try ORTValue(
+        tensorData: cData, elementType: .float,
+        shape: [NSNumber(value: 2), NSNumber(value: 1), NSNumber(value: 64)])
       let inputs = [
-        "input": inputData,
-        "sr": sampleRateData,
-        "h": hData,
-        "c": cData,
+        "input": inputTensor,
+        "sr": sampleRateTensor,
+        "h": hTensor,
+        "c": cTensor,
       ]
       let outputNames = Set(["output", "hn", "cn"])
 
       let startTime = Date()
       let outputs = try session.run(withInputs: inputs, outputNames: outputNames, runOptions: nil)
       let endTime = Date()
-      os_log("Inference time: %{public}.3f ms", (endTime.timeIntervalSince(startTime) * 1000))
 
       var processedMap = [String: Any]()
 
       if let outputTensor = outputs["output"],
         let outputData = try? outputTensor.tensorData() as Data
       {
-        let outputArray: [Float] = outputData.toFloatArray()
+        let outputArray = FlutterStandardTypedData(float32: outputData)
         processedMap["output"] = outputArray
       }
 
       if let hnTensor = outputs["hn"], let hnData = try? hnTensor.tensorData() as Data {
-        let hnArray: [[[Float]]] = hnData.to3DArray(depth: 2, height: 1, width: 64)!
-        processedMap["hn"] = hnArray.map { $0.map { $0 } }
+        let hnArray = FlutterStandardTypedData(float32: hnData)
+        processedMap["hn"] = hnArray
       }
 
       if let cnTensor = outputs["cn"], let cnData = try? cnTensor.tensorData() as Data {
-        let cnArray: [[[Float]]] = cnData.to3DArray(depth: 2, height: 1, width: 64)!
-        processedMap["cn"] = cnArray.map { $0.map { $0 } }
+        let cnArray = FlutterStandardTypedData(float32: cnData)
+        processedMap["cn"] = cnArray
       }
 
       return processedMap
     } catch {
       os_log("Error in doInference: %{public}s", error.localizedDescription)
+      for symbol in Thread.callStackSymbols {
+        os_log("Stack trace: %{public}s", symbol)
+      }
       return nil
     }
   }
@@ -111,86 +129,26 @@ extension Array where Element == [[Float]] {
 /// - Parameter audioBytes: The raw audio byte data. Assumes the byte order is little-endian.
 /// - Returns: An array of Float32 values representing the audio data.
 func convertAudioBytesToFloats(audioBytes: [UInt8]) -> [Float] {
-  // Ensure the audio bytes have an even number of elements
-  guard audioBytes.count % 2 == 0 else { return [] }
-
-  return stride(from: 0, to: audioBytes.count, by: 2).compactMap { index in
-    // Combine two bytes into one 16-bit short value, assuming little-endian byte order
-    let value = Int16(audioBytes[index]) | (Int16(audioBytes[index + 1]) << 8)
-    // Normalize the 16-bit short value to a floating-point value in [-1.0, 1.0]
-    // Int16.max is used for normalization as it represents the maximum positive value a 16-bit signed integer can hold.
-    return Float(value) / Float(Int16.max)
-  }
-}
-
-func transformToFloatArray3D(_ list: Any) -> [[[Float]]]? {
-  // Check if the outermost layer is an array and safely cast it.
-  guard let outerArray = list as? [[Any]] else { return nil }
-
-  // Transform the outer array into a 3D Float array, if possible.
-  let transformed = outerArray.compactMap { midLayer in
-    // For each mid-layer, attempt to cast it to an array of Any,
-    // then transform each element into a Float array, if possible.
-    midLayer.compactMap { innerLayer in
-      // Attempt to cast the innermost layer to either directly an array of Float
-      // or an array of NSNumber, then convert to Float.
-      if let floatArray = innerLayer as? [Float] {
-        // Directly return if already Float array.
-        return floatArray
-      } else if let numberArray = innerLayer as? [NSNumber] {
-        // Convert NSNumber array to Float array.
-        return numberArray.map { $0.floatValue }
-      } else {
-        // If the innermost layer isn't correctly structured, return nil for this layer.
-        return nil
-      }
+  var audioData = [Float](repeating: 0.0, count: audioBytes.count / 2)
+  for i in 0..<audioData.count {
+    var valInt = Int(audioBytes[i * 2]) | Int(audioBytes[i * 2 + 1]) << 8
+    if valInt > 0x7FFF {
+      valInt -= 0x10000
     }
+    audioData[i] = Float(valInt) / 32767.0
   }
+  return audioData
+}
 
-  // Check the transformed structure to ensure we have a non-empty 3D array.
-  return transformed.isEmpty ? nil : transformed
-}
-extension Double {
-  /// Converts the time interval in seconds to a string representing milliseconds.
-  var millisecondsString: String {
-    String(format: "%.3f", self * 1000)
-  }
-}
 extension Data {
-  /// Correctly converts Data to an array of the specified type.
-  /// The existing method works well for fixed-width integers.
-
-  /// Converts Data to a Float array - useful for neural network outputs.
-  func toFloatArray() -> [Float] {
-    return withUnsafeBytes {
-      Array($0.bindMemory(to: Float.self))
+  /// Converts Data to an array of a given type. 
+  /// - Parameter type: The type of the array elements.
+  /// - Returns: An array of the given type.
+  /// via https://stackoverflow.com/questions/24196820/nsdata-from-byte-array-in-swift
+  func toArray<T>(type: T.Type) -> [T] {
+    let value = self.withUnsafeBytes {
+      $0.baseAddress?.assumingMemoryBound(to: T.self)
     }
-  }
-
-  /// Assuming specific dimensions for the 3D Float array, for demonstration purposes.
-  /// This method will convert Data into a 3D Float array given expected row and column counts
-  /// where `depth * height * width == count / MemoryLayout<Float>.size`.
-  func to3DArray(depth: Int, height: Int, width: Int) -> [[[Float]]]? {
-    let expectedCount = depth * height * width
-    let floatCount = count / MemoryLayout<Float>.size
-
-    guard floatCount == expectedCount else { return nil }
-
-    return withUnsafeBytes { ptr -> [[[Float]]]? in
-      let floats = ptr.bindMemory(to: Float.self).baseAddress!
-
-      var threeDArray = [[[Float]]](
-        repeating: [[Float]](repeating: [Float](repeating: 0, count: width), count: height),
-        count: depth)
-      for d in 0..<depth {
-        for h in 0..<height {
-          for w in 0..<width {
-            let index = d * height * width + h * width + w
-            threeDArray[d][h][w] = floats[index]
-          }
-        }
-      }
-      return threeDArray
-    }
+    return [T](UnsafeBufferPointer(start: value, count: self.count / MemoryLayout<T>.stride))
   }
 }
