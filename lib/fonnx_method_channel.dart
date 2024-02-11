@@ -16,7 +16,7 @@ class MethodChannelFonnx extends FonnxPlatform {
     return version;
   }
 
-  /// Create embeddings for [inputs].
+  /// Create embeddi∑ngs for [inputs].
   /// Inputs are BERT tokens. Use [WordpieceTokenizer] to convert a [String].
   @override
   Future<Float32List?> miniLm({
@@ -40,5 +40,26 @@ class MethodChannelFonnx extends FonnxPlatform {
       [modelPath, audioBytes],
     );
     return result;
+  }
+
+  @override
+  Future<Map<String, dynamic>?> sileroVad({
+    required String modelPath,
+    required List<int> audioBytes,
+    required Map<String, dynamic> previousState,
+  }) async {
+    final dynamic rawResult = await methodChannel.invokeMethod<dynamic>(
+      'sileroVad',
+      [modelPath, audioBytes, previousState],
+    );
+
+    // Check if the result is not null and is a Map, then cast it to the correct type
+    if (rawResult != null && rawResult is Map) {
+      // Casting each key and value to String and dynamic respectively
+      // This step makes sure you're returning the correct type
+      return rawResult
+          .map<String, dynamic>((key, value) => MapEntry(key as String, value));
+    }
+    return null;
   }
 }

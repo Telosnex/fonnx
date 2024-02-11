@@ -25,6 +25,7 @@ class OrtWhisper(private val modelPath: String) {
             val numReturnSequencesData = OnnxTensor.createTensor(ortEnv, IntBuffer.wrap(intArrayOf(1)), longArrayOf(1))
             val lengthPenaltyData = OnnxTensor.createTensor(ortEnv, FloatBuffer.wrap(floatArrayOf(1.0f)), longArrayOf(1))
             val repetitionPenaltyData = OnnxTensor.createTensor(ortEnv, FloatBuffer.wrap(floatArrayOf(1.0f)), longArrayOf(1))
+            val logitsProcessorData = OnnxTensor.createTensor(ortEnv, IntBuffer.wrap(intArrayOf(0)), longArrayOf(1))
 
             val byteBuffer = ByteBuffer.wrap(audioBytes).order(ByteOrder.nativeOrder())
             val audioStreamTensor = OnnxTensor.createTensor(ortEnv, byteBuffer, longArrayOf(1, audioBytes.size.toLong()), OnnxJavaType.UINT8)
@@ -37,11 +38,15 @@ class OrtWhisper(private val modelPath: String) {
                 "num_beams" to numBeamsData,
                 "num_return_sequences" to numReturnSequencesData,
                 "length_penalty" to lengthPenaltyData,
-                "repetition_penalty" to repetitionPenaltyData
+                "repetition_penalty" to repetitionPenaltyData,
+                "logits_processor" to logitsProcessorData
             )
 
             val outputNames = setOf("str")
+            val startTimestamp = System.currentTimeMillis()
             val result = session.run(inputs, outputNames)
+            val endTimestamp = System.currentTimeMillis()
+            Log.d("[OrtWhisper.kt]", "Time taken to run inference: ${endTimestamp - startTimestamp}ms")
             val output = result.get("str").get().value as Array<Array<String>> // Assuming output is non-null and has at least one element
             // Assuming output is non-null and has at least one element
             val transcript = output?.firstOrNull()?.firstOrNull()

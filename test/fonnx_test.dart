@@ -16,11 +16,18 @@ class MockFonnxPlatform
       {required String modelPath, required List<int> inputs}) {
     throw UnimplementedError();
   }
-  
+
   @override
   Future<String?> whisper(
       {required String modelPath, required List<int> audioBytes}) {
-    // TODO: implement whisper
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Map<String, dynamic>?> sileroVad(
+      {required String modelPath,
+      required List<int> audioBytes,
+      required Map<String, dynamic> previousState}) {
     throw UnimplementedError();
   }
 }

@@ -99,6 +99,7 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: _sttServiceResponse!.audioFrames.map((e) {
+                  final index = _sttServiceResponse!.audioFrames.indexOf(e);
                   final Color color;
                   if (e?.vadP == null) {
                     color = Colors.transparent;
@@ -114,7 +115,7 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
                       waitDuration: Duration.zero,
                       message: e?.vadP == null
                           ? 'not recorded yet'
-                          : '${(e!.vadP! * 100).toStringAsFixed(0)}%',
+                          : '${(e!.vadP! * 100).toStringAsFixed(0)}%\n@${index * SttService.kMaxVadFrameMs}ms',
                       child: Container(
                         width: 10,
                         height: 100 * (e?.vadP == null ? 1 : e!.vadP!),
@@ -171,14 +172,27 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
               );
               debugPrint(
                   'Detected ${framesToProcess.length} frames of voice (from ${frames.whereType<AudioFrame>().toList().length} of audio @ threshold $_sttIsVoiceThreshold)');
+              final indexOfFirstSpeech = frames.indexWhere((frame) {
+                return frame?.vadP != null &&
+                    frame!.vadP! >= _sttIsVoiceThreshold;
+              });
+              // Intent: capture ~100ms of audio before the first speech.
+              final startIndex = math.max(0, indexOfFirstSpeech - 3);
+              final voiceFrames = frames.sublist(startIndex);
+          
               final wav = wavFromFrames(
-                frames: framesToProcess.whereType<AudioFrame>().toList(),
+                frames: voiceFrames.nonNulls.toList(),
                 minVadP: 0,
               );
+              if (wav == null) {
+                debugPrint('No frames with voice, skipping WAV creation.');
+                return;
+              }
               final tempDir = await path_provider.getTemporaryDirectory();
               final wavPath = path.join(tempDir.path, 'voice.wav');
               final wavFile = File(wavPath);
               await wavFile.writeAsBytes(wav);
+              debugPrint('Wrote voice to $wavPath');
               final player = AudioPlayer();
               player.play(DeviceFileSource(wavPath));
             },
@@ -198,8 +212,17 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
     final result = await silero.doInference(wavFile.buffer.asUint8List());
     setState(() {
       // obtained on macOS M2 9 Feb 2024.
+      final acceptableAnswers = {
+        0.4739372134208679, // macOS MBP M2 10 Feb 2024
+        0.4739373028278351, // Android Pixel Fold 10 Feb 2024
+      };
       _verifyPassed = result.length == 3 &&
-          (result['output'] as Float32List).first == 0.4739372134208679;
+          acceptableAnswers.contains(result['output'].first);
+      if (_verifyPassed != true) {
+        if (kDebugMode) {
+          print('got ${result['output']}');
+        }
+      }
     });
   }
 

@@ -1,7 +1,11 @@
 package com.telosnex.fonnx
 
 import android.util.Log
-import ai.onnxruntime.*
+import ai.onnxruntime.OnnxTensor
+import ai.onnxruntime.OrtEnvironment
+import ai.onnxruntime.OrtSession
+import ai.onnxruntime.extensions.OrtxPackage
+import ai.onnxruntime.providers.NNAPIFlags
 import ai.onnxruntime.extensions.OrtxPackage;
 import androidx.annotation.NonNull
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -25,7 +29,7 @@ internal class OrtSessionObjects(private val modelPath: String, private val isOr
         val sessionOptions: OrtSession.SessionOptions = OrtSession.SessionOptions()
         if (isOrtExtensionsEnabled) {
             sessionOptions.registerCustomOpLibrary(OrtxPackage.getLibraryPath());
-        }
+        }        
         _ortSession = ortEnv.createSession(modelPath, sessionOptions)
     }
 }

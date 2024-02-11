@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:fonnx/dylib_path_overrides.dart';
+import 'package:fonnx/fonnx.dart';
 import 'package:fonnx/models/sileroVad/silero_vad.dart';
 import 'package:fonnx/models/sileroVad/silero_vad_isolate.dart';
 
@@ -10,6 +11,7 @@ SileroVad getSileroVad(String path) => SileroVadNative(path);
 class SileroVadNative implements SileroVad {
   final SileroVadIsolateManager _sileroVadIsolateManager =
       SileroVadIsolateManager();
+  Fonnx? _fonnx;
 
   @override
   final String modelPath;
@@ -32,18 +34,18 @@ class SileroVadNative implements SileroVad {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
-        return _getTranscriptPlatformChannel(bytes, previousState);
+        return _doInferencePlatformChannel(bytes, previousState);
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-        return _getTranscriptFfi(bytes, previousState);
+        return _doInferenceFfi(bytes, previousState);
       case TargetPlatform.fuchsia:
         throw UnimplementedError();
     }
   }
 
 
-  Future<Map<String, dynamic>> _getTranscriptFfi(
+  Future<Map<String, dynamic>> _doInferenceFfi(
     List<int> audio,
     Map<String, dynamic> previousState,
   ) async {
@@ -55,10 +57,19 @@ class SileroVadNative implements SileroVad {
     );
   }
 
-  Future<Map<String, dynamic>> _getTranscriptPlatformChannel(
+  Future<Map<String, dynamic>> _doInferencePlatformChannel(
     List<int> audioBytes,
     Map<String, dynamic> previousState,
   ) async {
-    throw UnimplementedError();
+    final fonnx = _fonnx ??= Fonnx();
+    final result = await fonnx.sileroVad(
+      modelPath: modelPath,
+      audioBytes: audioBytes,
+      previousState: previousState,
+    );
+    if (result == null) {
+      throw Exception('Result returned from platform code is null');
+    }
+    return result;
   }
 }

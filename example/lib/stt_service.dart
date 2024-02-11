@@ -1,6 +1,6 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:math' as math;
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:fonnx/models/sileroVad/silero_vad.dart';
@@ -77,15 +77,15 @@ class SttService {
   final double voiceThreshold;
   String transcription = '';
   var lastVadState = <String, dynamic>{};
+  var lastVadStateIndex = 0;
   bool stopped = false;
   Timer? stopForMaxDurationTimer;
-  var _detectedSpeech = false;
 
   SttService({
     required this.vadModelPath,
     required this.whisperModelPath,
     this.maxDuration = const Duration(seconds: 10),
-    this.maxSilenceDuration = const Duration(seconds: 1),
+    this.maxSilenceDuration = const Duration(milliseconds: 1000),
     this.voiceThreshold = kVadPIsVoiceThreshold,
   });
 
@@ -111,14 +111,15 @@ class SttService {
       return;
     }
 
-    Uint8List buffer = Uint8List(0);
+    Uint8List audioBuffer = Uint8List(0);
     final List<AudioFrame> frames = [];
 
     final audioStream = await audioRecorder.startStream(const RecordConfig(
-      encoder: AudioEncoder.pcm16bits,
-      numChannels: kChannels,
-      sampleRate: kSampleRate,
-    ));
+        encoder: AudioEncoder.pcm16bits,
+        numChannels: kChannels,
+        sampleRate: kSampleRate,
+        echoCancel: false,
+        noiseSuppress: false));
 
     stopForMaxDurationTimer = Timer(maxDuration, () {
       stop();
@@ -133,10 +134,19 @@ class SttService {
         audioRecorder.stop();
         return;
       }
-      buffer = Uint8List.fromList(buffer + event);
-      _processBufferAndVad(vad, buffer, frames, streamController);
-      buffer = Uint8List(0); // Clear the buffer after processing.
+      audioBuffer = Uint8List.fromList(audioBuffer + event);
+      const maxVadFrameSizeInBytes = kSampleRate *
+          kMaxVadFrameMs *
+          kChannels *
+          (kBitsPerSample / 8) ~/
+          1000;
+      final remainder = audioBuffer.length % maxVadFrameSizeInBytes;
+      final vadBufferLength = audioBuffer.length - remainder;
+      final vadBuffer = audioBuffer.sublist(0, vadBufferLength);
+      _vadBufferQueue.add(vadBuffer);
+      audioBuffer = audioBuffer.sublist(vadBufferLength);
     });
+    _vadInferenceLoop(vad, frames, streamController);
     _whisperInferenceLoop(
       Whisper.load(whisperModelPath),
       frames,
@@ -144,11 +154,31 @@ class SttService {
     );
   }
 
-  void _processBufferAndVad(
+  final Queue<Uint8List> _vadBufferQueue = Queue<Uint8List>();
+  void _vadInferenceLoop(
+    SileroVad vad,
+    List<AudioFrame> frames,
+    StreamController<SttServiceResponse> streamController,
+  ) async {
+    if (stopped) {
+      return;
+    }
+    final hasBuffer = _vadBufferQueue.isNotEmpty;
+    if (hasBuffer) {
+      final buffer = _vadBufferQueue.removeFirst();
+      await _processBufferAndVad(vad, buffer, frames, streamController);
+      _vadInferenceLoop(vad, frames, streamController);
+    } else {
+      Future.delayed(const Duration(milliseconds: kMaxVadFrameMs),
+          () => _vadInferenceLoop(vad, frames, streamController));
+    }
+  }
+
+  Future<void> _processBufferAndVad(
       SileroVad vad,
       Uint8List buffer,
       List<AudioFrame> frames,
-      StreamController<SttServiceResponse> streamController) {
+      StreamController<SttServiceResponse> streamController) async {
     // Process buffer into frames for VAD
     final frameSizeInBytes =
         (kSampleRate * kMaxVadFrameMs * kChannels * (kBitsPerSample / 8))
@@ -156,26 +186,28 @@ class SttService {
             1000;
     int index = 0;
     while ((index + 1) * frameSizeInBytes <= buffer.length) {
-      final frameBytes = buffer.sublist(
-          index * frameSizeInBytes, (index + 1) * frameSizeInBytes);
+      final startIdx = index * frameSizeInBytes;
+      final endIdx = (index + 1) * frameSizeInBytes;
+      final frameBytes = buffer.sublist(startIdx, endIdx);
       final frame = AudioFrame(bytes: frameBytes);
       frames.add(frame);
       final idx = frames.length - 1;
-      vad.doInference(frameBytes, previousState: lastVadState).then((value) {
-        lastVadState = value;
-        final p = (value['output'] as Float32List).first;
-        frames[idx].vadP = p;
-        streamController.add(SttServiceResponse(
-          transcription: transcription,
-          audioFrames: frames,
-        ));
-        if (_shouldStopForSilence(frames)) {
-          if (kDebugMode) {
-            print('[SttService] Stopping due to silence.');
-          }
-          stop();
+      final nextVdState =
+          await vad.doInference(frameBytes, previousState: lastVadState);
+      lastVadState = nextVdState;
+      lastVadStateIndex = idx;
+      final p = (nextVdState['output'] as Float32List).first;
+      frames[idx].vadP = p;
+      streamController.add(SttServiceResponse(
+        transcription: transcription,
+        audioFrames: frames,
+      ));
+      if (_shouldStopForSilence(frames)) {
+        if (kDebugMode) {
+          print('[SttService] Stopping due to silence.');
         }
-      });
+        stop();
+      }
       index++;
     }
   }
@@ -190,9 +222,6 @@ class SttService {
     if (!frameThatIsSpeech) {
       return false;
     }
-    final maxVadP = frames.map((frame) => frame.vadP ?? 0).reduce((a, b) {
-      return a > b ? a : b;
-    });
     // There's an asymmetry with voiceThreshold due to VAD behavior.
     //
     // At start speech, it behooves voiceThreshold to be low enough to capture
@@ -208,7 +237,7 @@ class SttService {
     // A simpler approach of using a threshold that's a fraction of the max
     // VAD output is used here. That works astonishingly well across test cases
     // of whispering, speaking, and speaking strongly.
-    final isSilenceThreshold = math.max(voiceThreshold, maxVadP * 0.25);
+    final isSilenceThreshold = voiceThreshold;
     final lastNFrames = frames.reversed.takeWhile((frame) {
       return frame.vadP != null && frame.vadP! < isSilenceThreshold;
     }).toList();
@@ -222,79 +251,95 @@ class SttService {
     List<AudioFrame> frames,
     StreamController<SttServiceResponse> streamController,
   ) async {
-    // Using isSilent == false caused too many trancription errors.
-    // The best technique is to keep _some_ silence.
-    // For now, we'll simply send all audio. It doesn't make a huge difference
-    // in inference budget for intended use case (voice assistant-like, audio
-    // is short and designed to terminate quickly, where short and quickly is
-    // < 30 seconds).
-    final notSilentFrames =
-        frames.where((frame) => frame.vadP != null).toList();
-    // Make sure we have non-silent frames to process
-    if (notSilentFrames.isNotEmpty) {
-      final bytesToInfer = Uint8List.fromList(notSilentFrames
-          .map((e) => e.bytes)
-          .expand((element) => element)
-          .toList());
-      final wav = generateWavFile(
-        bytesToInfer,
-        bitsPerSample: kBitsPerSample,
-        numChannels: kChannels,
-        sampleRate: kSampleRate,
-      );
-      final result = await whisper.doInference(wav);
-      // The if statement here is an interesting choice.
-      // Whisper output tends to fluctuate, especially in the presence of
-      // extended silence following speech, ex.
-      // 1. "what time is it in beijing"
-      // 2. "What time is it in Beijing?"
-      // 3. "what time is it in beijing"
-      // This is a nice heuristic that reduces fluctuation and 'rewards' the
-      // lengthier version that's more likely to have diacritical marks, or will
-      // advance past the length of the version with diagritical marks due to
-      // more speech following silence.
-      if (result.length > transcription.length) {
-        transcription = result;
+    void scheduleNextInference() async {
+      if (!stopped) {
+        Future.delayed(const Duration(milliseconds: 16),
+            () => _whisperInferenceLoop(whisper, frames, streamController));
+        return;
       }
-
-      streamController.add(SttServiceResponse(
-        transcription: transcription,
-        audioFrames: frames,
-      ));
-    }
-
-    if (stopped) {
-      // Do one last inference and close the stream.
+      // Stopped.
+      // Do one last inference with all audio bytes, then close the stream.
       final wav = wavFromFrames(
         frames: frames,
         minVadP: voiceThreshold,
       );
-      final result = await whisper.doInference(wav);
-      if (result.length > transcription.length) {
-        transcription = result;
+      if (wav != null) {
+        final result = await whisper.doInference(wav);
+        if (result.length > transcription.length) {
+          transcription = result;
+        }
+        streamController.add(SttServiceResponse(
+          transcription: transcription,
+          audioFrames: frames,
+        ));
       }
-      streamController.add(SttServiceResponse(
-        transcription: transcription,
-        audioFrames: frames,
-      ));
+
       streamController.close();
-      return;
-    } else {
-      // Re-run the loop
-      Future.delayed(Duration.zero,
-          () => _whisperInferenceLoop(whisper, frames, streamController));
     }
+
+    final indexOfFirstSpeech = frames.indexWhere((frame) {
+      return frame.vadP != null && frame.vadP! >= voiceThreshold;
+    });
+    // Intent: capture ~100ms of audio before the first speech.
+    final startIndex = math.max(0, indexOfFirstSpeech - 3);
+    final voiceFrames =
+        indexOfFirstSpeech == -1 ? <AudioFrame>[] : frames.sublist(startIndex);
+    if (voiceFrames.isEmpty) {
+      scheduleNextInference();
+      return;
+    }
+
+    final bytesToInfer = Uint8List.fromList(
+        voiceFrames.map((e) => e.bytes).expand((element) => element).toList());
+    final wav = generateWavFile(
+      bytesToInfer,
+      bitsPerSample: kBitsPerSample,
+      numChannels: kChannels,
+      sampleRate: kSampleRate,
+    );
+    final result = (await whisper.doInference(wav)).trim();
+
+    // Whisper output tends to fluctuate, especially in the presence of
+    // extended silence following speech, ex.
+    // 1. "what time is it in beijing"
+    // 2. "What time is it in Beijing?"
+    // 3. "what time is it in beijing"
+    // This is a nice heuristic that reduces fluctuation and 'rewards' the
+    // lengthier version that's more likely to have diacritical marks.
+    //
+    // A weak point is this presumes any additional coherent speech will end
+    // up increasing the length of the transcription. Theoratically, maybe
+    // this doesn't happen: ex. "What time is it in Beijing????????"
+    // "What time is it in Beijing, China?".
+    if (result.length > transcription.length) {
+      transcription = result;
+    }
+
+    streamController.add(SttServiceResponse(
+      transcription: transcription,
+      audioFrames: frames,
+    ));
+
+    scheduleNextInference();
   }
 }
 
-Uint8List wavFromFrames(
+/// Returns null if no frames are above the threshold.
+///
+/// Dealing with that issue here avoids exceptions and issues from passing an
+/// empty WAV to Whisper.
+Uint8List? wavFromFrames(
     {required List<AudioFrame> frames, required double minVadP}) {
   final bytes = frames
       .where((e) => e.vadP != null && e.vadP! >= minVadP)
       .map((e) => e.bytes)
       .expand((element) => element);
+  if (bytes.isEmpty) {
+    return null;
+  }
+  final bytesList = bytes.toList();
   return generateWavFile(
-    Uint8List.fromList(bytes.toList()),
+    bytesList,
     bitsPerSample: SttService.kBitsPerSample,
     numChannels: SttService.kChannels,
     sampleRate: SttService.kSampleRate,

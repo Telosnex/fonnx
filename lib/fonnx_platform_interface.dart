@@ -42,4 +42,12 @@ abstract class FonnxPlatform extends PlatformInterface {
   }) async {
     throw UnimplementedError('whisper() has not been implemented.');
   }
+
+  Future<Map<String, dynamic>?> sileroVad({
+    required String modelPath,
+    required List<int> audioBytes,
+    required Map<String, dynamic> previousState,
+  }) async {
+    throw UnimplementedError('sileroVad() has not been implemented.');
+  }
 }

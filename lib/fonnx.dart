@@ -30,4 +30,16 @@ class Fonnx {
       audioBytes: audioBytes,
     );
   }
+
+  Future<Map<String, dynamic>?> sileroVad({
+    required String modelPath,
+    required List<int> audioBytes,
+    required Map<String, dynamic> previousState,
+  }) {
+    return FonnxPlatform.instance.sileroVad(
+      modelPath: modelPath,
+      audioBytes: audioBytes,
+      previousState: previousState,
+    );
+  }
 }
