@@ -22,6 +22,8 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
       doMiniLm(call, result: result)
     case "whisper":
       doWhisper(call, result: result)
+    case "sileroVad":
+      doSileroVad(call, result: result)
     default:
       result(FlutterMethodNotImplemented)
     }
@@ -55,6 +57,52 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
         })
     } catch {
       result(FlutterError(code: "MiniLm", message: "Failed to get embedding", details: error))
+    }
+  }
+
+  public func doSileroVad(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    let path = (call.arguments as! [Any])[0] as! String
+    let audioData = (call.arguments as! [Any])[1] as! FlutterStandardTypedData
+    let previousState = (call.arguments as! [Any])[2] as! [String: Any]
+    let vad = OrtVad(modelPath: path)
+
+    // Process the FlutterStandardTypedData to create an NSArray of Ints
+    // Simplified and corrected code block for handling audio bytes
+    var audioBytes = [UInt8]()
+    switch audioData.type {
+    case .uInt8:
+      audioBytes = [UInt8](audioData.data)
+    case .int32:
+      audioData.data.withUnsafeBytes { pointer in
+        audioBytes = Array(
+          UnsafeBufferPointer(
+            start: pointer.bindMemory(to: Int32.self).baseAddress,
+            count: audioData.data.count / MemoryLayout<Int32>.size)
+        ).map(UInt8.init)
+      }
+    case .int64:
+      audioData.data.withUnsafeBytes { pointer in
+        audioBytes = Array(
+          UnsafeBufferPointer(
+            start: pointer.bindMemory(to: Int64.self).baseAddress,
+            count: audioData.data.count / MemoryLayout<Int64>.size)
+        ).map(UInt8.init)
+      }
+    case .float32, .float64:
+      result(
+        FlutterError(
+          code: "SileroVad", message: "Unsupported data type for audio bytes", details: nil))
+      return
+    @unknown default:
+      result(FlutterError(code: "SileroVad", message: "Unknown data type", details: nil))
+      return
+    }
+
+    do {
+      let answer = vad.doInference(audioBytes: audioBytes, previousState: previousState)
+      result(answer)
+    } catch {
+      result(FlutterError(code: "SileroVad", message: "Failed to get inference", details: error))
     }
   }
 
