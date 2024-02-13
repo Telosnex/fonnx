@@ -41,24 +41,24 @@ class WhisperNative implements Whisper {
     }
   }
 
-
   Future<String> _getTranscriptFfi(List<int> audio) async {
-    return _whisperIsolateManager.sendInference(
+    final answer = await _whisperIsolateManager.sendInference(
       modelPath,
       audio,
       ortDylibPathOverride: fonnxOrtDylibPathOverride,
     );
+    return Whisper.removeTimestamps(answer);
   }
 
   Future<String> _getTranscriptPlatformChannel(List<int> audioBytes) async {
     final fonnx = _fonnx ??= Fonnx();
-    final transcript = await fonnx.whisper(
+    final answer = await fonnx.whisper(
       modelPath: modelPath,
       audioBytes: audioBytes,
     );
-    if (transcript == null) {
+    if (answer == null) {
       throw Exception('Transcript returned from platform code is null');
     }
-    return transcript;
+    return Whisper.removeTimestamps(answer);
   }
 }

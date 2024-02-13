@@ -14,4 +14,16 @@ abstract class Whisper {
   }
 
   Future<String> doInference(Uint8List bytes);
+
+  /// Strips Whispers timestamps from the input string.
+  ///
+  /// Even when timestamps are disabled, the model seems to occasionally
+  /// include them in the output. This method removes them.
+  static String removeTimestamps(String input) {
+    // Pattern to match "<|...|>"
+    final pattern = RegExp(r'<\|.*?\|>');
+
+    // Replace all instances of the pattern with an empty string
+    return input.replaceAll(pattern, '').trim();
+  }
 }

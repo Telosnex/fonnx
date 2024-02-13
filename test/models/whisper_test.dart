@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fonnx/models/whisper/whisper.dart';
 import 'package:fonnx/models/whisper/whisper_native.dart';
 
 void main() {
@@ -62,5 +63,19 @@ void main() {
     const fileDurationMs = 5000;
     final speedMultilper = fileDurationMs.toDouble() / average;
     debugPrint('  Speed multiplier: ${speedMultilper.toStringAsFixed(2)}x');
+  });
+
+  group('Remove timestamps', () {
+    test('surrounded and space', () {
+      const input = '<|0.00|> Hello world <|1.2443|>';
+      final output = Whisper.removeTimestamps(input);
+      expect(output, 'Hello world');
+    });
+
+    test('surrounded no space', () {
+      const input = '<|0.00|>Hello world<|1.2443|>';
+      final output = Whisper.removeTimestamps(input);
+      expect(output, 'Hello world');
+    });
   });
 }
