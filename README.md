@@ -63,7 +63,6 @@ Additionally, it has 2x the input size of MiniLM L6 V2: it can accept up to 400 
 Avg. ms for 1 Mini LM L6 V2 embedding / 200 words.
 
 * Run on Thurs Oct 12th 2023.  
-* macOS and WASM-SIMD on MacBook Pro M2 Max.  
+* macOS and WASM-SIMD runs on MacBook Pro M2 Max.  
 * Average of 100 embeddings, after a warmup of 10.  
-* Input is Mix of lorem ipsum text from 8 languages.  
-
+* Input is mix of lorem ipsum text from 8 languages.
