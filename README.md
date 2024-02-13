@@ -6,6 +6,15 @@ framework."
 __Linux__ `       `[![Codemagic build status](https://api.codemagic.io/apps/652897766ee3f7af8490a79f/6529e7751eac22d544044175/status_badge.svg)](https://codemagic.io/apps/652897766ee3f7af8490a79f/6529e7751eac22d544044175/latest_build)  
 __macOS arm64__ [![Codemagic build status](https://api.codemagic.io/apps/652897766ee3f7af8490a79f/652897766ee3f7af8490a79e/status_badge.svg)](https://codemagic.io/apps/652897766ee3f7af8490a79f/652897766ee3f7af8490a79e/latest_build)  
 __Windows__`    `[![Codemagic build status](https://api.codemagic.io/apps/652897766ee3f7af8490a79f/652b298fe7e0c7e9e4cb275f/status_badge.svg)](https://codemagic.io/apps/652897766ee3f7af8490a79f/652b298fe7e0c7e9e4cb275f/latest_build)
+
+# Changelog
+## 2024 Feb 13
+- Whisper now supported on all platforms besides web.
+- Whisper models support timestamps. (not exposed via API, yet)
+- Silero VAD added to all platforms besides web.
+- Silero VAD enables detecting when the user is done speaking with a much higher success rate than relying on volume levels.
+- Example contains `SttService`, an example of how to integrate the VAD and Whisper together with an easy to use interface. (Stream<String>)
+  
 # FONNX
 ## Any model on any edge
 Run ML models natively on any platform. ONNX models can be run on iOS, Android, Web, Linux, Windows, and macOS.
