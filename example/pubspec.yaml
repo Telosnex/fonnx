@@ -41,5 +41,7 @@ flutter:
     - assets/models/whisper/whisper_tiny.onnx
     - assets/text_sample.txt
     - assets/audio_sample.wav
+    - assets/audio_sample.pcm
     - assets/audio_sample_16khz.wav
+    - assets/audio_sample_ac1_ar16000.pcm
     - assets/silence_16khz.wav

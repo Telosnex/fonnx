@@ -5,6 +5,7 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fonnx/dylib_path_overrides.dart';
+import 'package:fonnx/extensions/uint8list.dart';
 import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free;
 import 'package:fonnx/onnx/ort.dart';
 
@@ -42,8 +43,7 @@ void sileroVadIsolateEntryPoint(SendPort mainSendPort) {
         ortSessionObjects ??=
             createOrtSession(message.modelPath, includeOnnxExtensionsOps: true);
         // Perform the inference here using ortSessionObjects and message.tokens, retrieve result.
-        final result =
-            await _getTranscriptFfi(
+        final result = await _getTranscriptFfi(
             ortSessionObjects!, message.audioBytes, message.previousState);
         message.replyPort.send(result);
       } catch (e) {
@@ -167,20 +167,7 @@ Future<Map<String, dynamic>> _getTranscriptFfi(
   // - output: probability of speech, float32[batch, 1]
   // - hn: LTSM hidden state, float32[2, batch, 64]
   // - cn: LTSM cell state, float32[2, batch, 64]
-  Float32List audioData = Float32List((audioBytes.length ~/ 2));
-
-  for (int i = 0; i < audioData.length; i++) {
-    // Combine two bytes to form a 16-bit integer value and normalize
-    int val = (audioBytes[i * 2] & 0xff) | (audioBytes[i * 2 + 1] << 8);
-    // If the 16-bit integer exceeds 32767 (max positive value for a signed 16-bit int),
-    // it should be interpreted as a negative number. This is a quick way to do that.
-    if (val > 0x7FFF) {
-      val = val - 0x10000;
-    }
-    // Normalization to [-1.0, 1.0] range for float32 representation
-    // Divide by the maximum value for a signed 16-bit integer
-    audioData[i] = val / 32767.0;
-  }
+  Float32List audioData = audioBytes.toAudioFloat32List();
   final usePreviousState = previousState.length >= 2 &&
       previousState['hn'] is List<List<Float32List>> &&
       previousState['cn'] is List<List<Float32List>>;
@@ -200,11 +187,11 @@ Future<Map<String, dynamic>> _getTranscriptFfi(
           2, (_) => List.generate(batchSize, (_) => List.filled(64, 0.0)));
   List<List<List<double>>> c = usePreviousState ? previousState['cn'] : h;
   final hValue = calloc<Pointer<OrtValue>>();
-  session.api.createFloat32Tensor3D(hValue,
-      memoryInfo: memoryInfo.value, values: h);
+  session.api
+      .createFloat32Tensor3D(hValue, memoryInfo: memoryInfo.value, values: h);
   final cValue = calloc<Pointer<OrtValue>>();
-  session.api.createFloat32Tensor3D(cValue,
-      memoryInfo: memoryInfo.value, values: c);
+  session.api
+      .createFloat32Tensor3D(cValue, memoryInfo: memoryInfo.value, values: c);
 
   const kInputCount = 4;
   final inputNamesPointer = calloc<Pointer<Pointer<Char>>>(kInputCount);

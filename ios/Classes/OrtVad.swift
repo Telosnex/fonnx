@@ -125,21 +125,6 @@ extension Array where Element == [[Float]] {
   }
 }
 
-/// Converts a byte array representation of 16-bit PCM audio to an array of Float32s.
-/// - Parameter audioBytes: The raw audio byte data. Assumes the byte order is little-endian.
-/// - Returns: An array of Float32 values representing the audio data.
-func convertAudioBytesToFloats(audioBytes: [UInt8]) -> [Float] {
-  var audioData = [Float](repeating: 0.0, count: audioBytes.count / 2)
-  for i in 0..<audioData.count {
-    var valInt = Int(audioBytes[i * 2]) | Int(audioBytes[i * 2 + 1]) << 8
-    if valInt > 0x7FFF {
-      valInt -= 0x10000
-    }
-    audioData[i] = Float(valInt) / 32767.0
-  }
-  return audioData
-}
-
 extension Data {
   /// Converts Data to an array of a given type. 
   /// - Parameter type: The type of the array elements.

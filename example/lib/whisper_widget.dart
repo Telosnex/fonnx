@@ -30,10 +30,6 @@ class _WhisperWidgetState extends State<WhisperWidget> {
           'Whisper',
           style: Theme.of(context).textTheme.headlineLarge,
         ),
-        Text(
-          'Not supported on web.',
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
         heightPadding,
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -77,10 +73,11 @@ class _WhisperWidgetState extends State<WhisperWidget> {
 
   void _runVerificationTest() async {
     final modelPath =
-        await getWhisperModelPath('assets/models/whisper/whisper_tiny.onnx');
+        await getWhisperModelPath('whisper_tiny.onnx');
     final whisper = Whisper.load(modelPath);
-    final wavFile = await rootBundle.load('assets/audio_sample.wav');
-    final result = await whisper.doInference(wavFile.buffer.asUint8List());
+    final pcmFile =
+        await rootBundle.load('assets/audio_sample_ac1_ar16000.pcm');
+    final result = await whisper.doInference(pcmFile.buffer.asUint8List());
     setState(() {
       _verifyPassed =
           result.trim() == 'The rain and Spain falls mainly on the plane.';
@@ -89,7 +86,7 @@ class _WhisperWidgetState extends State<WhisperWidget> {
 
   void _runPerformanceTest() async {
     final modelPath =
-        await getWhisperModelPath('assets/models/whisper/whisper_tiny.onnx');
+        await getWhisperModelPath('whisper_tiny.onnx');
     final whisper = Whisper.load(modelPath);
     final result = await testPerformance(whisper);
     setState(() {

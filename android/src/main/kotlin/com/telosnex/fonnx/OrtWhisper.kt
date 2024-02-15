@@ -14,11 +14,34 @@ class OrtWhisper(private val modelPath: String) {
         OrtSessionObjects(modelPath, true)
     }
 
+    fun convertAudioBytesToFloats(audioBytes: ByteArray): FloatArray {
+        // Initialize a FloatArray of half the size of audioBytes,
+        // since we're combining each pair of bytes into one float.
+        val audioData = FloatArray(audioBytes.size / 2)
+
+        for (i in audioData.indices) {
+            // Combine two bytes to form a 16-bit integer value
+            var valInt = (
+                (audioBytes[i * 2].toInt() and 0xFF) or
+                    (audioBytes[i * 2 + 1].toInt() shl 8)
+            )
+
+            // Interpret the 16-bit integer as a signed value and normalize
+            if (valInt > 0x7FFF) {
+                valInt -= 0x10000
+            }
+
+            // Normalize to [-1.0, 1.0] range for float32 representation
+            audioData[i] = valInt / 32767.0f
+        }
+
+        return audioData
+    }
+
     fun getTranscription(audioBytes: ByteArray): String? {
         try {
             val ortEnv = model.ortEnv
             val session = model.ortSession
-
             val maxLengthData = OnnxTensor.createTensor(ortEnv, IntBuffer.wrap(intArrayOf(200)), longArrayOf(1))
             val minLengthData = OnnxTensor.createTensor(ortEnv, IntBuffer.wrap(intArrayOf(0)), longArrayOf(1))
             val numBeamsData = OnnxTensor.createTensor(ortEnv, IntBuffer.wrap(intArrayOf(2)), longArrayOf(1))
@@ -26,13 +49,11 @@ class OrtWhisper(private val modelPath: String) {
             val lengthPenaltyData = OnnxTensor.createTensor(ortEnv, FloatBuffer.wrap(floatArrayOf(1.0f)), longArrayOf(1))
             val repetitionPenaltyData = OnnxTensor.createTensor(ortEnv, FloatBuffer.wrap(floatArrayOf(1.0f)), longArrayOf(1))
             val logitsProcessorData = OnnxTensor.createTensor(ortEnv, IntBuffer.wrap(intArrayOf(0)), longArrayOf(1))
-
-            val byteBuffer = ByteBuffer.wrap(audioBytes).order(ByteOrder.nativeOrder())
-            val audioStreamTensor = OnnxTensor.createTensor(ortEnv, byteBuffer, longArrayOf(1, audioBytes.size.toLong()), OnnxJavaType.UINT8)
-            // val audioStreamTensor = OnnxTensor.createTensor(ortEnv, ByteBuffer.wrap(audioBytes), longArrayOf(1, audioBytes.size.toLong()))
+            val audioFloats = convertAudioBytesToFloats(audioBytes)
+            val audioPcmTensor = OnnxTensor.createTensor(ortEnv, FloatBuffer.wrap(audioFloats), longArrayOf(1, audioFloats.size.toLong()))
 
             val inputs = mapOf(
-                "audio_stream" to audioStreamTensor,
+                "audio_pcm" to audioPcmTensor,
                 "max_length" to maxLengthData,
                 "min_length" to minLengthData,
                 "num_beams" to numBeamsData,

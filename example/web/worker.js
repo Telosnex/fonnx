@@ -12,9 +12,11 @@ self.onmessage = async e => {
     const { action, modelArrayBuffer, wordpieces, messageId } = e.data;
     try {
         if (action === 'loadModel' && modelArrayBuffer) {
+            console.log('MiniLm loading model');
             session = await ort.InferenceSession.create(modelArrayBuffer, {
                 executionProviders: ['wasm', 'cpu'],
             });
+            console.log('MiniLm model loaded');
             self.postMessage({ messageId, action: 'modelLoaded' });
         } else if (action === 'runInference') {
             if (!session) {
@@ -26,7 +28,7 @@ self.onmessage = async e => {
                 console.error('Wordpieces are not provided');
                 self.postMessage({ messageId, action: 'error', error: 'Wordpieces are not provided' });
                 return;
-            }       
+            }
             // Prepare tensors and run the inference session
             const shape = [1, wordpieces.length];
             const inputIdsTensor = new ort.Tensor('int64', wordpieces.map(x => BigInt(x)), shape);

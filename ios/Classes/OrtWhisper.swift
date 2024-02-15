@@ -38,13 +38,13 @@ class OrtWhisper {
       let startDate = Date()
       // The more exact construction here, and in the caller, avoids an error of "Invalid audio format"
       // It seems otherwise the bytes are not interpreted as Uint8.
-      let audioStreamData = Data(bytes: audioBytes, count: audioBytes.count)
-      let audioStreamTensor = try ORTValue(
-        tensorData: NSMutableData(data: audioStreamData), elementType: .uInt8,
-        shape: [1, NSNumber(value: audioBytes.count)])
+      let audioData = convertAudioBytesToFloats(audioBytes: audioBytes)
+      let audioTensor = try createORTValue(
+        from: audioData, elementType: .float,
+        shape: [NSNumber(value: 1), NSNumber(value: audioData.count)])
       let outputs = try session.run(
         withInputs: [
-          "audio_stream": audioStreamTensor,
+          "audio_pcm": audioTensor,
           "max_length": maxLengthData,
           "min_length": minLengthData,
           "num_beams": numBeamsData,
@@ -91,4 +91,19 @@ func createORTValue<T>(from array: [T], elementType: ORTTensorElementDataType, s
   let data = Data(fromArray: array)
   let mutableData = NSMutableData(data: data)  // Safely create NSMutableData from Data
   return try ORTValue(tensorData: mutableData, elementType: elementType, shape: shape)
+}
+
+/// Converts a byte array representation of 16-bit PCM audio to an array of Float32s.
+/// - Parameter audioBytes: The raw audio byte data. Assumes the byte order is little-endian.
+/// - Returns: An array of Float32 values representing the audio data.
+func convertAudioBytesToFloats(audioBytes: [UInt8]) -> [Float] {
+  var audioData = [Float](repeating: 0.0, count: audioBytes.count / 2)
+  for i in 0..<audioData.count {
+    var valInt = Int(audioBytes[i * 2]) | Int(audioBytes[i * 2 + 1]) << 8
+    if valInt > 0x7FFF {
+      valInt -= 0x10000
+    }
+    audioData[i] = Float(valInt) / 32767.0
+  }
+  return audioData
 }

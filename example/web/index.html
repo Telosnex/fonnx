@@ -58,53 +58,53 @@
   <!-- 5. When inference is complete, the Promise is resolved. -->
   <script>
     // Get the number of logical processors available.
-    const cores = navigator.hardwareConcurrency;
+    const miniLmCores = navigator.hardwareConcurrency;
 
     // Ensure at least 1 and at most half the number of hardwareConcurrency.
     // Testing showed using all cores was 10% slower than using half.
     // Tested on MBA M2 with a natural value of 8 for navigator.hardwareConcurrency.
-    ort.env.wasm.numThreads = Math.max(1, Math.min(Math.floor(cores / 2), cores));
-    let cachedModelPath = null;
-    let modelPromise = null;
+    ort.env.wasm.numThreads = Math.max(1, Math.min(Math.floor(miniLmCores / 2), miniLmCores));
+    let cachedMiniLmModelPath = null;
+    let cachedMiniLmModelPromise = null;
 
-    const worker = new Worker('worker.js');
+    const miniLmWorker = new Worker('worker.js');
 
     // Simplified logs for brevity; can be extended to log each property if required.
-    worker.onmessage = function (e) {
+    miniLmWorker.onmessage = function (e) {
       const { messageId, action, embeddings, error } = e.data;
-      if (action === "inferenceResult" && messageIdToResolve.has(messageId)) {
-        messageIdToResolve.get(messageId)(embeddings);
+      if (action === "inferenceResult" && miniLmMessageIdToResolve.has(messageId)) {
+        miniLmMessageIdToResolve.get(messageId)(embeddings);
         cleanup(messageId);
-      } else if (action === "error" && messageIdToReject.has(messageId)) {
-        messageIdToReject.get(messageId)(new Error(error));
+      } else if (action === "error" && miniLmMessageIdToReject.has(messageId)) {
+        miniLmMessageIdToReject.get(messageId)(new Error(error));
         cleanup(messageId);
       }
     };
 
-    const messageIdToResolve = new Map();
-    const messageIdToReject = new Map();
+    const miniLmMessageIdToResolve = new Map();
+    const miniLmMessageIdToReject = new Map();
 
     function cleanup(messageId) {
-      messageIdToResolve.delete(messageId);
-      messageIdToReject.delete(messageId);
+      miniLmMessageIdToResolve.delete(messageId);
+      miniLmMessageIdToReject.delete(messageId);
     }
 
     function miniLmL6V2(modelPath, wordpieces) {
       return new Promise((resolve, reject) => {
         const messageId = Math.random().toString(36).substring(2);
 
-        messageIdToResolve.set(messageId, resolve);
-        messageIdToReject.set(messageId, reject);
+        miniLmMessageIdToResolve.set(messageId, resolve);
+        miniLmMessageIdToReject.set(messageId, reject);
 
         // If model path has changed or model is not yet loaded, fetch and load the model.
-        if (cachedModelPath !== modelPath || !modelPromise) {
-          cachedModelPath = modelPath;
-          modelPromise = fetch(modelPath)
+        if (cachedMiniLmModelPath !== modelPath || !cachedMiniLmModelPromise) {
+          cachedMiniLmModelPath = modelPath;
+          cachedMiniLmModelPromise = fetch(modelPath)
             .then(response => response.arrayBuffer())
             .then(modelArrayBuffer => {
               return new Promise((resolveLoad) => {
                 // Post the load model message to the worker.
-                worker.postMessage({
+                miniLmWorker.postMessage({
                   action: 'loadModel',
                   modelArrayBuffer,
                   messageId
@@ -113,21 +113,177 @@
                 // Setup a one-time message listener for the "modelLoaded" message.
                 const onModelLoaded = (e) => {
                   if (e.data.action === 'modelLoaded' && e.data.messageId === messageId) {
-                    worker.removeEventListener('message', onModelLoaded);
+                    miniLmWorker.removeEventListener('message', onModelLoaded);
                     resolveLoad();
                   }
                 };
-                worker.addEventListener('message', onModelLoaded);
+                miniLmWorker.addEventListener('message', onModelLoaded);
               });
             })
             .catch(reject);
         }
 
-        modelPromise.then(() => {
+        cachedMiniLmModelPromise.then(() => {
           // Once the model is loaded, send the run inference message to the worker.
-          worker.postMessage({
+          miniLmWorker.postMessage({
             action: 'runInference',
             wordpieces,
+            messageId
+          });
+        }).catch(reject);
+      });
+    }
+  </script>
+  <script>
+    // Get the number of logical processors available.
+    const whisperCores = navigator.hardwareConcurrency;
+
+    // Ensure at least 1 and at most half the number of hardwareConcurrency.
+    // Testing showed using all cores was 10% slower than using half.
+    // Tested on MBA M2 with a natural value of 8 for navigator.hardwareConcurrency.
+    ort.env.wasm.numThreads = Math.max(1, Math.min(Math.floor(whisperCores / 2), whisperCores));
+    let cachedWhisperModelPath = null;
+    let cachedWhisperModelPromise = null;
+
+    const whisperWorker = new Worker('whisper_worker.js');
+
+    // Simplified logs for brevity; can be extended to log each property if required.
+    whisperWorker.onmessage = function (e) {
+      const { messageId, action, transcript, error } = e.data;
+      if (action === "inferenceResult" && whisperMessageIdToResolve.has(messageId)) {
+        whisperMessageIdToResolve.get(messageId)(transcript);
+        cleanup(messageId);
+      } else if (action === "error" && whisperMessageIdToReject.has(messageId)) {
+        whisperMessageIdToReject.get(messageId)(new Error(error));
+        cleanup(messageId);
+      }
+    };
+
+    const whisperMessageIdToResolve = new Map();
+    const whisperMessageIdToReject = new Map();
+
+    function cleanup(messageId) {
+      whisperMessageIdToResolve.delete(messageId);
+      whisperMessageIdToReject.delete(messageId);
+    }
+
+    function whisper(modelPath, audioBytes) {
+      return new Promise((resolve, reject) => {
+        const messageId = Math.random().toString(36).substring(2);
+
+        whisperMessageIdToResolve.set(messageId, resolve);
+        whisperMessageIdToReject.set(messageId, reject);
+
+        // If model path has changed or model is not yet loaded, fetch and load the model.
+        if (cachedWhisperModelPath !== modelPath || !cachedWhisperModelPromise) {
+          cachedWhisperModelPath = modelPath;
+          cachedWhisperModelPromise = fetch(modelPath)
+            .then(response => response.arrayBuffer())
+            .then(modelArrayBuffer => {
+              return new Promise((resolveLoad) => {
+                // Post the load model message to the worker.
+                whisperWorker.postMessage({
+                  action: 'loadModel',
+                  modelArrayBuffer,
+                  messageId
+                }, [modelArrayBuffer]);
+
+                // Setup a one-time message listener for the "modelLoaded" message.
+                const onModelLoaded = (e) => {
+                  if (e.data.action === 'modelLoaded' && e.data.messageId === messageId) {
+                    whisperWorker.removeEventListener('message', onModelLoaded);
+                    resolveLoad();
+                  }
+                };
+                whisperWorker.addEventListener('message', onModelLoaded);
+              });
+            })
+            .catch(reject);
+        }
+
+        cachedWhisperModelPromise.then(() => {
+          // Once the model is loaded, send the run inference message to the worker.
+          whisperWorker.postMessage({
+            action: 'runInference',
+            audioBytes,
+            messageId
+          });
+        }).catch(reject);
+      });
+    }
+  </script>
+  <script>
+    // Get the number of logical processors available.
+    const sileroVadCores = navigator.hardwareConcurrency;
+
+    // Ensure at least 1 and at most half the number of hardwareConcurrency.
+    // Testing showed using all cores was 10% slower than using half.
+    // Tested on MBA M2 with a natural value of 8 for navigator.hardwareConcurrency.
+    ort.env.wasm.numThreads = Math.max(1, Math.min(Math.floor(sileroVadCores / 2), sileroVadCores));
+    let cachedSileroVadModelPath = null;
+    let cachedSileroVadModelPromise = null;
+
+    const sileroVadWorker = new Worker('silero_vad_worker.js');
+
+    const sileroVadMessageIdToResolve = new Map();
+    const sileroVadMessageIdToReject = new Map();
+
+    sileroVadWorker.onmessage = function (e) {
+      const { messageId, action, resultMapAsJsonString, error } = e.data;
+      if (action === "inferenceResult" && sileroVadMessageIdToResolve.has(messageId)) {
+        sileroVadMessageIdToResolve.get(messageId)(resultMapAsJsonString);
+        cleanup(messageId);
+      } else if (action === "error" && sileroVadMessageIdToReject.has(messageId)) {
+        sileroVadMessageIdToReject.get(messageId)(new Error(error));
+        cleanup(messageId);
+      }
+    };
+
+    function cleanup(messageId) {
+      sileroVadMessageIdToResolve.delete(messageId);
+      sileroVadMessageIdToReject.delete(messageId);
+    }
+
+    function sileroVad(modelPath, audioBytes, previousStateAsJsonString) {
+      return new Promise((resolve, reject) => {
+        const messageId = Math.random().toString(36).substring(2);
+
+        sileroVadMessageIdToResolve.set(messageId, resolve);
+        sileroVadMessageIdToReject.set(messageId, reject);
+
+        // If model path has changed or model is not yet loaded, fetch and load the model.
+        if (cachedSileroVadModelPath !== modelPath || !cachedSileroVadModelPromise) {
+          cachedSileroVadModelPath = modelPath;
+          cachedSileroVadModelPromise = fetch(modelPath)
+            .then(response => response.arrayBuffer())
+            .then(modelArrayBuffer => {
+              return new Promise((resolveLoad) => {
+                // Post the load model message to the worker.
+                sileroVadWorker.postMessage({
+                  action: 'loadModel',
+                  modelArrayBuffer,
+                  messageId
+                }, [modelArrayBuffer]);
+
+                // Setup a one-time message listener for the "modelLoaded" message.
+                const onModelLoaded = (e) => {
+                  if (e.data.action === 'modelLoaded' && e.data.messageId === messageId) {
+                    sileroVadWorker.removeEventListener('message', onModelLoaded);
+                    resolveLoad();
+                  }
+                };
+                sileroVadWorker.addEventListener('message', onModelLoaded);
+              });
+            })
+            .catch(reject);
+        }
+
+        cachedSileroVadModelPromise.then(() => {
+          // Once the model is loaded, send the run inference message to the worker.
+          sileroVadWorker.postMessage({
+            action: 'runInference',
+            audioBytes,
+            previousStateAsJsonString,
             messageId
           });
         }).catch(reject);

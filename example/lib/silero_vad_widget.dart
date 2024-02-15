@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -142,6 +143,8 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
             },
           ),
           ElevatedButton.icon(
+            icon: const Icon(Icons.play_arrow),
+            label: const Text("Play"),
             onPressed: () async {
               final frames = _sttServiceResponse!.audioFrames;
               int? firstFrameIndex;
@@ -179,25 +182,114 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
               // Intent: capture ~100ms of audio before the first speech.
               final startIndex = math.max(0, indexOfFirstSpeech - 3);
               final voiceFrames = frames.sublist(startIndex);
-          
-              final wav = wavFromFrames(
+
+
+
+              Uint8List generateWavHeader(
+                int pcmDataLength, {
+                required int bitsPerSample,
+                required int numChannels,
+                required int sampleRate,
+              }) {
+                int fileSize = pcmDataLength +
+                    44 -
+                    8; // Add WAV header size except for 'RIFF' and its size field
+                int byteRate = sampleRate * numChannels * bitsPerSample ~/ 8;
+                int blockAlign = numChannels * bitsPerSample ~/ 8;
+
+                var header = Uint8List(44);
+                var buffer = ByteData.view(header.buffer);
+
+                // RIFF header
+                buffer.setUint32(0, 0x52494646, Endian.big); // 'RIFF'
+                buffer.setUint32(4, fileSize, Endian.little);
+                buffer.setUint32(8, 0x57415645, Endian.big); // 'WAVE'
+
+                // fmt subchunk
+                buffer.setUint32(12, 0x666d7420, Endian.big); // 'fmt '
+                buffer.setUint32(
+                    16, 16, Endian.little); // Subchunk1 size (16 for PCM)
+                buffer.setUint16(
+                    20, 1, Endian.little); // Audio format (1 for PCM)
+                buffer.setUint16(
+                    22, numChannels, Endian.little); // Number of channels
+                buffer.setUint32(24, sampleRate, Endian.little); // Sample rate
+                buffer.setUint32(28, byteRate, Endian.little); // Byte rate
+                buffer.setUint16(32, blockAlign, Endian.little); // Block align
+                buffer.setUint16(
+                    34, bitsPerSample, Endian.little); // Bits per sample
+
+                // data subchunk
+                buffer.setUint32(36, 0x64617461, Endian.big); // 'data'
+                buffer.setUint32(40, pcmDataLength,
+                    Endian.little); // Subchunk2 size (PCM data size)
+
+                return header;
+              }
+
+              Uint8List generateWavFile(
+                List<int> pcmData, {
+                required int bitsPerSample,
+                required int numChannels,
+                required int sampleRate,
+              }) {
+                final header = generateWavHeader(
+                  pcmData.length,
+                  sampleRate: sampleRate,
+                  numChannels: numChannels,
+                  bitsPerSample: bitsPerSample,
+                );
+                final wavFile = Uint8List(header.length + pcmData.length);
+                wavFile.setAll(0, header);
+                wavFile.setAll(header.length, pcmData);
+                return wavFile;
+              }
+
+              /// Returns null if no frames are above the threshold.
+              Uint8List? wavFromFrames(
+                  {required List<AudioFrame> frames, required double minVadP}) {
+                final bytes = frames
+                    .where((e) => e.vadP != null && e.vadP! >= minVadP)
+                    .map((e) => e.bytes)
+                    .expand((element) => element);
+                if (bytes.isEmpty) {
+                  return null;
+                }
+                final bytesList = bytes.toList();
+                return generateWavFile(
+                  bytesList,
+                  bitsPerSample: SttService.kBitsPerSample,
+                  numChannels: SttService.kChannels,
+                  sampleRate: SttService.kSampleRate,
+                );
+              }
+
+              final playWav = wavFromFrames(
                 frames: voiceFrames.nonNulls.toList(),
                 minVadP: 0,
               );
-              if (wav == null) {
+              if (playWav == null) {
                 debugPrint('No frames with voice, skipping WAV creation.');
                 return;
               }
+              if (kIsWeb) {
+                String base64String = base64Encode(playWav);
+
+                // Step 4: Create the data URL
+                final url = 'data:audio/wav;base64,$base64String';
+                final player = AudioPlayer();
+                player.play(UrlSource(url));
+              } else {
               final tempDir = await path_provider.getTemporaryDirectory();
-              final wavPath = path.join(tempDir.path, 'voice.wav');
-              final wavFile = File(wavPath);
-              await wavFile.writeAsBytes(wav);
-              debugPrint('Wrote voice to $wavPath');
+                final playWavPath = path.join(tempDir.path, 'voice.wav');
+                final playWavFile = File(playWavPath);
+                await playWavFile.writeAsBytes(playWav);
+                debugPrint('Wrote voice to $playWavPath');
               final player = AudioPlayer();
-              player.play(DeviceFileSource(wavPath));
+                player.play(DeviceFileSource(playWavPath));
+              }
+
             },
-            icon: const Icon(Icons.play_arrow),
-            label: const Text("Play"),
           ),
         ]
       ],
@@ -205,8 +297,7 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
   }
 
   void _runVerificationTest() async {
-    final modelPath =
-        await getModelPath('assets/models/sileroVad/silero_vad.onnx');
+    final modelPath = await getModelPath('silero_vad.onnx');
     final silero = SileroVad.load(modelPath);
     final wavFile = await rootBundle.load('assets/audio_sample_16khz.wav');
     final result = await silero.doInference(wavFile.buffer.asUint8List());
@@ -215,12 +306,14 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
       final acceptableAnswers = {
         0.4739372134208679, // macOS MBP M2 10 Feb 2024
         0.4739373028278351, // Android Pixel Fold 10 Feb 2024
+        0.4739360809326172, // Web 15 Feb 2024
       };
       _verifyPassed = result.length == 3 &&
           acceptableAnswers.contains(result['output'].first);
       if (_verifyPassed != true) {
         if (kDebugMode) {
-          print('got ${result['output']}');
+          print(
+              'verification of Silero output failed, got ${result['output']}');
         }
       }
     });
@@ -236,10 +329,8 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
       });
       return;
     }
-    final vadModelPath =
-        await getModelPath('assets/models/sileroVad/silero_vad.onnx');
-    final whisperModelPath =
-        await getWhisperModelPath('assets/models/whisper/whisper_tiny.onnx');
+    final vadModelPath = await getModelPath('silero_vad.onnx');
+    final whisperModelPath = await getWhisperModelPath('whisper_tiny.onnx');
     final service = SttService(
         vadModelPath: vadModelPath, whisperModelPath: whisperModelPath);
     _sttService = service;
@@ -255,8 +346,7 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
   }
 
   void _runPerformanceTest() async {
-    final modelPath =
-        await getModelPath('assets/models/sileroVad/silero_vad.onnx');
+    final modelPath = await getModelPath('silero_vad.onnx');
     final sileroVad = SileroVad.load(modelPath);
     final result = await testPerformance(sileroVad);
     setState(() {
@@ -265,8 +355,9 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
   }
 
   static Future<String> testPerformance(SileroVad sileroVad) async {
-    final wavFile = await rootBundle.load('assets/audio_sample_16khz.wav');
-    final bytes = wavFile.buffer.asUint8List();
+    final vadPerfWavFile =
+        await rootBundle.load('assets/audio_sample_16khz.wav');
+    final bytes = vadPerfWavFile.buffer.asUint8List();
     const iterations = 3;
     final Stopwatch sw = Stopwatch();
     for (var i = 0; i < iterations; i++) {

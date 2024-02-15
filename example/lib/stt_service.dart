@@ -46,8 +46,14 @@ class SttService {
   /// Sample rate in Hz
   static const int kSampleRate = 16000;
 
+  // Rationale for 1 channel:
+  // - Whisper needs ORT Extensions in order to decode anything other than
+  // signed 16-bit PCM audio in 1 channel at 16kHz.
+  // - ORT Extensions are not supported on web.
+  // - Generally, 1 channel is sufficient for speech recognition, it is
+  //   both best practice and supported universally.
   /// Number of audio channels
-  static const int kChannels = 2;
+  static const int kChannels = 1;
 
   /// Bits per sample, assuming 16-bit PCM audio
   static const int kBitsPerSample = 16;
@@ -256,6 +262,47 @@ class SttService {
     List<AudioFrame> frames,
     StreamController<SttServiceResponse> streamController,
   ) async {
+
+    Future<void> doIt() async {
+      final indexOfFirstSpeech = frames.indexWhere((frame) {
+        return frame.vadP != null && frame.vadP! >= voiceThreshold;
+      });
+      // Intent: capture ~100ms of audio before the first speech.
+      final startIndex = math.max(0, indexOfFirstSpeech - 3);
+      final voiceFrames = indexOfFirstSpeech == -1
+          ? <AudioFrame>[]
+          : frames.sublist(startIndex);
+      if (voiceFrames.isEmpty) {
+        return;
+      }
+
+      final bytesToInfer = Uint8List.fromList(voiceFrames
+          .map((e) => e.bytes)
+          .expand((element) => element)
+          .toList());
+      final result = (await whisper.doInference(bytesToInfer)).trim();
+      // Whisper output tends to fluctuate, especially in the presence of
+      // extended silence following speech, ex.
+      // 1. "what time is it in beijing"
+      // 2. "What time is it in Beijing?"
+      // 3. "what time is it in beijing"
+      // This is a nice heuristic that reduces fluctuation and 'rewards' the
+      // lengthier version that's more likely to have diacritical marks.
+      //
+      // A weak point is this presumes any additional coherent speech will end
+      // up increasing the length of the transcription. Theoratically, maybe
+      // this doesn't happen: ex. "What time is it in Beijing????????"
+      // "What time is it in Beijing, China?".
+      if (result.length > transcription.length) {
+        transcription = result;
+      }
+
+      streamController.add(SttServiceResponse(
+        transcription: transcription,
+        audioFrames: frames,
+      ));
+    }
+
     void scheduleNextInference() async {
       if (!stopped) {
         Future.delayed(const Duration(milliseconds: 16),
@@ -264,145 +311,12 @@ class SttService {
       }
       // Stopped.
       // Do one last inference with all audio bytes, then close the stream.
-      final wav = wavFromFrames(
-        frames: frames,
-        minVadP: voiceThreshold,
-      );
-      if (wav != null) {
-        final result = await whisper.doInference(wav);
-        if (result.length > transcription.length) {
-          transcription = result;
-        }
-        streamController.add(SttServiceResponse(
-          transcription: transcription,
-          audioFrames: frames,
-        ));
-      }
-
+      await doIt();
       streamController.close();
     }
 
-    final indexOfFirstSpeech = frames.indexWhere((frame) {
-      return frame.vadP != null && frame.vadP! >= voiceThreshold;
-    });
-    // Intent: capture ~100ms of audio before the first speech.
-    final startIndex = math.max(0, indexOfFirstSpeech - 3);
-    final voiceFrames =
-        indexOfFirstSpeech == -1 ? <AudioFrame>[] : frames.sublist(startIndex);
-    if (voiceFrames.isEmpty) {
-      scheduleNextInference();
-      return;
-    }
 
-    final bytesToInfer = Uint8List.fromList(
-        voiceFrames.map((e) => e.bytes).expand((element) => element).toList());
-    final wav = generateWavFile(
-      bytesToInfer,
-      bitsPerSample: kBitsPerSample,
-      numChannels: kChannels,
-      sampleRate: kSampleRate,
-    );
-    final result = (await whisper.doInference(wav)).trim();
-
-    // Whisper output tends to fluctuate, especially in the presence of
-    // extended silence following speech, ex.
-    // 1. "what time is it in beijing"
-    // 2. "What time is it in Beijing?"
-    // 3. "what time is it in beijing"
-    // This is a nice heuristic that reduces fluctuation and 'rewards' the
-    // lengthier version that's more likely to have diacritical marks.
-    //
-    // A weak point is this presumes any additional coherent speech will end
-    // up increasing the length of the transcription. Theoratically, maybe
-    // this doesn't happen: ex. "What time is it in Beijing????????"
-    // "What time is it in Beijing, China?".
-    if (result.length > transcription.length) {
-      transcription = result;
-    }
-
-    streamController.add(SttServiceResponse(
-      transcription: transcription,
-      audioFrames: frames,
-    ));
-
+    await doIt();
     scheduleNextInference();
   }
-}
-
-/// Returns null if no frames are above the threshold.
-///
-/// Dealing with that issue here avoids exceptions and issues from passing an
-/// empty WAV to Whisper.
-Uint8List? wavFromFrames(
-    {required List<AudioFrame> frames, required double minVadP}) {
-  final bytes = frames
-      .where((e) => e.vadP != null && e.vadP! >= minVadP)
-      .map((e) => e.bytes)
-      .expand((element) => element);
-  if (bytes.isEmpty) {
-    return null;
-  }
-  final bytesList = bytes.toList();
-  return generateWavFile(
-    bytesList,
-    bitsPerSample: SttService.kBitsPerSample,
-    numChannels: SttService.kChannels,
-    sampleRate: SttService.kSampleRate,
-  );
-}
-
-Uint8List generateWavFile(
-  List<int> pcmData, {
-  required int bitsPerSample,
-  required int numChannels,
-  required int sampleRate,
-}) {
-  final header = generateWavHeader(
-    pcmData.length,
-    sampleRate: sampleRate,
-    numChannels: numChannels,
-    bitsPerSample: bitsPerSample,
-  );
-  final wavFile = Uint8List(header.length + pcmData.length);
-  wavFile.setAll(0, header);
-  wavFile.setAll(header.length, pcmData);
-  return wavFile;
-}
-
-Uint8List generateWavHeader(
-  int pcmDataLength, {
-  required int bitsPerSample,
-  required int numChannels,
-  required int sampleRate,
-}) {
-  int fileSize = pcmDataLength +
-      44 -
-      8; // Add WAV header size except for 'RIFF' and its size field
-  int byteRate = sampleRate * numChannels * bitsPerSample ~/ 8;
-  int blockAlign = numChannels * bitsPerSample ~/ 8;
-
-  var header = Uint8List(44);
-  var buffer = ByteData.view(header.buffer);
-
-  // RIFF header
-  buffer.setUint32(0, 0x52494646, Endian.big); // 'RIFF'
-  buffer.setUint32(4, fileSize, Endian.little);
-  buffer.setUint32(8, 0x57415645, Endian.big); // 'WAVE'
-
-  // fmt subchunk
-  buffer.setUint32(12, 0x666d7420, Endian.big); // 'fmt '
-  buffer.setUint32(16, 16, Endian.little); // Subchunk1 size (16 for PCM)
-  buffer.setUint16(20, 1, Endian.little); // Audio format (1 for PCM)
-  buffer.setUint16(22, numChannels, Endian.little); // Number of channels
-  buffer.setUint32(24, sampleRate, Endian.little); // Sample rate
-  buffer.setUint32(28, byteRate, Endian.little); // Byte rate
-  buffer.setUint16(32, blockAlign, Endian.little); // Block align
-  buffer.setUint16(34, bitsPerSample, Endian.little); // Bits per sample
-
-  // data subchunk
-  buffer.setUint32(36, 0x64617461, Endian.big); // 'data'
-  buffer.setUint32(
-      40, pcmDataLength, Endian.little); // Subchunk2 size (PCM data size)
-
-  return header;
 }
