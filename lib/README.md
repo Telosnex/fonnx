@@ -19,7 +19,7 @@ See [this GitHub issue](https://github.com/nagadomi/nunif/issues/34) for details
 
 #### Developing with Web
 While developing, two issues prevent it work working on the web.
-Both have workaround.
+Both have workarounds
 
 ##### WASM Mime Type
 You may see errors in console logs about the MIME type of the
