@@ -134,6 +134,13 @@
       });
     }
   </script>
+  <!-- REQUIRED FOR: Whisper models. -->
+  <!-- This script: -->
+  <!-- 1. Sets up a web worker for inference to avoid blocking UI. -->
+  <!-- 2. Loads the model into an array buffer. -->
+  <!-- 3. Sends the array buffer to the worker. (ONNX can't load from a file in a worker) -->
+  <!-- 4. Sends inference calls to the worker and returns a Promise. -->
+  <!-- 5. When inference is complete, the Promise is resolved. -->
   <script>
     // Get the number of logical processors available.
     const whisperCores = navigator.hardwareConcurrency;
@@ -212,6 +219,13 @@
       });
     }
   </script>
+  <!-- REQUIRED FOR: Silero VAD (voice activity detection) model. -->
+  <!-- This script: -->
+  <!-- 1. Sets up a web worker for inference to avoid blocking UI. -->
+  <!-- 2. Loads the model into an array buffer. -->
+  <!-- 3. Sends the array buffer to the worker. (ONNX can't load from a file in a worker) -->
+  <!-- 4. Sends inference calls to the worker and returns a Promise. -->
+  <!-- 5. When inference is complete, the Promise is resolved. -->
   <script>
     // Get the number of logical processors available.
     const sileroVadCores = navigator.hardwareConcurrency;
