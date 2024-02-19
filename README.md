@@ -75,3 +75,50 @@ Avg. ms for 1 Mini LM L6 V2 embedding / 200 words.
 * macOS and WASM-SIMD runs on MacBook Pro M2 Max.  
 * Average of 100 embeddings, after a warmup of 10.  
 * Input is mix of lorem ipsum text from 8 languages.
+
+# Integrating FONNX
+## macOS, Windows, Linux via FFI
+The ONNX C library is used for macOS, Windows, and Linux.
+Flutter can call into it via FFI. Nothing special is required to use FFI on these platforms.
+
+## iOS via ONNX pods
+iOS uses the official ONNX Objective-C library. No additional tasks besides adding FONNX to your Flutter project are required.
+
+iOS build fails when linked against .dylib provided with ONNX releases. They are explicitly marked as for macOS. 
+
+## Android via ONNX AAR
+Android uses the official ONNX Android dependencies from a Maven repository. Note that ProGuard rules are required to prevent the ONNX library from being stripped.
+
+## Web
+Sending these headers with the request for the ONNX JS package gives a 10x speedup:
+
+  Cross-Origin-Embedder-Policy: require-corp
+  Cross-Origin-Opener-Policy: same-origin
+
+See [this GitHub issue](https://github.com/nagadomi/nunif/issues/34) for details. TL;DR: It allows use of multiple threads by ONNX's WASM implementation by using a SharedArrayBuffer.
+
+### Developing with Web
+While developing, two issues prevent it work working on the web.
+Both have workarounds
+
+#### WASM Mime Type
+You may see errors in console logs about the MIME type of the
+.wasm being incorrect and starting with the wrong bytes. 
+
+That is due to local Flutter serving of the web app.
+
+To fix, download the WASM files from the same CDN folder that hosts ort.min.js
+(see worker.js) and also in worker.js, remove the // in front of ort.env.wasm.wasmPaths = "". 
+
+Then, place the WASM files downloaded from the CDN next to index.html.
+
+In release mode and deployed, this is not an issue, you do not need to host the WASM files.
+
+#### Cross-Origin-Embedder-Policy
+To safely use SharedArrayBuffer, the server must send the Cross-Origin-Embedder-Policy header with the value require-corp.
+
+See here for how to workaround it: https://github.com/nagadomi/nunif/issues/34
+
+Note that the extension became adware, you should have Chrome set up its
+permissions such that it isn't run until you click it. Also, note that you have to do
+that each time the Flutter web app in debug mode's port changes.
