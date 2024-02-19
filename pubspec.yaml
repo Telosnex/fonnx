@@ -14,7 +14,7 @@ dependencies:
     sdk: flutter
   flutter_web_plugins:
     sdk: flutter
-  js: ^0.7.1
+  js: ^0.6.7
   ml_linalg: ^13.11.31
   plugin_platform_interface: ^2.0.2
 
