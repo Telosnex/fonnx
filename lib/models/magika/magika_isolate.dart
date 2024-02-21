@@ -5,34 +5,31 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fonnx/dylib_path_overrides.dart';
-import 'package:fonnx/extensions/uint8list.dart';
 import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free;
 import 'package:fonnx/onnx/ort.dart';
 
-class SileroVadIsolateMessage {
+class MagikaIsolateMessage {
   final SendPort replyPort;
   final String modelPath;
   final String? ortDylibPathOverride;
-  final List<int> audioBytes;
-  final Map<String, dynamic> previousState;
+  final List<int> bytes;
 
-  SileroVadIsolateMessage({
+  MagikaIsolateMessage({
     required this.replyPort,
     required this.modelPath,
-    required this.audioBytes,
+    required this.bytes,
     this.ortDylibPathOverride,
-    this.previousState = const {},
   });
 }
 
-void sileroVadIsolateEntryPoint(SendPort mainSendPort) {
+void magikaIsolateEntryPoint(SendPort mainSendPort) {
   final receivePort = ReceivePort();
   mainSendPort.send(receivePort.sendPort);
 
   OrtSessionObjects? ortSessionObjects;
 
   receivePort.listen((dynamic message) async {
-    if (message is SileroVadIsolateMessage) {
+    if (message is MagikaIsolateMessage) {
       try {
         // Set the global constant because its a different global on the
         // isolate.
@@ -43,8 +40,8 @@ void sileroVadIsolateEntryPoint(SendPort mainSendPort) {
         ortSessionObjects ??=
             createOrtSession(message.modelPath, includeOnnxExtensionsOps: true);
         // Perform the inference here using ortSessionObjects and message.tokens, retrieve result.
-        final result = await _getTranscriptFfi(
-            ortSessionObjects!, message.audioBytes, message.previousState);
+        final result =
+            await _getMagikaResultVector(ortSessionObjects!, message.bytes);
         message.replyPort.send(result);
       } catch (e) {
         // Send the error message back to the main isolate.
@@ -69,7 +66,7 @@ void cleanupOrtSession(OrtSessionObjects? ortSessionObjects) {
   }
 }
 
-class SileroVadIsolateManager {
+class MagikaIsolateManager {
   SendPort? _sendPort;
   Isolate? _isolate;
   Future<void>? _starting;
@@ -90,7 +87,7 @@ class SileroVadIsolateManager {
 
     final receivePort = ReceivePort();
     _isolate = await Isolate.spawn(
-      sileroVadIsolateEntryPoint,
+      magikaIsolateEntryPoint,
       receivePort.sendPort,
       onError: receivePort.sendPort, // Handle isolate errors.
     );
@@ -105,30 +102,27 @@ class SileroVadIsolateManager {
   }
 
   // Send data to the isolate and get a result.
-  Future<Map<String, dynamic>> sendInference(
+  Future<Float32List> sendInference(
     String modelPath,
-    List<int> audioBytes,
-    Map<String, dynamic> previousState, {
+    List<int> bytes, {
     String? ortDylibPathOverride,
     String? ortExtensionsDylibPathOverride,
   }) async {
     await start();
     final response = ReceivePort();
-    final message = SileroVadIsolateMessage(
+    final message = MagikaIsolateMessage(
       replyPort: response.sendPort,
       modelPath: modelPath,
-      audioBytes: audioBytes,
+      bytes: bytes,
       ortDylibPathOverride: ortDylibPathOverride,
-      previousState: previousState,
     );
 
     _sendPort!.send(message);
-
     // This will wait for a response from the isolate.
     final dynamic result = await response.first;
-    if (result is Map<String, dynamic>) {
+    if (result is Float32List) {
       return result;
-    } else if (result is Error) {
+    } else if (result is Error || result is Exception) {
       throw result;
     } else {
       throw Exception(
@@ -153,64 +147,34 @@ class SileroVadIsolateManager {
 /// issues with use in Isolates or via Squadron. Custom objects are
 /// supported by both, but in practice, add complication and aren't worth the
 /// trade-off in this case.
-Future<Map<String, dynamic>> _getTranscriptFfi(
+Future<Float32List> _getMagikaResultVector(
   OrtSessionObjects session,
-  List<int> audioBytes,
-  Map<String, dynamic> previousState,
+  List<int> bytes,
 ) async {
   // Inputs:
-  // - input: audio, float32[batch, sequence]
-  // - sr: sample rate, int64
-  // - h: LTSM hidden state, float32[2, batch, 64]
-  // - c: LTSM cell state, float32[2, batch, 64]
+  // - bytes: file bytes, example code takes 512 bytes from 3 chunks of file.
+  //    float32[batch, 1536]
   // Outputs:
-  // - output: probability of speech, float32[batch, 1]
-  // - hn: LTSM hidden state, float32[2, batch, 64]
-  // - cn: LTSM cell state, float32[2, batch, 64]
-  Float32List audioData = audioBytes.toAudioFloat32List();
-  final usePreviousState = previousState.length >= 2 &&
-      previousState['hn'] is List<List<Float32List>> &&
-      previousState['cn'] is List<List<Float32List>>;
+  // - target_label: float32[batch, 113]
 
   final memoryInfo = calloc<Pointer<OrtMemoryInfo>>();
   session.api.createCpuMemoryInfo(memoryInfo);
   final inputValue = calloc<Pointer<OrtValue>>();
-  session.api.createFloat32Tensor2D(inputValue,
-      memoryInfo: memoryInfo.value, values: [audioData]);
-  final srValue = calloc<Pointer<OrtValue>>();
-  session.api.createInt64Tensor(srValue,
-      memoryInfo: memoryInfo.value, values: [16000]);
-  const batchSize = 1;
-  List<List<List<double>>> h = usePreviousState
-      ? previousState['hn']
-      : List.generate(
-          2, (_) => List.generate(batchSize, (_) => List.filled(64, 0.0)));
-  List<List<List<double>>> c = usePreviousState ? previousState['cn'] : h;
-  final hValue = calloc<Pointer<OrtValue>>();
-  session.api
-      .createFloat32Tensor3D(hValue, memoryInfo: memoryInfo.value, values: h);
-  final cValue = calloc<Pointer<OrtValue>>();
-  session.api
-      .createFloat32Tensor3D(cValue, memoryInfo: memoryInfo.value, values: c);
-
-  const kInputCount = 4;
+  session.api.createFloat32Tensor2DFromInts(
+    inputValue,
+    memoryInfo: memoryInfo.value,
+    values: [bytes]
+  );
+  const kInputCount = 1;
   final inputNamesPointer = calloc<Pointer<Pointer<Char>>>(kInputCount);
-  inputNamesPointer[0] = 'input'.toNativeUtf8().cast();
-  inputNamesPointer[1] = 'sr'.toNativeUtf8().cast();
-  inputNamesPointer[2] = 'h'.toNativeUtf8().cast();
-  inputNamesPointer[3] = 'c'.toNativeUtf8().cast();
+  inputNamesPointer[0] = 'bytes'.toNativeUtf8().cast();
   final inputNames = inputNamesPointer.cast<Pointer<Char>>();
   final inputValues = calloc<Pointer<OrtValue>>(kInputCount);
   inputValues[0] = inputValue.value;
-  inputValues[1] = srValue.value;
-  inputValues[2] = hValue.value;
-  inputValues[3] = cValue.value;
 
-  const kOutputCount = 3;
+  const kOutputCount = 1;
   final outputNamesPointer = calloc<Pointer<Pointer<Char>>>(kOutputCount);
-  outputNamesPointer[0] = 'output'.toNativeUtf8().cast();
-  outputNamesPointer[1] = 'hn'.toNativeUtf8().cast();
-  outputNamesPointer[2] = 'cn'.toNativeUtf8().cast();
+  outputNamesPointer[0] = 'target_label'.toNativeUtf8().cast();
   final outputNames = outputNamesPointer.cast<Pointer<Char>>();
   final outputValues = calloc<Pointer<OrtValue>>(kOutputCount);
   final runOptionsPtr = calloc<Pointer<OrtRunOptions>>();
@@ -226,54 +190,15 @@ Future<Map<String, dynamic>> _getTranscriptFfi(
     outputCount: kOutputCount,
   );
 
-  List<Pointer<OrtValue>> outputValuesList = [
-    outputValues[0],
-    outputValues[1],
-    outputValues[2],
-  ];
-  final result = extractOutputs(session.api, outputValuesList);
-  return result;
-}
-
-Map<String, dynamic> extractOutputs(
-    OrtApi api, List<Pointer<OrtValue>> outputValues) {
-  Map<String, dynamic> result = {};
-
-  for (int i = 0; i < 3; i++) {
-    // Iterate through output, hn, cn
-    final tensorDataPointer = calloc<Pointer<Void>>();
-    api.getTensorMutableData(outputValues[i], tensorDataPointer);
-    final floatsPtr = tensorDataPointer.value.cast<Float>();
-
-    final tensorTypeAndShape = calloc<Pointer<OrtTensorTypeAndShapeInfo>>();
-    api.getTensorTypeAndShape(outputValues[i], tensorTypeAndShape);
-    final tensorShapeElementCount = calloc<Size>();
-    api.getTensorShapeElementCount(
-        tensorTypeAndShape.value, tensorShapeElementCount);
-    final elementCount = tensorShapeElementCount.value;
-    final floatList = floatsPtr.asTypedList(elementCount);
-
-    // Based on the assumption of shape [2, batch size (1), 64] for hn and cn
-    if (i > 0) {
-      // For hn and cn
-      // Reshape the flat list into [2, 1, 64] - Since the batch size is known to be 1, we simplify
-      List<List<Float32List>> reshaped = List.generate(
-          2,
-          (dim1) => List.generate(
-              1,
-              (dim2) => Float32List.fromList(floatList.sublist(
-                  (dim1 * 64) + (dim2 * 64),
-                  (dim1 * 64) + ((dim2 + 1) * 64)))));
-      result[i == 1 ? 'hn' : 'cn'] = reshaped;
-    } else {
-      result['output'] = floatList;
-    }
-
-    // Cleanup
-    calloc.free(tensorDataPointer);
-    calloc.free(tensorTypeAndShape);
-    calloc.free(tensorShapeElementCount);
-  }
-
-  return result;
+  final tensorDataPointer = calloc<Pointer<Void>>();
+  session.api.getTensorMutableData(outputValues[0], tensorDataPointer);
+  final floatsPtr = tensorDataPointer.value.cast<Float>();
+  final tensorTypeAndShape = calloc<Pointer<OrtTensorTypeAndShapeInfo>>();
+  session.api.getTensorTypeAndShape(outputValues[0], tensorTypeAndShape);
+  final tensorShapeElementCount = calloc<Size>();
+  session.api.getTensorShapeElementCount(
+      tensorTypeAndShape.value, tensorShapeElementCount);
+  final elementCount = tensorShapeElementCount.value;
+  final floatList = floatsPtr.asTypedList(elementCount);
+  return floatList;
 }

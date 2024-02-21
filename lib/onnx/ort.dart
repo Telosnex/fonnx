@@ -57,6 +57,42 @@ extension DartNativeFunctions on OrtApi {
     return inputTensorNative;
   }
 
+  Pointer<Float> createFloat32Tensor2DFromInts(
+    Pointer<Pointer<OrtValue>> inputTensorPointer, {
+    required Pointer<OrtMemoryInfo> memoryInfo,
+    required List<List<int>> values,
+  }) {
+    final sizeOfFloat32 = sizeOf<Float>();
+    final flatArray = values.expand((i) => i).toList();
+    final inputTensorNative = calloc<Float>(flatArray.length * sizeOfFloat32);
+    for (var i = 0; i < flatArray.length; i += 1) {
+      inputTensorNative[i] = flatArray[i].toDouble();
+    }
+    final inputShape = calloc<Int64>(2 * sizeOf<Int64>());
+    inputShape[0] = values.length;
+    inputShape[1] = values.first.length;
+    final ptrVoid = inputTensorNative.cast<Void>();
+    final status = createTensorWithDataAsOrtValue(
+      inputTensorPointer,
+      memoryInfo: memoryInfo,
+      inputData: ptrVoid,
+      inputDataLengthInBytes: flatArray.length * sizeOfFloat32,
+      inputShape: inputShape,
+      inputShapeLengthInBytes: 2,
+      onnxTensorElementDataType:
+          ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT,
+    );
+    if (status.isError) {
+      final error = 'Code: ${getErrorCodeMessage(status)}\n'
+          'Message: ${getErrorMessage(status)}';
+      calloc.free(inputTensorNative);
+      calloc.free(inputShape);
+      throw Exception(error);
+    }
+    calloc.free(inputShape);
+    return inputTensorNative;
+  }
+
   Pointer<Float> createFloat32Tensor2D(
     Pointer<Pointer<OrtValue>> inputTensorPointer, {
     required Pointer<OrtMemoryInfo> memoryInfo,

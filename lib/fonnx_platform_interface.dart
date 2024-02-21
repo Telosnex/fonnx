@@ -29,6 +29,13 @@ abstract class FonnxPlatform extends PlatformInterface {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
+  Future<Float32List> magika({
+    required String modelPath,
+    required List<int> bytes,
+  }) {
+    throw UnimplementedError('magika() has not been implemented.');
+  }
+  
   Future<Float32List?> miniLm({
     required String modelPath,
     required List<int> inputs,

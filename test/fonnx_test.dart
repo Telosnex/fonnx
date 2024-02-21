@@ -12,14 +12,13 @@ class MockFonnxPlatform
   Future<String?> getPlatformVersion() => throw UnimplementedError();
 
   @override
-  Future<Float32List?> miniLm(
-      {required String modelPath, required List<int> inputs}) {
+  Future<Float32List> magika({required String modelPath, required List<int> bytes}) {
     throw UnimplementedError();
   }
 
   @override
-  Future<String?> whisper(
-      {required String modelPath, required List<int> audioBytes}) {
+  Future<Float32List?> miniLm(
+      {required String modelPath, required List<int> inputs}) {
     throw UnimplementedError();
   }
 
@@ -28,6 +27,12 @@ class MockFonnxPlatform
       {required String modelPath,
       required List<int> audioBytes,
       required Map<String, dynamic> previousState}) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<String?> whisper(
+      {required String modelPath, required List<int> audioBytes}) {
     throw UnimplementedError();
   }
 }

@@ -11,6 +11,16 @@ class Fonnx {
     return FonnxPlatform.instance.getPlatformVersion();
   }
 
+  Future<Float32List> magika({
+    required String modelPath,
+    required List<int> bytes,
+  }) {
+    return FonnxPlatform.instance.magika(
+      modelPath: modelPath,
+      bytes: bytes,
+    );
+  }
+
   Future<Float32List?> miniLm({
     required String modelPath,
     required List<int> inputs,
