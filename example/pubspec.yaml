@@ -36,6 +36,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - assets/models/magika/magika.onnx
     - assets/models/miniLmL6V2/miniLmL6V2.onnx
     - assets/models/msmarcoMiniLmL6V3/msmarcoMiniLmL6V3.onnx
     - assets/models/sileroVad/silero_vad.onnx

@@ -47,7 +47,7 @@ class MagikaNative implements Magika {
     final fonnx = _fonnx ??= Fonnx();
     final type = await fonnx.magika(
       modelPath: modelPath,
-      bytes: bytes,
+      bytes: extractFeaturesFromBytes(Uint8List.fromList(bytes)).all,
     );
     return type;
   }

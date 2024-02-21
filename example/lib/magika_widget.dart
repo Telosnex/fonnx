@@ -4,7 +4,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fonnx/models/magika/magika_web.dart';
+import 'package:fonnx/models/magika/magika.dart';
+
 import 'package:fonnx_example/padding.dart';
 import 'dart:async';
 import 'package:path_provider/path_provider.dart' as path_provider;
@@ -46,6 +47,15 @@ class _MagikaWidgetState extends State<MagikaWidget> {
               },
               child: const Text('Open File'),
             ),
+            if (_fileBytes != null) widthPadding,
+            if (_fileBytes != null)
+              const Icon(
+                Icons.check,
+                color: Colors.green,
+              ),
+            if (_fileBytes != null) widthPadding,
+            if (_fileBytes != null)
+              Text('Size: ${_fileBytes?.length ?? 0} bytes'),
           ],
         ),
         if (_fileBytes != null) ...[
@@ -53,7 +63,7 @@ class _MagikaWidgetState extends State<MagikaWidget> {
           ElevatedButton(
             onPressed: () async {
               final path = await getMagikaModelPath('magika.onnx');
-              final magika = getMagika(path);
+              final magika = Magika.load(path);
               final result = await magika.getType(_fileBytes!);
               setState(() {
                 _magikaResult = result.toString();
@@ -83,6 +93,10 @@ Future<List<int>?> _pickFileBytes() async {
   }
   if (result.files.isEmpty) {
     return null;
+  }
+  if (!kIsWeb && Platform.isIOS && result.files.first.bytes == null) {
+    final file = File(result.files.first.path!);
+    return file.readAsBytes();
   }
   return result.files.first.bytes;
 }

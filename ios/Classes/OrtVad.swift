@@ -75,9 +75,7 @@ class OrtVad {
       ]
       let outputNames = Set(["output", "hn", "cn"])
 
-      let startTime = Date()
       let outputs = try session.run(withInputs: inputs, outputNames: outputNames, runOptions: nil)
-      let endTime = Date()
 
       var processedMap = [String: Any]()
 
@@ -114,14 +112,6 @@ extension Int64 {
   var asData: Data {
     var value = self
     return Data(bytes: &value, count: MemoryLayout<Self>.size)
-  }
-}
-
-extension Array where Element == [[Float]] {
-  /// Converts a 3D Float array to Data, assuming the innermost array represents a contiguous block of Floats.
-  var asData: Data {
-    let flattened = self.flatMap { $0.flatMap { $0 } }
-    return Data(buffer: UnsafeBufferPointer(start: flattened, count: flattened.count))
   }
 }
 

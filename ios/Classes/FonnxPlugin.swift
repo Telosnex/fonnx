@@ -3,6 +3,8 @@ import UIKit
 import os
 
 public class FonnxPlugin: NSObject, FlutterPlugin {
+  private var cachedMagikaModelPath: String?
+  private var cachedMagika: OrtMagika?
   private var cachedMiniLmModelPath: String?
   private var cachedMiniLm: OrtMiniLm?
   private var cachedWhisperModelPath: String?
@@ -20,6 +22,8 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
     switch call.method {
     case "getPlatformVersion":
       result("iOS " + UIDevice.current.systemVersion)
+    case "magika":
+      doMagika(call, result: result)
     case "miniLm":
       doMiniLm(call, result: result)
     case "whisper":
@@ -31,12 +35,30 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
     }
   }
 
+  public func doMagika(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    let path = (call.arguments as! [Any])[0] as! String
+    let fileFloats = (call.arguments as! [Any])[1] as! [Float]
+
+    if cachedMagikaModelPath != path {
+      cachedMagika = OrtMagika(modelPath: path)
+      cachedMagikaModelPath = path
+    }
+
+    guard let model = cachedMagika else {
+      result(FlutterError(code: "Magika", message: "Could not instantiate model", details: nil))
+      return
+    }
+
+    let answer = model.doInference(fileBytes: fileFloats)
+    result(answer)
+  }
+
   public func doMiniLm(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     let path = (call.arguments as! [Any])[0] as! String
     let tokens = (call.arguments as! [Any])[1] as! [Int64]
 
     if cachedMiniLmModelPath != path {
-      cachedMiniLm = try? OrtMiniLm(modelPath: path)
+      cachedMiniLm = OrtMiniLm(modelPath: path)
       cachedMiniLmModelPath = path
     }
 
@@ -45,7 +67,6 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
       return
     }
 
-    do {
       model.getEmbedding(
         tokens: tokens,
         completion: { (answer, error) in
@@ -57,9 +78,6 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
             result(answer)
           }
         })
-    } catch {
-      result(FlutterError(code: "MiniLm", message: "Failed to get embedding", details: error))
-    }
   }
 
   public func doSileroVad(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -68,7 +86,7 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
     let previousState = (call.arguments as! [Any])[2] as! [String: Any]
 
     if cachedSileroVadModelPath != path {
-      cachedSileroVad = try? OrtVad(modelPath: path)
+      cachedSileroVad = OrtVad(modelPath: path)
       cachedSileroVadModelPath = path
     }
 
@@ -109,12 +127,8 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
       return
     }
 
-    do {
-      let answer = model.doInference(audioBytes: audioBytes, previousState: previousState)
-      result(answer)
-    } catch {
-      result(FlutterError(code: "SileroVad", message: "Failed to get inference", details: error))
-    }
+    let answer = model.doInference(audioBytes: audioBytes, previousState: previousState)
+    result(answer)
   }
 
   public func doWhisper(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -122,7 +136,7 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
     let audioData = (call.arguments as! [Any])[1] as! FlutterStandardTypedData
 
     if cachedWhisperModelPath != path {
-      cachedWhisper = try? OrtWhisper(modelPath: path)
+      cachedWhisper = OrtWhisper(modelPath: path)
       cachedWhisperModelPath = path
     }
 
@@ -163,7 +177,6 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
       return
     }
 
-    do {
       model.getTranscription(
         audioBytes: audioBytes,
         completion: { (answer, error) in
@@ -175,8 +188,5 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
             result(answer)
           }
         })
-    } catch {
-      result(FlutterError(code: "Whisper", message: "Failed to get transcription", details: error))
-    }
   }
 }

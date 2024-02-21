@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'magika_abstract.dart'
+import 'magika_none.dart'
     if (dart.library.io) 'magika_native.dart'
     if (dart.library.js) 'magika_web.dart';
 
@@ -47,33 +47,33 @@ Future<MagikaType> getTypeFromResultVector(Float32List resultVector) async {
   return matchingType;
 }
 
-List<int> trimBytes(List<int> bytes) {
-  int start = 0;
-  int end = bytes.length - 1;
-
-  // Identifying leading white spaces/new lines.
-  while (start <= end &&
-      (bytes[start] == 32 || bytes[start] == 10 || bytes[start] == 13)) {
-    start++;
-  }
-
-  // Identifying trailing white spaces/new lines.
-  while (end >= start &&
-      (bytes[end] == 32 || bytes[end] == 10 || bytes[end] == 13)) {
-    end--;
-  }
-
-  // If there's nothing to trim, return the original bytes; otherwise, return the trimmed subsection.
-  return (start <= end) ? bytes.sublist(start, end + 1) : [];
-}
-
 ModelFeatures extractFeaturesFromBytes(Uint8List content,
     {int paddingToken = 256,
     int begSize = 512,
     int midSize = 512,
     int endSize = 512}) {
-  content = Uint8List.fromList( trimBytes(content));
-  // Initialize the arrays with padding
+  List<int> trimBytes(List<int> bytes) {
+    int start = 0;
+    int end = bytes.length - 1;
+
+    // Identifying leading white spaces/new lines.
+    while (start <= end &&
+        (bytes[start] == 32 || bytes[start] == 10 || bytes[start] == 13)) {
+      start++;
+    }
+
+    // Identifying trailing white spaces/new lines.
+    while (end >= start &&
+        (bytes[end] == 32 || bytes[end] == 10 || bytes[end] == 13)) {
+      end--;
+    }
+
+    // If there's nothing to trim, return the original bytes; otherwise, return the trimmed subsection.
+    return (start <= end) ? bytes.sublist(start, end + 1) : [];
+  }
+
+  content = Uint8List.fromList(trimBytes(content));
+
   List<int> beg = [];
   List<int> mid = [];
   List<int> end = [];
@@ -856,8 +856,6 @@ enum MagikaType {
   final String mimetype;
   final String description;
 }
-
-
 
 final labels = [
   "ai",

@@ -35,7 +35,6 @@ class OrtWhisper {
       let session = sessionObjects.session
       let outputName = "str"
 
-      let startDate = Date()
       // The more exact construction here, and in the caller, avoids an error of "Invalid audio format"
       // It seems otherwise the bytes are not interpreted as Uint8.
       let audioData = convertAudioBytesToFloats(audioBytes: audioBytes)
@@ -65,7 +64,6 @@ class OrtWhisper {
       }
       // Assuming model outputs a string tensor
       let outputString = try rawOutputValue.tensorStringData()
-      let interval = Date().timeIntervalSince(startDate) * 1000
       completion(outputString.first, nil)
     } catch {
 

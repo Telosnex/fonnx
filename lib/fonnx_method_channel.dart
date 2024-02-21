@@ -16,7 +16,19 @@ class MethodChannelFonnx extends FonnxPlatform {
     return version;
   }
 
-  /// Create embeddi∑ngs for [inputs].
+  @override
+  Future<Float32List> magika({
+    required String modelPath,
+    required List<int> bytes,
+  }) async {
+    final result = await methodChannel.invokeMethod<Float32List>(
+      'magika',
+      [modelPath, bytes],
+    );
+    return result ?? Float32List(0);
+  }
+  
+  /// Create embeddings for [inputs].
   /// Inputs are BERT tokens. Use [WordpieceTokenizer] to convert a [String].
   @override
   Future<Float32List?> miniLm({
