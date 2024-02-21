@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fonnx_example/magika_widget.dart';
 import 'package:fonnx_example/minilml6v2_widget.dart';
 import 'package:fonnx_example/msmarco_minilm_l6v3_widget.dart';
 import 'package:fonnx_example/silero_vad_widget.dart';
@@ -45,19 +46,16 @@ class _MyAppState extends State<MyApp> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  MiniLmL6V2Widget(),
-                  SizedBox(
-                    height: 16,
-                  ),
-                  MsmarcoMiniLmL6V3Widget(),
-                  SizedBox(
-                    height: 16,
-                  ),
-                  WhisperWidget(),
-                  SizedBox(
-                    height: 16,
-                  ),
+                  MagikaWidget(),
+                  SizedBox(height: 16),
                   SileroVadWidget(),
+                  SizedBox(height: 16),
+                  MiniLmL6V2Widget(),
+                  SizedBox(height: 16),
+                  MsmarcoMiniLmL6V3Widget(),
+                  SizedBox(height: 16),
+                  WhisperWidget(),
+                  SizedBox(height: 16),
                 ],
               ),
             ),

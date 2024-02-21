@@ -24,11 +24,55 @@ class ModelFeatures {
   ModelFeatures({required this.beg, required this.mid, required this.end});
 }
 
+Future<MagikaType> getTypeFromResultVector(Float32List resultVector) async {
+  int maxIndex = 0; // Default to the first index if all else fails.
+  double maxValue = -double.infinity;
+
+  // Efficiently find the index of the maximum value in the result vector
+  for (int i = 0; i < resultVector.length; i++) {
+    if (resultVector[i] > maxValue) {
+      maxValue = resultVector[i];
+      maxIndex = i;
+      // final label = labels[maxIndex];
+      // print('Label: $label, Value: $maxValue');
+    }
+  }
+  final label = labels[maxIndex];
+  assert(resultVector.length == labels.length,
+      'Result vector length does not match the number of labels');
+  final matchingType = MagikaType.values.firstWhere(
+    (type) => type.label == label,
+    orElse: () => MagikaType.unknown,
+  );
+  return matchingType;
+}
+
+List<int> trimBytes(List<int> bytes) {
+  int start = 0;
+  int end = bytes.length - 1;
+
+  // Identifying leading white spaces/new lines.
+  while (start <= end &&
+      (bytes[start] == 32 || bytes[start] == 10 || bytes[start] == 13)) {
+    start++;
+  }
+
+  // Identifying trailing white spaces/new lines.
+  while (end >= start &&
+      (bytes[end] == 32 || bytes[end] == 10 || bytes[end] == 13)) {
+    end--;
+  }
+
+  // If there's nothing to trim, return the original bytes; otherwise, return the trimmed subsection.
+  return (start <= end) ? bytes.sublist(start, end + 1) : [];
+}
+
 ModelFeatures extractFeaturesFromBytes(Uint8List content,
     {int paddingToken = 256,
     int begSize = 512,
     int midSize = 512,
     int endSize = 512}) {
+  content = Uint8List.fromList( trimBytes(content));
   // Initialize the arrays with padding
   List<int> beg = [];
   List<int> mid = [];
@@ -812,3 +856,121 @@ enum MagikaType {
   final String mimetype;
   final String description;
 }
+
+
+
+final labels = [
+  "ai",
+  "apk",
+  "appleplist",
+  "asm",
+  "asp",
+  "batch",
+  "bmp",
+  "bzip",
+  "c",
+  "cab",
+  "cat",
+  "chm",
+  "coff",
+  "crx",
+  "cs",
+  "css",
+  "csv",
+  "deb",
+  "dex",
+  "dmg",
+  "doc",
+  "docx",
+  "elf",
+  "emf",
+  "eml",
+  "epub",
+  "flac",
+  "gif",
+  "go",
+  "gzip",
+  "hlp",
+  "html",
+  "ico",
+  "ini",
+  "internetshortcut",
+  "iso",
+  "jar",
+  "java",
+  "javabytecode",
+  "javascript",
+  "jpeg",
+  "json",
+  "latex",
+  "lisp",
+  "lnk",
+  "m3u",
+  "macho",
+  "makefile",
+  "markdown",
+  "mht",
+  "mp3",
+  "mp4",
+  "mscompress",
+  "msi",
+  "mum",
+  "odex",
+  "odp",
+  "ods",
+  "odt",
+  "ogg",
+  "outlook",
+  "pcap",
+  "pdf",
+  "pebin",
+  "pem",
+  "perl",
+  "php",
+  "png",
+  "postscript",
+  "powershell",
+  "ppt",
+  "pptx",
+  "python",
+  "pythonbytecode",
+  "rar",
+  "rdf",
+  "rpm",
+  "rst",
+  "rtf",
+  "ruby",
+  "rust",
+  "scala",
+  "sevenzip",
+  "shell",
+  "smali",
+  "sql",
+  "squashfs",
+  "svg",
+  "swf",
+  "symlinktext",
+  "tar",
+  "tga",
+  "tiff",
+  "torrent",
+  "ttf",
+  "txt",
+  "unknown",
+  "vba",
+  "wav",
+  "webm",
+  "webp",
+  "winregistry",
+  "wmf",
+  "xar",
+  "xls",
+  "xlsb",
+  "xlsx",
+  "xml",
+  "xpi",
+  "xz",
+  "yaml",
+  "zip",
+  "zlibstream"
+];

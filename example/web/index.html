@@ -49,6 +49,10 @@
   -->
   <!-- REQUIRED FOR: ALL models. -->
   <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+  <!-- REQUIRED FOR: Magika -->
+  <script type="module">
+    import './magika_init.js';
+  </script>
   <!-- REQUIRED FOR: MiniLM models. -->
   <!-- This script: -->
   <!-- 1. Sets up a web worker for inference to avoid blocking UI. -->
