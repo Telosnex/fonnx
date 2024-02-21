@@ -62,21 +62,34 @@ extension DartNativeFunctions on OrtApi {
     required Pointer<OrtMemoryInfo> memoryInfo,
     required List<List<int>> values,
   }) {
-    final sizeOfFloat32 = sizeOf<Float>();
     final flatArray = values.expand((i) => i).toList();
-    final inputTensorNative = calloc<Float>(flatArray.length * sizeOfFloat32);
+    final inputTensorNative = calloc<Float>(flatArray.length);
     for (var i = 0; i < flatArray.length; i += 1) {
       inputTensorNative[i] = flatArray[i].toDouble();
+      // Extremely useful for debugging failures, allows comparison of Magika
+      // example code's input array to our input array.
+      // 
+      // Magika can be thought of as a model that takes 1536 bytes and returns
+      // a 113-length vector of floats.
+      //
+      // The bytes have to become floats, have leading and trailing whitespace
+      // trimmed. These requirements are non-obvious and only were identified
+      // through failing tests. Moreover, tests are very sensitive due to the
+      // nature of the model and the size of the test files. ex. trimming one
+      // whitespace character in html.htm led to it being detected as 
+      // javascript.
+      // print(
+      //     'inputTensorNative[$i] => ${flatArray[i]} => ${inputTensorNative[i]}');
     }
-    final inputShape = calloc<Int64>(2 * sizeOf<Int64>());
-    inputShape[0] = values.length;
-    inputShape[1] = values.first.length;
+    final inputShape = calloc<Int64>(2);
+    inputShape[0] = 1;
+    inputShape[1] = flatArray.length;
     final ptrVoid = inputTensorNative.cast<Void>();
     final status = createTensorWithDataAsOrtValue(
       inputTensorPointer,
       memoryInfo: memoryInfo,
       inputData: ptrVoid,
-      inputDataLengthInBytes: flatArray.length * sizeOfFloat32,
+      inputDataLengthInBytes: flatArray.length * sizeOf<Float>(),
       inputShape: inputShape,
       inputShapeLengthInBytes: 2,
       onnxTensorElementDataType:

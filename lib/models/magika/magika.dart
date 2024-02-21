@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'magika_abstract.dart'
@@ -17,53 +16,87 @@ abstract class Magika {
 }
 
 class ModelFeatures {
-  Uint8List beg;
-  Uint8List mid;
-  Uint8List end;
-  Uint8List get all => Uint8List.fromList([...beg, ...mid, ...end]);
+  List<int> beg;
+  List<int> mid;
+  List<int> end;
+  List<int> get all => [...beg, ...mid, ...end];
 
   ModelFeatures({required this.beg, required this.mid, required this.end});
 }
 
 ModelFeatures extractFeaturesFromBytes(Uint8List content,
-    {int paddingToken = 255,
+    {int paddingToken = 256,
     int begSize = 512,
     int midSize = 512,
     int endSize = 512}) {
   // Initialize the arrays with padding
-  List<int> beg = List<int>.filled(begSize, paddingToken);
-  List<int> mid = List<int>.filled(midSize, paddingToken);
-  List<int> end = List<int>.filled(endSize, paddingToken);
+  List<int> beg = [];
+  List<int> mid = [];
+  List<int> end = [];
 
-  // Beginning chunk
-  for (int i = 0; i < math.min(content.length, begSize); i++) {
-    beg[i] = content[i];
-    // print('beg using $i for content.length ${content.length} and begSize $begSize');
+  if (begSize > 0) {
+    if (begSize < content.length) {
+      beg = List<int>.filled(begSize, 0);
+      for (int i = 0; i < begSize; i++) {
+        beg[i] = content[i];
+      }
+    } else {
+      final paddingSize = begSize - content.length;
+      beg = [
+        ...content,
+        ...List<int>.filled(paddingSize, paddingToken),
+      ];
+    }
   }
+  assert(beg.length == begSize);
 
   // Middle chunk
-  int midPoint = ((content.length / 2).round()) * 2; // Ensuring it's even
-  int startHalf = math.max(0, midPoint - (midSize ~/ 2));
-  int endHalf = math.min(content.length, startHalf + midSize);
+  if (midSize > 0) {
+    final midIdx = (content.length ~/ 2);
+    if (midSize < content.length) {
+      final leftIndex = midIdx - (midSize ~/ 2);
 
-  for (int i = startHalf; i < endHalf; i++) {
-    mid[(i - startHalf) + (midSize - (endHalf - startHalf)) ~/ 2] = content[i];
-    // print('mid using $i for startHalf $startHalf and endHalf $endHalf');
-  }
+      final midSizeIsEven = midSize.isEven;
+      final rightIndex = midIdx + (midSize ~/ 2) + (midSizeIsEven ? 0 : 1);
+      mid = content.sublist(leftIndex, rightIndex);
+    } else {
+      final totalPaddingSize = midSize - content.length;
+      final leftPaddingSize = totalPaddingSize ~/ 2;
+      final paddingIsEven = totalPaddingSize.isEven;
+      final rightPaddingSize = leftPaddingSize + (paddingIsEven ? 0 : 1);
 
-  // End chunk
-  for (int i = math.max(0, content.length - endSize), j = 0;
-      i < content.length;
-      i++, j++) {
-    end[j + (endSize - math.min(content.length, endSize))] = content[i];
-    // print('end using $i for content.length ${content.length} and endSize $endSize');
+      mid = [
+        ...List<int>.filled(leftPaddingSize, paddingToken),
+        ...content,
+        ...List<int>.filled(rightPaddingSize, paddingToken),
+      ];
+    }
+  } else {
+    mid = [];
   }
+  assert(mid.length == midSize, 'Mid length: ${mid.length}');
+
+  if (endSize > 0) {
+    if (endSize < content.length) {
+      end = List<int>.filled(endSize, 0);
+      for (int i = 0; i < endSize; i++) {
+        end[i] = content[content.length - endSize + i];
+      }
+    } else {
+      final paddingSize = endSize - content.length;
+      end = [
+        ...List<int>.filled(paddingSize, paddingToken),
+        ...content,
+      ];
+    }
+  }
+  assert(end.length == endSize);
 
   // Convert lists back to Uint8List
   return ModelFeatures(
-    beg: Uint8List.fromList(beg),
-    mid: Uint8List.fromList(mid),
-    end: Uint8List.fromList(end),
+    beg: beg,
+    mid: mid,
+    end: end,
   );
 }
 

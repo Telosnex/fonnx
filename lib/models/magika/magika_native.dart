@@ -19,7 +19,6 @@ class MagikaNative implements Magika {
   @override
   Future<MagikaType> getType(List<int> bytes) async {
     await _isolate.start();
-
     final Float32List resultVector;
     if (!kIsWeb && Platform.environment['FLUTTER_TEST'] == 'true') {
       resultVector = await _isolate.sendInference(modelPath, bytes);
@@ -27,23 +26,23 @@ class MagikaNative implements Magika {
       switch (defaultTargetPlatform) {
         case TargetPlatform.android:
         case TargetPlatform.iOS:
-          resultVector = await getMagikaResultVectorViaPlatformChannel(bytes);
+          resultVector = await _getMagikaResultVectorViaPlatformChannel(bytes);
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
         case TargetPlatform.windows:
-          resultVector = await getMagikaResultVectorViaFfi(bytes);
+          resultVector = await _getMagikaResultVectorViaFfi(bytes);
         case TargetPlatform.fuchsia:
           throw UnimplementedError();
       }
     }
-    return getTypeFromResultVector(resultVector);
+    return _getTypeFromResultVector(resultVector);
   }
 
-  Future<Float32List> getMagikaResultVectorViaFfi(List<int> bytes) {
+  Future<Float32List> _getMagikaResultVectorViaFfi(List<int> bytes) {
     return _isolate.sendInference(modelPath, bytes);
   }
 
-  Future<Float32List> getMagikaResultVectorViaPlatformChannel(
+  Future<Float32List> _getMagikaResultVectorViaPlatformChannel(
       List<int> bytes) async {
     final fonnx = _fonnx ??= Fonnx();
     final type = await fonnx.magika(
@@ -53,7 +52,7 @@ class MagikaNative implements Magika {
     return type;
   }
 
-  Future<MagikaType> getTypeFromResultVector(Float32List resultVector) async {
+  Future<MagikaType> _getTypeFromResultVector(Float32List resultVector) async {
     int maxIndex = 0; // Default to the first index if all else fails.
     double maxValue = -double.infinity;
 
@@ -67,10 +66,13 @@ class MagikaNative implements Magika {
       }
     }
     final label = labels[maxIndex];
-    final matchingTypes = MagikaType.values
-        .where((type) => type.label == label)
-        .toList(growable: false);
-    return matchingTypes.isNotEmpty ? matchingTypes.first : MagikaType.unknown;
+    assert(resultVector.length == labels.length,
+        'Result vector length does not match the number of labels');
+    final matchingType = MagikaType.values.firstWhere(
+      (type) => type.label == label,
+      orElse: () => MagikaType.unknown,
+    );
+    return matchingType;
   }
 }
 

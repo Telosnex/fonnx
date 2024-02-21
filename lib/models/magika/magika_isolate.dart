@@ -138,15 +138,6 @@ class MagikaIsolateManager {
   }
 }
 
-/// Return value is a Map<String, dynamic> with keys 'output', 'hn', 'cn'.
-/// 'output' is a Float32List, 'hn' and 'cn' are List<List<Float32List>>.
-/// The 'hn' and 'cn' are reshaped to [2, 1, 64] from [2, 64].
-/// This allows them to be passed to the next inference.
-///
-/// It is purposefully designed to be a primitive return value in order to avoid
-/// issues with use in Isolates or via Squadron. Custom objects are
-/// supported by both, but in practice, add complication and aren't worth the
-/// trade-off in this case.
 Future<Float32List> _getMagikaResultVector(
   OrtSessionObjects session,
   List<int> bytes,
@@ -156,15 +147,11 @@ Future<Float32List> _getMagikaResultVector(
   //    float32[batch, 1536]
   // Outputs:
   // - target_label: float32[batch, 113]
-
   final memoryInfo = calloc<Pointer<OrtMemoryInfo>>();
   session.api.createCpuMemoryInfo(memoryInfo);
   final inputValue = calloc<Pointer<OrtValue>>();
-  session.api.createFloat32Tensor2DFromInts(
-    inputValue,
-    memoryInfo: memoryInfo.value,
-    values: [bytes]
-  );
+  session.api.createFloat32Tensor2DFromInts(inputValue,
+      memoryInfo: memoryInfo.value, values: [bytes]);
   const kInputCount = 1;
   final inputNamesPointer = calloc<Pointer<Pointer<Char>>>(kInputCount);
   inputNamesPointer[0] = 'bytes'.toNativeUtf8().cast();

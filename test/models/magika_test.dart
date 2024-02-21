@@ -5,18 +5,42 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fonnx/models/magika/magika.dart';
 import 'package:fonnx/models/magika/magika_native.dart';
 
+List<int> trimBytes(List<int> bytes) {
+  int start = 0;
+  int end = bytes.length - 1;
+
+  // Identifying leading white spaces/new lines.
+  while (start <= end &&
+      (bytes[start] == 32 || bytes[start] == 10 || bytes[start] == 13)) {
+    start++;
+  }
+
+  // Identifying trailing white spaces/new lines.
+  while (end >= start &&
+      (bytes[end] == 32 || bytes[end] == 10 || bytes[end] == 13)) {
+    end--;
+  }
+
+  // If there's nothing to trim, return the original bytes; otherwise, return the trimmed subsection.
+  return (start <= end) ? bytes.sublist(start, end + 1) : [];
+}
+
+
 void main() {
   const modelPath = 'example/assets/models/magika/magika.onnx';
   final magika = MagikaNative(modelPath);
 
-  Future<Uint8List> getBytes(String path) async {
+  Future<List<int>> getBytes(String path) async {
     String testFilePath = 'test/data/magika/$path';
     File file = File(testFilePath);
     final bytes = await file.readAsBytes();
-    return extractFeaturesFromBytes(bytes).all;
+    // Trim whitespace from the file bytes.
+    final trimmed = trimBytes(bytes);
+    return extractFeaturesFromBytes(Uint8List.fromList(trimmed)).all;
   }
 
-  Future<MagikaType> getType(Uint8List bytes) async {
+ 
+  Future<MagikaType> getType(List<int> bytes) async {
     return magika.getType(bytes);
   }
 
@@ -24,20 +48,6 @@ void main() {
     final bytes = await getBytes('basic/code.asm');
     final type = await getType(bytes);
     expect(type, MagikaType.asm);
-  });
-
-  group('failing', skip: 'failing', () {
-    test('doc.html', () async {
-      final bytes = await getBytes('basic/doc.html');
-      final type = await getType(bytes);
-      expect(type, MagikaType.html);
-    });
-
-    test('xz.xz', () async {
-      final bytes = await getBytes('mitra/xz.xz');
-      final type = await getType(bytes);
-      expect(type, MagikaType.xz);
-    });
   });
 
   test('code.c', () async {
@@ -86,6 +96,12 @@ void main() {
     final bytes = await getBytes('basic/doc.epub');
     final type = await getType(bytes);
     expect(type, MagikaType.epub);
+  });
+
+  test('doc.html', () async {
+    final bytes = await getBytes('basic/doc.html');
+    final type = await getType(bytes);
+    expect(type, MagikaType.html);
   });
 
   test('doc.ini', () async {
@@ -265,7 +281,7 @@ void main() {
   test('pcapng.pcapng', () async {
     final bytes = await getBytes('mitra/pcapng.pcapng');
     final type = await getType(bytes);
-    expect(type, MagikaType.pythonbytecode);
+    expect(type, MagikaType.pcap);
   });
 
   test('pdf.pdf', () async {
@@ -368,5 +384,11 @@ void main() {
     final bytes = await getBytes('mitra/zip.zip');
     final type = await getType(bytes);
     expect(type, MagikaType.zip);
+  });
+
+  test('xz.xz', () async {
+    final bytes = await getBytes('mitra/xz.xz');
+    final type = await getType(bytes);
+    expect(type, MagikaType.xz);
   });
 }
