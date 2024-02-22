@@ -47,7 +47,6 @@ Future<MagikaType> getTypeFromResultVector(Float32List resultVector) async {
   final matchingType = MagikaType.values.firstWhere(
     (type) => type.targetLabel == label,
     orElse: () {
-      print('Unknown label: $label');
       return MagikaType.unknown;
     },
   );
