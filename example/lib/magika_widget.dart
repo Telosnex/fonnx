@@ -94,7 +94,7 @@ Future<List<int>?> _pickFileBytes() async {
   if (result.files.isEmpty) {
     return null;
   }
-  if (!kIsWeb && Platform.isIOS && result.files.first.bytes == null) {
+  if (!kIsWeb && result.files.first.bytes == null) {
     final file = File(result.files.first.path!);
     return file.readAsBytes();
   }

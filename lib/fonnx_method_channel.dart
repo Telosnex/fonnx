@@ -21,11 +21,15 @@ class MethodChannelFonnx extends FonnxPlatform {
     required String modelPath,
     required List<int> bytes,
   }) async {
-    final result = await methodChannel.invokeMethod<Float32List>(
+    final result = await methodChannel.invokeMethod<List<Object?>>(
       'magika',
       [modelPath, bytes],
     );
-    return result ?? Float32List(0);
+    final cast = result?.cast<double>();
+    if (cast == null) {
+      throw Exception('Invalid result from platform');
+    }
+    return Float32List.fromList(cast);
   }
   
   /// Create embeddings for [inputs].

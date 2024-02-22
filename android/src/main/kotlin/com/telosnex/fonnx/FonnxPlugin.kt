@@ -11,6 +11,8 @@ import io.flutter.plugin.common.MethodChannel.Result
 class FonnxPlugin : FlutterPlugin, MethodCallHandler {
     private val mainScope = CoroutineScope(Dispatchers.Main)
 
+    var cachedMagikaPath: String? = null
+    var cachedMagika: OrtMagika? = null
     var cachedMiniLmPath: String? = null
     var cachedMiniLm: OrtMiniLm? = null
     var cachedWhisperPath: String? = null
@@ -32,6 +34,27 @@ class FonnxPlugin : FlutterPlugin, MethodCallHandler {
         mainScope.launch {
             if (call.method == "getPlatformVersion") {
                 result.success("Android ${android.os.Build.VERSION.RELEASE}")
+            } else if (call.method == "magika") {
+              val list = call.arguments as List<Any>
+                val modelPath = list[0] as String
+                val input = list[1] as List<Int>
+                
+                if (cachedMagikaPath != modelPath) {
+                    cachedMagika = OrtMagika(modelPath)
+                    cachedMagikaPath = modelPath
+                }
+                val magika = cachedMagika
+                if (magika != null) {
+                    val floatInput = input.map { it.toFloat() }.toFloatArray()               
+                    val output = magika.doInference(floatInput)
+                    if (output != null) {
+                        result.success(output.toList())
+                    } else {
+                        result.error("Magika", "Inference failed", null)
+                    }
+                } else {
+                    result.error("Magika", "Could not instantiate model", null)
+                }
             } else if (call.method == "miniLm") {
                 val list = call.arguments as List<Any>
                 val modelPath = list[0] as String

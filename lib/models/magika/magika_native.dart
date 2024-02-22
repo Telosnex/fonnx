@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:fonnx/fonnx.dart';
-import 'package:fonnx/models/magika/magika.dart';
 import 'package:fonnx/models/magika/magika_isolate.dart';
 
 Magika getMagika(String path) => MagikaNative(path);
