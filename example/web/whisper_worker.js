@@ -1,4 +1,4 @@
-importScripts("https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.all.min.js");
+import * as ort from 'https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/esm/ort.min.js';
 
 let session = null;
 

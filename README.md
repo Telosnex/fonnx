@@ -91,10 +91,10 @@ Android uses the official ONNX Android dependencies from a Maven repository. Not
 
 ## Web
 Sending these headers with the request for the ONNX JS package gives a 10x speedup:
-
-  Cross-Origin-Embedder-Policy: require-corp
-  Cross-Origin-Opener-Policy: same-origin
-
+```
+Cross-Origin-Embedder-Policy: require-corp  
+Cross-Origin-Opener-Policy: same-origin
+```
 See [this GitHub issue](https://github.com/nagadomi/nunif/issues/34) for details. TL;DR: It allows use of multiple threads by ONNX's WASM implementation by using a SharedArrayBuffer.
 
 ### Developing with Web
@@ -108,7 +108,7 @@ You may see errors in console logs about the MIME type of the
 That is due to local Flutter serving of the web app.
 
 To fix, download the WASM files from the same CDN folder that hosts ort.min.js
-(see worker.js) and also in worker.js, remove the // in front of ort.env.wasm.wasmPaths = "". 
+(see *_worker.js) and also in *_minilm_worker.js, remove the // in front of ort.env.wasm.wasmPaths = "". 
 
 Then, place the WASM files downloaded from the CDN next to index.html.
 
