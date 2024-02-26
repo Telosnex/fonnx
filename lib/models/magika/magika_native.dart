@@ -38,7 +38,8 @@ class MagikaNative implements Magika {
   }
 
   Future<Float32List> _getMagikaResultVectorViaFfi(List<int> bytes) {
-    return _isolate.sendInference(modelPath, bytes);
+    return _isolate.sendInference(
+        modelPath, extractFeaturesFromBytes(Uint8List.fromList(bytes)).all);
   }
 
   Future<Float32List> _getMagikaResultVectorViaPlatformChannel(
