@@ -30,6 +30,8 @@ class _MiniLmL6V2WidgetState extends State<MiniLmL6V2Widget> {
           'MiniLM L6 V2',
           style: Theme.of(context).textTheme.headlineLarge,
         ),
+        const Text(
+            '23 MB model can convert text to a 384-dimensional vector. By Microsoft.\nFor symmetric search: matching a query to other text like it.'),
         heightPadding,
         Row(
           mainAxisAlignment: MainAxisAlignment.start,

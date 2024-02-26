@@ -31,6 +31,8 @@ class _MsmarcoMiniLmL6V3WidgetState extends State<MsmarcoMiniLmL6V3Widget> {
           'MSMARCO MiniLM L6 V3',
           style: Theme.of(context).textTheme.headlineLarge,
         ),
+        const Text(
+            '23 MB model can convert text to a 384-dimensional vector. By Microsoft.\nFor asymmetric search: matching a query to documents with the answer in them.'),
         heightPadding,
         Row(
           mainAxisAlignment: MainAxisAlignment.start,

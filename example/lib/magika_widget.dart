@@ -32,6 +32,8 @@ class _MagikaWidgetState extends State<MagikaWidget> {
           'Magika',
           style: Theme.of(context).textTheme.headlineLarge,
         ),
+        const Text(
+            '1 MB model detects 113 types of documents from 1.5 KB. By Google.'),
         heightPadding,
         Row(
           mainAxisAlignment: MainAxisAlignment.start,

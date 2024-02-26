@@ -25,6 +25,7 @@ dependencies:
   record: ^5.0.4
   audioplayers: ^5.2.1
   file_picker: ^6.1.1
+  collection: ^1.18.0
 
 dev_dependencies:
   integration_test:

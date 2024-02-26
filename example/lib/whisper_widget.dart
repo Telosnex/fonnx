@@ -30,6 +30,8 @@ class _WhisperWidgetState extends State<WhisperWidget> {
           'Whisper',
           style: Theme.of(context).textTheme.headlineLarge,
         ),
+        const Text(
+            'Models ranging from 75 MB to 550 MB provide speech recognition. By OpenAI.'),
         heightPadding,
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
