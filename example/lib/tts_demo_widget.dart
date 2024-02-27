@@ -296,6 +296,7 @@ class _TtsDemoWidgetState extends State<TtsDemoWidget> {
         _sttServiceResponse = event;
       });
     });
+    _sttStreamSubscription = subscription;
     subscription.onDone(() {
       setState(() {
         _sttStreamSubscription = null;
