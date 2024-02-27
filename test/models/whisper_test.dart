@@ -18,7 +18,7 @@ void main() {
       : null;
 
   test('Whisper works', skip: skipReason, () async {
-    String testFilePath = 'test/data/rain_in_spain.wav';
+    String testFilePath = 'test/data/audio_sample_ac1_ar16000.pcm';
     File file = File(testFilePath);
     final bytes = await file.readAsBytes();
     final transcript = await whisper.doInference(bytes);
@@ -27,7 +27,7 @@ void main() {
     // whisper_base:
     //  expect(transcript.trim(), 'The rain in Spain falls, mainly on the plain.');
     // whisper_small:
-    //    expect(transcript.trim(), 'The rain in Spain falls mainly on the plain.');
+    //  expect(transcript.trim(), 'The rain in Spain falls mainly on the plain.');
   });
 
   test('Whisper over 30 seconds does not work', skip: skipReason, () async {
