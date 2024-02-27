@@ -4,7 +4,7 @@ const miniLmCores = navigator.hardwareConcurrency;
 let cachedMiniLmModelPath = null;
 let cachedMiniLmModelPromise = null;
 
-const miniLmWorker = new Worker('minilm_worker.js', { type: 'module' });
+const miniLmWorker = new Worker('fonnx_minilm_worker.js', { type: 'module' });
 
 // Simplified logs for brevity; can be extended to log each property if required.
 miniLmWorker.onmessage = function (e) {

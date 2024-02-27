@@ -4,7 +4,7 @@
  let cachedSileroVadModelPath = null;
  let cachedSileroVadModelPromise = null;
 
- const sileroVadWorker = new Worker('silero_vad_worker.js', { type: 'module' });
+ const sileroVadWorker = new Worker('fonnx_silero_vad_worker.js', { type: 'module' });
 
  const sileroVadMessageIdToResolve = new Map();
  const sileroVadMessageIdToReject = new Map();

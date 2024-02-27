@@ -1,6 +1,6 @@
 let magikaCachedModelPath = null;
 let magikaCachedModelPromise = null;
-const magikaWorker = new Worker(new URL('./magika_worker.js', import.meta.url), { type: 'module' });
+const magikaWorker = new Worker(new URL('fonnx_magika_worker.js', import.meta.url), { type: 'module' });
 const magikaMessageIdToResolve = new Map();
 const magikaMessageIdToReject = new Map();
 

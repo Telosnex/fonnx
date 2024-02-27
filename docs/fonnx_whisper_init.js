@@ -4,7 +4,7 @@
  let cachedWhisperModelPath = null;
  let cachedWhisperModelPromise = null;
 
- const whisperWorker = new Worker('whisper_worker.js', { type: 'module' });
+ const whisperWorker = new Worker('fonnx_whisper_worker.js', { type: 'module' });
 
  // Simplified logs for brevity; can be extended to log each property if required.
  whisperWorker.onmessage = function (e) {
