@@ -161,6 +161,14 @@ void main() {
     return magika.getType(bytes);
   }
 
+  test('text formats', skip: 'not needed; lists text formats', () async {
+    for (final magikaType in MagikaType.values) {
+      if (magikaType.tags.contains(MagikaTag.text)) {
+        print(magikaType);
+      }
+    }
+  });
+
   test('code.asm', () async {
     final bytes = await getBytes('basic/code.asm');
     final type = await getType(bytes);
