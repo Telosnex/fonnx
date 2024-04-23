@@ -65,7 +65,7 @@ definitions:
     name: Linux packages
     script: |
       sudo apt-get update
-      sudo apt-get install --y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+      sudo apt-get install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
   script_linux_build: &script_linux_build
     name: Linux build
     script: cd example && flutter build linux --verbose --no-tree-shake-icons
