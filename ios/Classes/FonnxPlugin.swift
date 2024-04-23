@@ -67,17 +67,17 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
       return
     }
 
-      model.getEmbedding(
-        tokens: tokens,
-        completion: { (answer, error) in
-          if let error = error {
-            result(
-              FlutterError(code: "MiniLm", message: "Failed to get embedding", details: error)
-            )
-          } else {
-            result(answer)
-          }
-        })
+    model.getEmbedding(
+      tokens: tokens,
+      completion: { (answer, error) in
+        if let error = error {
+          result(
+            FlutterError(code: "MiniLm", message: "Failed to get embedding", details: error)
+          )
+        } else {
+          result(answer)
+        }
+      })
   }
 
   public func doSileroVad(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -177,16 +177,16 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
       return
     }
 
-      model.getTranscription(
-        audioBytes: audioBytes,
-        completion: { (answer, error) in
-          if let error = error {
-            result(
-              FlutterError(code: "Whisper", message: "Failed to get transcription", details: error)
-            )
-          } else {
-            result(answer)
-          }
-        })
+    model.getTranscription(
+      audioBytes: audioBytes,
+      completion: { (answer, error) in
+        if let error = error {
+          result(
+            FlutterError(code: "Whisper", message: "Failed to get transcription", details: error)
+          )
+        } else {
+          result(answer)
+        }
+      })
   }
 }
