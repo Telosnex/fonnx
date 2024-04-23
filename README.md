@@ -14,6 +14,16 @@ framework."
 
 # Changelog
 
+## 2024 Apr 22
+- CI builds for all platforms are now running on Codemagic..
+
+## 2024 Feb 26
+- Google's [Magika](https://google.github.io/magika/) for file identification supported on all platforms.
+- Example app including full voice assistant flow, with Whisper, Silero voice activity detection. Available at [telosnex.github.io/fonnx/](https://telosnex.github.io/fonnx/)
+
+## 2024 Feb 19
+- Whisper supported on all platforms, including web.
+
 ## 2024 Feb 13
 
 - Whisper now supported on all platforms besides web.
