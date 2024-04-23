@@ -1,0 +1,257 @@
+definitions:
+  cache_paths: &cache_paths
+    # From https://docs.codemagic.io/yaml-basic-configuration/yaml-getting-started/
+    # Except ~/.pub-cache: found that by logging into build machine. The $FLUTTER_ROOT
+    # environment variable in the above link is not actually set.
+    cache_paths:
+      - ~/.pub-cache
+      - ~/.gradle/caches
+      - $HOME/Library/Caches/CocoaPods
+      - $CM_BUILD_DIR/node_modules
+  email_notifications: &email_notifications
+    email:
+      recipients:
+        - james@telosnex.com
+      notify:
+        failure: true
+  env_keys: &env_keys
+    groups:
+      - app
+  # https://docs.codemagic.io/yaml-basic-configuration/yaml-getting-started/#instance-type
+  instance_linux: &instance_linux
+    instance_type: linux_x2
+    max_build_duration: 15 # minutes.
+  instance_linux_release_build: &instance_linux_release_build
+    instance_type: linux_x2
+    max_build_duration: 90 # minutes. Android observed to take 57 minutes on 2023 12 22.
+  instance_mac_mini_m2: &instance_mac_mini_m2
+    instance_type: mac_mini_m2
+    max_build_duration: 15 # minutes
+  instance_mac_release_build: &instance_mac_release_build
+    instance_type: mac_mini_m2
+    max_build_duration: 90 # minutes
+  instance_mac_release_combo_build: &instance_mac_release_combo_build
+    instance_type: mac_mini_m2
+    max_build_duration: 120 # minutes
+  instance_windows: &instance_windows
+    instance_type: windows_x2
+    max_build_duration: 15 # minutes.
+  instance_windows_build: &instance_windows_build
+    instance_type: windows_x2
+    max_build_duration: 60 # minutes.
+  env_versions: &env_versions
+    flutter: stable
+    xcode: latest
+    cocoapods: 1.15.2
+    java: 17
+  trigger_on_push: &trigger_on_push
+    events:
+      - push
+    branch_patterns:
+      - pattern: "*"
+    cancel_previous_builds: true
+  script_android_build: &script_android_build
+    name: Build AAB
+    script:  |
+      cd example && flutter build appbundle --verbose --no-tree-shake-icons
+  script_android_setup: &script_android_setup
+    name: Android setup
+    script: echo "flutter.sdk=$HOME/programs/flutter" > "$CM_BUILD_DIR/android/local.properties"
+  script_ios_build: &script_ios_build
+    name: Build IPA
+    script: |
+      cd example && flutter build ios --verbose --no-tree-shake-icons
+  script_linux_build: &script_linux_build
+    name: Linux build
+    script: cd example && flutter build linux --verbose --no-tree-shake-icons
+  script_macos_build: &script_macos_build
+    name: macOS build
+    script: |
+      cd example && flutter build macos --verbose --no-tree-shake-icons
+  script_web_build: &script_web_build
+    name: Web build
+    script: |
+      cd example && flutter build web --web-renderer canvaskit --no-tree-shake-icons
+  script_windows_build: &script_windows_build
+    name: Windows build
+    script: |
+      # Ensure NuGet executable exists and set its path
+      $nugetExePath = "$env:DOTNET_PATH\nuget.exe"
+      if (-not (Test-Path $nugetExePath)) {
+        Write-Error "nuget.exe not found at the specified location: $nugetExePath"
+        exit 1
+      }
+      $env:NUGET_EXE = $nugetExePath
+
+      # Print the environment variables for verification
+      Write-Host "DOTNET_PATH: $env:DOTNET_PATH"
+      Write-Host "NUGET_EXE: $env:NUGET_EXE"
+      Write-Host "PATH: $env:PATH"
+
+      # Test running NuGet to verify accessibility
+      Try {
+        & "$env:NUGET_EXE" help | Out-Null
+      } Catch {
+        Write-Error "Failed to execute nuget.exe with error: $_"
+        exit 1
+      }
+      
+      # Update the PATH to include DOTNET_PATH
+      $env:PATH = "$env:DOTNET_PATH;$env:PATH"
+      Write-Host "Updated PATH: $env:PATH"
+
+      Write-Host "Environment Variables just before CMake call:"
+      Get-ChildItem env:
+      Write-Host "Building with Flutter..."
+      cd example; flutter build windows --verbose --no-tree-shake-icons
+  # Required for llama.cpp / cmake. Fixes "NUGET.EXE not found." error on codemagic.
+  # codemagic .NET MAUI apps docs referenced for implementation:
+  #   https://docs.codemagic.io/yaml-quick-start/building-a-dotnet-maui-app/
+  script_windows_install_nuget: &script_windows_install_nuget
+    name: Install NuGet
+    script: |
+      try {
+        Write-Host "Using DOTNET_PATH: $env:DOTNET_PATH"
+        Write-Host "Using DOTNET: $env:DOTNET"
+
+        if (-not (Test-Path $env:DOTNET_PATH)) {
+          Write-Host "Creating directory: $env:DOTNET_PATH"
+          New-Item -ItemType Directory -Force -Path $env:DOTNET_PATH
+        } else {
+          Write-Host "Directory already exists: $env:DOTNET_PATH"
+        }
+
+        $nugetUrl = "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe"
+        $nugetExePath = Join-Path $env:DOTNET_PATH "nuget.exe"
+        Write-Host "Downloading NuGet from $nugetUrl to $nugetExePath"
+        Invoke-WebRequest -Uri $nugetUrl -OutFile $nugetExePath
+        Write-Host "Download completed successfully."
+
+        Write-Host "Adding $env:DOTNET_PATH to PATH"
+        $env:PATH = "$env:DOTNET_PATH;$env:PATH"
+        
+        [Environment]::SetEnvironmentVariable("PATH", $env:PATH + ";$env:DOTNET_PATH", [EnvironmentVariableTarget]::User)
+
+        Write-Host "Verifying NuGet installation..."
+        & "$nugetExePath" help | Out-Null
+        Write-Host "NuGet installed successfully."
+      } catch {
+        Write-Error "Error during NuGet installation: $_"
+        exit 1
+      }
+  script_install_pods: &script_install_pods
+    name: Install pods
+    script: find . -name "Podfile" -execdir pod install --repo-update \;
+  script_ios_codesign_setup: &script_ios_codesign_setup
+    name: Apple codesign setup
+    script: xcode-project use-profiles
+  script_pub_get: &script_pub_get
+    name: flutter pub get
+    script: flutter pub get
+  flutter_test_artifacts: &flutter_test_artifacts
+    - flutter_drive.log
+    - test-results/flutter.json
+  flutter_test_artifacts_windows: &flutter_test_artifacts_windows
+    - C:\Users\builder\clone\test-results\flutter.json
+
+workflows:
+  android-build:
+    name: Android Build
+    <<: *instance_mac_release_build # 31m vs. linux_x2 57m on 2023 12 22.
+    triggering:
+      <<: *trigger_on_push
+    environment:
+      <<: *env_versions
+    scripts:
+      - <<: *script_pub_get
+      - <<: *script_android_setup
+      - <<: *script_android_build
+    artifacts:
+      - build/**/outputs/**/mapping.txt
+    publishing:
+      <<: *email_notifications
+  ios-build:
+    name: iOS Build
+    <<: *instance_mac_release_build
+    triggering:
+      <<: *trigger_on_push
+    environment:
+      <<: *env_versions
+      <<: *env_keys
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.telosnex.telosnex
+    integrations:
+      app_store_connect: Codemagic240331
+    scripts:
+      - <<: *script_ios_codesign_setup
+      - <<: *script_pub_get
+      - <<: *script_install_pods
+      - <<: *script_ios_build
+    artifacts:
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      <<: *email_notifications
+  linux-build:
+    name: Linux Build
+    <<: *instance_linux_release_build
+    triggering:
+      <<: *trigger_on_push
+    environment:
+      <<: *env_versions
+    scripts:
+      - <<: *script_pub_get
+      - <<: *script_linux_build
+    artifacts:
+      - build/linux/**/*.zip
+    publishing:
+      <<: *email_notifications
+  macos-build:
+    name: macOS Build
+    <<: *instance_mac_release_build
+    triggering:
+      <<: *trigger_on_push
+    environment:
+      <<: *env_versions
+    scripts:
+      - <<: *script_pub_get
+      - <<: *script_install_pods
+      - <<: *script_macos_build
+    artifacts:
+      - build/macos/**/*.app
+      - /tmp/xcodebuild_logs/*.log
+      - build/macos/Build/Products/Release/*
+    publishing:
+      <<: *email_notifications
+    cache:
+      <<: *cache_paths
+  web-build:
+    name: Web Build
+    <<: *instance_linux # No particular rationale here, other than Linux is probably worst case for web compat
+    triggering:
+      <<: *trigger_on_push
+    environment:
+      <<: *env_versions
+    scripts:
+      - <<: *script_pub_get
+      - <<: *script_web_build
+    cache:
+      <<: *cache_paths
+    publishing:
+      <<: *email_notifications
+  windows-build:
+    name: Windows Build
+    <<: *instance_windows_build
+    triggering:
+      <<: *trigger_on_push
+    environment:
+      <<: *env_versions
+      vars:
+        DOTNET_PATH: $CM_BUILD_DIR\dotnet
+        DOTNET: $CM_BUILD_DIR\dotnet\dotnet
+    scripts:
+      - <<: *script_windows_install_nuget
+      - <<: *script_pub_get
+      - <<: *script_windows_build
+    publishing:
+      <<: *email_notifications
