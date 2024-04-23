@@ -3,11 +3,14 @@
 on any edge. Run ONNX model & runtime, with platform-specific acceleration,  inside Flutter, a modern, beautiful, cross-platform development
 framework."
      style="float: left; margin-right: 0px;" />
-| Platform | Status |
+| Platform     | Status |
 |--------------|--------|
-| **Linux** | [![Codemagic build status](https://api.codemagic.io/apps/652897766ee3f7af8490a79f/6529e7751eac22d544044175/status_badge.svg)](https://codemagic.io/apps/652897766ee3f7af8490a79f/6529e7751eac22d544044175/latest_build) |
-| **macOS arm64** | [![Codemagic build status](https://api.codemagic.io/apps/652897766ee3f7af8490a79f/652897766ee3f7af8490a79e/status_badge.svg)](https://codemagic.io/apps/652897766ee3f7af8490a79f/652897766ee3f7af8490a79e/latest_build) |
-| **Windows** | [![Codemagic build status](https://api.codemagic.io/apps/652897766ee3f7af8490a79f/652b298fe7e0c7e9e4cb275f/status_badge.svg)](https://codemagic.io/apps/652897766ee3f7af8490a79f/652b298fe7e0c7e9e4cb275f/latest_build) |
+| __Android__  | [![Codemagic build status](https://api.codemagic.io/apps/652897766ee3f7af8490a79f/android-build/status_badge.svg)](https://codemagic.io/app/652897766ee3f7af8490a79f/android-build/latest_build) |
+| __iOS__  | [![Codemagic build status](https://api.codemagic.io/apps/652897766ee3f7af8490a79f/ios-build/status_badge.svg)](https://codemagic.io/app/652897766ee3f7af8490a79f/ios-build/latest_build) |
+| __Linux__    | [![Codemagic build status](https://api.codemagic.io/apps/652897766ee3f7af8490a79f/linux-build/status_badge.svg)](https://codemagic.io/app/652897766ee3f7af8490a79f/linux-build/latest_build) |
+| __macOS__ | [![Codemagic build status](https://api.codemagic.io/apps/652897766ee3f7af8490a79f/macos-build/status_badge.svg)](https://codemagic.io/app/652897766ee3f7af8490a79f/macos-build/latest_build) |
+| __Web__  | [![Codemagic build status](https://api.codemagic.io/apps/652897766ee3f7af8490a79f/web-build/status_badge.svg)](https://codemagic.io/app/652897766ee3f7af8490a79f/web-build/latest_build) |
+| __Windows__  | [![Codemagic build status](https://api.codemagic.io/apps/652897766ee3f7af8490a79f/windows-build/status_badge.svg)](https://codemagic.io/app/652897766ee3f7af8490a79f/windows-build/latest_build) |
 
 # Changelog
 
