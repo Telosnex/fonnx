@@ -75,10 +75,7 @@ class _TtsDemoWidgetState extends State<TtsDemoWidget> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.end,
-              children: _sttServiceResponse!.audioFrames.reversed
-                  .take(20)
-                  .toList()
-                  .reversed
+              children: _sttServiceResponse!.audioFrames
                   .mapIndexed((index, e) {
                 final Color color;
                 if (e?.vadP == null) {
