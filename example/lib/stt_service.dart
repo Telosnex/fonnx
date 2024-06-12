@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:fonnx/models/sileroVad/silero_vad.dart';
@@ -30,6 +31,22 @@ class SttServiceResponse {
   final List<AudioFrame?> audioFrames;
 
   SttServiceResponse({required this.transcription, required this.audioFrames});
+}
+
+class GetMicrophoneResponse {
+  final Stream<Uint8List> audioStream;
+  final AudioRecorder audioRecorder;
+
+  GetMicrophoneResponse(
+      {required this.audioStream, required this.audioRecorder});
+}
+
+class GetExistingBytesResponse {
+  final Stream<Uint8List> audioStream;
+  final StreamController<Uint8List> audioStreamController;
+
+  GetExistingBytesResponse(
+      {required this.audioStream, required this.audioStreamController});
 }
 
 class SttService {
@@ -81,7 +98,9 @@ class SttService {
   /// the frame contains speech. >= this value is considered speech when
   /// deciding which frames to keep and when to stop recording.
   final double voiceThreshold;
-  String transcription = '';
+
+  final sessionManager = WhisperSessionManager();
+
   var lastVadState = <String, dynamic>{};
   var lastVadStateIndex = 0;
   bool stopped = false;
@@ -108,26 +127,13 @@ class SttService {
   }
 
   void _start(StreamController<SttServiceResponse> streamController) async {
-    final audioRecorder = AudioRecorder();
-
-    final hasPermission = await audioRecorder.hasPermission();
-    if (!hasPermission) {
-      streamController.addError('Denied permission to record audio.');
-      streamController.close();
-      return;
-    }
-
     Uint8List audioBuffer = Uint8List(0);
     final List<AudioFrame> frames = [];
-
-    final audioStream = await audioRecorder.startStream(const RecordConfig(
-        encoder: AudioEncoder.pcm16bits,
-        numChannels: kChannels,
-        sampleRate: kSampleRate,
-        echoCancel: false,
-        noiseSuppress: false));
+    final getMicrophoneResponse = await _getMicrophoneStreamThrows();
+    final audioStream = getMicrophoneResponse.audioStream;
 
     stopForMaxDurationTimer = Timer(maxDuration, () {
+      debugPrint('[SttService] Stopping due to max duration.');
       stop();
       stopForMaxDurationTimer = null;
     });
@@ -137,7 +143,7 @@ class SttService {
     audioStream.listen((event) {
       if (stopped && !stoppedAudioRecorderForStoppedStream) {
         stoppedAudioRecorderForStoppedStream = true;
-        audioRecorder.stop();
+        getMicrophoneResponse.audioRecorder.stop();
         return;
       }
       audioBuffer = Uint8List.fromList(audioBuffer + event);
@@ -206,7 +212,7 @@ class SttService {
       frames[idx].vadP = p;
       if (!stopped) {
         streamController.add(SttServiceResponse(
-          transcription: transcription,
+          transcription: sessionManager.transcription,
           audioFrames: frames,
         ));
       } else {
@@ -233,21 +239,6 @@ class SttService {
     if (!frameThatIsSpeech) {
       return false;
     }
-    // There's an asymmetry with voiceThreshold due to VAD behavior.
-    //
-    // At start speech, it behooves voiceThreshold to be low enough to capture
-    // a whisper.
-    //
-    // At end speech, the VAD tends to exponentially decay its output in the
-    // presence of pure silence. This can take ~3 seconds and tends to increase
-    // with query volume.
-    //
-    // We can't rely on the exponential decay being strictly monotonic: there's
-    // small fluctuations in the output. Smoothing could be an option.
-    //
-    // A simpler approach of using a threshold that's a fraction of the max
-    // VAD output is used here. That works astonishingly well across test cases
-    // of whispering, speaking, and speaking strongly.
     final isSilenceThreshold = voiceThreshold;
     final lastNFrames = frames.reversed.takeWhile((frame) {
       return frame.vadP != null && frame.vadP! < isSilenceThreshold;
@@ -262,43 +253,23 @@ class SttService {
     List<AudioFrame> frames,
     StreamController<SttServiceResponse> streamController,
   ) async {
-
     Future<void> doIt() async {
-      final indexOfFirstSpeech = frames.indexWhere((frame) {
-        return frame.vadP != null && frame.vadP! >= voiceThreshold;
-      });
-      // Intent: capture ~100ms of audio before the first speech.
-      final startIndex = math.max(0, indexOfFirstSpeech - 3);
-      final voiceFrames = indexOfFirstSpeech == -1
-          ? <AudioFrame>[]
-          : frames.sublist(startIndex);
+      final voiceFrames = sessionManager.getAudioFrames(
+        frames: frames,
+        voiceThresholdSegmentEnd: voiceThreshold,
+      );
       if (voiceFrames.isEmpty) {
         return;
       }
-
-      final bytesToInfer = Uint8List.fromList(voiceFrames
-          .map((e) => e.bytes)
-          .expand((element) => element)
-          .toList());
-      final result = (await whisper.doInference(bytesToInfer)).trim();
-      // Whisper output tends to fluctuate, especially in the presence of
-      // extended silence following speech, ex.
-      // 1. "what time is it in beijing"
-      // 2. "What time is it in Beijing?"
-      // 3. "what time is it in beijing"
-      // This is a nice heuristic that reduces fluctuation and 'rewards' the
-      // lengthier version that's more likely to have diacritical marks.
-      //
-      // A weak point is this presumes any additional coherent speech will end
-      // up increasing the length of the transcription. Theoratically, maybe
-      // this doesn't happen: ex. "What time is it in Beijing????????"
-      // "What time is it in Beijing, China?".
-      if (result.length > transcription.length) {
-        transcription = result;
+      final bytesToInferBuilder = BytesBuilder(copy: false);
+      for (final frame in voiceFrames) {
+        bytesToInferBuilder.add(frame.bytes);
       }
-
+      final bytesToInfer = bytesToInferBuilder.takeBytes();
+      final result = (await whisper.doInference(bytesToInfer)).trim();
+      sessionManager.addInferenceResult(result, voiceFrames.first);
       streamController.add(SttServiceResponse(
-        transcription: transcription,
+        transcription: sessionManager.transcription,
         audioFrames: frames,
       ));
     }
@@ -315,8 +286,87 @@ class SttService {
       streamController.close();
     }
 
-
     await doIt();
     scheduleNextInference();
   }
+}
+
+class WhisperSessionManager {
+  var _frozenTranscription = '';
+  String? _lastInferenceResult;
+  AudioFrame? _lastFirstInferenceInputFrame;
+
+  String get transcription {
+    if (_lastInferenceResult != null && _lastInferenceResult!.isNotEmpty) {
+      final StringBuffer sb = StringBuffer();
+      sb.write(_frozenTranscription);
+      sb.write(' ');
+      sb.write(_lastInferenceResult);
+      return sb.toString();
+    }
+    return _frozenTranscription;
+  }
+
+  List<AudioFrame> getAudioFrames({
+    required List<AudioFrame> frames,
+    required double voiceThresholdSegmentEnd,
+  }) {
+    var indexOfLastSegmentStart = -1;
+    for (var i = frames.length - 1; i >= 0; i--) {
+      final currentIndexInSegment =
+          frames[i].vadP != null && frames[i].vadP! >= voiceThresholdSegmentEnd;
+      final hasPreviousIndex = i - 1 >= 0;
+      final previousIndexIsOutsideSegment = hasPreviousIndex &&
+          frames[i - 1].vadP != null &&
+          frames[i - 1].vadP! < voiceThresholdSegmentEnd;
+      if (currentIndexInSegment && previousIndexIsOutsideSegment) {
+        indexOfLastSegmentStart = i;
+        break;
+      }
+    }
+
+    final framesToInference = indexOfLastSegmentStart == -1
+        ? <AudioFrame>[]
+        : frames.sublist(math.max(0, indexOfLastSegmentStart - 3));
+    return framesToInference;
+  }
+
+  void addInferenceResult(String result, AudioFrame firstInferenceInputFrame) {
+    final lastResult = _lastInferenceResult;
+    final isNewSegment = lastResult != null &&
+        _lastFirstInferenceInputFrame != firstInferenceInputFrame;
+    if (isNewSegment) {
+      if (_frozenTranscription.isNotEmpty && lastResult.isNotEmpty) {
+        _frozenTranscription += ' ';
+      }
+      _frozenTranscription += lastResult;
+    }
+    _lastFirstInferenceInputFrame = firstInferenceInputFrame;
+    _lastInferenceResult = result;
+  }
+}
+
+// Throws an error if the microphone stream cannot be obtained.
+Future<GetMicrophoneResponse> _getMicrophoneStreamThrows() async {
+  final audioRecorder = AudioRecorder();
+
+  final hasPermission = await audioRecorder.hasPermission();
+  if (!hasPermission) {
+    throw 'Denied permission to record audio.';
+  }
+
+  final stream = await audioRecorder.startStream(
+    const RecordConfig(
+      encoder: AudioEncoder.pcm16bits,
+      numChannels: SttService.kChannels,
+      sampleRate: SttService.kSampleRate,
+      echoCancel: false,
+      noiseSuppress: false,
+    ),
+  );
+
+  return GetMicrophoneResponse(
+    audioStream: stream,
+    audioRecorder: audioRecorder,
+  );
 }
