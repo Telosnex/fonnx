@@ -45,7 +45,7 @@ android {
         applicationId "com.telosnex.fonnx.example"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdkVersion 21 // for Fonnx, and Fonnx needs it for ONNX ORT 1.16
+        minSdkVersion 23 // needed 21 for ONNX ORT 1.16; in June 2024 need 23 for record_android
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -65,5 +65,3 @@ android {
 flutter {
     source '../..'
 }
-
-dependencies {}
