@@ -101,11 +101,11 @@ SPEC CHECKSUMS:
   file_picker: 15fd9539e4eb735dc54bae8c0534a7a9511a03de
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   fonnx: 43ccf5b747f218b7cf389d84c5b841aada6cb70d
-  integration_test: 13825b8a9334a850581300559b8839134b124670
+  integration_test: ce0a3ffa1de96d1a89ca0ac26fca7ea18a749ef4
   onnxruntime-c: f5350dc5e5c4a25d0b2887a7320b8589db84431a
   onnxruntime-extensions-c: 05cabc77ae90a851127fb966e1b4159d5da42874
   onnxruntime-objc: f801d5bd43ac14110136f707dccf0c851822b51e
-  path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943
+  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   record_darwin: 1f6619f2abac4d1ca91d3eeab038c980d76f1517
   SDWebImage: a3ba0b8faac7228c3c8eadd1a55c9c9fe5e16457
   SwiftyGif: 93a1cc87bf3a51916001cf8f3d63835fb64c819f
