@@ -8,7 +8,7 @@ environment:
   flutter: '>=3.3.0'
 
 dependencies:
-  diacritic: ^0.1.4
+  diacritic: ^0.1.5
   ffi: ^2.1.0
   flutter:
     sdk: flutter
