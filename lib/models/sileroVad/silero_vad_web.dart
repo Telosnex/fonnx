@@ -1,22 +1,12 @@
 import 'dart:convert';
+import 'dart:js_interop';
 import 'dart:typed_data';
-import 'package:js/js.dart';
-import 'package:js/js_util.dart';
 
 import 'package:fonnx/models/sileroVad/silero_vad.dart';
 
 SileroVad getSileroVad(String path) => SileroVadWeb(path);
 
-@JS()
-class Promise<T> {
-  external Promise(
-      void Function(void Function(T result) resolve, Function reject) executor);
-  external Promise then(void Function(T result) onFulfilled,
-      [Function onRejected]);
-}
-
-@JS('window.sileroVad')
-external Promise<String> sileroVadJs(String modelPath, List<int> audioBytes, String previousStateAsJsonString);
+external JSPromise<JSString?> sileroVadJs(String modelPath, List<int> audioBytes, String previousStateAsJsonString);
 
 
 class SileroVadWeb implements SileroVad {
@@ -29,12 +19,12 @@ class SileroVadWeb implements SileroVad {
   Future<Map<String, dynamic>> doInference(Uint8List bytes,
       {Map<String, dynamic> previousState = const {}}) async {
     final previousStateAsJsonString = json.encode(previousState);
-    final jsObject = await promiseToFuture(sileroVadJs(modelPath, bytes, previousStateAsJsonString));
+    final jsObject = await sileroVadJs(modelPath, bytes, previousStateAsJsonString).toDart;
 
     if (jsObject == null) {
       throw Exception('Silero VAD result returned from JS code is null');
     }
-    final dartObject = json.decode(jsObject);
+    final dartObject = json.decode(jsObject.toDart);
     if (dartObject is! Map<String, dynamic>) {
       throw Exception(
           'Silero VAD result returned from JS code is not a Map<String, dynamic>, it is a ${jsObject.runtimeType}');
