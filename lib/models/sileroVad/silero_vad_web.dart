@@ -7,7 +7,7 @@ import 'package:fonnx/models/sileroVad/silero_vad.dart';
 SileroVad getSileroVad(String path) => SileroVadWeb(path);
 
 @JS('window.sileroVad')
-external JSPromise<JSString?> sileroVadJs(String modelPath, List<int> audioBytes, String previousStateAsJsonString);
+external JSPromise<JSString?> sileroVadJs(String modelPath, JSUint8Array audioBytes, String previousStateAsJsonString);
 
 
 class SileroVadWeb implements SileroVad {
@@ -20,7 +20,7 @@ class SileroVadWeb implements SileroVad {
   Future<Map<String, dynamic>> doInference(Uint8List bytes,
       {Map<String, dynamic> previousState = const {}}) async {
     final previousStateAsJsonString = json.encode(previousState);
-    final jsObject = await sileroVadJs(modelPath, bytes, previousStateAsJsonString).toDart;
+    final jsObject = await sileroVadJs(modelPath, bytes.toJS, previousStateAsJsonString).toDart;
 
     if (jsObject == null) {
       throw Exception('Silero VAD result returned from JS code is null');
