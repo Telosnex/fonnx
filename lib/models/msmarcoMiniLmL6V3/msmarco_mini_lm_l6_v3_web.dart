@@ -7,6 +7,7 @@ import 'package:ml_linalg/linalg.dart';
 MsmarcoMiniLmL6V3 getMsmarcoMiniLmL6V3(String path) =>
     MsmarcoMiniLmL6V3Web(path);
 
+@JS('window.miniLmL6V2')
 external JSPromise<JSAny?> sbertJs(
     String modelPath, List<int> wordpieces);
 

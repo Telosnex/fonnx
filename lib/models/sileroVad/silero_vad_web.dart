@@ -6,6 +6,7 @@ import 'package:fonnx/models/sileroVad/silero_vad.dart';
 
 SileroVad getSileroVad(String path) => SileroVadWeb(path);
 
+@JS('window.sileroVad')
 external JSPromise<JSString?> sileroVadJs(String modelPath, List<int> audioBytes, String previousStateAsJsonString);
 
 
