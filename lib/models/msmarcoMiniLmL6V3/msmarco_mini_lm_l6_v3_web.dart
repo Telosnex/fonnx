@@ -8,8 +8,7 @@ MsmarcoMiniLmL6V3 getMsmarcoMiniLmL6V3(String path) =>
     MsmarcoMiniLmL6V3Web(path);
 
 @JS('window.miniLmL6V2')
-external JSPromise<JSAny?> sbertJs(
-    String modelPath, JSUint8Array wordpieces);
+external JSPromise<JSAny?> sbertJs(JSString modelPath, JSInt16Array wordpieces);
 
 class MsmarcoMiniLmL6V3Web implements MsmarcoMiniLmL6V3 {
   final String modelPath;
@@ -19,15 +18,14 @@ class MsmarcoMiniLmL6V3Web implements MsmarcoMiniLmL6V3 {
   @override
   Future<Vector> getEmbeddingAsVector(List<int> tokens) async {
     final jsObject =
-        await sbertJs(modelPath, Uint8List.fromList(tokens).toJS).toDart;
+        await sbertJs(modelPath.toJS, Int16List.fromList(tokens).toJS).toDart;
 
     if (jsObject == null) {
       throw Exception('Embeddings returned from JS code are null');
     }
-
-    final jsList = (jsObject as List<dynamic>);
+    final jsList = jsObject as JSFloat32Array;
     final vector = Vector.fromList(
-      Float32List.fromList(jsList.cast()),
+      jsList.toDart,
       dtype: DType.float32,
     ).normalize();
     return vector;

@@ -7,8 +7,7 @@ import 'package:ml_linalg/linalg.dart';
 MiniLmL6V2 getMiniLmL6V2(String path) => MiniLmL6V2Web(path);
 
 @JS('window.miniLmL6V2')
-external JSPromise<JSAny?> sbertJs(
-    String modelPath, List<int> wordpieces);
+external JSPromise<JSAny?> sbertJs(JSString modelPath, JSInt16Array wordpieces);
 
 class MiniLmL6V2Web implements MiniLmL6V2 {
   final String modelPath;
@@ -17,15 +16,15 @@ class MiniLmL6V2Web implements MiniLmL6V2 {
 
   @override
   Future<Vector> getEmbeddingAsVector(List<int> tokens) async {
-    final jsObject = await sbertJs(modelPath, tokens).toDart;
+    final jsObject =
+        await sbertJs(modelPath.toJS, Int16List.fromList(tokens).toJS).toDart;
 
     if (jsObject == null) {
       throw Exception('Embeddings returned from JS code are null');
     }
-
-    final jsList = jsObject as List<dynamic>;
+    final jsList = jsObject as JSFloat32Array;
     final vector = Vector.fromList(
-      Float32List.fromList(jsList.cast()),
+      jsList.toDart,
       dtype: DType.float32,
     ).normalize();
     return vector;
