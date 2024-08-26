@@ -34,9 +34,9 @@ SPEC CHECKSUMS:
   audioplayers_darwin: dcad41de4fbd0099cb3749f7ab3b0cb8f70b810c
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   fonnx: e8af51c8a0554da8883ff7087b00906cebc9b3e5
-  path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943
-  record_darwin: 1f6619f2abac4d1ca91d3eeab038c980d76f1517
+  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
+  record_darwin: df0a677188e5fed18472550298e675f19ddaffbe
 
 PODFILE CHECKSUM: 91f0996b85caf3478dfdcf490d95bb166c22642b
 
-COCOAPODS: 1.14.3
+COCOAPODS: 1.15.2
