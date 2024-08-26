@@ -257,6 +257,7 @@ class SttService {
       final voiceFrames = sessionManager.getAudioFrames(
         frames: frames,
         voiceThresholdSegmentEnd: voiceThreshold,
+        multipleSegments: false,
       );
       if (voiceFrames.isEmpty) {
         return;
@@ -307,10 +308,26 @@ class WhisperSessionManager {
     return _frozenTranscription;
   }
 
+
   List<AudioFrame> getAudioFrames({
     required List<AudioFrame> frames,
     required double voiceThresholdSegmentEnd,
+    /// If true, all frames without speech are discarded.
+    /// If false, only the first frames without speech are discarded.
+    /// This significantly helps inference quality on at least Whisper Tiny.
+    /// The downside is, if the audio is > 30s, the inference cannot be
+    /// completed.
+    required bool multipleSegments,
   }) {
+    if (!multipleSegments) {
+      final firstVoiceFrameIndex = frames.indexWhere((frame) =>
+          frame.vadP != null && frame.vadP! >= voiceThresholdSegmentEnd);
+      if (firstVoiceFrameIndex == -1) {
+        return <AudioFrame>[];
+      }
+      return frames.sublist(firstVoiceFrameIndex);
+    }
+    
     var indexOfLastSegmentStart = -1;
     for (var i = frames.length - 1; i >= 0; i--) {
       final currentIndexInSegment =
