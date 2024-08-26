@@ -287,7 +287,7 @@ class _TtsDemoWidgetState extends State<TtsDemoWidget> {
       return;
     }
     final vadModelPath = await getModelPath('silero_vad.onnx');
-    final whisperModelPath = await getWhisperModelPath('whisper_small.onnx');
+    final whisperModelPath = await getWhisperModelPath('whisper_tiny.onnx');
     final service = SttService(
       vadModelPath: vadModelPath,
       whisperModelPath: whisperModelPath,
