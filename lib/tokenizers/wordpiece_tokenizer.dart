@@ -67,83 +67,21 @@ class WordpieceTokenizer {
     List<int> outputTokens = [startToken];
     List<String> outputString = [];
     for (final word in words) {
-      // Convert to lowercase individual characters. Why lowercase? The BERT
-      // vocabulary doesn't have tokens with uppercase English letters.
-      List<String> characters = word.split('');
-
-      if (characters.length > maxInputCharsPerWord) {
+      if (word.length > maxInputCharsPerWord) {
         continue;
       }
 
-      bool wordUnknown = false;
-      int start = 0;
-
-      List<int> wordTokens = [];
-      wordProcess:
-      while (start < characters.length) {
-        int end = characters.length;
-        String? wordpiece;
-        int? wordpieceToken;
-
-        wordpieceProcess:
-        while (start < end) {
-          // Ensure e.g. Spanish/French/German don't end up with [UNK] tokens
-          // for every word with a diacritic.
-          var substr = characters.sublist(start, end).join();
-          final originalSubstr = substr;
-          // Append "##" in front of the substring if it's not at the start of
-          // the token
-          if (start > 0) {
-            substr = "##$substr";
-          }
-
-          // Check if the substring exists in the vocabulary
-          final token = encoder[substr];
-          if (token != null) {
-            wordpiece = originalSubstr;
-            wordpieceToken = token;
-            break wordpieceProcess;
-          } else if (end - start == 1) {
-            if (_isNoSpaceLanguageChar(characters[start].codeUnitAt(0))) {
-              // Chinese character without token? add UNK token. Essentially,
-              // we are treating each Chinese character as a word. This matches
-              // the character-based tokenization scheme in the original BERT.
-              wordpiece = unkString;
-              wordpieceToken = unkToken;
-              break wordpieceProcess;
-            }
-          }
-          end -= 1;
-        }
-
-        if (wordpiece == null) {
-          // Couldn't find any valid substring for the remaining characters in
-          // the word. Emit UNK token and move on to the next word.
-          wordUnknown = true;
-          break wordProcess;
-        }
-
-        // Add current substring to subTokens
-        wordTokens.add(wordpieceToken!);
-        start = end;
-      }
-
-      final stringForWord = wordUnknown ? unkString : word;
-      final tokensForWord = wordUnknown ? [unkToken] : wordTokens;
-      if (outputTokens.length + tokensForWord.length >= max - 1) {
+      List<int> wordTokens = _tokenizeWord(word);
+    
+      if (outputTokens.length + wordTokens.length >= max - 1) {
         outputTokens.add(endToken);
         allOutputStrings.add(outputString.join(' '));
         allOutputTokens.add(outputTokens);
-        // This does not account for the event that tokensForWord is longer than
-        // maxInputTokens - 1. In that case, we would need to split
-        // tokensForWord. This is very unlikely to happen, due to
-        // maxInputCharsPerWord being << maxInputTokens. It is also irrelevant
-        // because the model will simply truncate the input to maxInputTokens.
-        outputString = [stringForWord];
-        outputTokens = [startToken, ...tokensForWord];
+        outputString = [word];
+        outputTokens = [startToken, ...wordTokens];
       } else {
-        outputString.add(stringForWord);
-        outputTokens.addAll(tokensForWord);
+        outputString.add(word);
+        outputTokens.addAll(wordTokens);
       }
     }
     outputTokens.add(endToken);
@@ -158,6 +96,45 @@ class WordpieceTokenizer {
     });
   }
 
+  List<int> _tokenizeWord(String word) {
+    List<int> wordTokens = [];
+    int start = 0;
+    while (start < word.length) {
+      int end = word.length;
+      int? wordpieceToken;
+
+      while (start < end) {
+        String substr = word.substring(start, end);
+        if (start > 0) {
+          substr = "##$substr";
+        }
+
+        final token = encoder[substr];
+        if (token != null) {
+          wordpieceToken = token;
+          break;
+        }
+
+        if (end - start == 1) {
+          if (_isNoSpaceLanguageChar(word.codeUnitAt(start))) {
+            wordpieceToken = unkToken;
+            break;
+          }
+        }
+        end--;
+      }
+
+      if (wordpieceToken == null) {
+        return [unkToken];
+      }
+
+      wordTokens.add(wordpieceToken);
+      start = end;
+    }
+
+    return wordTokens;
+  }
+  
   List<TextAndTokens> tokenize(String text, {int? maxTokens}) {
     return _createSubstrings(text, maxTokens: maxTokens);
   }
