@@ -57,6 +57,8 @@ class WordpieceTokenizer {
         TextAndTokens(text: '', tokens: [101, 102])
       ];
     }
+    text = removeDiacritics(text);
+    text = text.toLowerCase();
 
     List<List<int>> allOutputTokens = [];
     List<String> allOutputStrings = [];
@@ -67,7 +69,7 @@ class WordpieceTokenizer {
     for (final word in words) {
       // Convert to lowercase individual characters. Why lowercase? The BERT
       // vocabulary doesn't have tokens with uppercase English letters.
-      List<String> characters = word.toLowerCase().split('');
+      List<String> characters = word.split('');
 
       if (characters.length > maxInputCharsPerWord) {
         continue;
@@ -89,7 +91,6 @@ class WordpieceTokenizer {
           // for every word with a diacritic.
           var substr = characters.sublist(start, end).join();
           final originalSubstr = substr;
-          substr = removeDiacritics(substr);
           // Append "##" in front of the substring if it's not at the start of
           // the token
           if (start > 0) {
