@@ -23,6 +23,12 @@ void main() {
       expect(result.first.tokens, equals([101, 2008, 3504, 2307, 100, 102]));
     });
 
+    test('reverses to original', () async {
+      final input = "Hello, world!";
+      final result = tokenizer.tokenize(input);
+      expect(result.first.text, equals(input));
+    });
+
     test('chinese', () async {
       // String from https://github.com/huggingface/tokenizers/blob/0d8c57da48319a91fe9cd3e31a36b9bd29a8292c/tokenizers/src/pre_tokenizers/bert.rs#L52
       final result = tokenizer.tokenize('野口里佳 Noguchi Rika');
@@ -50,6 +56,27 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
       expect('$stringOne $stringTwo',
           equals(lipsum.toLowerCase().replaceAll('\n\n', ' ')));
       // This ensures the input string did exceed the model's max input length.
+    });
+
+    test('speed test', skip: true, () async {
+      final sw = Stopwatch()..start();
+      const trials = 200;
+      for (var i = 0; i < trials; i++) {
+        const lipsum = '''
+Lorem ipsum dolor sit amet, id assum putant est, in vis aliquid molestiae. Diam scriptorem delicatissimi nec no, usu an possim sensibus, maluisset consectetuer vis te. Ex suas lobortis mei. Ei scripta copiosae duo, ridens definitionem duo eu, prima oportere in ius.
+
+Te has impedit oporteat, per te eruditi consetetur, magna libris blandit ea per. Nec euripidis intellegat accommodare ad. Sea sint autem doctus an. Ipsum aliquip perpetua vim te. Mel facilisi quaestio te, vix in ignota impedit delicata, et impetus similique pri.
+
+Sententiae adipiscing vim ei. Cum at accusamus similique. Eum no nulla labitur, id mei eros aliquip, sed cu putent maluisset. Vel et congue partem convenire.
+
+Aliquam feugiat vel ex, vim et simul perfecto singulis, pri ad deseruisse adipiscing. Mea elitr rationibus ex, ad sadipscing persequeris eloquentiam eos. Expetendis quaerendum reformidans ad pri, cibo dissentias pro ne. Vis facer offendit pertinacia et, eu sit rebum appareat, te patrioque evertitur cum. Timeam prompta nam no. Ius ex atqui repudiare, justo mediocrem cum ad, nec utinam erroribus reformidans et.
+
+Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias suscipiantur. Ei has oratio veniam nostro, pri at laudem impedit consulatu. Semper denique te usu, quando epicurei nam cu, ut eleifend temporibus sit. Impetus laoreet mentitum quo in.''';
+        final _ = tokenizer.tokenize(lipsum);
+      }
+      sw.stop();
+      debugPrint(
+          'Speed test: ${sw.elapsedMilliseconds / trials} ms. Total: ${sw.elapsedMilliseconds} ms');
     });
 
     test('sentence', () async {
