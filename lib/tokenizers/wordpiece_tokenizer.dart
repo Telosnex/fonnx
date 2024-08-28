@@ -49,53 +49,6 @@ class WordpieceTokenizer {
         (0x30A0 <= codeUnit && codeUnit <= 0x30FF);
   }
 
-  List<TextAndTokens> _createSubstrings(String text, {int? maxTokens}) {
-    final max = maxTokens ?? maxInputTokens;
-    text = text.trim();
-    if (text.isEmpty) {
-      return [
-        TextAndTokens(text: '', tokens: [101, 102])
-      ];
-    }
-    text = removeDiacritics(text);
-    text = text.toLowerCase();
-
-    List<List<int>> allOutputTokens = [];
-    List<String> allOutputStrings = [];
-    List<String> words = text.split(RegExp(r'\s+')); // Split on whitespace
-
-    List<int> outputTokens = [startToken];
-    List<String> outputString = [];
-    for (final word in words) {
-      if (word.length > maxInputCharsPerWord) {
-        continue;
-      }
-
-      List<int> wordTokens = _tokenizeWord(word);
-    
-      if (outputTokens.length + wordTokens.length >= max - 1) {
-        outputTokens.add(endToken);
-        allOutputStrings.add(outputString.join(' '));
-        allOutputTokens.add(outputTokens);
-        outputString = [word];
-        outputTokens = [startToken, ...wordTokens];
-      } else {
-        outputString.add(word);
-        outputTokens.addAll(wordTokens);
-      }
-    }
-    outputTokens.add(endToken);
-    allOutputTokens.add(outputTokens);
-    allOutputStrings.add(outputString.join(' '));
-    assert(allOutputStrings.length == allOutputTokens.length);
-    return List<TextAndTokens>.generate(allOutputStrings.length, (index) {
-      return TextAndTokens(
-        text: allOutputStrings[index],
-        tokens: allOutputTokens[index],
-      );
-    });
-  }
-
   List<int> _tokenizeWord(String word) {
     List<int> wordTokens = [];
     int start = 0;
@@ -136,7 +89,51 @@ class WordpieceTokenizer {
   }
   
   List<TextAndTokens> tokenize(String text, {int? maxTokens}) {
-    return _createSubstrings(text, maxTokens: maxTokens);
+    final max = maxTokens ?? maxInputTokens;
+    text = text.trim();
+    if (text.isEmpty) {
+      return [
+        TextAndTokens(text: '', tokens: [startToken, endToken])
+      ];
+    }
+
+    List<List<int>> allOutputTokens = [];
+    List<String> allOutputStrings = [];
+    List<String> words = text.split(RegExp(r'\s+')); // Split on whitespace
+
+    List<int> outputTokens = [startToken];
+    List<String> outputString = [];
+    String normalizedWord = '';
+
+    for (final word in words) {
+      if (word.length > maxInputCharsPerWord) {
+        continue;
+      }
+
+      normalizedWord = removeDiacritics(word.toLowerCase());
+      List<int> wordTokens = _tokenizeWord(normalizedWord);
+
+      if (outputTokens.length + wordTokens.length >= max - 1) {
+        outputTokens.add(endToken);
+        allOutputStrings.add(outputString.join(' '));
+        allOutputTokens.add(outputTokens);
+        outputString = [word];
+        outputTokens = [startToken, ...wordTokens];
+      } else {
+        outputString.add(word);
+        outputTokens.addAll(wordTokens);
+      }
+    }
+    outputTokens.add(endToken);
+    allOutputTokens.add(outputTokens);
+    allOutputStrings.add(outputString.join(' '));
+
+    return List<TextAndTokens>.generate(allOutputStrings.length, (index) {
+      return TextAndTokens(
+        text: allOutputStrings[index],
+        tokens: allOutputTokens[index],
+      );
+    });
   }
 
   String detokenize(List<int> tokens) {
