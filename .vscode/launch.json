@@ -6,6 +6,15 @@
             "cwd": "example",
             "request": "launch",
             "type": "dart"
+        },
+        {
+            "name": "example (Flutter macOS)",
+            "program": "lib/main.dart",
+            "cwd": "example",
+            "deviceId": "macos",
+            "request": "launch",
+            "type": "dart",
+            "args": ["--profile"]
         }
     ]
 }
