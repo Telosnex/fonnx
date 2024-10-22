@@ -28,8 +28,12 @@ self.onmessage = async e => {
                 return;
             }
 
+            const float32Array = fileBytes instanceof Float32Array 
+            ? fileBytes 
+            : new Float32Array(fileBytes);
+
             console.log('Magika running inference');
-            const bytesTensor = new ort.Tensor('float32', fileBytes, [1, fileBytes.length]);
+            const bytesTensor = new ort.Tensor('float32', float32Array, [1, float32Array.length]);
             const results = await session.run({ bytes: bytesTensor });
             const targetLabel = results['target_label'].data;
             const message = { messageId, action: 'inferenceResult', targetLabel };
