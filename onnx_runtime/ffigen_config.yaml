@@ -1,4 +1,5 @@
-output: "../lib/ort_ffi_bindings.dart"
+output: "../lib/onnx/ort_ffi_bindings.dart"
+ignore-source-errors: true
 headers:
   entry-points:
     - "../onnx_runtime/headers/**.h"

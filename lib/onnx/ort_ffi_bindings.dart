@@ -6,84 +6,94 @@
 import 'dart:ffi' as ffi;
 
 @ffi.Native<
-        ffi.Pointer<ffi.NativeFunction<ffi.Void Function(ffi.Int)>> Function(
-            ffi.Int,
-            ffi.Pointer<ffi.NativeFunction<ffi.Void Function(ffi.Int)>>)>(
-    symbol: 'signal')
+    ffi.Pointer<ffi.NativeFunction<ffi.Void Function(ffi.Int)>> Function(
+        ffi.Int, ffi.Pointer<ffi.NativeFunction<ffi.Void Function(ffi.Int)>>)>()
 external ffi.Pointer<ffi.NativeFunction<ffi.Void Function(ffi.Int)>> signal(
   int arg0,
   ffi.Pointer<ffi.NativeFunction<ffi.Void Function(ffi.Int)>> arg1,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Int, id_t)>(symbol: 'getpriority')
+@ffi.Native<ffi.Int Function(ffi.Int, id_t)>()
 external int getpriority(
   int arg0,
   int arg1,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Int, ffi.Int)>(symbol: 'getiopolicy_np')
+@ffi.Native<ffi.Int Function(ffi.Int, ffi.Int)>()
 external int getiopolicy_np(
   int arg0,
   int arg1,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Int, ffi.Pointer<rlimit>)>(symbol: 'getrlimit')
+@ffi.Native<ffi.Int Function(ffi.Int, ffi.Pointer<rlimit>)>()
 external int getrlimit(
   int arg0,
   ffi.Pointer<rlimit> arg1,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Int, ffi.Pointer<rusage>)>(symbol: 'getrusage')
+@ffi.Native<ffi.Int Function(ffi.Int, ffi.Pointer<rusage>)>()
 external int getrusage(
   int arg0,
   ffi.Pointer<rusage> arg1,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Int, id_t, ffi.Int)>(symbol: 'setpriority')
+@ffi.Native<ffi.Int Function(ffi.Int, id_t, ffi.Int)>()
 external int setpriority(
   int arg0,
   int arg1,
   int arg2,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Int, ffi.Int, ffi.Int)>(
-    symbol: 'setiopolicy_np')
+@ffi.Native<ffi.Int Function(ffi.Int, ffi.Int, ffi.Int)>()
 external int setiopolicy_np(
   int arg0,
   int arg1,
   int arg2,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Int, ffi.Pointer<rlimit>)>(symbol: 'setrlimit')
+@ffi.Native<ffi.Int Function(ffi.Int, ffi.Pointer<rlimit>)>()
 external int setrlimit(
   int arg0,
   ffi.Pointer<rlimit> arg1,
 );
 
-@ffi.Native<pid_t Function(ffi.Pointer<ffi.Int>)>(symbol: 'wait')
+@ffi.Native<pid_t Function(ffi.Pointer<ffi.Int>)>(symbol: "wait")
 external int wait1(
   ffi.Pointer<ffi.Int> arg0,
 );
 
-@ffi.Native<pid_t Function(pid_t, ffi.Pointer<ffi.Int>, ffi.Int)>(
-    symbol: 'waitpid')
+@ffi.Native<pid_t Function(pid_t, ffi.Pointer<ffi.Int>, ffi.Int)>()
 external int waitpid(
   int arg0,
   ffi.Pointer<ffi.Int> arg1,
   int arg2,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Int32, id_t, ffi.Pointer<siginfo_t>, ffi.Int)>(
-    symbol: 'waitid')
-external int waitid(
+@ffi.Native<
+    ffi.Int Function(ffi.UnsignedInt, id_t, ffi.Pointer<siginfo_t>,
+        ffi.Int)>(symbol: "waitid")
+external int _waitid(
   int arg0,
   int arg1,
   ffi.Pointer<siginfo_t> arg2,
   int arg3,
 );
 
-@ffi.Native<pid_t Function(ffi.Pointer<ffi.Int>, ffi.Int, ffi.Pointer<rusage>)>(
-    symbol: 'wait3')
+int waitid(
+  idtype_t arg0,
+  Dart__uint32_t arg1,
+  ffi.Pointer<siginfo_t> arg2,
+  int arg3,
+) =>
+    _waitid(
+      arg0.value,
+      arg1,
+      arg2,
+      arg3,
+    );
+
+@ffi.Native<
+    pid_t Function(ffi.Pointer<ffi.Int>, ffi.Int, ffi.Pointer<rusage>)>()
 external int wait3(
   ffi.Pointer<ffi.Int> arg0,
   int arg1,
@@ -91,8 +101,7 @@ external int wait3(
 );
 
 @ffi.Native<
-    pid_t Function(pid_t, ffi.Pointer<ffi.Int>, ffi.Int,
-        ffi.Pointer<rusage>)>(symbol: 'wait4')
+    pid_t Function(pid_t, ffi.Pointer<ffi.Int>, ffi.Int, ffi.Pointer<rusage>)>()
 external int wait4(
   int arg0,
   ffi.Pointer<ffi.Int> arg1,
@@ -100,87 +109,207 @@ external int wait4(
   ffi.Pointer<rusage> arg3,
 );
 
-@ffi.Native<ffi.Pointer<ffi.Void> Function(ffi.Size)>(symbol: 'alloca')
+@ffi.Native<ffi.Pointer<ffi.Void> Function(ffi.Size)>()
 external ffi.Pointer<ffi.Void> alloca(
   int arg0,
 );
 
-@ffi.Native<ffi.Pointer<ffi.Void> Function(ffi.Size)>(symbol: 'malloc')
+@ffi.Native<ffi.Int>()
+external int __mb_cur_max;
+
+@ffi.Native<ffi.Pointer<ffi.Void> Function(ffi.Size, malloc_type_id_t)>()
+external ffi.Pointer<ffi.Void> malloc_type_malloc(
+  int size,
+  int type_id,
+);
+
+@ffi.Native<
+    ffi.Pointer<ffi.Void> Function(ffi.Size, ffi.Size, malloc_type_id_t)>()
+external ffi.Pointer<ffi.Void> malloc_type_calloc(
+  int count,
+  int size,
+  int type_id,
+);
+
+@ffi.Native<ffi.Void Function(ffi.Pointer<ffi.Void>, malloc_type_id_t)>()
+external void malloc_type_free(
+  ffi.Pointer<ffi.Void> ptr,
+  int type_id,
+);
+
+@ffi.Native<
+    ffi.Pointer<ffi.Void> Function(
+        ffi.Pointer<ffi.Void>, ffi.Size, malloc_type_id_t)>()
+external ffi.Pointer<ffi.Void> malloc_type_realloc(
+  ffi.Pointer<ffi.Void> ptr,
+  int size,
+  int type_id,
+);
+
+@ffi.Native<ffi.Pointer<ffi.Void> Function(ffi.Size, malloc_type_id_t)>()
+external ffi.Pointer<ffi.Void> malloc_type_valloc(
+  int size,
+  int type_id,
+);
+
+@ffi.Native<
+    ffi.Pointer<ffi.Void> Function(ffi.Size, ffi.Size, malloc_type_id_t)>()
+external ffi.Pointer<ffi.Void> malloc_type_aligned_alloc(
+  int alignment,
+  int size,
+  int type_id,
+);
+
+@ffi.Native<
+    ffi.Int Function(ffi.Pointer<ffi.Pointer<ffi.Void>>, ffi.Size, ffi.Size,
+        malloc_type_id_t)>()
+external int malloc_type_posix_memalign(
+  ffi.Pointer<ffi.Pointer<ffi.Void>> memptr,
+  int alignment,
+  int size,
+  int type_id,
+);
+
+@ffi.Native<
+    ffi.Pointer<ffi.Void> Function(
+        ffi.Pointer<malloc_zone_t>, ffi.Size, malloc_type_id_t)>()
+external ffi.Pointer<ffi.Void> malloc_type_zone_malloc(
+  ffi.Pointer<malloc_zone_t> zone,
+  int size,
+  int type_id,
+);
+
+@ffi.Native<
+    ffi.Pointer<ffi.Void> Function(
+        ffi.Pointer<malloc_zone_t>, ffi.Size, ffi.Size, malloc_type_id_t)>()
+external ffi.Pointer<ffi.Void> malloc_type_zone_calloc(
+  ffi.Pointer<malloc_zone_t> zone,
+  int count,
+  int size,
+  int type_id,
+);
+
+@ffi.Native<
+    ffi.Void Function(
+        ffi.Pointer<malloc_zone_t>, ffi.Pointer<ffi.Void>, malloc_type_id_t)>()
+external void malloc_type_zone_free(
+  ffi.Pointer<malloc_zone_t> zone,
+  ffi.Pointer<ffi.Void> ptr,
+  int type_id,
+);
+
+@ffi.Native<
+    ffi.Pointer<ffi.Void> Function(ffi.Pointer<malloc_zone_t>,
+        ffi.Pointer<ffi.Void>, ffi.Size, malloc_type_id_t)>()
+external ffi.Pointer<ffi.Void> malloc_type_zone_realloc(
+  ffi.Pointer<malloc_zone_t> zone,
+  ffi.Pointer<ffi.Void> ptr,
+  int size,
+  int type_id,
+);
+
+@ffi.Native<
+    ffi.Pointer<ffi.Void> Function(
+        ffi.Pointer<malloc_zone_t>, ffi.Size, malloc_type_id_t)>()
+external ffi.Pointer<ffi.Void> malloc_type_zone_valloc(
+  ffi.Pointer<malloc_zone_t> zone,
+  int size,
+  int type_id,
+);
+
+@ffi.Native<
+    ffi.Pointer<ffi.Void> Function(
+        ffi.Pointer<malloc_zone_t>, ffi.Size, ffi.Size, malloc_type_id_t)>()
+external ffi.Pointer<ffi.Void> malloc_type_zone_memalign(
+  ffi.Pointer<malloc_zone_t> zone,
+  int alignment,
+  int size,
+  int type_id,
+);
+
+@ffi.Native<ffi.Pointer<ffi.Void> Function(ffi.Size)>()
 external ffi.Pointer<ffi.Void> malloc(
   int __size,
 );
 
-@ffi.Native<ffi.Pointer<ffi.Void> Function(ffi.Size, ffi.Size)>(
-    symbol: 'calloc')
+@ffi.Native<ffi.Pointer<ffi.Void> Function(ffi.Size, ffi.Size)>()
 external ffi.Pointer<ffi.Void> calloc(
   int __count,
   int __size,
 );
 
-@ffi.Native<ffi.Void Function(ffi.Pointer<ffi.Void>)>(symbol: 'free')
+@ffi.Native<ffi.Void Function(ffi.Pointer<ffi.Void>)>()
 external void free(
   ffi.Pointer<ffi.Void> arg0,
 );
 
-@ffi.Native<ffi.Pointer<ffi.Void> Function(ffi.Pointer<ffi.Void>, ffi.Size)>(
-    symbol: 'realloc')
+@ffi.Native<ffi.Pointer<ffi.Void> Function(ffi.Pointer<ffi.Void>, ffi.Size)>()
 external ffi.Pointer<ffi.Void> realloc(
   ffi.Pointer<ffi.Void> __ptr,
   int __size,
 );
 
-@ffi.Native<ffi.Pointer<ffi.Void> Function(ffi.Size)>(symbol: 'valloc')
-external ffi.Pointer<ffi.Void> valloc(
-  int arg0,
+@ffi.Native<ffi.Pointer<ffi.Void> Function(ffi.Pointer<ffi.Void>, ffi.Size)>()
+external ffi.Pointer<ffi.Void> reallocf(
+  ffi.Pointer<ffi.Void> __ptr,
+  int __size,
 );
 
-@ffi.Native<ffi.Pointer<ffi.Void> Function(ffi.Size, ffi.Size)>(
-    symbol: 'aligned_alloc')
+@ffi.Native<ffi.Pointer<ffi.Void> Function(ffi.Size)>()
+external ffi.Pointer<ffi.Void> valloc(
+  int __size,
+);
+
+@ffi.Native<ffi.Pointer<ffi.Void> Function(ffi.Size, ffi.Size)>()
 external ffi.Pointer<ffi.Void> aligned_alloc(
   int __alignment,
   int __size,
 );
 
 @ffi.Native<
-    ffi.Int Function(ffi.Pointer<ffi.Pointer<ffi.Void>>, ffi.Size,
-        ffi.Size)>(symbol: 'posix_memalign')
+    ffi.Int Function(ffi.Pointer<ffi.Pointer<ffi.Void>>, ffi.Size, ffi.Size)>()
 external int posix_memalign(
   ffi.Pointer<ffi.Pointer<ffi.Void>> __memptr,
   int __alignment,
   int __size,
 );
 
-@ffi.Native<ffi.Void Function()>(symbol: 'abort')
+@ffi.Native<ffi.Void Function()>()
 external void abort();
 
-@ffi.Native<ffi.Int Function(ffi.Int)>(symbol: 'abs')
+@ffi.Native<ffi.Int Function(ffi.Int)>()
 external int abs(
   int arg0,
 );
 
 @ffi.Native<
-    ffi.Int Function(
-        ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>>)>(symbol: 'atexit')
+    ffi.Int Function(ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>>)>()
 external int atexit(
   ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>> arg0,
 );
 
-@ffi.Native<ffi.Double Function(ffi.Pointer<ffi.Char>)>(symbol: 'atof')
+@ffi.Native<
+    ffi.Int Function(ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>>)>()
+external int at_quick_exit(
+  ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>> arg0,
+);
+
+@ffi.Native<ffi.Double Function(ffi.Pointer<ffi.Char>)>()
 external double atof(
   ffi.Pointer<ffi.Char> arg0,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Char>)>(symbol: 'atoi')
+@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Char>)>()
 external int atoi(
   ffi.Pointer<ffi.Char> arg0,
 );
 
-@ffi.Native<ffi.Long Function(ffi.Pointer<ffi.Char>)>(symbol: 'atol')
+@ffi.Native<ffi.Long Function(ffi.Pointer<ffi.Char>)>()
 external int atol(
   ffi.Pointer<ffi.Char> arg0,
 );
 
-@ffi.Native<ffi.LongLong Function(ffi.Pointer<ffi.Char>)>(symbol: 'atoll')
+@ffi.Native<ffi.LongLong Function(ffi.Pointer<ffi.Char>)>()
 external int atoll(
   ffi.Pointer<ffi.Char> arg0,
 );
@@ -193,8 +322,8 @@ external int atoll(
         ffi.Size,
         ffi.Pointer<
             ffi.NativeFunction<
-                ffi.Int Function(ffi.Pointer<ffi.Void>,
-                    ffi.Pointer<ffi.Void>)>>)>(symbol: 'bsearch')
+                ffi.Int Function(
+                    ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>)>>)>()
 external ffi.Pointer<ffi.Void> bsearch(
   ffi.Pointer<ffi.Void> __key,
   ffi.Pointer<ffi.Void> __base,
@@ -206,54 +335,53 @@ external ffi.Pointer<ffi.Void> bsearch(
       __compar,
 );
 
-@ffi.Native<div_t Function(ffi.Int, ffi.Int)>(symbol: 'div')
+@ffi.Native<div_t Function(ffi.Int, ffi.Int)>()
 external div_t div(
   int arg0,
   int arg1,
 );
 
-@ffi.Native<ffi.Void Function(ffi.Int)>(symbol: 'exit')
+@ffi.Native<ffi.Void Function(ffi.Int)>()
 external void exit(
   int arg0,
 );
 
-@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>)>(
-    symbol: 'getenv')
+@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>)>()
 external ffi.Pointer<ffi.Char> getenv(
   ffi.Pointer<ffi.Char> arg0,
 );
 
-@ffi.Native<ffi.Long Function(ffi.Long)>(symbol: 'labs')
+@ffi.Native<ffi.Long Function(ffi.Long)>()
 external int labs(
   int arg0,
 );
 
-@ffi.Native<ldiv_t Function(ffi.Long, ffi.Long)>(symbol: 'ldiv')
+@ffi.Native<ldiv_t Function(ffi.Long, ffi.Long)>()
 external ldiv_t ldiv(
   int arg0,
   int arg1,
 );
 
-@ffi.Native<ffi.LongLong Function(ffi.LongLong)>(symbol: 'llabs')
+@ffi.Native<ffi.LongLong Function(ffi.LongLong)>()
 external int llabs(
   int arg0,
 );
 
-@ffi.Native<lldiv_t Function(ffi.LongLong, ffi.LongLong)>(symbol: 'lldiv')
+@ffi.Native<lldiv_t Function(ffi.LongLong, ffi.LongLong)>()
 external lldiv_t lldiv(
   int arg0,
   int arg1,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Char>, ffi.Size)>(symbol: 'mblen')
+@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Char>, ffi.Size)>()
 external int mblen(
   ffi.Pointer<ffi.Char> __s,
   int __n,
 );
 
 @ffi.Native<
-    ffi.Size Function(ffi.Pointer<ffi.WChar>, ffi.Pointer<ffi.Char>,
-        ffi.Size)>(symbol: 'mbstowcs')
+    ffi.Size Function(
+        ffi.Pointer<ffi.WChar>, ffi.Pointer<ffi.Char>, ffi.Size)>()
 external int mbstowcs(
   ffi.Pointer<ffi.WChar> arg0,
   ffi.Pointer<ffi.Char> arg1,
@@ -261,8 +389,7 @@ external int mbstowcs(
 );
 
 @ffi.Native<
-    ffi.Int Function(ffi.Pointer<ffi.WChar>, ffi.Pointer<ffi.Char>,
-        ffi.Size)>(symbol: 'mbtowc')
+    ffi.Int Function(ffi.Pointer<ffi.WChar>, ffi.Pointer<ffi.Char>, ffi.Size)>()
 external int mbtowc(
   ffi.Pointer<ffi.WChar> arg0,
   ffi.Pointer<ffi.Char> arg1,
@@ -276,8 +403,8 @@ external int mbtowc(
         ffi.Size,
         ffi.Pointer<
             ffi.NativeFunction<
-                ffi.Int Function(ffi.Pointer<ffi.Void>,
-                    ffi.Pointer<ffi.Void>)>>)>(symbol: 'qsort')
+                ffi.Int Function(
+                    ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>)>>)>()
 external void qsort(
   ffi.Pointer<ffi.Void> __base,
   int __nel,
@@ -288,33 +415,38 @@ external void qsort(
       __compar,
 );
 
-@ffi.Native<ffi.Int Function()>(symbol: 'rand')
+@ffi.Native<ffi.Void Function(ffi.Int)>()
+external void quick_exit(
+  int arg0,
+);
+
+@ffi.Native<ffi.Int Function()>()
 external int rand();
 
-@ffi.Native<ffi.Void Function(ffi.UnsignedInt)>(symbol: 'srand')
+@ffi.Native<ffi.Void Function(ffi.UnsignedInt)>()
 external void srand(
   int arg0,
 );
 
 @ffi.Native<
-    ffi.Double Function(ffi.Pointer<ffi.Char>,
-        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'strtod')
+    ffi.Double Function(
+        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Pointer<ffi.Char>>)>()
 external double strtod(
   ffi.Pointer<ffi.Char> arg0,
   ffi.Pointer<ffi.Pointer<ffi.Char>> arg1,
 );
 
 @ffi.Native<
-    ffi.Float Function(ffi.Pointer<ffi.Char>,
-        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'strtof')
+    ffi.Float Function(
+        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Pointer<ffi.Char>>)>()
 external double strtof(
   ffi.Pointer<ffi.Char> arg0,
   ffi.Pointer<ffi.Pointer<ffi.Char>> arg1,
 );
 
 @ffi.Native<
-    ffi.Long Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Pointer<ffi.Char>>,
-        ffi.Int)>(symbol: 'strtol')
+    ffi.Long Function(
+        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Pointer<ffi.Char>>, ffi.Int)>()
 external int strtol(
   ffi.Pointer<ffi.Char> __str,
   ffi.Pointer<ffi.Pointer<ffi.Char>> __endptr,
@@ -322,8 +454,8 @@ external int strtol(
 );
 
 @ffi.Native<
-    ffi.LongLong Function(ffi.Pointer<ffi.Char>,
-        ffi.Pointer<ffi.Pointer<ffi.Char>>, ffi.Int)>(symbol: 'strtoll')
+    ffi.LongLong Function(
+        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Pointer<ffi.Char>>, ffi.Int)>()
 external int strtoll(
   ffi.Pointer<ffi.Char> __str,
   ffi.Pointer<ffi.Pointer<ffi.Char>> __endptr,
@@ -331,8 +463,8 @@ external int strtoll(
 );
 
 @ffi.Native<
-    ffi.UnsignedLong Function(ffi.Pointer<ffi.Char>,
-        ffi.Pointer<ffi.Pointer<ffi.Char>>, ffi.Int)>(symbol: 'strtoul')
+    ffi.UnsignedLong Function(
+        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Pointer<ffi.Char>>, ffi.Int)>()
 external int strtoul(
   ffi.Pointer<ffi.Char> __str,
   ffi.Pointer<ffi.Pointer<ffi.Char>> __endptr,
@@ -340,51 +472,50 @@ external int strtoul(
 );
 
 @ffi.Native<
-    ffi.UnsignedLongLong Function(ffi.Pointer<ffi.Char>,
-        ffi.Pointer<ffi.Pointer<ffi.Char>>, ffi.Int)>(symbol: 'strtoull')
+    ffi.UnsignedLongLong Function(
+        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Pointer<ffi.Char>>, ffi.Int)>()
 external int strtoull(
   ffi.Pointer<ffi.Char> __str,
   ffi.Pointer<ffi.Pointer<ffi.Char>> __endptr,
   int __base,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Char>)>(symbol: 'system')
+@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Char>)>()
 external int system(
   ffi.Pointer<ffi.Char> arg0,
 );
 
 @ffi.Native<
-    ffi.Size Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.WChar>,
-        ffi.Size)>(symbol: 'wcstombs')
+    ffi.Size Function(
+        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.WChar>, ffi.Size)>()
 external int wcstombs(
   ffi.Pointer<ffi.Char> arg0,
   ffi.Pointer<ffi.WChar> arg1,
   int arg2,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Char>, ffi.WChar)>(
-    symbol: 'wctomb')
+@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Char>, ffi.WChar)>()
 external int wctomb(
   ffi.Pointer<ffi.Char> arg0,
   int arg1,
 );
 
-@ffi.Native<ffi.Void Function(ffi.Int)>(symbol: '_Exit')
+@ffi.Native<ffi.Void Function(ffi.Int)>()
 external void _Exit(
   int arg0,
 );
 
-@ffi.Native<ffi.Long Function(ffi.Pointer<ffi.Char>)>(symbol: 'a64l')
+@ffi.Native<ffi.Long Function(ffi.Pointer<ffi.Char>)>()
 external int a64l(
   ffi.Pointer<ffi.Char> arg0,
 );
 
-@ffi.Native<ffi.Double Function()>(symbol: 'drand48')
+@ffi.Native<ffi.Double Function()>()
 external double drand48();
 
 @ffi.Native<
-    ffi.Pointer<ffi.Char> Function(ffi.Double, ffi.Int, ffi.Pointer<ffi.Int>,
-        ffi.Pointer<ffi.Int>)>(symbol: 'ecvt')
+    ffi.Pointer<ffi.Char> Function(
+        ffi.Double, ffi.Int, ffi.Pointer<ffi.Int>, ffi.Pointer<ffi.Int>)>()
 external ffi.Pointer<ffi.Char> ecvt(
   double arg0,
   int arg1,
@@ -392,15 +523,14 @@ external ffi.Pointer<ffi.Char> ecvt(
   ffi.Pointer<ffi.Int> arg3,
 );
 
-@ffi.Native<ffi.Double Function(ffi.Pointer<ffi.UnsignedShort>)>(
-    symbol: 'erand48')
+@ffi.Native<ffi.Double Function(ffi.Pointer<ffi.UnsignedShort>)>()
 external double erand48(
   ffi.Pointer<ffi.UnsignedShort> arg0,
 );
 
 @ffi.Native<
-    ffi.Pointer<ffi.Char> Function(ffi.Double, ffi.Int, ffi.Pointer<ffi.Int>,
-        ffi.Pointer<ffi.Int>)>(symbol: 'fcvt')
+    ffi.Pointer<ffi.Char> Function(
+        ffi.Double, ffi.Int, ffi.Pointer<ffi.Int>, ffi.Pointer<ffi.Int>)>()
 external ffi.Pointer<ffi.Char> fcvt(
   double arg0,
   int arg1,
@@ -410,7 +540,7 @@ external ffi.Pointer<ffi.Char> fcvt(
 
 @ffi.Native<
     ffi.Pointer<ffi.Char> Function(
-        ffi.Double, ffi.Int, ffi.Pointer<ffi.Char>)>(symbol: 'gcvt')
+        ffi.Double, ffi.Int, ffi.Pointer<ffi.Char>)>()
 external ffi.Pointer<ffi.Char> gcvt(
   double arg0,
   int arg1,
@@ -421,195 +551,183 @@ external ffi.Pointer<ffi.Char> gcvt(
     ffi.Int Function(
         ffi.Pointer<ffi.Pointer<ffi.Char>>,
         ffi.Pointer<ffi.Pointer<ffi.Char>>,
-        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'getsubopt')
+        ffi.Pointer<ffi.Pointer<ffi.Char>>)>()
 external int getsubopt(
   ffi.Pointer<ffi.Pointer<ffi.Char>> arg0,
   ffi.Pointer<ffi.Pointer<ffi.Char>> arg1,
   ffi.Pointer<ffi.Pointer<ffi.Char>> arg2,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Int)>(symbol: 'grantpt')
+@ffi.Native<ffi.Int Function(ffi.Int)>()
 external int grantpt(
   int arg0,
 );
 
 @ffi.Native<
     ffi.Pointer<ffi.Char> Function(
-        ffi.UnsignedInt, ffi.Pointer<ffi.Char>, ffi.Size)>(symbol: 'initstate')
+        ffi.UnsignedInt, ffi.Pointer<ffi.Char>, ffi.Size)>()
 external ffi.Pointer<ffi.Char> initstate(
   int arg0,
   ffi.Pointer<ffi.Char> arg1,
   int arg2,
 );
 
-@ffi.Native<ffi.Long Function(ffi.Pointer<ffi.UnsignedShort>)>(
-    symbol: 'jrand48')
+@ffi.Native<ffi.Long Function(ffi.Pointer<ffi.UnsignedShort>)>()
 external int jrand48(
   ffi.Pointer<ffi.UnsignedShort> arg0,
 );
 
-@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Long)>(symbol: 'l64a')
+@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Long)>()
 external ffi.Pointer<ffi.Char> l64a(
   int arg0,
 );
 
-@ffi.Native<ffi.Void Function(ffi.Pointer<ffi.UnsignedShort>)>(
-    symbol: 'lcong48')
+@ffi.Native<ffi.Void Function(ffi.Pointer<ffi.UnsignedShort>)>()
 external void lcong48(
   ffi.Pointer<ffi.UnsignedShort> arg0,
 );
 
-@ffi.Native<ffi.Long Function()>(symbol: 'lrand48')
+@ffi.Native<ffi.Long Function()>()
 external int lrand48();
 
-@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>)>(
-    symbol: 'mktemp')
+@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>)>()
 external ffi.Pointer<ffi.Char> mktemp(
   ffi.Pointer<ffi.Char> arg0,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Char>)>(symbol: 'mkstemp')
+@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Char>)>()
 external int mkstemp(
   ffi.Pointer<ffi.Char> arg0,
 );
 
-@ffi.Native<ffi.Long Function()>(symbol: 'mrand48')
+@ffi.Native<ffi.Long Function()>()
 external int mrand48();
 
-@ffi.Native<ffi.Long Function(ffi.Pointer<ffi.UnsignedShort>)>(
-    symbol: 'nrand48')
+@ffi.Native<ffi.Long Function(ffi.Pointer<ffi.UnsignedShort>)>()
 external int nrand48(
   ffi.Pointer<ffi.UnsignedShort> arg0,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Int)>(symbol: 'posix_openpt')
+@ffi.Native<ffi.Int Function(ffi.Int)>()
 external int posix_openpt(
   int arg0,
 );
 
-@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Int)>(symbol: 'ptsname')
+@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Int)>()
 external ffi.Pointer<ffi.Char> ptsname(
   int arg0,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Int, ffi.Pointer<ffi.Char>, ffi.Size)>(
-    symbol: 'ptsname_r')
+@ffi.Native<ffi.Int Function(ffi.Int, ffi.Pointer<ffi.Char>, ffi.Size)>()
 external int ptsname_r(
   int fildes,
   ffi.Pointer<ffi.Char> buffer,
   int buflen,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Char>)>(symbol: 'putenv')
+@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Char>)>()
 external int putenv(
   ffi.Pointer<ffi.Char> arg0,
 );
 
-@ffi.Native<ffi.Long Function()>(symbol: 'random')
+@ffi.Native<ffi.Long Function()>()
 external int random();
 
-@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.UnsignedInt>)>(symbol: 'rand_r')
+@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.UnsignedInt>)>()
 external int rand_r(
   ffi.Pointer<ffi.UnsignedInt> arg0,
 );
 
 @ffi.Native<
     ffi.Pointer<ffi.Char> Function(
-        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>(symbol: 'realpath')
+        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>()
 external ffi.Pointer<ffi.Char> realpath(
   ffi.Pointer<ffi.Char> arg0,
   ffi.Pointer<ffi.Char> arg1,
 );
 
 @ffi.Native<
-    ffi.Pointer<ffi.UnsignedShort> Function(
-        ffi.Pointer<ffi.UnsignedShort>)>(symbol: 'seed48')
+    ffi.Pointer<ffi.UnsignedShort> Function(ffi.Pointer<ffi.UnsignedShort>)>()
 external ffi.Pointer<ffi.UnsignedShort> seed48(
   ffi.Pointer<ffi.UnsignedShort> arg0,
 );
 
 @ffi.Native<
-    ffi.Int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
-        ffi.Int)>(symbol: 'setenv')
+    ffi.Int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>, ffi.Int)>()
 external int setenv(
   ffi.Pointer<ffi.Char> __name,
   ffi.Pointer<ffi.Char> __value,
   int __overwrite,
 );
 
-@ffi.Native<ffi.Void Function(ffi.Pointer<ffi.Char>)>(symbol: 'setkey')
+@ffi.Native<ffi.Void Function(ffi.Pointer<ffi.Char>)>()
 external void setkey(
   ffi.Pointer<ffi.Char> arg0,
 );
 
-@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>)>(
-    symbol: 'setstate')
+@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>)>()
 external ffi.Pointer<ffi.Char> setstate(
   ffi.Pointer<ffi.Char> arg0,
 );
 
-@ffi.Native<ffi.Void Function(ffi.Long)>(symbol: 'srand48')
+@ffi.Native<ffi.Void Function(ffi.Long)>()
 external void srand48(
   int arg0,
 );
 
-@ffi.Native<ffi.Void Function(ffi.UnsignedInt)>(symbol: 'srandom')
+@ffi.Native<ffi.Void Function(ffi.UnsignedInt)>()
 external void srandom(
   int arg0,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Int)>(symbol: 'unlockpt')
+@ffi.Native<ffi.Int Function(ffi.Int)>()
 external int unlockpt(
   int arg0,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Char>)>(symbol: 'unsetenv')
+@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Char>)>()
 external int unsetenv(
   ffi.Pointer<ffi.Char> arg0,
 );
 
-@ffi.Native<ffi.Uint32 Function()>(symbol: 'arc4random')
+@ffi.Native<ffi.Uint32 Function()>()
 external int arc4random();
 
-@ffi.Native<ffi.Void Function(ffi.Pointer<ffi.UnsignedChar>, ffi.Int)>(
-    symbol: 'arc4random_addrandom')
+@ffi.Native<ffi.Void Function(ffi.Pointer<ffi.UnsignedChar>, ffi.Int)>()
 external void arc4random_addrandom(
   ffi.Pointer<ffi.UnsignedChar> arg0,
   int arg1,
 );
 
-@ffi.Native<ffi.Void Function(ffi.Pointer<ffi.Void>, ffi.Size)>(
-    symbol: 'arc4random_buf')
+@ffi.Native<ffi.Void Function(ffi.Pointer<ffi.Void>, ffi.Size)>()
 external void arc4random_buf(
   ffi.Pointer<ffi.Void> __buf,
   int __nbytes,
 );
 
-@ffi.Native<ffi.Void Function()>(symbol: 'arc4random_stir')
+@ffi.Native<ffi.Void Function()>()
 external void arc4random_stir();
 
-@ffi.Native<ffi.Uint32 Function(ffi.Uint32)>(symbol: 'arc4random_uniform')
+@ffi.Native<ffi.Uint32 Function(ffi.Uint32)>()
 external int arc4random_uniform(
   int __upper_bound,
 );
 
 @ffi.Native<
-    ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
-        ffi.Int)>(symbol: 'cgetcap')
+    ffi.Pointer<ffi.Char> Function(
+        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>, ffi.Int)>()
 external ffi.Pointer<ffi.Char> cgetcap(
   ffi.Pointer<ffi.Char> arg0,
   ffi.Pointer<ffi.Char> arg1,
   int arg2,
 );
 
-@ffi.Native<ffi.Int Function()>(symbol: 'cgetclose')
+@ffi.Native<ffi.Int Function()>()
 external int cgetclose();
 
 @ffi.Native<
-    ffi.Int Function(
-        ffi.Pointer<ffi.Pointer<ffi.Char>>,
-        ffi.Pointer<ffi.Pointer<ffi.Char>>,
-        ffi.Pointer<ffi.Char>)>(symbol: 'cgetent')
+    ffi.Int Function(ffi.Pointer<ffi.Pointer<ffi.Char>>,
+        ffi.Pointer<ffi.Pointer<ffi.Char>>, ffi.Pointer<ffi.Char>)>()
 external int cgetent(
   ffi.Pointer<ffi.Pointer<ffi.Char>> arg0,
   ffi.Pointer<ffi.Pointer<ffi.Char>> arg1,
@@ -618,14 +736,13 @@ external int cgetent(
 
 @ffi.Native<
     ffi.Int Function(ffi.Pointer<ffi.Pointer<ffi.Char>>,
-        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'cgetfirst')
+        ffi.Pointer<ffi.Pointer<ffi.Char>>)>()
 external int cgetfirst(
   ffi.Pointer<ffi.Pointer<ffi.Char>> arg0,
   ffi.Pointer<ffi.Pointer<ffi.Char>> arg1,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>(
-    symbol: 'cgetmatch')
+@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>()
 external int cgetmatch(
   ffi.Pointer<ffi.Char> arg0,
   ffi.Pointer<ffi.Char> arg1,
@@ -633,29 +750,29 @@ external int cgetmatch(
 
 @ffi.Native<
     ffi.Int Function(ffi.Pointer<ffi.Pointer<ffi.Char>>,
-        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'cgetnext')
+        ffi.Pointer<ffi.Pointer<ffi.Char>>)>()
 external int cgetnext(
   ffi.Pointer<ffi.Pointer<ffi.Char>> arg0,
   ffi.Pointer<ffi.Pointer<ffi.Char>> arg1,
 );
 
 @ffi.Native<
-    ffi.Int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
-        ffi.Pointer<ffi.Long>)>(symbol: 'cgetnum')
+    ffi.Int Function(
+        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Long>)>()
 external int cgetnum(
   ffi.Pointer<ffi.Char> arg0,
   ffi.Pointer<ffi.Char> arg1,
   ffi.Pointer<ffi.Long> arg2,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Char>)>(symbol: 'cgetset')
+@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Char>)>()
 external int cgetset(
   ffi.Pointer<ffi.Char> arg0,
 );
 
 @ffi.Native<
     ffi.Int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
-        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'cgetstr')
+        ffi.Pointer<ffi.Pointer<ffi.Char>>)>()
 external int cgetstr(
   ffi.Pointer<ffi.Char> arg0,
   ffi.Pointer<ffi.Char> arg1,
@@ -664,20 +781,20 @@ external int cgetstr(
 
 @ffi.Native<
     ffi.Int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
-        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'cgetustr')
+        ffi.Pointer<ffi.Pointer<ffi.Char>>)>()
 external int cgetustr(
   ffi.Pointer<ffi.Char> arg0,
   ffi.Pointer<ffi.Char> arg1,
   ffi.Pointer<ffi.Pointer<ffi.Char>> arg2,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Int, ffi.Int)>(symbol: 'daemon')
+@ffi.Native<ffi.Int Function(ffi.Int, ffi.Int)>()
 external int daemon(
   int arg0,
   int arg1,
 );
 
-@ffi.Native<ffi.Pointer<ffi.Char> Function(dev_t, mode_t)>(symbol: 'devname')
+@ffi.Native<ffi.Pointer<ffi.Char> Function(dev_t, mode_t)>()
 external ffi.Pointer<ffi.Char> devname(
   int arg0,
   int arg1,
@@ -685,7 +802,7 @@ external ffi.Pointer<ffi.Char> devname(
 
 @ffi.Native<
     ffi.Pointer<ffi.Char> Function(
-        dev_t, mode_t, ffi.Pointer<ffi.Char>, ffi.Int)>(symbol: 'devname_r')
+        dev_t, mode_t, ffi.Pointer<ffi.Char>, ffi.Int)>()
 external ffi.Pointer<ffi.Char> devname_r(
   int arg0,
   int arg1,
@@ -695,23 +812,22 @@ external ffi.Pointer<ffi.Char> devname_r(
 
 @ffi.Native<
     ffi.Pointer<ffi.Char> Function(
-        ffi.Pointer<ffi.Int>, ffi.Pointer<ffi.Long>)>(symbol: 'getbsize')
+        ffi.Pointer<ffi.Int>, ffi.Pointer<ffi.Long>)>()
 external ffi.Pointer<ffi.Char> getbsize(
   ffi.Pointer<ffi.Int> arg0,
   ffi.Pointer<ffi.Long> arg1,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Double>, ffi.Int)>(
-    symbol: 'getloadavg')
+@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Double>, ffi.Int)>()
 external int getloadavg(
   ffi.Pointer<ffi.Double> arg0,
   int arg1,
 );
 
-@ffi.Native<ffi.Pointer<ffi.Char> Function()>(symbol: 'getprogname')
+@ffi.Native<ffi.Pointer<ffi.Char> Function()>()
 external ffi.Pointer<ffi.Char> getprogname();
 
-@ffi.Native<ffi.Void Function(ffi.Pointer<ffi.Char>)>(symbol: 'setprogname')
+@ffi.Native<ffi.Void Function(ffi.Pointer<ffi.Char>)>()
 external void setprogname(
   ffi.Pointer<ffi.Char> arg0,
 );
@@ -723,8 +839,8 @@ external void setprogname(
         ffi.Size,
         ffi.Pointer<
             ffi.NativeFunction<
-                ffi.Int Function(ffi.Pointer<ffi.Void>,
-                    ffi.Pointer<ffi.Void>)>>)>(symbol: 'heapsort')
+                ffi.Int Function(
+                    ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>)>>)>()
 external int heapsort(
   ffi.Pointer<ffi.Void> __base,
   int __nel,
@@ -742,8 +858,8 @@ external int heapsort(
         ffi.Size,
         ffi.Pointer<
             ffi.NativeFunction<
-                ffi.Int Function(ffi.Pointer<ffi.Void>,
-                    ffi.Pointer<ffi.Void>)>>)>(symbol: 'mergesort')
+                ffi.Int Function(
+                    ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>)>>)>()
 external int mergesort(
   ffi.Pointer<ffi.Void> __base,
   int __nel,
@@ -761,8 +877,8 @@ external int mergesort(
         ffi.Size,
         ffi.Pointer<
             ffi.NativeFunction<
-                ffi.Int Function(ffi.Pointer<ffi.Void>,
-                    ffi.Pointer<ffi.Void>)>>)>(symbol: 'psort')
+                ffi.Int Function(
+                    ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>)>>)>()
 external void psort(
   ffi.Pointer<ffi.Void> __base,
   int __nel,
@@ -782,7 +898,7 @@ external void psort(
         ffi.Pointer<
             ffi.NativeFunction<
                 ffi.Int Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>,
-                    ffi.Pointer<ffi.Void>)>>)>(symbol: 'psort_r')
+                    ffi.Pointer<ffi.Void>)>>)>()
 external void psort_r(
   ffi.Pointer<ffi.Void> __base,
   int __nel,
@@ -804,7 +920,7 @@ external void psort_r(
         ffi.Pointer<
             ffi.NativeFunction<
                 ffi.Int Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>,
-                    ffi.Pointer<ffi.Void>)>>)>(symbol: 'qsort_r')
+                    ffi.Pointer<ffi.Void>)>>)>()
 external void qsort_r(
   ffi.Pointer<ffi.Void> __base,
   int __nel,
@@ -819,7 +935,7 @@ external void qsort_r(
 
 @ffi.Native<
     ffi.Int Function(ffi.Pointer<ffi.Pointer<ffi.UnsignedChar>>, ffi.Int,
-        ffi.Pointer<ffi.UnsignedChar>, ffi.UnsignedInt)>(symbol: 'radixsort')
+        ffi.Pointer<ffi.UnsignedChar>, ffi.UnsignedInt)>()
 external int radixsort(
   ffi.Pointer<ffi.Pointer<ffi.UnsignedChar>> __base,
   int __nel,
@@ -827,14 +943,14 @@ external int radixsort(
   int __endbyte,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Char>)>(symbol: 'rpmatch')
+@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Char>)>()
 external int rpmatch(
   ffi.Pointer<ffi.Char> arg0,
 );
 
 @ffi.Native<
     ffi.Int Function(ffi.Pointer<ffi.Pointer<ffi.UnsignedChar>>, ffi.Int,
-        ffi.Pointer<ffi.UnsignedChar>, ffi.UnsignedInt)>(symbol: 'sradixsort')
+        ffi.Pointer<ffi.UnsignedChar>, ffi.UnsignedInt)>()
 external int sradixsort(
   ffi.Pointer<ffi.Pointer<ffi.UnsignedChar>> __base,
   int __nel,
@@ -842,22 +958,15 @@ external int sradixsort(
   int __endbyte,
 );
 
-@ffi.Native<ffi.Void Function()>(symbol: 'sranddev')
+@ffi.Native<ffi.Void Function()>()
 external void sranddev();
 
-@ffi.Native<ffi.Void Function()>(symbol: 'srandomdev')
+@ffi.Native<ffi.Void Function()>()
 external void srandomdev();
-
-@ffi.Native<ffi.Pointer<ffi.Void> Function(ffi.Pointer<ffi.Void>, ffi.Size)>(
-    symbol: 'reallocf')
-external ffi.Pointer<ffi.Void> reallocf(
-  ffi.Pointer<ffi.Void> __ptr,
-  int __size,
-);
 
 @ffi.Native<
     ffi.LongLong Function(ffi.Pointer<ffi.Char>, ffi.LongLong, ffi.LongLong,
-        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'strtonum')
+        ffi.Pointer<ffi.Pointer<ffi.Char>>)>()
 external int strtonum(
   ffi.Pointer<ffi.Char> __numstr,
   int __minval,
@@ -866,8 +975,8 @@ external int strtonum(
 );
 
 @ffi.Native<
-    ffi.LongLong Function(ffi.Pointer<ffi.Char>,
-        ffi.Pointer<ffi.Pointer<ffi.Char>>, ffi.Int)>(symbol: 'strtoq')
+    ffi.LongLong Function(
+        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Pointer<ffi.Char>>, ffi.Int)>()
 external int strtoq(
   ffi.Pointer<ffi.Char> __str,
   ffi.Pointer<ffi.Pointer<ffi.Char>> __endptr,
@@ -875,17 +984,19 @@ external int strtoq(
 );
 
 @ffi.Native<
-    ffi.UnsignedLongLong Function(ffi.Pointer<ffi.Char>,
-        ffi.Pointer<ffi.Pointer<ffi.Char>>, ffi.Int)>(symbol: 'strtouq')
+    ffi.UnsignedLongLong Function(
+        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Pointer<ffi.Char>>, ffi.Int)>()
 external int strtouq(
   ffi.Pointer<ffi.Char> __str,
   ffi.Pointer<ffi.Pointer<ffi.Char>> __endptr,
   int __base,
 );
 
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external ffi.Pointer<ffi.Char> suboptarg;
+
 @ffi.Native<
-    ffi.Pointer<ffi.Void> Function(
-        ffi.Pointer<ffi.Void>, ffi.Int, ffi.Size)>(symbol: 'memchr')
+    ffi.Pointer<ffi.Void> Function(ffi.Pointer<ffi.Void>, ffi.Int, ffi.Size)>()
 external ffi.Pointer<ffi.Void> memchr(
   ffi.Pointer<ffi.Void> __s,
   int __c,
@@ -893,8 +1004,7 @@ external ffi.Pointer<ffi.Void> memchr(
 );
 
 @ffi.Native<
-    ffi.Int Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>,
-        ffi.Size)>(symbol: 'memcmp')
+    ffi.Int Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>, ffi.Size)>()
 external int memcmp(
   ffi.Pointer<ffi.Void> __s1,
   ffi.Pointer<ffi.Void> __s2,
@@ -902,8 +1012,8 @@ external int memcmp(
 );
 
 @ffi.Native<
-    ffi.Pointer<ffi.Void> Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>,
-        ffi.Size)>(symbol: 'memcpy')
+    ffi.Pointer<ffi.Void> Function(
+        ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>, ffi.Size)>()
 external ffi.Pointer<ffi.Void> memcpy(
   ffi.Pointer<ffi.Void> __dst,
   ffi.Pointer<ffi.Void> __src,
@@ -911,8 +1021,8 @@ external ffi.Pointer<ffi.Void> memcpy(
 );
 
 @ffi.Native<
-    ffi.Pointer<ffi.Void> Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>,
-        ffi.Size)>(symbol: 'memmove')
+    ffi.Pointer<ffi.Void> Function(
+        ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>, ffi.Size)>()
 external ffi.Pointer<ffi.Void> memmove(
   ffi.Pointer<ffi.Void> __dst,
   ffi.Pointer<ffi.Void> __src,
@@ -920,8 +1030,7 @@ external ffi.Pointer<ffi.Void> memmove(
 );
 
 @ffi.Native<
-    ffi.Pointer<ffi.Void> Function(
-        ffi.Pointer<ffi.Void>, ffi.Int, ffi.Size)>(symbol: 'memset')
+    ffi.Pointer<ffi.Void> Function(ffi.Pointer<ffi.Void>, ffi.Int, ffi.Size)>()
 external ffi.Pointer<ffi.Void> memset(
   ffi.Pointer<ffi.Void> __b,
   int __c,
@@ -930,28 +1039,25 @@ external ffi.Pointer<ffi.Void> memset(
 
 @ffi.Native<
     ffi.Pointer<ffi.Char> Function(
-        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>(symbol: 'strcat')
+        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>()
 external ffi.Pointer<ffi.Char> strcat(
   ffi.Pointer<ffi.Char> __s1,
   ffi.Pointer<ffi.Char> __s2,
 );
 
-@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>, ffi.Int)>(
-    symbol: 'strchr')
+@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>, ffi.Int)>()
 external ffi.Pointer<ffi.Char> strchr(
   ffi.Pointer<ffi.Char> __s,
   int __c,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>(
-    symbol: 'strcmp')
+@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>()
 external int strcmp(
   ffi.Pointer<ffi.Char> __s1,
   ffi.Pointer<ffi.Char> __s2,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>(
-    symbol: 'strcoll')
+@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>()
 external int strcoll(
   ffi.Pointer<ffi.Char> __s1,
   ffi.Pointer<ffi.Char> __s2,
@@ -959,33 +1065,32 @@ external int strcoll(
 
 @ffi.Native<
     ffi.Pointer<ffi.Char> Function(
-        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>(symbol: 'strcpy')
+        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>()
 external ffi.Pointer<ffi.Char> strcpy(
   ffi.Pointer<ffi.Char> __dst,
   ffi.Pointer<ffi.Char> __src,
 );
 
 @ffi.Native<
-    ffi.UnsignedLong Function(
-        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>(symbol: 'strcspn')
+    ffi.UnsignedLong Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>()
 external int strcspn(
   ffi.Pointer<ffi.Char> __s,
   ffi.Pointer<ffi.Char> __charset,
 );
 
-@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Int)>(symbol: 'strerror')
+@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Int)>()
 external ffi.Pointer<ffi.Char> strerror(
   int __errnum,
 );
 
-@ffi.Native<ffi.UnsignedLong Function(ffi.Pointer<ffi.Char>)>(symbol: 'strlen')
+@ffi.Native<ffi.UnsignedLong Function(ffi.Pointer<ffi.Char>)>()
 external int strlen(
   ffi.Pointer<ffi.Char> __s,
 );
 
 @ffi.Native<
-    ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
-        ffi.Size)>(symbol: 'strncat')
+    ffi.Pointer<ffi.Char> Function(
+        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>, ffi.Size)>()
 external ffi.Pointer<ffi.Char> strncat(
   ffi.Pointer<ffi.Char> __s1,
   ffi.Pointer<ffi.Char> __s2,
@@ -993,8 +1098,7 @@ external ffi.Pointer<ffi.Char> strncat(
 );
 
 @ffi.Native<
-    ffi.Int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
-        ffi.Size)>(symbol: 'strncmp')
+    ffi.Int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>, ffi.Size)>()
 external int strncmp(
   ffi.Pointer<ffi.Char> __s1,
   ffi.Pointer<ffi.Char> __s2,
@@ -1002,8 +1106,8 @@ external int strncmp(
 );
 
 @ffi.Native<
-    ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
-        ffi.Size)>(symbol: 'strncpy')
+    ffi.Pointer<ffi.Char> Function(
+        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>, ffi.Size)>()
 external ffi.Pointer<ffi.Char> strncpy(
   ffi.Pointer<ffi.Char> __dst,
   ffi.Pointer<ffi.Char> __src,
@@ -1012,22 +1116,20 @@ external ffi.Pointer<ffi.Char> strncpy(
 
 @ffi.Native<
     ffi.Pointer<ffi.Char> Function(
-        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>(symbol: 'strpbrk')
+        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>()
 external ffi.Pointer<ffi.Char> strpbrk(
   ffi.Pointer<ffi.Char> __s,
   ffi.Pointer<ffi.Char> __charset,
 );
 
-@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>, ffi.Int)>(
-    symbol: 'strrchr')
+@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>, ffi.Int)>()
 external ffi.Pointer<ffi.Char> strrchr(
   ffi.Pointer<ffi.Char> __s,
   int __c,
 );
 
 @ffi.Native<
-    ffi.UnsignedLong Function(
-        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>(symbol: 'strspn')
+    ffi.UnsignedLong Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>()
 external int strspn(
   ffi.Pointer<ffi.Char> __s,
   ffi.Pointer<ffi.Char> __charset,
@@ -1035,7 +1137,7 @@ external int strspn(
 
 @ffi.Native<
     ffi.Pointer<ffi.Char> Function(
-        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>(symbol: 'strstr')
+        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>()
 external ffi.Pointer<ffi.Char> strstr(
   ffi.Pointer<ffi.Char> __big,
   ffi.Pointer<ffi.Char> __little,
@@ -1043,15 +1145,15 @@ external ffi.Pointer<ffi.Char> strstr(
 
 @ffi.Native<
     ffi.Pointer<ffi.Char> Function(
-        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>(symbol: 'strtok')
+        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>()
 external ffi.Pointer<ffi.Char> strtok(
   ffi.Pointer<ffi.Char> __str,
   ffi.Pointer<ffi.Char> __sep,
 );
 
 @ffi.Native<
-    ffi.UnsignedLong Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
-        ffi.Size)>(symbol: 'strxfrm')
+    ffi.UnsignedLong Function(
+        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>, ffi.Size)>()
 external int strxfrm(
   ffi.Pointer<ffi.Char> __s1,
   ffi.Pointer<ffi.Char> __s2,
@@ -1060,30 +1162,28 @@ external int strxfrm(
 
 @ffi.Native<
     ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
-        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'strtok_r')
+        ffi.Pointer<ffi.Pointer<ffi.Char>>)>()
 external ffi.Pointer<ffi.Char> strtok_r(
   ffi.Pointer<ffi.Char> __str,
   ffi.Pointer<ffi.Char> __sep,
   ffi.Pointer<ffi.Pointer<ffi.Char>> __lasts,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Int, ffi.Pointer<ffi.Char>, ffi.Size)>(
-    symbol: 'strerror_r')
+@ffi.Native<ffi.Int Function(ffi.Int, ffi.Pointer<ffi.Char>, ffi.Size)>()
 external int strerror_r(
   int __errnum,
   ffi.Pointer<ffi.Char> __strerrbuf,
   int __buflen,
 );
 
-@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>)>(
-    symbol: 'strdup')
+@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>)>()
 external ffi.Pointer<ffi.Char> strdup(
   ffi.Pointer<ffi.Char> __s1,
 );
 
 @ffi.Native<
-    ffi.Pointer<ffi.Void> Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>,
-        ffi.Int, ffi.Size)>(symbol: 'memccpy')
+    ffi.Pointer<ffi.Void> Function(
+        ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>, ffi.Int, ffi.Size)>()
 external ffi.Pointer<ffi.Void> memccpy(
   ffi.Pointer<ffi.Void> __dst,
   ffi.Pointer<ffi.Void> __src,
@@ -1093,42 +1193,40 @@ external ffi.Pointer<ffi.Void> memccpy(
 
 @ffi.Native<
     ffi.Pointer<ffi.Char> Function(
-        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>(symbol: 'stpcpy')
+        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>()
 external ffi.Pointer<ffi.Char> stpcpy(
   ffi.Pointer<ffi.Char> __dst,
   ffi.Pointer<ffi.Char> __src,
 );
 
 @ffi.Native<
-    ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
-        ffi.Size)>(symbol: 'stpncpy')
+    ffi.Pointer<ffi.Char> Function(
+        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>, ffi.Size)>()
 external ffi.Pointer<ffi.Char> stpncpy(
   ffi.Pointer<ffi.Char> __dst,
   ffi.Pointer<ffi.Char> __src,
   int __n,
 );
 
-@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>, ffi.Size)>(
-    symbol: 'strndup')
+@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>, ffi.Size)>()
 external ffi.Pointer<ffi.Char> strndup(
   ffi.Pointer<ffi.Char> __s1,
   int __n,
 );
 
-@ffi.Native<ffi.Size Function(ffi.Pointer<ffi.Char>, ffi.Size)>(
-    symbol: 'strnlen')
+@ffi.Native<ffi.Size Function(ffi.Pointer<ffi.Char>, ffi.Size)>()
 external int strnlen(
   ffi.Pointer<ffi.Char> __s1,
   int __n,
 );
 
-@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Int)>(symbol: 'strsignal')
+@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Int)>()
 external ffi.Pointer<ffi.Char> strsignal(
   int __sig,
 );
 
-@ffi.Native<errno_t Function(ffi.Pointer<ffi.Void>, rsize_t, ffi.Int, rsize_t)>(
-    symbol: 'memset_s')
+@ffi.Native<
+    errno_t Function(ffi.Pointer<ffi.Void>, rsize_t, ffi.Int, rsize_t)>()
 external int memset_s(
   ffi.Pointer<ffi.Void> __s,
   int __smax,
@@ -1137,8 +1235,8 @@ external int memset_s(
 );
 
 @ffi.Native<
-    ffi.Pointer<ffi.Void> Function(ffi.Pointer<ffi.Void>, ffi.Size,
-        ffi.Pointer<ffi.Void>, ffi.Size)>(symbol: 'memmem')
+    ffi.Pointer<ffi.Void> Function(
+        ffi.Pointer<ffi.Void>, ffi.Size, ffi.Pointer<ffi.Void>, ffi.Size)>()
 external ffi.Pointer<ffi.Void> memmem(
   ffi.Pointer<ffi.Void> __big,
   int __big_len,
@@ -1147,8 +1245,7 @@ external ffi.Pointer<ffi.Void> memmem(
 );
 
 @ffi.Native<
-    ffi.Void Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>,
-        ffi.Size)>(symbol: 'memset_pattern4')
+    ffi.Void Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>, ffi.Size)>()
 external void memset_pattern4(
   ffi.Pointer<ffi.Void> __b,
   ffi.Pointer<ffi.Void> __pattern4,
@@ -1156,8 +1253,7 @@ external void memset_pattern4(
 );
 
 @ffi.Native<
-    ffi.Void Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>,
-        ffi.Size)>(symbol: 'memset_pattern8')
+    ffi.Void Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>, ffi.Size)>()
 external void memset_pattern8(
   ffi.Pointer<ffi.Void> __b,
   ffi.Pointer<ffi.Void> __pattern8,
@@ -1165,8 +1261,7 @@ external void memset_pattern8(
 );
 
 @ffi.Native<
-    ffi.Void Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>,
-        ffi.Size)>(symbol: 'memset_pattern16')
+    ffi.Void Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>, ffi.Size)>()
 external void memset_pattern16(
   ffi.Pointer<ffi.Void> __b,
   ffi.Pointer<ffi.Void> __pattern16,
@@ -1175,15 +1270,15 @@ external void memset_pattern16(
 
 @ffi.Native<
     ffi.Pointer<ffi.Char> Function(
-        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>(symbol: 'strcasestr')
+        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>()
 external ffi.Pointer<ffi.Char> strcasestr(
   ffi.Pointer<ffi.Char> __big,
   ffi.Pointer<ffi.Char> __little,
 );
 
 @ffi.Native<
-    ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
-        ffi.Size)>(symbol: 'strnstr')
+    ffi.Pointer<ffi.Char> Function(
+        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>, ffi.Size)>()
 external ffi.Pointer<ffi.Char> strnstr(
   ffi.Pointer<ffi.Char> __big,
   ffi.Pointer<ffi.Char> __little,
@@ -1191,8 +1286,8 @@ external ffi.Pointer<ffi.Char> strnstr(
 );
 
 @ffi.Native<
-    ffi.UnsignedLong Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
-        ffi.Size)>(symbol: 'strlcat')
+    ffi.UnsignedLong Function(
+        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>, ffi.Size)>()
 external int strlcat(
   ffi.Pointer<ffi.Char> __dst,
   ffi.Pointer<ffi.Char> __source,
@@ -1200,32 +1295,30 @@ external int strlcat(
 );
 
 @ffi.Native<
-    ffi.UnsignedLong Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
-        ffi.Size)>(symbol: 'strlcpy')
+    ffi.UnsignedLong Function(
+        ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>, ffi.Size)>()
 external int strlcpy(
   ffi.Pointer<ffi.Char> __dst,
   ffi.Pointer<ffi.Char> __source,
   int __size,
 );
 
-@ffi.Native<ffi.Void Function(ffi.Int, ffi.Pointer<ffi.Char>)>(
-    symbol: 'strmode')
+@ffi.Native<ffi.Void Function(ffi.Int, ffi.Pointer<ffi.Char>)>()
 external void strmode(
   int __mode,
   ffi.Pointer<ffi.Char> __bp,
 );
 
 @ffi.Native<
-    ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Pointer<ffi.Char>>,
-        ffi.Pointer<ffi.Char>)>(symbol: 'strsep')
+    ffi.Pointer<ffi.Char> Function(
+        ffi.Pointer<ffi.Pointer<ffi.Char>>, ffi.Pointer<ffi.Char>)>()
 external ffi.Pointer<ffi.Char> strsep(
   ffi.Pointer<ffi.Pointer<ffi.Char>> __stringp,
   ffi.Pointer<ffi.Char> __delim,
 );
 
 @ffi.Native<
-    ffi.Void Function(
-        ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>, ssize_t)>(symbol: 'swab')
+    ffi.Void Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>, ssize_t)>()
 external void swab(
   ffi.Pointer<ffi.Void> arg0,
   ffi.Pointer<ffi.Void> arg1,
@@ -1233,16 +1326,14 @@ external void swab(
 );
 
 @ffi.Native<
-    ffi.Int Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>,
-        ffi.Size)>(symbol: 'timingsafe_bcmp')
+    ffi.Int Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>, ffi.Size)>()
 external int timingsafe_bcmp(
   ffi.Pointer<ffi.Void> __b1,
   ffi.Pointer<ffi.Void> __b2,
   int __len,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Int, ffi.Pointer<ffi.Char>, ffi.Size)>(
-    symbol: 'strsignal_r')
+@ffi.Native<ffi.Int Function(ffi.Int, ffi.Pointer<ffi.Char>, ffi.Size)>()
 external int strsignal_r(
   int __sig,
   ffi.Pointer<ffi.Char> __strsignalbuf,
@@ -1250,8 +1341,7 @@ external int strsignal_r(
 );
 
 @ffi.Native<
-    ffi.Int Function(
-        ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>, ffi.Size)>(symbol: 'bcmp')
+    ffi.Int Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>, ffi.Size)>()
 external int bcmp(
   ffi.Pointer<ffi.Void> arg0,
   ffi.Pointer<ffi.Void> arg1,
@@ -1259,76 +1349,71 @@ external int bcmp(
 );
 
 @ffi.Native<
-    ffi.Void Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>,
-        ffi.Size)>(symbol: 'bcopy')
+    ffi.Void Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>, ffi.Size)>()
 external void bcopy(
   ffi.Pointer<ffi.Void> arg0,
   ffi.Pointer<ffi.Void> arg1,
   int arg2,
 );
 
-@ffi.Native<ffi.Void Function(ffi.Pointer<ffi.Void>, ffi.Size)>(symbol: 'bzero')
+@ffi.Native<ffi.Void Function(ffi.Pointer<ffi.Void>, ffi.Size)>()
 external void bzero(
   ffi.Pointer<ffi.Void> arg0,
   int arg1,
 );
 
-@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>, ffi.Int)>(
-    symbol: 'index')
+@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>, ffi.Int)>()
 external ffi.Pointer<ffi.Char> index(
   ffi.Pointer<ffi.Char> arg0,
   int arg1,
 );
 
-@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>, ffi.Int)>(
-    symbol: 'rindex')
+@ffi.Native<ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>, ffi.Int)>()
 external ffi.Pointer<ffi.Char> rindex(
   ffi.Pointer<ffi.Char> arg0,
   int arg1,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Int)>(symbol: 'ffs')
+@ffi.Native<ffi.Int Function(ffi.Int)>()
 external int ffs(
   int arg0,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>(
-    symbol: 'strcasecmp')
+@ffi.Native<ffi.Int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>()
 external int strcasecmp(
   ffi.Pointer<ffi.Char> arg0,
   ffi.Pointer<ffi.Char> arg1,
 );
 
 @ffi.Native<
-    ffi.Int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
-        ffi.Size)>(symbol: 'strncasecmp')
+    ffi.Int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>, ffi.Size)>()
 external int strncasecmp(
   ffi.Pointer<ffi.Char> arg0,
   ffi.Pointer<ffi.Char> arg1,
   int arg2,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Long)>(symbol: 'ffsl')
+@ffi.Native<ffi.Int Function(ffi.Long)>()
 external int ffsl(
   int arg0,
 );
 
-@ffi.Native<ffi.Int Function(ffi.LongLong)>(symbol: 'ffsll')
+@ffi.Native<ffi.Int Function(ffi.LongLong)>()
 external int ffsll(
   int arg0,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Int)>(symbol: 'fls')
+@ffi.Native<ffi.Int Function(ffi.Int)>()
 external int fls(
   int arg0,
 );
 
-@ffi.Native<ffi.Int Function(ffi.Long)>(symbol: 'flsl')
+@ffi.Native<ffi.Int Function(ffi.Long)>()
 external int flsl(
   int arg0,
 );
 
-@ffi.Native<ffi.Int Function(ffi.LongLong)>(symbol: 'flsll')
+@ffi.Native<ffi.Int Function(ffi.LongLong)>()
 external int flsll(
   int arg0,
 );
@@ -1336,50 +1421,162 @@ external int flsll(
 /// \brief The Onnxruntime library's entry point to access the C API
 ///
 /// Call this to get the a pointer to an ::OrtApiBase
-@ffi.Native<ffi.Pointer<OrtApiBase> Function()>(symbol: 'OrtGetApiBase')
+@ffi.Native<ffi.Pointer<OrtApiBase> Function()>()
 external ffi.Pointer<OrtApiBase> OrtGetApiBase();
 
-@ffi.Native<OrtStatusPtr Function(ffi.Pointer<OrtSessionOptions>, ffi.Int)>(
-    symbol: 'OrtSessionOptionsAppendExecutionProvider_CUDA')
+@ffi.Native<OrtStatusPtr Function(ffi.Pointer<OrtSessionOptions>, ffi.Int)>()
 external OrtStatusPtr OrtSessionOptionsAppendExecutionProvider_CUDA(
   ffi.Pointer<OrtSessionOptions> options,
   int device_id,
 );
 
-@ffi.Native<OrtStatusPtr Function(ffi.Pointer<OrtSessionOptions>, ffi.Int)>(
-    symbol: 'OrtSessionOptionsAppendExecutionProvider_ROCM')
+@ffi.Native<OrtStatusPtr Function(ffi.Pointer<OrtSessionOptions>, ffi.Int)>()
 external OrtStatusPtr OrtSessionOptionsAppendExecutionProvider_ROCM(
   ffi.Pointer<OrtSessionOptions> options,
   int device_id,
 );
 
-@ffi.Native<OrtStatusPtr Function(ffi.Pointer<OrtSessionOptions>, ffi.Int)>(
-    symbol: 'OrtSessionOptionsAppendExecutionProvider_MIGraphX')
+@ffi.Native<OrtStatusPtr Function(ffi.Pointer<OrtSessionOptions>, ffi.Int)>()
 external OrtStatusPtr OrtSessionOptionsAppendExecutionProvider_MIGraphX(
   ffi.Pointer<OrtSessionOptions> options,
   int device_id,
 );
 
-@ffi.Native<OrtStatusPtr Function(ffi.Pointer<OrtSessionOptions>, ffi.Int)>(
-    symbol: 'OrtSessionOptionsAppendExecutionProvider_Dnnl')
+@ffi.Native<OrtStatusPtr Function(ffi.Pointer<OrtSessionOptions>, ffi.Int)>()
 external OrtStatusPtr OrtSessionOptionsAppendExecutionProvider_Dnnl(
   ffi.Pointer<OrtSessionOptions> options,
   int use_arena,
 );
 
-@ffi.Native<OrtStatusPtr Function(ffi.Pointer<OrtSessionOptions>, ffi.Uint32)>(
-    symbol: 'OrtSessionOptionsAppendExecutionProvider_CoreML')
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char> kOrtSessionOptionsConfigDisablePrepacking;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char> kOrtSessionOptionsConfigUseEnvAllocators;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char> kOrtSessionOptionsConfigLoadModelFormat;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char> kOrtSessionOptionsConfigSaveModelFormat;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char> kOrtSessionOptionsConfigSetDenormalAsZero;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char> kOrtSessionOptionsDisableQuantQDQ;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char> kOrtSessionOptionsDisableDoubleQDQRemover;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char> kOrtSessionOptionsEnableQuantQDQCleanup;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char> kOrtSessionOptionsEnableGeluApproximation;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char>
+    kOrtSessionOptionsUseDeviceAllocatorForInitializers;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char>
+    kOrtSessionOptionsConfigAllowInterOpSpinning;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char>
+    kOrtSessionOptionsConfigAllowIntraOpSpinning;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char>
+    kOrtSessionOptionsConfigUseORTModelBytesDirectly;
+
+/// <summary>
+/// Key for using the ORT format model flatbuffer bytes directly for initializers.
+/// This avoids copying the bytes and reduces peak memory usage during model loading and initialization.
+/// Requires `session.use_ort_model_bytes_directly` to be true.
+/// If set, the flatbuffer bytes provided when creating the InferenceSession MUST remain valid for the entire
+/// duration of the InferenceSession.
+/// </summary>
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char>
+    kOrtSessionOptionsConfigUseORTModelBytesForInitializers;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char> kOrtSessionOptionsQDQIsInt8Allowed;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char> kOrtSessionOptionsAvx2PrecisionMode;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char>
+    kOrtSessionOptionsConfigMinimalBuildOptimizations;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char>
+    kOrtSessionOptionsConfigNnapiEpPartitioningStopOps;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char> kOrtSessionOptionsConfigDynamicBlockBase;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char> kOrtSessionOptionsConfigForceSpinningStop;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char>
+    kOrtSessionOptionsConfigStrictShapeTypeInference;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char>
+    kOrtSessionOptionsConfigStrictAllowReleasedOpsetsOnly;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char> kNodePartitionConfigFile;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char>
+    kOrtSessionOptionsConfigIntraOpThreadAffinities;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char> kDebugLayoutTransformation;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char> kOrtSessionOptionsDisableCPUEPFallback;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char>
+    kOrtSessionOptionsOptimizedModelExternalInitializersFileName;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char>
+    kOrtSessionOptionsOptimizedModelExternalInitializersMinSizeInBytes;
+
+@ffi.Native<OrtStatusPtr Function(ffi.Pointer<OrtSessionOptions>, ffi.Uint32)>()
 external OrtStatusPtr OrtSessionOptionsAppendExecutionProvider_CoreML(
   ffi.Pointer<OrtSessionOptions> options,
   int coreml_flags,
 );
 
-@ffi.Native<OrtStatusPtr Function(ffi.Pointer<OrtSessionOptions>, ffi.Int)>(
-    symbol: 'OrtSessionOptionsAppendExecutionProvider_CPU')
+@ffi.Native<OrtStatusPtr Function(ffi.Pointer<OrtSessionOptions>, ffi.Int)>()
 external OrtStatusPtr OrtSessionOptionsAppendExecutionProvider_CPU(
   ffi.Pointer<OrtSessionOptions> options,
   int use_arena,
 );
+
+/// \brief All C++ Onnxruntime APIs are defined inside this namespace
+@ffi.Native<ffi.Int>()
+external int Ort;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char>
+    kOrtRunOptionsConfigEnableMemoryArenaShrinkage;
+
+@ffi.Native<ffi.Pointer<ffi.Char>>()
+external final ffi.Pointer<ffi.Char>
+    kOrtRunOptionsConfigDisableSynchronizeExecutionProviders;
+
+@ffi.Native<ffi.Int>()
+external int onnxruntime;
 
 final class __mbstate_t extends ffi.Union {
   @ffi.Array.multi([128])
@@ -1473,10 +1670,20 @@ final class _opaque_pthread_t extends ffi.Struct {
   external ffi.Array<ffi.Char> __opaque;
 }
 
-abstract class idtype_t {
-  static const int P_ALL = 0;
-  static const int P_PID = 1;
-  static const int P_PGID = 2;
+enum idtype_t {
+  P_ALL(0),
+  P_PID(1),
+  P_PGID(2);
+
+  final int value;
+  const idtype_t(this.value);
+
+  static idtype_t fromValue(int value) => switch (value) {
+        0 => P_ALL,
+        1 => P_PID,
+        2 => P_PGID,
+        _ => throw ArgumentError("Unknown value for idtype_t: $value"),
+      };
 }
 
 final class __darwin_arm_exception_state extends ffi.Struct {
@@ -1491,6 +1698,7 @@ final class __darwin_arm_exception_state extends ffi.Struct {
 }
 
 typedef __uint32_t = ffi.UnsignedInt;
+typedef Dart__uint32_t = int;
 
 final class __darwin_arm_exception_state64 extends ffi.Struct {
   @__uint64_t()
@@ -1504,6 +1712,15 @@ final class __darwin_arm_exception_state64 extends ffi.Struct {
 }
 
 typedef __uint64_t = ffi.UnsignedLongLong;
+typedef Dart__uint64_t = int;
+
+final class __darwin_arm_exception_state64_v2 extends ffi.Struct {
+  @__uint64_t()
+  external int __far;
+
+  @__uint64_t()
+  external int __esr;
+}
 
 final class __darwin_arm_thread_state extends ffi.Struct {
   @ffi.Array.multi([13])
@@ -1636,6 +1853,7 @@ final class __darwin_sigaltstack extends ffi.Struct {
 }
 
 typedef __darwin_size_t = ffi.UnsignedLong;
+typedef Dart__darwin_size_t = int;
 
 final class __darwin_ucontext extends ffi.Struct {
   @ffi.Int()
@@ -1714,6 +1932,7 @@ final class __siginfo extends ffi.Struct {
 typedef pid_t = __darwin_pid_t;
 typedef __darwin_pid_t = __int32_t;
 typedef __int32_t = ffi.Int;
+typedef Dart__int32_t = int;
 typedef uid_t = __darwin_uid_t;
 typedef __darwin_uid_t = __uint32_t;
 
@@ -1783,6 +2002,7 @@ final class timeval extends ffi.Struct {
 }
 
 typedef __darwin_time_t = ffi.Long;
+typedef Dart__darwin_time_t = int;
 typedef __darwin_suseconds_t = __int32_t;
 
 final class rusage extends ffi.Struct {
@@ -2419,7 +2639,22 @@ final class rusage_info_v6 extends ffi.Struct {
   @ffi.Uint64()
   external int ri_penergy_nj;
 
-  @ffi.Array.multi([14])
+  @ffi.Uint64()
+  external int ri_secure_time_in_system;
+
+  @ffi.Uint64()
+  external int ri_secure_ptime_in_system;
+
+  @ffi.Uint64()
+  external int ri_neural_footprint;
+
+  @ffi.Uint64()
+  external int ri_lifetime_max_neural_footprint;
+
+  @ffi.Uint64()
+  external int ri_interval_max_neural_footprint;
+
+  @ffi.Array.multi([9])
   external ffi.Array<ffi.Uint64> ri_reserved;
 }
 
@@ -2443,24 +2678,6 @@ final class proc_rlimit_control_wakeupmon extends ffi.Struct {
 
 typedef id_t = __darwin_id_t;
 typedef __darwin_id_t = __uint32_t;
-
-@ffi.Packed(1)
-final class _OSUnalignedU16 extends ffi.Struct {
-  @ffi.Uint16()
-  external int __val;
-}
-
-@ffi.Packed(1)
-final class _OSUnalignedU32 extends ffi.Struct {
-  @ffi.Uint32()
-  external int __val;
-}
-
-@ffi.Packed(1)
-final class _OSUnalignedU64 extends ffi.Struct {
-  @ffi.Uint64()
-  external int __val;
-}
 
 final class wait extends ffi.Opaque {}
 
@@ -2488,109 +2705,229 @@ final class lldiv_t extends ffi.Struct {
   external int rem;
 }
 
+typedef malloc_type_id_t = ffi.UnsignedLongLong;
+typedef Dartmalloc_type_id_t = int;
+
+final class _malloc_zone_t extends ffi.Opaque {}
+
+typedef malloc_zone_t = _malloc_zone_t;
 typedef dev_t = __darwin_dev_t;
 typedef __darwin_dev_t = __int32_t;
 typedef mode_t = __darwin_mode_t;
 typedef __darwin_mode_t = __uint16_t;
 typedef __uint16_t = ffi.UnsignedShort;
+typedef Dart__uint16_t = int;
 typedef errno_t = ffi.Int;
+typedef Darterrno_t = int;
 typedef rsize_t = __darwin_size_t;
 typedef ssize_t = __darwin_ssize_t;
 typedef __darwin_ssize_t = ffi.Long;
+typedef Dart__darwin_ssize_t = int;
 
 /// Copied from TensorProto::DataType
 /// Currently, Ort doesn't support complex64, complex128
-abstract class ONNXTensorElementDataType {
-  static const int ONNX_TENSOR_ELEMENT_DATA_TYPE_UNDEFINED = 0;
-  static const int ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT = 1;
-  static const int ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT8 = 2;
-  static const int ONNX_TENSOR_ELEMENT_DATA_TYPE_INT8 = 3;
-  static const int ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT16 = 4;
-  static const int ONNX_TENSOR_ELEMENT_DATA_TYPE_INT16 = 5;
-  static const int ONNX_TENSOR_ELEMENT_DATA_TYPE_INT32 = 6;
-  static const int ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64 = 7;
-  static const int ONNX_TENSOR_ELEMENT_DATA_TYPE_STRING = 8;
-  static const int ONNX_TENSOR_ELEMENT_DATA_TYPE_BOOL = 9;
-  static const int ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT16 = 10;
-  static const int ONNX_TENSOR_ELEMENT_DATA_TYPE_DOUBLE = 11;
-  static const int ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT32 = 12;
-  static const int ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT64 = 13;
-  static const int ONNX_TENSOR_ELEMENT_DATA_TYPE_COMPLEX64 = 14;
-  static const int ONNX_TENSOR_ELEMENT_DATA_TYPE_COMPLEX128 = 15;
-  static const int ONNX_TENSOR_ELEMENT_DATA_TYPE_BFLOAT16 = 16;
-  static const int ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT8E4M3FN = 17;
-  static const int ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT8E4M3FNUZ = 18;
-  static const int ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT8E5M2 = 19;
-  static const int ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT8E5M2FNUZ = 20;
+enum ONNXTensorElementDataType {
+  ONNX_TENSOR_ELEMENT_DATA_TYPE_UNDEFINED(0),
+  ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT(1),
+  ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT8(2),
+  ONNX_TENSOR_ELEMENT_DATA_TYPE_INT8(3),
+  ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT16(4),
+  ONNX_TENSOR_ELEMENT_DATA_TYPE_INT16(5),
+  ONNX_TENSOR_ELEMENT_DATA_TYPE_INT32(6),
+  ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64(7),
+  ONNX_TENSOR_ELEMENT_DATA_TYPE_STRING(8),
+  ONNX_TENSOR_ELEMENT_DATA_TYPE_BOOL(9),
+  ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT16(10),
+  ONNX_TENSOR_ELEMENT_DATA_TYPE_DOUBLE(11),
+  ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT32(12),
+  ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT64(13),
+  ONNX_TENSOR_ELEMENT_DATA_TYPE_COMPLEX64(14),
+  ONNX_TENSOR_ELEMENT_DATA_TYPE_COMPLEX128(15),
+  ONNX_TENSOR_ELEMENT_DATA_TYPE_BFLOAT16(16),
+  ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT8E4M3FN(17),
+  ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT8E4M3FNUZ(18),
+  ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT8E5M2(19),
+  ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT8E5M2FNUZ(20);
+
+  final int value;
+  const ONNXTensorElementDataType(this.value);
+
+  static ONNXTensorElementDataType fromValue(int value) => switch (value) {
+        0 => ONNX_TENSOR_ELEMENT_DATA_TYPE_UNDEFINED,
+        1 => ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT,
+        2 => ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT8,
+        3 => ONNX_TENSOR_ELEMENT_DATA_TYPE_INT8,
+        4 => ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT16,
+        5 => ONNX_TENSOR_ELEMENT_DATA_TYPE_INT16,
+        6 => ONNX_TENSOR_ELEMENT_DATA_TYPE_INT32,
+        7 => ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64,
+        8 => ONNX_TENSOR_ELEMENT_DATA_TYPE_STRING,
+        9 => ONNX_TENSOR_ELEMENT_DATA_TYPE_BOOL,
+        10 => ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT16,
+        11 => ONNX_TENSOR_ELEMENT_DATA_TYPE_DOUBLE,
+        12 => ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT32,
+        13 => ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT64,
+        14 => ONNX_TENSOR_ELEMENT_DATA_TYPE_COMPLEX64,
+        15 => ONNX_TENSOR_ELEMENT_DATA_TYPE_COMPLEX128,
+        16 => ONNX_TENSOR_ELEMENT_DATA_TYPE_BFLOAT16,
+        17 => ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT8E4M3FN,
+        18 => ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT8E4M3FNUZ,
+        19 => ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT8E5M2,
+        20 => ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT8E5M2FNUZ,
+        _ => throw ArgumentError(
+            "Unknown value for ONNXTensorElementDataType: $value"),
+      };
 }
 
-abstract class ONNXType {
-  static const int ONNX_TYPE_UNKNOWN = 0;
-  static const int ONNX_TYPE_TENSOR = 1;
-  static const int ONNX_TYPE_SEQUENCE = 2;
-  static const int ONNX_TYPE_MAP = 3;
-  static const int ONNX_TYPE_OPAQUE = 4;
-  static const int ONNX_TYPE_SPARSETENSOR = 5;
-  static const int ONNX_TYPE_OPTIONAL = 6;
+enum ONNXType {
+  ONNX_TYPE_UNKNOWN(0),
+  ONNX_TYPE_TENSOR(1),
+  ONNX_TYPE_SEQUENCE(2),
+  ONNX_TYPE_MAP(3),
+  ONNX_TYPE_OPAQUE(4),
+  ONNX_TYPE_SPARSETENSOR(5),
+  ONNX_TYPE_OPTIONAL(6);
+
+  final int value;
+  const ONNXType(this.value);
+
+  static ONNXType fromValue(int value) => switch (value) {
+        0 => ONNX_TYPE_UNKNOWN,
+        1 => ONNX_TYPE_TENSOR,
+        2 => ONNX_TYPE_SEQUENCE,
+        3 => ONNX_TYPE_MAP,
+        4 => ONNX_TYPE_OPAQUE,
+        5 => ONNX_TYPE_SPARSETENSOR,
+        6 => ONNX_TYPE_OPTIONAL,
+        _ => throw ArgumentError("Unknown value for ONNXType: $value"),
+      };
 }
 
-abstract class OrtSparseFormat {
-  static const int ORT_SPARSE_UNDEFINED = 0;
-  static const int ORT_SPARSE_COO = 1;
-  static const int ORT_SPARSE_CSRC = 2;
-  static const int ORT_SPARSE_BLOCK_SPARSE = 4;
+enum OrtSparseFormat {
+  ORT_SPARSE_UNDEFINED(0),
+  ORT_SPARSE_COO(1),
+  ORT_SPARSE_CSRC(2),
+  ORT_SPARSE_BLOCK_SPARSE(4);
+
+  final int value;
+  const OrtSparseFormat(this.value);
+
+  static OrtSparseFormat fromValue(int value) => switch (value) {
+        0 => ORT_SPARSE_UNDEFINED,
+        1 => ORT_SPARSE_COO,
+        2 => ORT_SPARSE_CSRC,
+        4 => ORT_SPARSE_BLOCK_SPARSE,
+        _ => throw ArgumentError("Unknown value for OrtSparseFormat: $value"),
+      };
 }
 
-abstract class OrtSparseIndicesFormat {
-  static const int ORT_SPARSE_COO_INDICES = 0;
-  static const int ORT_SPARSE_CSR_INNER_INDICES = 1;
-  static const int ORT_SPARSE_CSR_OUTER_INDICES = 2;
-  static const int ORT_SPARSE_BLOCK_SPARSE_INDICES = 3;
+enum OrtSparseIndicesFormat {
+  ORT_SPARSE_COO_INDICES(0),
+  ORT_SPARSE_CSR_INNER_INDICES(1),
+  ORT_SPARSE_CSR_OUTER_INDICES(2),
+  ORT_SPARSE_BLOCK_SPARSE_INDICES(3);
+
+  final int value;
+  const OrtSparseIndicesFormat(this.value);
+
+  static OrtSparseIndicesFormat fromValue(int value) => switch (value) {
+        0 => ORT_SPARSE_COO_INDICES,
+        1 => ORT_SPARSE_CSR_INNER_INDICES,
+        2 => ORT_SPARSE_CSR_OUTER_INDICES,
+        3 => ORT_SPARSE_BLOCK_SPARSE_INDICES,
+        _ => throw ArgumentError(
+            "Unknown value for OrtSparseIndicesFormat: $value"),
+      };
 }
 
 /// \brief Logging severity levels
 ///
 /// In typical API usage, specifying a logging severity level specifies the minimum severity of log messages to show.
-abstract class OrtLoggingLevel {
+enum OrtLoggingLevel {
   /// < Verbose informational messages (least severe).
-  static const int ORT_LOGGING_LEVEL_VERBOSE = 0;
+  ORT_LOGGING_LEVEL_VERBOSE(0),
 
   /// < Informational messages.
-  static const int ORT_LOGGING_LEVEL_INFO = 1;
+  ORT_LOGGING_LEVEL_INFO(1),
 
   /// < Warning messages.
-  static const int ORT_LOGGING_LEVEL_WARNING = 2;
+  ORT_LOGGING_LEVEL_WARNING(2),
 
   /// < Error messages.
-  static const int ORT_LOGGING_LEVEL_ERROR = 3;
+  ORT_LOGGING_LEVEL_ERROR(3),
 
   /// < Fatal error messages (most severe).
-  static const int ORT_LOGGING_LEVEL_FATAL = 4;
+  ORT_LOGGING_LEVEL_FATAL(4);
+
+  final int value;
+  const OrtLoggingLevel(this.value);
+
+  static OrtLoggingLevel fromValue(int value) => switch (value) {
+        0 => ORT_LOGGING_LEVEL_VERBOSE,
+        1 => ORT_LOGGING_LEVEL_INFO,
+        2 => ORT_LOGGING_LEVEL_WARNING,
+        3 => ORT_LOGGING_LEVEL_ERROR,
+        4 => ORT_LOGGING_LEVEL_FATAL,
+        _ => throw ArgumentError("Unknown value for OrtLoggingLevel: $value"),
+      };
 }
 
-abstract class OrtErrorCode {
-  static const int ORT_OK = 0;
-  static const int ORT_FAIL = 1;
-  static const int ORT_INVALID_ARGUMENT = 2;
-  static const int ORT_NO_SUCHFILE = 3;
-  static const int ORT_NO_MODEL = 4;
-  static const int ORT_ENGINE_ERROR = 5;
-  static const int ORT_RUNTIME_EXCEPTION = 6;
-  static const int ORT_INVALID_PROTOBUF = 7;
-  static const int ORT_MODEL_LOADED = 8;
-  static const int ORT_NOT_IMPLEMENTED = 9;
-  static const int ORT_INVALID_GRAPH = 10;
-  static const int ORT_EP_FAIL = 11;
+enum OrtErrorCode {
+  ORT_OK(0),
+  ORT_FAIL(1),
+  ORT_INVALID_ARGUMENT(2),
+  ORT_NO_SUCHFILE(3),
+  ORT_NO_MODEL(4),
+  ORT_ENGINE_ERROR(5),
+  ORT_RUNTIME_EXCEPTION(6),
+  ORT_INVALID_PROTOBUF(7),
+  ORT_MODEL_LOADED(8),
+  ORT_NOT_IMPLEMENTED(9),
+  ORT_INVALID_GRAPH(10),
+  ORT_EP_FAIL(11);
+
+  final int value;
+  const OrtErrorCode(this.value);
+
+  static OrtErrorCode fromValue(int value) => switch (value) {
+        0 => ORT_OK,
+        1 => ORT_FAIL,
+        2 => ORT_INVALID_ARGUMENT,
+        3 => ORT_NO_SUCHFILE,
+        4 => ORT_NO_MODEL,
+        5 => ORT_ENGINE_ERROR,
+        6 => ORT_RUNTIME_EXCEPTION,
+        7 => ORT_INVALID_PROTOBUF,
+        8 => ORT_MODEL_LOADED,
+        9 => ORT_NOT_IMPLEMENTED,
+        10 => ORT_INVALID_GRAPH,
+        11 => ORT_EP_FAIL,
+        _ => throw ArgumentError("Unknown value for OrtErrorCode: $value"),
+      };
 }
 
-abstract class OrtOpAttrType {
-  static const int ORT_OP_ATTR_UNDEFINED = 0;
-  static const int ORT_OP_ATTR_INT = 1;
-  static const int ORT_OP_ATTR_INTS = 2;
-  static const int ORT_OP_ATTR_FLOAT = 3;
-  static const int ORT_OP_ATTR_FLOATS = 4;
-  static const int ORT_OP_ATTR_STRING = 5;
-  static const int ORT_OP_ATTR_STRINGS = 6;
+enum OrtOpAttrType {
+  ORT_OP_ATTR_UNDEFINED(0),
+  ORT_OP_ATTR_INT(1),
+  ORT_OP_ATTR_INTS(2),
+  ORT_OP_ATTR_FLOAT(3),
+  ORT_OP_ATTR_FLOATS(4),
+  ORT_OP_ATTR_STRING(5),
+  ORT_OP_ATTR_STRINGS(6);
+
+  final int value;
+  const OrtOpAttrType(this.value);
+
+  static OrtOpAttrType fromValue(int value) => switch (value) {
+        0 => ORT_OP_ATTR_UNDEFINED,
+        1 => ORT_OP_ATTR_INT,
+        2 => ORT_OP_ATTR_INTS,
+        3 => ORT_OP_ATTR_FLOAT,
+        4 => ORT_OP_ATTR_FLOATS,
+        5 => ORT_OP_ATTR_STRING,
+        6 => ORT_OP_ATTR_STRINGS,
+        _ => throw ArgumentError("Unknown value for OrtOpAttrType: $value"),
+      };
 }
 
 final class OrtEnv extends ffi.Opaque {}
@@ -2678,28 +3015,64 @@ final class OrtAllocator extends ffi.Struct {
 ///
 /// Refer to https://www.onnxruntime.ai/docs/performance/graph-optimizations.html#graph-optimization-levels
 /// for an in-depth understanding of the Graph Optimization Levels.
-abstract class GraphOptimizationLevel {
-  static const int ORT_DISABLE_ALL = 0;
-  static const int ORT_ENABLE_BASIC = 1;
-  static const int ORT_ENABLE_EXTENDED = 2;
-  static const int ORT_ENABLE_ALL = 99;
+enum GraphOptimizationLevel {
+  ORT_DISABLE_ALL(0),
+  ORT_ENABLE_BASIC(1),
+  ORT_ENABLE_EXTENDED(2),
+  ORT_ENABLE_ALL(99);
+
+  final int value;
+  const GraphOptimizationLevel(this.value);
+
+  static GraphOptimizationLevel fromValue(int value) => switch (value) {
+        0 => ORT_DISABLE_ALL,
+        1 => ORT_ENABLE_BASIC,
+        2 => ORT_ENABLE_EXTENDED,
+        99 => ORT_ENABLE_ALL,
+        _ => throw ArgumentError(
+            "Unknown value for GraphOptimizationLevel: $value"),
+      };
 }
 
-abstract class ExecutionMode {
-  static const int ORT_SEQUENTIAL = 0;
-  static const int ORT_PARALLEL = 1;
+enum ExecutionMode {
+  ORT_SEQUENTIAL(0),
+  ORT_PARALLEL(1);
+
+  final int value;
+  const ExecutionMode(this.value);
+
+  static ExecutionMode fromValue(int value) => switch (value) {
+        0 => ORT_SEQUENTIAL,
+        1 => ORT_PARALLEL,
+        _ => throw ArgumentError("Unknown value for ExecutionMode: $value"),
+      };
 }
 
 /// \brief Language projection identifiers
 /// /see OrtApi::SetLanguageProjection
-abstract class OrtLanguageProjection {
-  static const int ORT_PROJECTION_C = 0;
-  static const int ORT_PROJECTION_CPLUSPLUS = 1;
-  static const int ORT_PROJECTION_CSHARP = 2;
-  static const int ORT_PROJECTION_PYTHON = 3;
-  static const int ORT_PROJECTION_JAVA = 4;
-  static const int ORT_PROJECTION_WINML = 5;
-  static const int ORT_PROJECTION_NODEJS = 6;
+enum OrtLanguageProjection {
+  ORT_PROJECTION_C(0),
+  ORT_PROJECTION_CPLUSPLUS(1),
+  ORT_PROJECTION_CSHARP(2),
+  ORT_PROJECTION_PYTHON(3),
+  ORT_PROJECTION_JAVA(4),
+  ORT_PROJECTION_WINML(5),
+  ORT_PROJECTION_NODEJS(6);
+
+  final int value;
+  const OrtLanguageProjection(this.value);
+
+  static OrtLanguageProjection fromValue(int value) => switch (value) {
+        0 => ORT_PROJECTION_C,
+        1 => ORT_PROJECTION_CPLUSPLUS,
+        2 => ORT_PROJECTION_CSHARP,
+        3 => ORT_PROJECTION_PYTHON,
+        4 => ORT_PROJECTION_JAVA,
+        5 => ORT_PROJECTION_WINML,
+        6 => ORT_PROJECTION_NODEJS,
+        _ => throw ArgumentError(
+            "Unknown value for OrtLanguageProjection: $value"),
+      };
 }
 
 final class OrtKernelInfo extends ffi.Opaque {}
@@ -2727,18 +3100,18 @@ final class OrtCustomOp extends ffi.Struct {
       GetExecutionProviderType;
 
   external ffi.Pointer<
-          ffi.NativeFunction<
-              ffi.Int32 Function(ffi.Pointer<OrtCustomOp> op, ffi.Size index)>>
-      GetInputType;
+      ffi.NativeFunction<
+          ffi.UnsignedInt Function(
+              ffi.Pointer<OrtCustomOp> op, ffi.Size index)>> GetInputType;
 
   external ffi.Pointer<
           ffi.NativeFunction<ffi.Size Function(ffi.Pointer<OrtCustomOp> op)>>
       GetInputTypeCount;
 
   external ffi.Pointer<
-          ffi.NativeFunction<
-              ffi.Int32 Function(ffi.Pointer<OrtCustomOp> op, ffi.Size index)>>
-      GetOutputType;
+      ffi.NativeFunction<
+          ffi.UnsignedInt Function(
+              ffi.Pointer<OrtCustomOp> op, ffi.Size index)>> GetOutputType;
 
   external ffi.Pointer<
           ffi.NativeFunction<ffi.Size Function(ffi.Pointer<OrtCustomOp> op)>>
@@ -2756,17 +3129,19 @@ final class OrtCustomOp extends ffi.Struct {
 
   external ffi.Pointer<
           ffi.NativeFunction<
-              ffi.Int32 Function(ffi.Pointer<OrtCustomOp> op, ffi.Size index)>>
+              ffi.UnsignedInt Function(
+                  ffi.Pointer<OrtCustomOp> op, ffi.Size index)>>
       GetInputCharacteristic;
 
   external ffi.Pointer<
           ffi.NativeFunction<
-              ffi.Int32 Function(ffi.Pointer<OrtCustomOp> op, ffi.Size index)>>
+              ffi.UnsignedInt Function(
+                  ffi.Pointer<OrtCustomOp> op, ffi.Size index)>>
       GetOutputCharacteristic;
 
   external ffi.Pointer<
           ffi.NativeFunction<
-              ffi.Int32 Function(ffi.Pointer<OrtCustomOp> op, ffi.Size index)>>
+              ffi.Int Function(ffi.Pointer<OrtCustomOp> op, ffi.Size index)>>
       GetInputMemoryType;
 
   external ffi.Pointer<
@@ -2814,14 +3189,15 @@ final class OrtApi extends ffi.Struct {
   external ffi.Pointer<
       ffi.NativeFunction<
           ffi.Pointer<OrtStatus> Function(
-              ffi.Int32 code, ffi.Pointer<ffi.Char> msg)>> CreateStatus;
+              ffi.UnsignedInt code, ffi.Pointer<ffi.Char> msg)>> CreateStatus;
 
   /// \brief Get OrtErrorCode from OrtStatus
   ///
   /// \param[in] status
   /// \return OrtErrorCode that \p status was created with
   external ffi.Pointer<
-          ffi.NativeFunction<ffi.Int32 Function(ffi.Pointer<OrtStatus> status)>>
+          ffi.NativeFunction<
+              ffi.UnsignedInt Function(ffi.Pointer<OrtStatus> status)>>
       GetErrorCode;
 
   /// \brief Get error string from OrtStatus
@@ -2836,7 +3212,7 @@ final class OrtApi extends ffi.Struct {
   external ffi.Pointer<
       ffi.NativeFunction<
           OrtStatusPtr Function(
-              ffi.Int32 log_severity_level,
+              ffi.UnsignedInt log_severity_level,
               ffi.Pointer<ffi.Char> logid,
               ffi.Pointer<ffi.Pointer<OrtEnv>> out)>> CreateEnv;
 
@@ -2845,7 +3221,7 @@ final class OrtApi extends ffi.Struct {
           OrtStatusPtr Function(
               OrtLoggingFunction logging_function,
               ffi.Pointer<ffi.Void> logger_param,
-              ffi.Int32 log_severity_level,
+              ffi.UnsignedInt log_severity_level,
               ffi.Pointer<ffi.Char> logid,
               ffi.Pointer<ffi.Pointer<OrtEnv>> out)>> CreateEnvWithCustomLogger;
 
@@ -2908,7 +3284,7 @@ final class OrtApi extends ffi.Struct {
   external ffi.Pointer<
       ffi.NativeFunction<
           OrtStatusPtr Function(ffi.Pointer<OrtSessionOptions> options,
-              ffi.Int32 execution_mode)>> SetSessionExecutionMode;
+              ffi.UnsignedInt execution_mode)>> SetSessionExecutionMode;
 
   external ffi.Pointer<
       ffi.NativeFunction<
@@ -2959,7 +3335,7 @@ final class OrtApi extends ffi.Struct {
   external ffi.Pointer<
           ffi.NativeFunction<
               OrtStatusPtr Function(ffi.Pointer<OrtSessionOptions> options,
-                  ffi.Int32 graph_optimization_level)>>
+                  ffi.UnsignedInt graph_optimization_level)>>
       SetSessionGraphOptimizationLevel;
 
   external ffi.Pointer<
@@ -3117,7 +3493,7 @@ final class OrtApi extends ffi.Struct {
               ffi.Pointer<OrtAllocator> allocator,
               ffi.Pointer<ffi.Int64> shape,
               ffi.Size shape_len,
-              ffi.Int32 type,
+              ffi.UnsignedInt type,
               ffi.Pointer<ffi.Pointer<OrtValue>> out)>> CreateTensorAsOrtValue;
 
   external ffi.Pointer<
@@ -3128,7 +3504,7 @@ final class OrtApi extends ffi.Struct {
                   ffi.Size p_data_len,
                   ffi.Pointer<ffi.Int64> shape,
                   ffi.Size shape_len,
-                  ffi.Int32 type,
+                  ffi.UnsignedInt type,
                   ffi.Pointer<ffi.Pointer<OrtValue>> out)>>
       CreateTensorWithDataAsOrtValue;
 
@@ -3173,7 +3549,7 @@ final class OrtApi extends ffi.Struct {
   external ffi.Pointer<
       ffi.NativeFunction<
           OrtStatusPtr Function(ffi.Pointer<OrtTypeInfo> type_info,
-              ffi.Pointer<ffi.Int32> out)>> GetOnnxTypeFromTypeInfo;
+              ffi.Pointer<ffi.UnsignedInt> out)>> GetOnnxTypeFromTypeInfo;
 
   external ffi.Pointer<
           ffi.NativeFunction<
@@ -3182,10 +3558,9 @@ final class OrtApi extends ffi.Struct {
       CreateTensorTypeAndShapeInfo;
 
   external ffi.Pointer<
-          ffi.NativeFunction<
-              OrtStatusPtr Function(
-                  ffi.Pointer<OrtTensorTypeAndShapeInfo> info, ffi.Int32 type)>>
-      SetTensorElementType;
+      ffi.NativeFunction<
+          OrtStatusPtr Function(ffi.Pointer<OrtTensorTypeAndShapeInfo> info,
+              ffi.UnsignedInt type)>> SetTensorElementType;
 
   external ffi.Pointer<
       ffi.NativeFunction<
@@ -3197,7 +3572,7 @@ final class OrtApi extends ffi.Struct {
   external ffi.Pointer<
       ffi.NativeFunction<
           OrtStatusPtr Function(ffi.Pointer<OrtTensorTypeAndShapeInfo> info,
-              ffi.Pointer<ffi.Int32> out)>> GetTensorElementType;
+              ffi.Pointer<ffi.UnsignedInt> out)>> GetTensorElementType;
 
   external ffi.Pointer<
       ffi.NativeFunction<
@@ -3235,23 +3610,22 @@ final class OrtApi extends ffi.Struct {
               ffi.Pointer<ffi.Pointer<OrtTypeInfo>> out)>> GetTypeInfo;
 
   external ffi.Pointer<
-          ffi.NativeFunction<
-              OrtStatusPtr Function(
-                  ffi.Pointer<OrtValue> value, ffi.Pointer<ffi.Int32> out)>>
-      GetValueType;
+      ffi.NativeFunction<
+          OrtStatusPtr Function(ffi.Pointer<OrtValue> value,
+              ffi.Pointer<ffi.UnsignedInt> out)>> GetValueType;
 
   external ffi.Pointer<
       ffi.NativeFunction<
           OrtStatusPtr Function(
               ffi.Pointer<ffi.Char> name,
-              ffi.Int32 type,
+              ffi.Int type,
               ffi.Int id,
-              ffi.Int32 mem_type,
+              ffi.Int mem_type,
               ffi.Pointer<ffi.Pointer<OrtMemoryInfo>> out)>> CreateMemoryInfo;
 
   external ffi.Pointer<
           ffi.NativeFunction<
-              OrtStatusPtr Function(ffi.Int32 type, ffi.Int32 mem_type,
+              OrtStatusPtr Function(ffi.Int type, ffi.Int mem_type,
                   ffi.Pointer<ffi.Pointer<OrtMemoryInfo>> out)>>
       CreateCpuMemoryInfo;
 
@@ -3276,13 +3650,13 @@ final class OrtApi extends ffi.Struct {
   external ffi.Pointer<
           ffi.NativeFunction<
               OrtStatusPtr Function(
-                  ffi.Pointer<OrtMemoryInfo> ptr, ffi.Pointer<ffi.Int32> out)>>
+                  ffi.Pointer<OrtMemoryInfo> ptr, ffi.Pointer<ffi.Int> out)>>
       MemoryInfoGetMemType;
 
   external ffi.Pointer<
           ffi.NativeFunction<
               OrtStatusPtr Function(
-                  ffi.Pointer<OrtMemoryInfo> ptr, ffi.Pointer<ffi.Int32> out)>>
+                  ffi.Pointer<OrtMemoryInfo> ptr, ffi.Pointer<ffi.Int> out)>>
       MemoryInfoGetType;
 
   external ffi.Pointer<
@@ -3334,7 +3708,7 @@ final class OrtApi extends ffi.Struct {
           OrtStatusPtr Function(
               ffi.Pointer<ffi.Pointer<OrtValue>> in1,
               ffi.Size num_values,
-              ffi.Int32 value_type,
+              ffi.UnsignedInt value_type,
               ffi.Pointer<ffi.Pointer<OrtValue>> out)>> CreateValue;
 
   external ffi.Pointer<
@@ -3470,7 +3844,7 @@ final class OrtApi extends ffi.Struct {
   external ffi.Pointer<
       ffi.NativeFunction<
           OrtStatusPtr Function(ffi.Pointer<OrtMapTypeInfo> map_type_info,
-              ffi.Pointer<ffi.Int32> out)>> GetMapKeyType;
+              ffi.Pointer<ffi.UnsignedInt> out)>> GetMapKeyType;
 
   external ffi.Pointer<
           ffi.NativeFunction<
@@ -3562,7 +3936,7 @@ final class OrtApi extends ffi.Struct {
   external ffi.Pointer<
           ffi.NativeFunction<
               OrtStatusPtr Function(
-                  ffi.Int32 log_severity_level,
+                  ffi.UnsignedInt log_severity_level,
                   ffi.Pointer<ffi.Char> logid,
                   ffi.Pointer<OrtThreadingOptions> tp_options,
                   ffi.Pointer<ffi.Pointer<OrtEnv>> out)>>
@@ -3732,7 +4106,7 @@ final class OrtApi extends ffi.Struct {
   external ffi.Pointer<
           ffi.NativeFunction<
               OrtStatusPtr Function(
-                  ffi.Pointer<OrtEnv> ort_env, ffi.Int32 projection)>>
+                  ffi.Pointer<OrtEnv> ort_env, ffi.UnsignedInt projection)>>
       SetLanguageProjection;
 
   external ffi.Pointer<
@@ -3767,7 +4141,7 @@ final class OrtApi extends ffi.Struct {
               OrtStatusPtr Function(
                   OrtLoggingFunction logging_function,
                   ffi.Pointer<ffi.Void> logger_param,
-                  ffi.Int32 log_severity_level,
+                  ffi.UnsignedInt log_severity_level,
                   ffi.Pointer<ffi.Char> logid,
                   ffi.Pointer<OrtThreadingOptions> tp_options,
                   ffi.Pointer<ffi.Pointer<OrtEnv>> out)>>
@@ -3963,7 +4337,7 @@ final class OrtApi extends ffi.Struct {
                   ffi.Pointer<OrtAllocator> allocator,
                   ffi.Pointer<ffi.Int64> dense_shape,
                   ffi.Size dense_shape_len,
-                  ffi.Int32 type,
+                  ffi.UnsignedInt type,
                   ffi.Pointer<ffi.Pointer<OrtValue>> out)>>
       CreateSparseTensorAsOrtValue;
 
@@ -4013,7 +4387,7 @@ final class OrtApi extends ffi.Struct {
                   ffi.Size dense_shape_len,
                   ffi.Pointer<ffi.Int64> values_shape,
                   ffi.Size values_shape_len,
-                  ffi.Int32 type,
+                  ffi.UnsignedInt type,
                   ffi.Pointer<ffi.Pointer<OrtValue>> out)>>
       CreateSparseTensorWithValuesAsOrtValue;
 
@@ -4042,10 +4416,9 @@ final class OrtApi extends ffi.Struct {
               ffi.Pointer<ffi.Int32> indices_data)>> UseBlockSparseIndices;
 
   external ffi.Pointer<
-          ffi.NativeFunction<
-              OrtStatusPtr Function(
-                  ffi.Pointer<OrtValue> ort_value, ffi.Pointer<ffi.Int32> out)>>
-      GetSparseTensorFormat;
+      ffi.NativeFunction<
+          OrtStatusPtr Function(ffi.Pointer<OrtValue> ort_value,
+              ffi.Pointer<ffi.UnsignedInt> out)>> GetSparseTensorFormat;
 
   external ffi.Pointer<
           ffi.NativeFunction<
@@ -4062,7 +4435,7 @@ final class OrtApi extends ffi.Struct {
           ffi.NativeFunction<
               OrtStatusPtr Function(
                   ffi.Pointer<OrtValue> ort_value,
-                  ffi.Int32 indices_format,
+                  ffi.UnsignedInt indices_format,
                   ffi.Pointer<ffi.Pointer<OrtTensorTypeAndShapeInfo>> out)>>
       GetSparseTensorIndicesTypeShape;
 
@@ -4070,7 +4443,7 @@ final class OrtApi extends ffi.Struct {
           ffi.NativeFunction<
               OrtStatusPtr Function(
                   ffi.Pointer<OrtValue> ort_value,
-                  ffi.Int32 indices_format,
+                  ffi.UnsignedInt indices_format,
                   ffi.Pointer<ffi.Size> num_indices,
                   ffi.Pointer<ffi.Pointer<ffi.Void>> indices)>>
       GetSparseTensorIndices;
@@ -4204,7 +4577,7 @@ final class OrtApi extends ffi.Struct {
               ffi.Pointer<ffi.Char> name,
               ffi.Pointer<ffi.Void> data,
               ffi.Int len,
-              ffi.Int32 type,
+              ffi.UnsignedInt type,
               ffi.Pointer<ffi.Pointer<OrtOpAttr>> op_attr)>> CreateOpAttr;
 
   external ffi.Pointer<
@@ -4219,7 +4592,7 @@ final class OrtApi extends ffi.Struct {
               ffi.Pointer<ffi.Char> domain,
               ffi.Int version,
               ffi.Pointer<ffi.Pointer<ffi.Char>> type_constraint_names,
-              ffi.Pointer<ffi.Int32> type_constraint_values,
+              ffi.Pointer<ffi.UnsignedInt> type_constraint_values,
               ffi.Int type_constraint_count,
               ffi.Pointer<ffi.Pointer<OrtOpAttr>> attr_values,
               ffi.Int attr_count,
@@ -4321,16 +4694,14 @@ final class OrtApi extends ffi.Struct {
       ReleaseCANNProviderOptions;
 
   external ffi.Pointer<
-          ffi.NativeFunction<
-              ffi.Void Function(
-                  ffi.Pointer<OrtMemoryInfo> ptr, ffi.Pointer<ffi.Int32> out)>>
-      MemoryInfoGetDeviceType;
+      ffi.NativeFunction<
+          ffi.Void Function(ffi.Pointer<OrtMemoryInfo> ptr,
+              ffi.Pointer<ffi.UnsignedInt> out)>> MemoryInfoGetDeviceType;
 
   external ffi.Pointer<
-          ffi.NativeFunction<
-              OrtStatusPtr Function(
-                  ffi.Pointer<OrtEnv> ort_env, ffi.Int32 log_severity_level)>>
-      UpdateEnvWithCustomLogLevel;
+      ffi.NativeFunction<
+          OrtStatusPtr Function(ffi.Pointer<OrtEnv> ort_env,
+              ffi.UnsignedInt log_severity_level)>> UpdateEnvWithCustomLogLevel;
 
   external ffi.Pointer<
           ffi.NativeFunction<
@@ -4476,7 +4847,7 @@ final class OrtApi extends ffi.Struct {
       ffi.NativeFunction<
           OrtStatusPtr Function(
               ffi.Pointer<OrtLogger> logger,
-              ffi.Int32 log_severity_level,
+              ffi.UnsignedInt log_severity_level,
               ffi.Pointer<ffi.Char> message,
               ffi.Pointer<ffi.Char> file_path,
               ffi.Int line_number,
@@ -4484,8 +4855,8 @@ final class OrtApi extends ffi.Struct {
 
   external ffi.Pointer<
           ffi.NativeFunction<
-              OrtStatusPtr Function(
-                  ffi.Pointer<OrtLogger> logger, ffi.Pointer<ffi.Int32> out)>>
+              OrtStatusPtr Function(ffi.Pointer<OrtLogger> logger,
+                  ffi.Pointer<ffi.UnsignedInt> out)>>
       Logger_GetLoggingSeverityLevel;
 
   external ffi.Pointer<
@@ -4634,35 +5005,69 @@ final class OrtApi extends ffi.Struct {
 }
 
 typedef OrtStatusPtr = ffi.Pointer<OrtStatus>;
-typedef OrtLoggingFunction = ffi.Pointer<
-    ffi.NativeFunction<
-        ffi.Void Function(
-            ffi.Pointer<ffi.Void> param,
-            ffi.Int32 severity,
-            ffi.Pointer<ffi.Char> category,
-            ffi.Pointer<ffi.Char> logid,
-            ffi.Pointer<ffi.Char> code_location,
-            ffi.Pointer<ffi.Char> message)>>;
+typedef OrtLoggingFunction
+    = ffi.Pointer<ffi.NativeFunction<OrtLoggingFunctionFunction>>;
+typedef OrtLoggingFunctionFunction = ffi.Void Function(
+    ffi.Pointer<ffi.Void> param,
+    ffi.UnsignedInt severity,
+    ffi.Pointer<ffi.Char> category,
+    ffi.Pointer<ffi.Char> logid,
+    ffi.Pointer<ffi.Char> code_location,
+    ffi.Pointer<ffi.Char> message);
+typedef DartOrtLoggingFunctionFunction = void Function(
+    ffi.Pointer<ffi.Void> param,
+    OrtLoggingLevel severity,
+    ffi.Pointer<ffi.Char> category,
+    ffi.Pointer<ffi.Char> logid,
+    ffi.Pointer<ffi.Char> code_location,
+    ffi.Pointer<ffi.Char> message);
 
-abstract class OrtAllocatorType {
-  static const int OrtInvalidAllocator = -1;
-  static const int OrtDeviceAllocator = 0;
-  static const int OrtArenaAllocator = 1;
+enum OrtAllocatorType {
+  OrtInvalidAllocator(-1),
+  OrtDeviceAllocator(0),
+  OrtArenaAllocator(1);
+
+  final int value;
+  const OrtAllocatorType(this.value);
+
+  static OrtAllocatorType fromValue(int value) => switch (value) {
+        -1 => OrtInvalidAllocator,
+        0 => OrtDeviceAllocator,
+        1 => OrtArenaAllocator,
+        _ => throw ArgumentError("Unknown value for OrtAllocatorType: $value"),
+      };
 }
 
 /// \brief Memory types for allocated memory, execution provider specific types should be extended in each provider.
-abstract class OrtMemType {
+enum OrtMemType {
   /// < Any CPU memory used by non-CPU execution provider
-  static const int OrtMemTypeCPUInput = -2;
+  OrtMemTypeCPUInput(-2),
 
   /// < CPU accessible memory outputted by non-CPU execution provider, i.e. CUDA_PINNED
-  static const int OrtMemTypeCPUOutput = -1;
-
-  /// < Temporary CPU accessible memory allocated by non-CPU execution provider, i.e. CUDA_PINNED
-  static const int OrtMemTypeCPU = -1;
+  OrtMemTypeCPUOutput(-1),
 
   /// < The default allocator for execution provider
-  static const int OrtMemTypeDefault = 0;
+  OrtMemTypeDefault(0);
+
+  /// < Temporary CPU accessible memory allocated by non-CPU execution provider, i.e. CUDA_PINNED
+  static const OrtMemTypeCPU = OrtMemTypeCPUOutput;
+
+  final int value;
+  const OrtMemType(this.value);
+
+  static OrtMemType fromValue(int value) => switch (value) {
+        -2 => OrtMemTypeCPUInput,
+        -1 => OrtMemTypeCPUOutput,
+        0 => OrtMemTypeDefault,
+        _ => throw ArgumentError("Unknown value for OrtMemType: $value"),
+      };
+
+  @override
+  String toString() {
+    if (this == OrtMemTypeCPUOutput)
+      return "OrtMemType.OrtMemTypeCPUOutput, OrtMemType.OrtMemTypeCPU";
+    return super.toString();
+  }
 }
 
 /// \brief CUDA Provider Options
@@ -4677,8 +5082,11 @@ final class OrtCUDAProviderOptions extends ffi.Struct {
   /// \brief CUDA Convolution algorithm search configuration.
   /// See enum OrtCudnnConvAlgoSearch for more details.
   /// Defaults to OrtCudnnConvAlgoSearchExhaustive.
-  @ffi.Int32()
-  external int cudnn_conv_algo_search;
+  @ffi.UnsignedInt()
+  external int cudnn_conv_algo_searchAsInt;
+
+  OrtCudnnConvAlgoSearch get cudnn_conv_algo_search =>
+      OrtCudnnConvAlgoSearch.fromValue(cudnn_conv_algo_searchAsInt);
 
   /// \brief CUDA memory limit (To use all possible memory pass in maximum size_t)
   /// Defaults to SIZE_MAX.
@@ -4734,10 +5142,21 @@ final class OrtCUDAProviderOptions extends ffi.Struct {
 }
 
 /// \brief Algorithm to use for cuDNN Convolution Op
-abstract class OrtCudnnConvAlgoSearch {
-  static const int OrtCudnnConvAlgoSearchExhaustive = 0;
-  static const int OrtCudnnConvAlgoSearchHeuristic = 1;
-  static const int OrtCudnnConvAlgoSearchDefault = 2;
+enum OrtCudnnConvAlgoSearch {
+  OrtCudnnConvAlgoSearchExhaustive(0),
+  OrtCudnnConvAlgoSearchHeuristic(1),
+  OrtCudnnConvAlgoSearchDefault(2);
+
+  final int value;
+  const OrtCudnnConvAlgoSearch(this.value);
+
+  static OrtCudnnConvAlgoSearch fromValue(int value) => switch (value) {
+        0 => OrtCudnnConvAlgoSearchExhaustive,
+        1 => OrtCudnnConvAlgoSearchHeuristic,
+        2 => OrtCudnnConvAlgoSearchDefault,
+        _ => throw ArgumentError(
+            "Unknown value for OrtCudnnConvAlgoSearch: $value"),
+      };
 }
 
 /// \brief ROCM Provider Options
@@ -4899,12 +5318,12 @@ final class OrtTensorRTProviderOptions extends ffi.Struct {
 ///
 /// The function should return a thread handle to be used in onnxruntime thread pools
 /// Onnxruntime will throw exception on return value of nullptr or 0, indicating that the function failed to create a thread
-typedef OrtCustomCreateThreadFn = ffi.Pointer<
-    ffi.NativeFunction<
-        OrtCustomThreadHandle Function(
-            ffi.Pointer<ffi.Void> ort_custom_thread_creation_options,
-            OrtThreadWorkerFn ort_thread_worker_fn,
-            ffi.Pointer<ffi.Void> ort_worker_fn_param)>>;
+typedef OrtCustomCreateThreadFn
+    = ffi.Pointer<ffi.NativeFunction<OrtCustomCreateThreadFnFunction>>;
+typedef OrtCustomCreateThreadFnFunction = OrtCustomThreadHandle Function(
+    ffi.Pointer<ffi.Void> ort_custom_thread_creation_options,
+    OrtThreadWorkerFn ort_thread_worker_fn,
+    ffi.Pointer<ffi.Void> ort_worker_fn_param);
 typedef OrtCustomThreadHandle = ffi.Pointer<OrtCustomHandleType>;
 
 final class OrtCustomHandleType extends ffi.Struct {
@@ -4916,17 +5335,23 @@ final class OrtCustomHandleType extends ffi.Struct {
 ///
 /// Onnxruntime will provide the working loop on custom thread creation
 /// Argument is an onnxruntime built-in type which will be provided when thread pool calls OrtCustomCreateThreadFn
-typedef OrtThreadWorkerFn = ffi.Pointer<
-    ffi.NativeFunction<
-        ffi.Void Function(ffi.Pointer<ffi.Void> ort_worker_fn_param)>>;
+typedef OrtThreadWorkerFn
+    = ffi.Pointer<ffi.NativeFunction<OrtThreadWorkerFnFunction>>;
+typedef OrtThreadWorkerFnFunction = ffi.Void Function(
+    ffi.Pointer<ffi.Void> ort_worker_fn_param);
+typedef DartOrtThreadWorkerFnFunction = void Function(
+    ffi.Pointer<ffi.Void> ort_worker_fn_param);
 
 /// \brief Custom thread join function
 ///
 /// Onnxruntime thread pool destructor will call the function to join a custom thread.
 /// Argument ort_custom_thread_handle is the value returned by OrtCustomCreateThreadFn
-typedef OrtCustomJoinThreadFn = ffi.Pointer<
-    ffi.NativeFunction<
-        ffi.Void Function(OrtCustomThreadHandle ort_custom_thread_handle)>>;
+typedef OrtCustomJoinThreadFn
+    = ffi.Pointer<ffi.NativeFunction<OrtCustomJoinThreadFnFunction>>;
+typedef OrtCustomJoinThreadFnFunction = ffi.Void Function(
+    OrtCustomThreadHandle ort_custom_thread_handle);
+typedef DartOrtCustomJoinThreadFnFunction = void Function(
+    OrtCustomThreadHandle ort_custom_thread_handle);
 
 /// \brief MIGraphX Provider Options
 ///
@@ -5152,7 +5577,7 @@ final class OrtTrainingApi extends ffi.Struct {
           OrtStatusPtr Function(
               ffi.Pointer<OrtCheckpointState> checkpoint_state,
               ffi.Pointer<ffi.Char> property_name,
-              ffi.Int32 property_type,
+              ffi.UnsignedInt property_type,
               ffi.Pointer<ffi.Void> property_value)>> AddProperty;
 
   external ffi.Pointer<
@@ -5161,7 +5586,7 @@ final class OrtTrainingApi extends ffi.Struct {
               ffi.Pointer<OrtCheckpointState> checkpoint_state,
               ffi.Pointer<ffi.Char> property_name,
               ffi.Pointer<OrtAllocator> allocator,
-              ffi.Pointer<ffi.Int32> property_type,
+              ffi.Pointer<ffi.UnsignedInt> property_type,
               ffi.Pointer<ffi.Pointer<ffi.Void>> property_value)>> GetProperty;
 
   external ffi.Pointer<
@@ -5178,17 +5603,38 @@ final class OrtCheckpointState extends ffi.Opaque {}
 final class OrtTrainingSession extends ffi.Opaque {}
 
 /// \brief Type of property to be added to or returned from the ::OrtCheckpointState.
-abstract class OrtPropertyType {
-  static const int OrtIntProperty = 0;
-  static const int OrtFloatProperty = 1;
-  static const int OrtStringProperty = 2;
+enum OrtPropertyType {
+  OrtIntProperty(0),
+  OrtFloatProperty(1),
+  OrtStringProperty(2);
+
+  final int value;
+  const OrtPropertyType(this.value);
+
+  static OrtPropertyType fromValue(int value) => switch (value) {
+        0 => OrtIntProperty,
+        1 => OrtFloatProperty,
+        2 => OrtStringProperty,
+        _ => throw ArgumentError("Unknown value for OrtPropertyType: $value"),
+      };
 }
 
 /// \brief This mimics OrtDevice type constants so they can be returned in the API
-abstract class OrtMemoryInfoDeviceType {
-  static const int OrtMemoryInfoDeviceType_CPU = 0;
-  static const int OrtMemoryInfoDeviceType_GPU = 1;
-  static const int OrtMemoryInfoDeviceType_FPGA = 2;
+enum OrtMemoryInfoDeviceType {
+  OrtMemoryInfoDeviceType_CPU(0),
+  OrtMemoryInfoDeviceType_GPU(1),
+  OrtMemoryInfoDeviceType_FPGA(2);
+
+  final int value;
+  const OrtMemoryInfoDeviceType(this.value);
+
+  static OrtMemoryInfoDeviceType fromValue(int value) => switch (value) {
+        0 => OrtMemoryInfoDeviceType_CPU,
+        1 => OrtMemoryInfoDeviceType_GPU,
+        2 => OrtMemoryInfoDeviceType_FPGA,
+        _ => throw ArgumentError(
+            "Unknown value for OrtMemoryInfoDeviceType: $value"),
+      };
 }
 
 /// \brief Callback function for RunAsync
@@ -5197,18 +5643,35 @@ abstract class OrtMemoryInfoDeviceType {
 /// \param[out] outputs On succeed, outputs host inference results, on error, the value will be nullptr
 /// \param[out] num_outputs Number of outputs, on error, the value will be zero
 /// \param[out] status On error, status will provide details
-typedef RunAsyncCallbackFn = ffi.Pointer<
-    ffi.NativeFunction<
-        ffi.Void Function(
-            ffi.Pointer<ffi.Void> user_data,
-            ffi.Pointer<ffi.Pointer<OrtValue>> outputs,
-            ffi.Size num_outputs,
-            OrtStatusPtr status)>>;
+typedef RunAsyncCallbackFn
+    = ffi.Pointer<ffi.NativeFunction<RunAsyncCallbackFnFunction>>;
+typedef RunAsyncCallbackFnFunction = ffi.Void Function(
+    ffi.Pointer<ffi.Void> user_data,
+    ffi.Pointer<ffi.Pointer<OrtValue>> outputs,
+    ffi.Size num_outputs,
+    OrtStatusPtr status);
+typedef DartRunAsyncCallbackFnFunction = void Function(
+    ffi.Pointer<ffi.Void> user_data,
+    ffi.Pointer<ffi.Pointer<OrtValue>> outputs,
+    int num_outputs,
+    OrtStatusPtr status);
 
-abstract class OrtCustomOpInputOutputCharacteristic {
-  static const int INPUT_OUTPUT_REQUIRED = 0;
-  static const int INPUT_OUTPUT_OPTIONAL = 1;
-  static const int INPUT_OUTPUT_VARIADIC = 2;
+enum OrtCustomOpInputOutputCharacteristic {
+  INPUT_OUTPUT_REQUIRED(0),
+  INPUT_OUTPUT_OPTIONAL(1),
+  INPUT_OUTPUT_VARIADIC(2);
+
+  final int value;
+  const OrtCustomOpInputOutputCharacteristic(this.value);
+
+  static OrtCustomOpInputOutputCharacteristic fromValue(int value) =>
+      switch (value) {
+        0 => INPUT_OUTPUT_REQUIRED,
+        1 => INPUT_OUTPUT_OPTIONAL,
+        2 => INPUT_OUTPUT_VARIADIC,
+        _ => throw ArgumentError(
+            "Unknown value for OrtCustomOpInputOutputCharacteristic: $value"),
+      };
 }
 
 /// \brief The helper interface to get the right version of OrtApi
@@ -5234,13 +5697,33 @@ final class OrtApiBase extends ffi.Struct {
       GetVersionString;
 }
 
-abstract class COREMLFlags {
-  static const int COREML_FLAG_USE_NONE = 0;
-  static const int COREML_FLAG_USE_CPU_ONLY = 1;
-  static const int COREML_FLAG_ENABLE_ON_SUBGRAPH = 2;
-  static const int COREML_FLAG_ONLY_ENABLE_DEVICE_WITH_ANE = 4;
-  static const int COREML_FLAG_ONLY_ALLOW_STATIC_INPUT_SHAPES = 8;
-  static const int COREML_FLAG_LAST = 8;
+enum COREMLFlags {
+  COREML_FLAG_USE_NONE(0),
+  COREML_FLAG_USE_CPU_ONLY(1),
+  COREML_FLAG_ENABLE_ON_SUBGRAPH(2),
+  COREML_FLAG_ONLY_ENABLE_DEVICE_WITH_ANE(4),
+  COREML_FLAG_ONLY_ALLOW_STATIC_INPUT_SHAPES(8);
+
+  static const COREML_FLAG_LAST = COREML_FLAG_ONLY_ALLOW_STATIC_INPUT_SHAPES;
+
+  final int value;
+  const COREMLFlags(this.value);
+
+  static COREMLFlags fromValue(int value) => switch (value) {
+        0 => COREML_FLAG_USE_NONE,
+        1 => COREML_FLAG_USE_CPU_ONLY,
+        2 => COREML_FLAG_ENABLE_ON_SUBGRAPH,
+        4 => COREML_FLAG_ONLY_ENABLE_DEVICE_WITH_ANE,
+        8 => COREML_FLAG_ONLY_ALLOW_STATIC_INPUT_SHAPES,
+        _ => throw ArgumentError("Unknown value for COREMLFlags: $value"),
+      };
+
+  @override
+  String toString() {
+    if (this == COREML_FLAG_ONLY_ALLOW_STATIC_INPUT_SHAPES)
+      return "COREMLFlags.COREML_FLAG_ONLY_ALLOW_STATIC_INPUT_SHAPES, COREMLFlags.COREML_FLAG_LAST";
+    return super.toString();
+  }
 }
 
 const int __bool_true_false_are_defined = 1;
@@ -5255,13 +5738,15 @@ const int __API_TO_BE_DEPRECATED_MACOS = 100000;
 
 const int __API_TO_BE_DEPRECATED_IOS = 100000;
 
-const int __API_TO_BE_DEPRECATED_TVOS = 100000;
+const int __API_TO_BE_DEPRECATED_MACCATALYST = 100000;
 
 const int __API_TO_BE_DEPRECATED_WATCHOS = 100000;
 
-const int __API_TO_BE_DEPRECATED_MACCATALYST = 100000;
+const int __API_TO_BE_DEPRECATED_TVOS = 100000;
 
 const int __API_TO_BE_DEPRECATED_DRIVERKIT = 100000;
+
+const int __API_TO_BE_DEPRECATED_VISIONOS = 100000;
 
 const int __MAC_10_0 = 1000;
 
@@ -5319,6 +5804,8 @@ const int __MAC_10_14_1 = 101401;
 
 const int __MAC_10_14_4 = 101404;
 
+const int __MAC_10_14_5 = 101405;
+
 const int __MAC_10_14_6 = 101406;
 
 const int __MAC_10_15 = 101500;
@@ -5349,6 +5836,14 @@ const int __MAC_12_2 = 120200;
 
 const int __MAC_12_3 = 120300;
 
+const int __MAC_12_4 = 120400;
+
+const int __MAC_12_5 = 120500;
+
+const int __MAC_12_6 = 120600;
+
+const int __MAC_12_7 = 120700;
+
 const int __MAC_13_0 = 130000;
 
 const int __MAC_13_1 = 130100;
@@ -5356,6 +5851,28 @@ const int __MAC_13_1 = 130100;
 const int __MAC_13_2 = 130200;
 
 const int __MAC_13_3 = 130300;
+
+const int __MAC_13_4 = 130400;
+
+const int __MAC_13_5 = 130500;
+
+const int __MAC_13_6 = 130600;
+
+const int __MAC_14_0 = 140000;
+
+const int __MAC_14_1 = 140100;
+
+const int __MAC_14_2 = 140200;
+
+const int __MAC_14_3 = 140300;
+
+const int __MAC_14_4 = 140400;
+
+const int __MAC_14_5 = 140500;
+
+const int __MAC_15_0 = 150000;
+
+const int __MAC_15_1 = 150100;
 
 const int __IPHONE_2_0 = 20000;
 
@@ -5461,6 +5978,8 @@ const int __IPHONE_14_3 = 140300;
 
 const int __IPHONE_14_5 = 140500;
 
+const int __IPHONE_14_4 = 140400;
+
 const int __IPHONE_14_6 = 140600;
 
 const int __IPHONE_14_7 = 140700;
@@ -5477,6 +5996,14 @@ const int __IPHONE_15_3 = 150300;
 
 const int __IPHONE_15_4 = 150400;
 
+const int __IPHONE_15_5 = 150500;
+
+const int __IPHONE_15_6 = 150600;
+
+const int __IPHONE_15_7 = 150700;
+
+const int __IPHONE_15_8 = 150800;
+
 const int __IPHONE_16_0 = 160000;
 
 const int __IPHONE_16_1 = 160100;
@@ -5486,6 +6013,126 @@ const int __IPHONE_16_2 = 160200;
 const int __IPHONE_16_3 = 160300;
 
 const int __IPHONE_16_4 = 160400;
+
+const int __IPHONE_16_5 = 160500;
+
+const int __IPHONE_16_6 = 160600;
+
+const int __IPHONE_16_7 = 160700;
+
+const int __IPHONE_17_0 = 170000;
+
+const int __IPHONE_17_1 = 170100;
+
+const int __IPHONE_17_2 = 170200;
+
+const int __IPHONE_17_3 = 170300;
+
+const int __IPHONE_17_4 = 170400;
+
+const int __IPHONE_17_5 = 170500;
+
+const int __IPHONE_18_0 = 180000;
+
+const int __IPHONE_18_1 = 180100;
+
+const int __WATCHOS_1_0 = 10000;
+
+const int __WATCHOS_2_0 = 20000;
+
+const int __WATCHOS_2_1 = 20100;
+
+const int __WATCHOS_2_2 = 20200;
+
+const int __WATCHOS_3_0 = 30000;
+
+const int __WATCHOS_3_1 = 30100;
+
+const int __WATCHOS_3_1_1 = 30101;
+
+const int __WATCHOS_3_2 = 30200;
+
+const int __WATCHOS_4_0 = 40000;
+
+const int __WATCHOS_4_1 = 40100;
+
+const int __WATCHOS_4_2 = 40200;
+
+const int __WATCHOS_4_3 = 40300;
+
+const int __WATCHOS_5_0 = 50000;
+
+const int __WATCHOS_5_1 = 50100;
+
+const int __WATCHOS_5_2 = 50200;
+
+const int __WATCHOS_5_3 = 50300;
+
+const int __WATCHOS_6_0 = 60000;
+
+const int __WATCHOS_6_1 = 60100;
+
+const int __WATCHOS_6_2 = 60200;
+
+const int __WATCHOS_7_0 = 70000;
+
+const int __WATCHOS_7_1 = 70100;
+
+const int __WATCHOS_7_2 = 70200;
+
+const int __WATCHOS_7_3 = 70300;
+
+const int __WATCHOS_7_4 = 70400;
+
+const int __WATCHOS_7_5 = 70500;
+
+const int __WATCHOS_7_6 = 70600;
+
+const int __WATCHOS_8_0 = 80000;
+
+const int __WATCHOS_8_1 = 80100;
+
+const int __WATCHOS_8_3 = 80300;
+
+const int __WATCHOS_8_4 = 80400;
+
+const int __WATCHOS_8_5 = 80500;
+
+const int __WATCHOS_8_6 = 80600;
+
+const int __WATCHOS_8_7 = 80700;
+
+const int __WATCHOS_8_8 = 80800;
+
+const int __WATCHOS_9_0 = 90000;
+
+const int __WATCHOS_9_1 = 90100;
+
+const int __WATCHOS_9_2 = 90200;
+
+const int __WATCHOS_9_3 = 90300;
+
+const int __WATCHOS_9_4 = 90400;
+
+const int __WATCHOS_9_5 = 90500;
+
+const int __WATCHOS_9_6 = 90600;
+
+const int __WATCHOS_10_0 = 100000;
+
+const int __WATCHOS_10_1 = 100100;
+
+const int __WATCHOS_10_2 = 100200;
+
+const int __WATCHOS_10_3 = 100300;
+
+const int __WATCHOS_10_4 = 100400;
+
+const int __WATCHOS_10_5 = 100500;
+
+const int __WATCHOS_11_0 = 110000;
+
+const int __WATCHOS_11_1 = 110100;
 
 const int __TVOS_9_0 = 90000;
 
@@ -5553,6 +6200,10 @@ const int __TVOS_15_3 = 150300;
 
 const int __TVOS_15_4 = 150400;
 
+const int __TVOS_15_5 = 150500;
+
+const int __TVOS_15_6 = 150600;
+
 const int __TVOS_16_0 = 160000;
 
 const int __TVOS_16_1 = 160100;
@@ -5563,77 +6214,121 @@ const int __TVOS_16_3 = 160300;
 
 const int __TVOS_16_4 = 160400;
 
-const int __WATCHOS_1_0 = 10000;
+const int __TVOS_16_5 = 160500;
 
-const int __WATCHOS_2_0 = 20000;
+const int __TVOS_16_6 = 160600;
 
-const int __WATCHOS_2_1 = 20100;
+const int __TVOS_17_0 = 170000;
 
-const int __WATCHOS_2_2 = 20200;
+const int __TVOS_17_1 = 170100;
 
-const int __WATCHOS_3_0 = 30000;
+const int __TVOS_17_2 = 170200;
 
-const int __WATCHOS_3_1 = 30100;
+const int __TVOS_17_3 = 170300;
 
-const int __WATCHOS_3_1_1 = 30101;
+const int __TVOS_17_4 = 170400;
 
-const int __WATCHOS_3_2 = 30200;
+const int __TVOS_17_5 = 170500;
 
-const int __WATCHOS_4_0 = 40000;
+const int __TVOS_18_0 = 180000;
 
-const int __WATCHOS_4_1 = 40100;
+const int __TVOS_18_1 = 180100;
 
-const int __WATCHOS_4_2 = 40200;
+const int __BRIDGEOS_2_0 = 20000;
 
-const int __WATCHOS_4_3 = 40300;
+const int __BRIDGEOS_3_0 = 30000;
 
-const int __WATCHOS_5_0 = 50000;
+const int __BRIDGEOS_3_1 = 30100;
 
-const int __WATCHOS_5_1 = 50100;
+const int __BRIDGEOS_3_4 = 30400;
 
-const int __WATCHOS_5_2 = 50200;
+const int __BRIDGEOS_4_0 = 40000;
 
-const int __WATCHOS_5_3 = 50300;
+const int __BRIDGEOS_4_1 = 40100;
 
-const int __WATCHOS_6_0 = 60000;
+const int __BRIDGEOS_5_0 = 50000;
 
-const int __WATCHOS_6_1 = 60100;
+const int __BRIDGEOS_5_1 = 50100;
 
-const int __WATCHOS_6_2 = 60200;
+const int __BRIDGEOS_5_3 = 50300;
 
-const int __WATCHOS_7_0 = 70000;
+const int __BRIDGEOS_6_0 = 60000;
 
-const int __WATCHOS_7_1 = 70100;
+const int __BRIDGEOS_6_2 = 60200;
 
-const int __WATCHOS_7_2 = 70200;
+const int __BRIDGEOS_6_4 = 60400;
 
-const int __WATCHOS_7_3 = 70300;
+const int __BRIDGEOS_6_5 = 60500;
 
-const int __WATCHOS_7_4 = 70400;
+const int __BRIDGEOS_6_6 = 60600;
 
-const int __WATCHOS_7_5 = 70500;
+const int __BRIDGEOS_7_0 = 70000;
 
-const int __WATCHOS_7_6 = 70600;
+const int __BRIDGEOS_7_1 = 70100;
 
-const int __WATCHOS_8_0 = 80000;
+const int __BRIDGEOS_7_2 = 70200;
 
-const int __WATCHOS_8_1 = 80100;
+const int __BRIDGEOS_7_3 = 70300;
 
-const int __WATCHOS_8_3 = 80300;
+const int __BRIDGEOS_7_4 = 70400;
 
-const int __WATCHOS_8_4 = 80400;
+const int __BRIDGEOS_7_6 = 70600;
 
-const int __WATCHOS_8_5 = 80500;
+const int __BRIDGEOS_8_0 = 80000;
 
-const int __WATCHOS_9_0 = 90000;
+const int __BRIDGEOS_8_1 = 80100;
 
-const int __WATCHOS_9_1 = 90100;
+const int __BRIDGEOS_8_2 = 80200;
 
-const int __WATCHOS_9_2 = 90200;
+const int __BRIDGEOS_8_3 = 80300;
 
-const int __WATCHOS_9_3 = 90300;
+const int __BRIDGEOS_8_4 = 80400;
 
-const int __WATCHOS_9_4 = 90400;
+const int __BRIDGEOS_8_5 = 80500;
+
+const int __BRIDGEOS_9_0 = 90000;
+
+const int __BRIDGEOS_9_1 = 90100;
+
+const int __DRIVERKIT_19_0 = 190000;
+
+const int __DRIVERKIT_20_0 = 200000;
+
+const int __DRIVERKIT_21_0 = 210000;
+
+const int __DRIVERKIT_22_0 = 220000;
+
+const int __DRIVERKIT_22_4 = 220400;
+
+const int __DRIVERKIT_22_5 = 220500;
+
+const int __DRIVERKIT_22_6 = 220600;
+
+const int __DRIVERKIT_23_0 = 230000;
+
+const int __DRIVERKIT_23_1 = 230100;
+
+const int __DRIVERKIT_23_2 = 230200;
+
+const int __DRIVERKIT_23_3 = 230300;
+
+const int __DRIVERKIT_23_4 = 230400;
+
+const int __DRIVERKIT_23_5 = 230500;
+
+const int __DRIVERKIT_24_0 = 240000;
+
+const int __DRIVERKIT_24_1 = 240100;
+
+const int __VISIONOS_1_0 = 10000;
+
+const int __VISIONOS_1_1 = 10100;
+
+const int __VISIONOS_1_2 = 10200;
+
+const int __VISIONOS_2_0 = 20000;
+
+const int __VISIONOS_2_1 = 20100;
 
 const int MAC_OS_X_VERSION_10_0 = 1000;
 
@@ -5691,31 +6386,81 @@ const int MAC_OS_X_VERSION_10_14_1 = 101401;
 
 const int MAC_OS_X_VERSION_10_14_4 = 101404;
 
+const int MAC_OS_X_VERSION_10_14_5 = 101405;
+
 const int MAC_OS_X_VERSION_10_14_6 = 101406;
 
 const int MAC_OS_X_VERSION_10_15 = 101500;
 
 const int MAC_OS_X_VERSION_10_15_1 = 101501;
 
+const int MAC_OS_X_VERSION_10_15_4 = 101504;
+
 const int MAC_OS_X_VERSION_10_16 = 101600;
 
 const int MAC_OS_VERSION_11_0 = 110000;
 
+const int MAC_OS_VERSION_11_1 = 110100;
+
+const int MAC_OS_VERSION_11_3 = 110300;
+
+const int MAC_OS_VERSION_11_4 = 110400;
+
+const int MAC_OS_VERSION_11_5 = 110500;
+
+const int MAC_OS_VERSION_11_6 = 110600;
+
 const int MAC_OS_VERSION_12_0 = 120000;
+
+const int MAC_OS_VERSION_12_1 = 120100;
+
+const int MAC_OS_VERSION_12_2 = 120200;
+
+const int MAC_OS_VERSION_12_3 = 120300;
+
+const int MAC_OS_VERSION_12_4 = 120400;
+
+const int MAC_OS_VERSION_12_5 = 120500;
+
+const int MAC_OS_VERSION_12_6 = 120600;
+
+const int MAC_OS_VERSION_12_7 = 120700;
 
 const int MAC_OS_VERSION_13_0 = 130000;
 
-const int __DRIVERKIT_19_0 = 190000;
+const int MAC_OS_VERSION_13_1 = 130100;
 
-const int __DRIVERKIT_20_0 = 200000;
+const int MAC_OS_VERSION_13_2 = 130200;
 
-const int __DRIVERKIT_21_0 = 210000;
+const int MAC_OS_VERSION_13_3 = 130300;
 
-const int __MAC_OS_X_VERSION_MIN_REQUIRED = 130000;
+const int MAC_OS_VERSION_13_4 = 130400;
 
-const int __MAC_OS_X_VERSION_MAX_ALLOWED = 130300;
+const int MAC_OS_VERSION_13_5 = 130500;
+
+const int MAC_OS_VERSION_13_6 = 130600;
+
+const int MAC_OS_VERSION_14_0 = 140000;
+
+const int MAC_OS_VERSION_14_1 = 140100;
+
+const int MAC_OS_VERSION_14_2 = 140200;
+
+const int MAC_OS_VERSION_14_3 = 140300;
+
+const int MAC_OS_VERSION_14_4 = 140400;
+
+const int MAC_OS_VERSION_14_5 = 140500;
+
+const int MAC_OS_VERSION_15_0 = 150000;
+
+const int MAC_OS_VERSION_15_1 = 150100;
+
+const int __MAC_OS_X_VERSION_MAX_ALLOWED = 150100;
 
 const int __ENABLE_LEGACY_MAC_AVAILABILITY = 1;
+
+const int __has_safe_buffers = 0;
 
 const int __DARWIN_ONLY_64_BIT_INO_T = 1;
 
@@ -6277,6 +7022,10 @@ const int IOPOL_VFS_DISALLOW_RW_FOR_O_EVTONLY_DEFAULT = 0;
 
 const int IOPOL_VFS_DISALLOW_RW_FOR_O_EVTONLY_ON = 1;
 
+const int IOPOL_VFS_NOCACHE_WRITE_FS_BLKSIZE_DEFAULT = 0;
+
+const int IOPOL_VFS_NOCACHE_WRITE_FS_BLKSIZE_ON = 1;
+
 const int WNOHANG = 1;
 
 const int WUNTRACED = 2;
@@ -6307,13 +7056,13 @@ const int __DARWIN_BIG_ENDIAN = 4321;
 
 const int __DARWIN_PDP_ENDIAN = 3412;
 
-const int __DARWIN_BYTE_ORDER = 1234;
-
 const int LITTLE_ENDIAN = 1234;
 
 const int BIG_ENDIAN = 4321;
 
 const int PDP_ENDIAN = 3412;
+
+const int __DARWIN_BYTE_ORDER = 1234;
 
 const int BYTE_ORDER = 1234;
 
@@ -6328,4 +7077,4 @@ const int RAND_MAX = 2147483647;
 const int ORT_API_VERSION = 16;
 
 const String ORT_FILE =
-    '/var/folders/v8/cddv063n39799991xj6y4r4m0000gn/T/R9SfP3/temp_for_macros.hpp';
+    '/var/folders/v8/cddv063n39799991xj6y4r4m0000gn/T/eDEHnM/temp_for_macros.hpp';

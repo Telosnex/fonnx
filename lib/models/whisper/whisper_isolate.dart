@@ -253,11 +253,11 @@ Future<String> _getTranscriptFfi(
 
     final tensorTypeAndShape = calloc<Pointer<OrtTensorTypeAndShapeInfo>>();
     objects.api.getTensorTypeAndShape(outputValues.value, tensorTypeAndShape);
-    final tensorElementType = calloc<Int32>();
+    final tensorElementType = calloc<UnsignedInt>();
     objects.api
         .getTensorElementType(tensorTypeAndShape.value, tensorElementType);
     assert(tensorElementType.value ==
-        ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_STRING);
+        ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_STRING.value);
 
     final stringLengthPtr = calloc<Size>();
     objects.api

@@ -44,7 +44,7 @@ extension DartNativeFunctions on OrtApi {
       inputShape: inputShape,
       inputShapeLengthInBytes: 1,
       onnxTensorElementDataType:
-          ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT,
+          ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT.value,
     );
     if (status.isError) {
       final error = 'Code: ${getErrorCodeMessage(status)}\n'
@@ -93,7 +93,7 @@ extension DartNativeFunctions on OrtApi {
       inputShape: inputShape,
       inputShapeLengthInBytes: 2,
       onnxTensorElementDataType:
-          ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT,
+          ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT.value,
     );
     if (status.isError) {
       final error = 'Code: ${getErrorCodeMessage(status)}\n'
@@ -139,7 +139,7 @@ extension DartNativeFunctions on OrtApi {
       inputShape: inputShape,
       inputShapeLengthInBytes: 2, // We now have two dimensions
       onnxTensorElementDataType:
-          ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT,
+          ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT.value,
     );
 
     if (status.isError) {
@@ -190,7 +190,7 @@ extension DartNativeFunctions on OrtApi {
       inputShape: inputShape,
       inputShapeLengthInBytes: 3, // We now have three dimensions
       onnxTensorElementDataType:
-          ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT,
+          ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT.value,
     );
 
     if (status.isError) {
@@ -232,7 +232,7 @@ extension DartNativeFunctions on OrtApi {
       inputShape: inputShape,
       inputShapeLengthInBytes: 2,
       onnxTensorElementDataType:
-          ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64,
+          ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64.value,
     );
     if (status.isError) {
       final error = 'Code: ${getErrorCodeMessage(status)}\n'
@@ -268,7 +268,7 @@ extension DartNativeFunctions on OrtApi {
       inputShape: inputShape,
       inputShapeLengthInBytes: 1,
       onnxTensorElementDataType:
-          ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_INT32,
+          ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_INT32.value,
     );
     if (status.isError) {
       final error = 'Code: ${getErrorCodeMessage(status)}\n'
@@ -303,7 +303,7 @@ extension DartNativeFunctions on OrtApi {
       inputShape: inputShape,
       inputShapeLengthInBytes: 2,
       onnxTensorElementDataType:
-          ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT8,
+          ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT8.value,
     );
     if (status.isError) {
       final error = 'Code: ${getErrorCodeMessage(status)}\n'
@@ -412,8 +412,8 @@ extension DartNativeFunctions on OrtApi {
   /// Must be freed with [releaseMemoryInfo].
   Pointer<OrtStatus> createCpuMemoryInfo(
     Pointer<Pointer<OrtMemoryInfo>> memoryInfo, {
-    int ortAllocator = OrtAllocatorType.OrtArenaAllocator,
-    int ortMemType = OrtMemType.OrtMemTypeDefault,
+    int ortAllocator = 3 /* OrtAllocatorType.OrtArenaAllocator */,
+    int ortMemType = 0 /* OrtMemType.OrtMemTypeDefault */,
   }) {
     final createCpuMemoryInfoFn = CreateCpuMemoryInfo.asFunction<
         Pointer<OrtStatus> Function(
@@ -440,7 +440,7 @@ extension DartNativeFunctions on OrtApi {
 
   Pointer<OrtStatus> createEnv(
     Pointer<Pointer<OrtEnv>> env, {
-    int logLevel = OrtLoggingLevel.ORT_LOGGING_LEVEL_ERROR,
+    int logLevel = 3 /* OrtLoggingLevel.ORT_LOGGING_LEVEL_ERROR */,
     String logId = '',
   }) {
     final createEnvFn = CreateEnv.asFunction<
@@ -587,11 +587,11 @@ extension DartNativeFunctions on OrtApi {
 
   Pointer<OrtStatus> getTensorElementType(
     Pointer<OrtTensorTypeAndShapeInfo> info,
-    Pointer<Int32> out,
+    Pointer<UnsignedInt> out,
   ) {
     final getTensorElementTypeFn = GetTensorElementType.asFunction<
-        Pointer<OrtStatus> Function(
-            Pointer<OrtTensorTypeAndShapeInfo>, Pointer<Int32>)>();
+        OrtStatusPtr Function(
+            Pointer<OrtTensorTypeAndShapeInfo>, Pointer<UnsignedInt>)>();
     final status = getTensorElementTypeFn(info, out);
     if (status.isError) {
       final error =

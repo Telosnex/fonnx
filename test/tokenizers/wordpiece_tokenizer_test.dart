@@ -24,7 +24,7 @@ void main() {
     });
 
     test('reverses to original', () async {
-      final input = "Hello, world!";
+      const input = "Hello, world!";
       final result = tokenizer.tokenize(input);
       expect(result.first.text, equals(input));
     });
