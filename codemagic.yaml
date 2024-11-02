@@ -163,8 +163,8 @@ workflows:
   android-build:
     name: Android Build
     <<: *instance_mac_release_build # 31m vs. linux_x2 57m on 2023 12 22.
-    triggering:
-      <<: *trigger_on_push
+    # triggering:
+      # <<: *trigger_on_push
     environment:
       <<: *env_versions
     scripts:
@@ -200,8 +200,8 @@ workflows:
   linux-build:
     name: Linux Build
     <<: *instance_linux_release_build
-    triggering:
-      <<: *trigger_on_push
+    # triggering:
+      # <<: *trigger_on_push
     environment:
       <<: *env_versions
     scripts:
@@ -234,8 +234,8 @@ workflows:
   web-build:
     name: Web Build
     <<: *instance_linux # No particular rationale here, other than Linux is probably worst case for web compat
-    triggering:
-      <<: *trigger_on_push
+    # triggering:
+      # <<: *trigger_on_push
     environment:
       <<: *env_versions
     scripts:
@@ -248,8 +248,8 @@ workflows:
   windows-build:
     name: Windows Build
     <<: *instance_windows_build
-    triggering:
-      <<: *trigger_on_push
+    # triggering:
+      # <<: *trigger_on_push
     environment:
       <<: *env_versions
       vars:
