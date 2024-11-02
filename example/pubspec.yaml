@@ -22,7 +22,6 @@ dependencies:
     git:
       url: https://github.com/Telosnex/libmonet.git
       ref: main
-  record: ^5.1.2
   audioplayers: ^6.0.0
   file_picker: ^8.1.2
   collection: ^1.18.0

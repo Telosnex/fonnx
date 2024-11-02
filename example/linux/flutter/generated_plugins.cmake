@@ -5,7 +5,6 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   audioplayers_linux
   fonnx
-  record_linux
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
