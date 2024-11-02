@@ -42,7 +42,7 @@ definitions:
   env_versions: &env_versions
     flutter: fvm
     xcode: latest
-    cocoapods: 1.15.2
+    cocoapods: 1.16.2
     java: 17
   trigger_on_push: &trigger_on_push
     events:
