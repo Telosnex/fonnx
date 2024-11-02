@@ -40,7 +40,7 @@ definitions:
     instance_type: windows_x2
     max_build_duration: 60 # minutes.
   env_versions: &env_versions
-    flutter: stable
+    flutter: fvm
     xcode: latest
     cocoapods: 1.15.2
     java: 17
