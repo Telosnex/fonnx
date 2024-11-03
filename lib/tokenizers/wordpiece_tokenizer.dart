@@ -1,4 +1,5 @@
-import 'package:diacritic/diacritic.dart';
+
+import 'package:fonnx/third_party/diacritic/diacritic.dart';
 import 'package:fonnx/tokenizers/embedding.dart';
 
 class WordpieceTokenizer {
