@@ -25,6 +25,8 @@ dependencies:
   audioplayers: ^6.0.0
   file_picker: ^8.1.2
   collection: ^1.18.0
+  record: '<5.2.0'
+  record_darwin: '<1.2.0'
 dependency_overrides:
   audioplayers_web:
     git:
