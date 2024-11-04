@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 import 'dart:math' as math;
 
@@ -59,8 +61,8 @@ class PerfTester<Input, Output> {
       if (!isEqual) {
         print('\nMismatch found for test case $i:');
         print('Input: $input');
-        print('${impl1Name}: $result1');
-        print('${impl2Name}: $result2');
+        print('$impl1Name: $result1');
+        print('$impl2Name: $result2');
         allEqual = false;
       }
     }
