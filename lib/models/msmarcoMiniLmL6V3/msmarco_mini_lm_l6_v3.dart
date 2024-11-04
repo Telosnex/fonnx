@@ -14,7 +14,7 @@ abstract class MsmarcoMiniLmL6V3 {
     return _instance!;
   }
 
-  static const tokenizer = WordpieceTokenizer(
+  static final tokenizer = WordpieceTokenizer(
     encoder: bertEncoder,
     decoder: bertDecoder,
     unkString: '[UNK]',

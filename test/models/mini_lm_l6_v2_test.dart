@@ -8,7 +8,7 @@ import 'package:ml_linalg/linalg.dart';
 void main() {
   const modelPath = 'example/assets/models/miniLmL6V2/miniLmL6V2.onnx';
   final miniLm = MiniLmL6V2Native(modelPath);
-  const tokenizer = MiniLmL6V2.tokenizer;
+  final tokenizer = MiniLmL6V2.tokenizer;
 
   List<int> tokenize(String text) {
     return tokenizer.tokenize(text).first.tokens;

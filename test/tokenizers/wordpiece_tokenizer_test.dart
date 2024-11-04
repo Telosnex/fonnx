@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fonnx/models/minilml6v2/mini_lm_l6_v2.dart';
 
 void main() {
-  const tokenizer = MiniLmL6V2.tokenizer;
+  final tokenizer = MiniLmL6V2.tokenizer;
 
   group('tokenize', () {
     test('hello world tokens', () async {

@@ -14,7 +14,7 @@ abstract class MiniLmL6V2 {
     return _instance!;
   }
 
-  static const tokenizer = WordpieceTokenizer(
+  static final tokenizer = WordpieceTokenizer(
     encoder: bertEncoder,
     decoder: bertDecoder,
     unkString: '[UNK]',

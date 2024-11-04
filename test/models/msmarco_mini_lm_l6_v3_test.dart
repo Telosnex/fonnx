@@ -9,7 +9,7 @@ void main() {
   const modelPath =
       'example/assets/models/msmarcoMiniLmL6V3/msmarcoMiniLmL6V3.onnx';
   final miniLm = MsmarcoMiniLmL6V3Native(modelPath);
-  const tokenizer = MsmarcoMiniLmL6V3.tokenizer;
+  final tokenizer = MsmarcoMiniLmL6V3.tokenizer;
 
   List<int> tokenize(String text) {
     return tokenizer.tokenize(text).first.tokens;
