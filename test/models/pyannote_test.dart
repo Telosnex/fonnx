@@ -20,7 +20,8 @@ void main() {
 
   test('2 speakers', () async {
     // note: given arbitrary wav, convert to pcm with:
-    // ffmpeg -i input.wav -acodec pcm_s16le -ac 1 -ar 16000 output.pcm
+    // ffmpeg -i /Users/jamesoleary/Documents/talkovergpt.wav 
+    //  -acodec pcm_s16le -ac 1 -ar 16000 -f s16le ~/Documents/talkovergpt.pcm
     String testFilePath = 'test/data/talkovergpt.pcm';
     File file = File(testFilePath);
     final bytes = await file.readAsBytes();
