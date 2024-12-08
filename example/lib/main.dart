@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fonnx_example/magika_widget.dart';
 import 'package:fonnx_example/minilml6v2_widget.dart';
 import 'package:fonnx_example/msmarco_minilm_l6v3_widget.dart';
+import 'package:fonnx_example/pyannote_widget.dart';
 import 'package:fonnx_example/silero_vad_widget.dart';
 import 'package:fonnx_example/tts_demo_widget.dart';
 import 'package:fonnx_example/whisper_widget.dart';
@@ -79,6 +80,8 @@ class _MyAppState extends State<MyApp> {
                     MiniLmL6V2Widget(),
                     SizedBox(height: 16),
                     MsmarcoMiniLmL6V3Widget(),
+                    SizedBox(height: 16),
+                    PyannoteWidget(),
                     SizedBox(height: 16),
                     WhisperWidget(),
                     SizedBox(height: 16),

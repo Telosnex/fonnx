@@ -37,7 +37,7 @@ class MockFonnxPlatform
   }
   
   @override
-  Future<List<Map<String, dynamic>>?> pyannote({required String modelPath, required String modelName, required Float32List audioData, required double step}) {
+  Future<List<Map<String, dynamic>>?> pyannote({required String modelPath, required Float32List audioData}) {
     throw UnimplementedError();
   }
 }

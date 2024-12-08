@@ -11,6 +11,8 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
   private var cachedWhisper: OrtWhisper?
   private var cachedSileroVadModelPath: String?
   private var cachedSileroVad: OrtVad?
+  private var cachedPyannoteModelPath: String?
+  private var cachedPyannote: OrtPyannote?
 
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "fonnx", binaryMessenger: registrar.messenger())
@@ -30,6 +32,8 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
       doWhisper(call, result: result)
     case "sileroVad":
       doSileroVad(call, result: result)
+    case "pyannote":
+      doPyannote(call, result: result)
     default:
       result(FlutterMethodNotImplemented)
     }
@@ -78,6 +82,77 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
           result(answer)
         }
       })
+  }
+
+  public func doPyannote(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    let path = (call.arguments as! [Any])[0] as! String
+    let audioData = (call.arguments as! [Any])[1] as! FlutterStandardTypedData
+
+    // Check if we need to create a new model instance
+    if cachedPyannoteModelPath != path {
+      cachedPyannote = OrtPyannote(modelPath: path)
+      cachedPyannoteModelPath = path
+    }
+
+    guard let model = cachedPyannote else {
+      result(FlutterError(code: "Pyannote", message: "Could not instantiate model", details: nil))
+      return
+    }
+
+    // Convert audio data to float array
+    var audioFloats: [Float] = []
+
+    switch audioData.type {
+    case .float32:
+      audioData.data.withUnsafeBytes { pointer in
+        audioFloats = Array(
+          UnsafeBufferPointer(
+            start: pointer.bindMemory(to: Float.self).baseAddress,
+            count: audioData.data.count / MemoryLayout<Float>.size
+          )
+        )
+      }
+    case .float64:
+      audioData.data.withUnsafeBytes { pointer in
+        audioFloats = Array(
+          UnsafeBufferPointer(
+            start: pointer.bindMemory(to: Double.self).baseAddress,
+            count: audioData.data.count / MemoryLayout<Double>.size
+          )
+        ).map(Float.init)
+      }
+    case .int32:
+      audioData.data.withUnsafeBytes { pointer in
+        audioFloats = Array(
+          UnsafeBufferPointer(
+            start: pointer.bindMemory(to: Int32.self).baseAddress,
+            count: audioData.data.count / MemoryLayout<Int32>.size
+          )
+        ).map { Float($0) / Float(Int32.max) }
+      }
+    case .int64:
+      audioData.data.withUnsafeBytes { pointer in
+        audioFloats = Array(
+          UnsafeBufferPointer(
+            start: pointer.bindMemory(to: Int64.self).baseAddress,
+            count: audioData.data.count / MemoryLayout<Int64>.size
+          )
+        ).map { Float($0) / Float(Int64.max) }
+      }
+    case .uInt8:
+      audioFloats = [UInt8](audioData.data).map { Float($0) / 255.0 }
+    @unknown default:
+      result(FlutterError(code: "Pyannote", message: "Unknown data type", details: nil))
+      return
+    }
+
+    // Process audio and get diarization results
+    guard let diarizationResults = model.process(audioData: audioFloats) else {
+      result(FlutterError(code: "Pyannote", message: "Failed to process audio", details: nil))
+      return
+    }
+
+    result(diarizationResults)
   }
 
   public func doSileroVad(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

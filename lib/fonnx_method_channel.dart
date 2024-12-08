@@ -58,6 +58,23 @@ class MethodChannelFonnx extends FonnxPlatform {
     return result;
   }
 
+  @override 
+  Future<List<Map<String, dynamic>>?> pyannote({
+    required String modelPath,
+    required Float32List audioData,
+  }) async {
+    final result = await methodChannel.invokeMethod<List<dynamic>>(
+      'pyannote',
+      [modelPath, audioData],
+    );
+    if (result == null) {
+      return null;
+    }
+    return result
+        .map((dynamic e) => e as Map<String, dynamic>)
+        .toList();
+  }
+
   @override
   Future<Map<String, dynamic>?> sileroVad({
     required String modelPath,

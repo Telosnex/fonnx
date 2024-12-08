@@ -1,4 +1,4 @@
 import 'pyannote.dart';
 
-Pyannote getPyannote(String path, String modelName) =>
+Pyannote getPyannote(String path) =>
     throw UnsupportedError('Cannot create a Pyannote instance');

@@ -48,6 +48,7 @@ flutter:
     - assets/models/msmarcoMiniLmL6V3/msmarcoMiniLmL6V3.onnx
     - assets/models/sileroVad/silero_vad.onnx
     - assets/models/whisper/whisper_tiny.onnx
+    - assets/models/pyannote/pyannote_seg3.onnx
     - assets/text_sample.txt
     - assets/audio_sample.wav
     - assets/audio_sample.pcm

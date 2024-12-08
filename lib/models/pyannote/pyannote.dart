@@ -7,12 +7,24 @@ import 'pyannote_none.dart'
 abstract class Pyannote {
   static Pyannote? _instance;
   String get modelPath;
-  String get modelName;
 
-  static Pyannote load(String path, String modelName) {
-    _instance ??= getPyannote(path, modelName);
+  static Pyannote load(String path) {
+    _instance ??= getPyannote(path);
     return _instance!;
   }
+
+ /// Converts int16 PCM bytes to normalized float32 samples
+  static Float32List int16PcmBytesToFloat32(Uint8List bytes) {
+  // Convert bytes to Int16 samples
+  final samples = Int16List.sublistView(bytes);
+
+  // Convert to Float32, scaling from Int16 range to [-1, 1]
+  final float32Data = Float32List(samples.length);
+  for (int i = 0; i < samples.length; i++) {
+    float32Data[i] = samples[i] / 32768.0; // 32768 = 2^15
+  }
+  return float32Data;
+}
 
   /// Process audio data and return speaker segments
   /// 
@@ -24,12 +36,5 @@ abstract class Pyannote {
   ///   'stop': double,    // End time in seconds
   /// }
   /// ```
-  /// 
-  /// For short_scd_bigdata model:
-  /// ```dart
-  /// {
-  ///   'timestamp': double,  // Change point time in seconds
-  /// }
-  /// ```
-  Future<List<Map<String, dynamic>>> process(Float32List audioData, {double? step});
+  Future<List<Map<String, dynamic>>> process(Float32List audioData);
 }

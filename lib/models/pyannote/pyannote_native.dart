@@ -5,7 +5,7 @@ import 'package:fonnx/dylib_path_overrides.dart';
 import 'package:fonnx/fonnx.dart';
 import 'package:fonnx/models/pyannote/pyannote_isolate.dart';
 
-Pyannote getPyannote(String path, String modelName) => PyannoteNative(path, modelName);
+Pyannote getPyannote(String path) => PyannoteNative(path);
 
 class PyannoteNative implements Pyannote {
   final PyannoteIsolateManager _pyannoteIsolateManager = PyannoteIsolateManager();
@@ -14,10 +14,8 @@ class PyannoteNative implements Pyannote {
   @override
   final String modelPath;
 
-  @override
-  final String modelName;
 
-  PyannoteNative(this.modelPath, this.modelName);
+  PyannoteNative(this.modelPath);
 
   @override
   Future<List<Map<String, dynamic>>> process(Float32List audioData, {double? step}) async {
@@ -33,17 +31,17 @@ class PyannoteNative implements Pyannote {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
-        return _processPlatformChannel(audioData, step);
+        return _processPlatformChannel(audioData);
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-        return _processFfi(audioData, step);
+        return _processFfi(audioData);
       case TargetPlatform.fuchsia:
         throw UnimplementedError();
     }
   }
 
-  Future<List<Map<String, dynamic>>> _processFfi(Float32List audioData, double? step) async {
+  Future<List<Map<String, dynamic>>> _processFfi(Float32List audioData) async {
     return _pyannoteIsolateManager.sendInference(
       modelPath,
       audioData,
@@ -51,13 +49,11 @@ class PyannoteNative implements Pyannote {
     );
   }
 
-  Future<List<Map<String, dynamic>>> _processPlatformChannel(Float32List audioData, double? step) async {
+  Future<List<Map<String, dynamic>>> _processPlatformChannel(Float32List audioData) async {
     final fonnx = _fonnx ??= Fonnx();
     final result = await fonnx.pyannote(
       modelPath: modelPath,
-      modelName: modelName,
       audioData: audioData,
-      step: step ?? 0.0,
     );
     if (result == null) {
       throw Exception('Result returned from platform code is null');
