@@ -9,26 +9,6 @@ import 'package:fonnx/dylib_path_overrides.dart';
 import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free;
 import 'package:fonnx/onnx/ort.dart';
 
-/// Configuration for different Pyannote model variants.
-///
-/// Specifies the duration window and number of speakers for each model type.
-class PyannoteConfig {
-  /// Duration window in seconds
-  final int duration;
-
-  /// Number of speakers the model can detect
-  final int numSpeakers;
-
-  /// Creates a new PyannoteConfig.
-  ///
-  /// [duration] is in seconds.
-  /// [numSpeakers] is the maximum number of concurrent speakers.
-  const PyannoteConfig({
-    required this.duration,
-    required this.numSpeakers,
-  });
-}
-
 /// Message class for Pyannote isolate communication.
 ///
 /// Encapsulates all data needed for processing audio in an isolate.
@@ -45,8 +25,6 @@ class PyannoteIsolateMessage {
   /// Raw audio data as float32 samples
   final Float32List audioData;
 
-  /// Configuration parameters for processing
-  final Map<String, dynamic> config;
 
   /// Creates a new isolate message.
   ///
@@ -55,7 +33,6 @@ class PyannoteIsolateMessage {
     required this.replyPort,
     required this.modelPath,
     required this.audioData,
-    required this.config,
     this.ortDylibPathOverride,
   });
 }
@@ -82,14 +59,12 @@ class PyannoteException implements Exception {
 /// Main class for speaker diarization using Pyannote ONNX models.
 ///
 /// Provides functionality to process audio and detect speaker segments using
-/// various Pyannote model variants. Supports multiple speakers and different
-/// segmentation approaches.
+/// Pyannote ONNX model for segmentation-3.0.
 class PyannoteONNX {
   /// Sample rate required by all Pyannote models (16kHz)
   static const int sampleRate = 16000;
-
-  /// Name of the model variant being used
-  final String modelName;
+  static const int duration = 10 * 16000; // Fixed 10 seconds window
+  static const int numSpeakers = 3; // Fixed 3 speakers
 
   /// Whether to show processing progress
   final bool showProgress;
@@ -100,89 +75,32 @@ class PyannoteONNX {
   /// Manager for isolate communication
   final PyannoteIsolateManager _isolateManager;
 
-  /// Configuration for the selected model
-  late final PyannoteConfig _config;
-
-
-  /// Available model configurations
-  static const Map<String, PyannoteConfig> configs = {
-    'segmentation': PyannoteConfig(duration: 5, numSpeakers: 3),
-    'segmentation-3.0': PyannoteConfig(duration: 10, numSpeakers: 3),
-    'segmentation_bigdata': PyannoteConfig(duration: 5, numSpeakers: 4),
-    'short_scd_bigdata': PyannoteConfig(duration: 5, numSpeakers: 1),
-  };
-
   /// Creates a new PyannoteONNX instance from a model file.
-  ///
-  /// [modelPath] must point to a valid ONNX model file.
-  /// [modelName] must be one of the supported model types.
-  /// [showProgress] enables progress reporting (default: false).
-  ///
-  /// Throws [PyannoteException] if the model type is not supported.
-  factory PyannoteONNX.fromPath({
+  PyannoteONNX({
     required String modelPath,
-    required String modelName,
-    bool showProgress = false,
-  }) {
-    if (!configs.containsKey(modelName)) {
-      throw PyannoteException(
-        'Unsupported model type: $modelName. Must be one of: ${configs.keys.join(", ")}',
-      );
-    }
-    return PyannoteONNX._(modelPath, modelName, showProgress);
-  }
-
-  /// Internal constructor.
-  PyannoteONNX._(this._modelPath, this.modelName, this.showProgress)
-      : _isolateManager = PyannoteIsolateManager() {
-    _config = configs[modelName]!;
-  }
+    this.showProgress = false,
+  })  : _modelPath = modelPath,
+        _isolateManager = PyannoteIsolateManager();
 
   /// Processes audio data and returns speaker segments.
   ///
   /// [audioData] should be a Float32List of audio samples at 16kHz.
-  /// [step] optionally controls the window step size (default: duration/2).
   ///
-  /// Returns a list of segments. For regular segmentation models:
+  /// Returns a list of segments in the format:
   /// ```dart
   /// {
-  ///   'speaker': int,    // Speaker index
+  ///   'speaker': int,    // Speaker index (0-2)
   ///   'start': double,   // Start time in seconds
   ///   'stop': double,    // End time in seconds
   /// }
   /// ```
-  ///
-  /// For short_scd_bigdata model:
-  /// ```dart
-  /// {
-  ///   'timestamp': double,  // Change point time in seconds
-  /// }
-  /// ```
-  ///
-  /// Throws [PyannoteException] if processing fails.
-  Future<List<Map<String, dynamic>>> process(
-    Float32List audioData,
-    int duration,
-    int numberOfSpeakers, {
-    double? step,
-  }) async {
+  Future<List<Map<String, dynamic>>> process(Float32List audioData) async {
     if (audioData.isEmpty) {
       throw PyannoteException('Audio data cannot be empty');
     }
 
     try {
-      final processedData = await _isolateManager.sendInference(
-        _modelPath,
-        audioData,
-        {
-          'step': step,
-          'duration': duration,
-          'modelName': modelName,
-          'numSpeakers': _config.numSpeakers,
-        },
-      );
-
-      return processedData;
+      return await _isolateManager.sendInference(_modelPath, audioData);
     } catch (e) {
       throw PyannoteException('Failed to process audio', e);
     } finally {
@@ -242,8 +160,7 @@ class PyannoteIsolateManager {
   /// Throws if the isolate encounters an error.
   Future<List<Map<String, dynamic>>> sendInference(
     String modelPath,
-    Float32List audioData,
-    Map<String, dynamic> config, {
+    Float32List audioData, {
     String? ortDylibPathOverride,
   }) async {
     await start();
@@ -253,7 +170,6 @@ class PyannoteIsolateManager {
       replyPort: response.sendPort,
       modelPath: modelPath,
       audioData: audioData,
-      config: config,
       ortDylibPathOverride: ortDylibPathOverride,
     );
 
@@ -305,7 +221,6 @@ void pyannoteIsolateEntryPoint(SendPort mainSendPort) {
         final result = await _processAudioInIsolate(
           ortSessionObjects!,
           message.audioData,
-          message.config,
         );
 
         message.replyPort.send(result);
@@ -327,48 +242,43 @@ void pyannoteIsolateEntryPoint(SendPort mainSendPort) {
 ///
 /// Ensures proper deallocation of memory used by the ONNX Runtime session.
 void cleanupOrtSession(OrtSessionObjects? ortSessionObjects) {
-  // TODO: Unimplemented cleanupOrtSession.
   if (ortSessionObjects == null) {
     return;
   }
+  // TODO: Implement cleanup
 }
 
 /// Processes audio data in the isolate.
-///
-/// Handles the core ONNX inference and speaker tracking logic.
 Future<List<Map<String, dynamic>>> _processAudioInIsolate(
   OrtSessionObjects session,
   Float32List audioData,
-  Map<String, dynamic> config,
 ) async {
   try {
-    final modelName = config['modelName'] as String;
-    const duration = 10 * 16000; // in seconds, 10 is for segmentation-3.0
-    const numSpeakers = 3; // 3 is for segmentation-3.0
-    final step = (duration ~/ 2).clamp(
-        duration ~/ 2, // 80000
-        (0.9 * duration).toInt() // 144000
+    final step = (PyannoteONNX.duration ~/ 2).clamp(
+      PyannoteONNX.duration ~/ 2,
+      (0.9 * PyannoteONNX.duration).toInt(),
     );
-    // Set up ONNX inputs
+
     final memoryInfo = calloc<Pointer<OrtMemoryInfo>>();
     session.api.createCpuMemoryInfo(memoryInfo);
 
     List<Map<String, dynamic>> results = [];
-    List<bool> isActive = List.filled(numSpeakers, false);
-    List<int> startSamples = List.filled(numSpeakers, 0);
-    int currentSamples = 721; // Initial offset
+    List<bool> isActive = List.filled(PyannoteONNX.numSpeakers, false);
+    List<int> startSamples = List.filled(PyannoteONNX.numSpeakers, 0);
+    int currentSamples = 721;
 
-    // Calculate overlap
-    final overlap = sample2frame(duration - step);
+    final overlap = sample2frame(PyannoteONNX.duration - step);
     var overlapChunk = List.generate(
       overlap,
-      (_) => List.filled(numSpeakers, 0.0),
+      (_) => List.filled(PyannoteONNX.numSpeakers, 0.0),
     );
+
     final windows = slidingWindow(
       audioData,
-      duration,
+      PyannoteONNX.duration,
       step,
     ).toList();
+
     for (int idx = 0; idx < windows.length; idx++) {
       final (windowSize, window) = windows[idx];
       // Prepare input tensor
@@ -408,8 +318,6 @@ Future<List<Map<String, dynamic>>> _processAudioInIsolate(
         outputCount: 1,
       );
 
-
-
       // Extract output data
       final tensorDataPointer = calloc<Pointer<Void>>();
       session.api.getTensorMutableData(outputValue.value, tensorDataPointer);
@@ -423,38 +331,26 @@ Future<List<Map<String, dynamic>>> _processAudioInIsolate(
         tensorShapeElementCount,
       );
 
-
       var outputData = floatsPtr.asTypedList(tensorShapeElementCount.value);
       List<List<double>> frameOutputs = [];
 
-      // Process model-specific outputs
-      if (modelName == "segmentation-3.0") {
-        final numCompleteFrames = outputData.length ~/ 7;
+      final numCompleteFrames = outputData.length ~/ 7;
+      for (int frame = 0; frame < numCompleteFrames; frame++) {
+        final i = frame * 7;
+        var probs = outputData.sublist(i, i + 7).map((x) => exp(x)).toList();
 
-        for (int frame = 0; frame < numCompleteFrames; frame++) {
-          final i = frame * 7;
-          // Just do exp() like Python, no extra normalization
-          var probs = outputData.sublist(i, i + 7).map((x) => exp(x)).toList();
+        var speakerProbs = List<double>.filled(3, 0.0);
+        speakerProbs[0] = probs[1] + probs[4] + probs[5]; // spk1
+        speakerProbs[1] = probs[2] + probs[4] + probs[6]; // spk2
+        speakerProbs[2] = probs[3] + probs[5] + probs[6]; // spk3
 
-          var speakerProbs = List<double>.filled(3, 0.0);
-          speakerProbs[0] = probs[1] + probs[4] + probs[5]; // spk1
-          speakerProbs[1] = probs[2] + probs[4] + probs[6]; // spk2
-          speakerProbs[2] = probs[3] + probs[5] + probs[6]; // spk3
-
-          frameOutputs.add(speakerProbs);
-        }
-      } else {
-        for (int i = 0; i < outputData.length; i += numSpeakers) {
-          frameOutputs
-              .add(List.generate(numSpeakers, (j) => outputData[i + j]));
-        }
+        frameOutputs.add(speakerProbs);
       }
 
-      // Handle overlap between windows
       if (idx > 0) {
         frameOutputs = reorder(overlapChunk, frameOutputs);
         for (int i = 0; i < overlap; i++) {
-          for (int j = 0; j < numSpeakers; j++) {
+          for (int j = 0; j < PyannoteONNX.numSpeakers; j++) {
             frameOutputs[i][j] = (frameOutputs[i][j] + overlapChunk[i][j]) / 2;
           }
         }
@@ -473,32 +369,20 @@ Future<List<Map<String, dynamic>>> _processAudioInIsolate(
       // Process frames and track speaker segments
       for (var probs in frameOutputs) {
         currentSamples += 270;
-        if (modelName == "short_scd_bigdata") {
-          if (probs[0] > 0.5 && !isActive[0]) {
-            isActive[0] = true;
-            results.add({
-              'timestamp': currentSamples / PyannoteONNX.sampleRate,
-            });
-          }
-          if (probs[0] < 0.5) {
-            isActive[0] = false;
-          }
-        } else {
-          for (int spk = 0; spk < numSpeakers; spk++) {
-            if (isActive[spk]) {
-              if (probs[spk] < 0.5) {
-                results.add({
-                  'speaker': spk,
-                  'start': startSamples[spk] / PyannoteONNX.sampleRate,
-                  'stop': currentSamples / PyannoteONNX.sampleRate,
-                });
-                isActive[spk] = false;
-              }
-            } else {
-              if (probs[spk] > 0.5) {
-                startSamples[spk] = currentSamples;
-                isActive[spk] = true;
-              }
+        for (int spk = 0; spk < PyannoteONNX.numSpeakers; spk++) {
+          if (isActive[spk]) {
+            if (probs[spk] < 0.5) {
+              results.add({
+                'speaker': spk,
+                'start': startSamples[spk] / PyannoteONNX.sampleRate,
+                'stop': currentSamples / PyannoteONNX.sampleRate,
+              });
+              isActive[spk] = false;
+            }
+          } else {
+            if (probs[spk] > 0.5) {
+              startSamples[spk] = currentSamples;
+              isActive[spk] = true;
             }
           }
         }
@@ -512,16 +396,13 @@ Future<List<Map<String, dynamic>>> _processAudioInIsolate(
       calloc.free(outputValue);
     }
 
-    // Handle any active speakers at the end of processing
-    if (modelName != "short_scd_bigdata") {
-      for (int spk = 0; spk < numSpeakers; spk++) {
-        if (isActive[spk]) {
-          results.add({
-            'speaker': spk,
-            'start': startSamples[spk] / PyannoteONNX.sampleRate,
-            'stop': currentSamples / PyannoteONNX.sampleRate,
-          });
-        }
+    for (int spk = 0; spk < PyannoteONNX.numSpeakers; spk++) {
+      if (isActive[spk]) {
+        results.add({
+          'speaker': spk,
+          'start': startSamples[spk] / PyannoteONNX.sampleRate,
+          'stop': currentSamples / PyannoteONNX.sampleRate,
+        });
       }
     }
 
@@ -588,11 +469,10 @@ Iterable<(int, Float32List)> slidingWindow(
 /// Takes two consecutive sets of speaker probabilities and finds the
 /// permutation that minimizes differences between them.
 List<List<double>> reorder(List<List<double>> x, List<List<double>> y) {
-  final int numSpeakers = y[0].length;
-  final perms = _generatePermutations(numSpeakers);
+  final perms = _generatePermutations(PyannoteONNX.numSpeakers);
 
   List<List<double>> yTransposed = List.generate(
-    numSpeakers,
+    PyannoteONNX.numSpeakers,
     (i) => List.generate(y.length, (j) => y[j][i]),
   );
 
@@ -603,14 +483,14 @@ List<List<double>> reorder(List<List<double>> x, List<List<double>> y) {
     var permuted = List.generate(
       y.length,
       (i) => List.generate(
-        numSpeakers,
+        PyannoteONNX.numSpeakers,
         (j) => yTransposed[perm[j]][i],
       ),
     );
 
     double diff = 0;
     for (int i = 0; i < x.length; i++) {
-      for (int j = 0; j < numSpeakers; j++) {
+      for (int j = 0; j < PyannoteONNX.numSpeakers; j++) {
         diff += (x[i][j] - permuted[i][j]).abs();
       }
     }

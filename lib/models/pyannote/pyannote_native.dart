@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:fonnx/dylib_path_overrides.dart';
 import 'package:fonnx/fonnx.dart';
-import 'package:fonnx/models/pyannote/pyannote.dart';
 import 'package:fonnx/models/pyannote/pyannote_isolate.dart';
 
 Pyannote getPyannote(String path, String modelName) => PyannoteNative(path, modelName);
@@ -27,11 +26,6 @@ class PyannoteNative implements Pyannote {
       return _pyannoteIsolateManager.sendInference(
         modelPath,
         audioData,
-        {
-          'modelName': modelName,
-          'numSpeakers': 2,
-          'duration': 10.0,
-        },
         ortDylibPathOverride: fonnxOrtDylibPathOverride,
       );
     }
@@ -53,10 +47,6 @@ class PyannoteNative implements Pyannote {
     return _pyannoteIsolateManager.sendInference(
       modelPath,
       audioData,
-      {
-        'modelName': modelName,
-        'step': step,
-      },
       ortDylibPathOverride: fonnxOrtDylibPathOverride,
     );
   }
