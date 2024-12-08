@@ -4,6 +4,8 @@ import 'fonnx_platform_interface.dart';
 export 'extensions/vector.dart';
 export 'models/whisper/whisper.dart';
 export 'models/magika/magika.dart';
+export 'models/pyannote/pyannote.dart';
+
 
 class Fonnx {
   Future<String?> getPlatformVersion() {
