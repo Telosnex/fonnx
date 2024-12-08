@@ -64,6 +64,7 @@ void sileroVadIsolateEntryPoint(SendPort mainSendPort) {
 }
 
 void cleanupOrtSession(OrtSessionObjects? ortSessionObjects) {
+  // TODO: Unimplemented cleanupOrtSession
   if (ortSessionObjects == null) {
     return;
   }

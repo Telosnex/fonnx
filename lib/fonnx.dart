@@ -51,4 +51,18 @@ class Fonnx {
       previousState: previousState,
     );
   }
+
+  Future<List<Map<String, dynamic>>?> pyannote({
+    required String modelPath,
+    required String modelName,
+    required Float32List audioData,
+    required double step,
+  }) {
+    return FonnxPlatform.instance.pyannote(
+      modelPath: modelPath,
+      modelName: modelName,
+      audioData: audioData,
+      step: step,
+    );
+  }
 }

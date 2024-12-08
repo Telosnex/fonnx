@@ -68,7 +68,7 @@ extension DartNativeFunctions on OrtApi {
       inputTensorNative[i] = flatArray[i].toDouble();
       // Extremely useful for debugging failures, allows comparison of Magika
       // example code's input array to our input array.
-      // 
+      //
       // Magika can be thought of as a model that takes 1536 bytes and returns
       // a 113-length vector of floats.
       //
@@ -76,7 +76,7 @@ extension DartNativeFunctions on OrtApi {
       // trimmed. These requirements are non-obvious and only were identified
       // through failing tests. Moreover, tests are very sensitive due to the
       // nature of the model and the size of the test files. ex. trimming one
-      // whitespace character in html.htm led to it being detected as 
+      // whitespace character in html.htm led to it being detected as
       // javascript.
       // print(
       //     'inputTensorNative[$i] => ${flatArray[i]} => ${inputTensorNative[i]}');
@@ -333,6 +333,9 @@ extension DartNativeFunctions on OrtApi {
     return outputCount;
   }
 
+
+
+
   Pointer<OrtStatus> sessionGetOutputName(
     Pointer<OrtSession> session,
     int index,
@@ -431,7 +434,6 @@ extension DartNativeFunctions on OrtApi {
     return status;
   }
 
-  
   void releaseMemoryInfo(Pointer<OrtMemoryInfo> memoryInfo) {
     final releaseCpuMemoryInfoFn =
         ReleaseMemoryInfo.asFunction<void Function(Pointer<OrtMemoryInfo>)>();
@@ -552,6 +554,25 @@ extension DartNativeFunctions on OrtApi {
     if (status.isError) {
       final error =
           'Get tensor data failed. Code: ${getErrorCodeMessage(status)}\n'
+          'Message: ${getErrorMessage(status)}';
+      throw Exception(error);
+    }
+    return status;
+  }
+
+
+  Pointer<OrtStatus> getDimensionsCount(
+    Pointer<OrtTensorTypeAndShapeInfo> info,
+    Pointer<Size> out,
+  ) {
+    final getDimensionsCountFn = GetDimensionsCount.asFunction<
+        Pointer<OrtStatus> Function(
+            Pointer<OrtTensorTypeAndShapeInfo>, Pointer<Size>)>();
+
+    final status = getDimensionsCountFn(info, out);
+    if (status.isError) {
+      final error =
+          'Get dimensions count failed. Code: ${getErrorCodeMessage(status)}\n'
           'Message: ${getErrorMessage(status)}';
       throw Exception(error);
     }
@@ -807,7 +828,8 @@ String get ortExtensionsDylibPath {
     case TargetPlatform.macOS:
       return 'libortextensions.0.9.0.dylib';
     case TargetPlatform.windows:
-      return 'ortextensions-x64.dll';  }
+      return 'ortextensions-x64.dll';
+  }
 }
 
 /// You MUST call [calloc.free] on the returned pointer when you are done with it.

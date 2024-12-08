@@ -35,12 +35,21 @@ abstract class FonnxPlatform extends PlatformInterface {
   }) {
     throw UnimplementedError('magika() has not been implemented.');
   }
-  
+
   Future<Float32List?> miniLm({
     required String modelPath,
     required List<int> inputs,
   }) {
     throw UnimplementedError('miniLm() has not been implemented.');
+  }
+
+  Future<List<Map<String, dynamic>>?> pyannote({
+    required String modelPath,
+    required String modelName,
+    required Float32List audioData,
+    required double step,
+  }) {
+    throw UnimplementedError('pyannote() has not been implemented.');
   }
 
   Future<String?> whisper({
