@@ -37,7 +37,7 @@ class OrtPyannote(private val modelPath: String) {
             session?.let {
                 for ((windowIndex, window) in windows.withIndex()) {
                     val (windowSize, windowData) = window
-                    
+                    // Log.d("[OrtPyannote.kt]", "Processing window $windowIndex of ${windows.size}; this window has ${windowData.size} samples")
                     // Prepare input tensor
                     val inputs = mutableMapOf<String, OnnxTensor>()
                     inputs["input_values"] = OnnxTensor.createTensor(
@@ -48,11 +48,14 @@ class OrtPyannote(private val modelPath: String) {
                     val startTime = System.currentTimeMillis()
                     val rawResult = it.run(inputs, setOf("logits"))
                     val endTime = System.currentTimeMillis()
-                    Log.d("[OrtPyannote.kt]", "Inference time: ${endTime - startTime} ms")
+                    // Log.d("[OrtPyannote.kt]", "Inference time: ${endTime - startTime} ms")
 
                     // Process output
                     val logits = rawResult.get("logits").get().value as Array<Array<FloatArray>>
-                    var frameOutputs = processOutputData(logits[0])
+                    // Log.d("[OrtPyannote.kt]", "Logits shape: ${logits.size} x ${logits[0].size} x ${logits[0][0].size}")
+                    // Log.d("[OrtPyannote.kt]", "Logits: ${logits[0][0].joinToString(", ")}")
+                    var frameOutputs = processOutputData(logits)
+                    // Log.d("[OrtPyannote.kt]", "Frame outputs: ${frameOutputs.size}")
 
                     // Handle overlapping
                     if (windowIndex > 0) {
@@ -102,7 +105,6 @@ class OrtPyannote(private val modelPath: String) {
             }
 
             return results
-            
         } catch (e: Exception) {
             Log.e("[OrtPyannote.kt]", "Error in process: ${e.message}")
             e.printStackTrace()
@@ -151,22 +153,27 @@ class OrtPyannote(private val modelPath: String) {
         return windows
     }
 
-    private fun processOutputData(logits: FloatArray): List<DoubleArray> {
+    private fun processOutputData(logits: Array<Array<FloatArray>>): List<DoubleArray> {
         val frameOutputs = mutableListOf<DoubleArray>()
-        val numCompleteFrames = logits.size / 7
-
-        for (frame in 0 until numCompleteFrames) {
-            val i = frame * 7
-            val probs = logits.slice(i until i + 7).map { exp(it.toDouble()) }
+        val batchLogits = logits[0]  // First batch
+        
+        // Process each frame (589 frames)
+        for (frame in batchLogits.indices) {
+            val frameLogits = batchLogits[frame]  // Get the 7 logits for this frame
+            val probs = frameLogits.map { exp(it.toDouble()) }
             
             val speakerProbs = DoubleArray(NUM_SPEAKERS)
-            speakerProbs[0] = probs[1] + probs[4] + probs[5] // spk1
-            speakerProbs[1] = probs[2] + probs[4] + probs[6] // spk2
-            speakerProbs[2] = probs[3] + probs[5] + probs[6] // spk3
+            // Combine probabilities for each speaker
+            // spk1: solo (1) + with_spk2 (4) + with_spk3 (5)
+            speakerProbs[0] = probs[1] + probs[4] + probs[5]
+            // spk2: solo (2) + with_spk1 (4) + with_spk3 (6)
+            speakerProbs[1] = probs[2] + probs[4] + probs[6]
+            // spk3: solo (3) + with_spk1 (5) + with_spk2 (6)
+            speakerProbs[2] = probs[3] + probs[5] + probs[6]
             
             frameOutputs.add(speakerProbs)
         }
-
+    
         return frameOutputs
     }
 

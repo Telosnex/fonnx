@@ -19,6 +19,8 @@ class FonnxPlugin : FlutterPlugin, MethodCallHandler {
     var cachedWhisper: OrtWhisper? = null
     var cachedSileroVadPath: String? = null
     var cachedSileroVad: OrtVad? = null
+    var cachedPyannotePath: String? = null
+    var cachedPyannote: OrtPyannote? = null
 
     private lateinit var channel: MethodChannel
 
@@ -114,6 +116,48 @@ class FonnxPlugin : FlutterPlugin, MethodCallHandler {
                     }
                 } else {
                     result.error("SileroVad", "Could not instantiate model", null)
+                }
+            } else if (call.method == "pyannote") {
+                val list = call.arguments as List<Any>
+                val modelPath = list[0] as String
+                val audioBytes = list[1] as FloatArray
+                
+                if (cachedPyannotePath != modelPath) {
+                    cachedPyannote = OrtPyannote(modelPath)
+                    cachedPyannotePath = modelPath
+                }
+                val pyannote = cachedPyannote
+
+                if (pyannote != null) {
+                    launch(Dispatchers.Default) {
+                        try {
+                            // Process the audio data
+                            val diarization = pyannote.process(audioBytes)
+                            if (diarization != null) {
+                                launch(Dispatchers.Main) {
+                                    result.success(diarization)
+                                }
+                            } else {
+                                launch(Dispatchers.Main) {
+                                    result.error(
+                                        "Pyannote",
+                                        "Processing failed",
+                                        null
+                                    )
+                                }
+                            }
+                        } catch (e: Exception) {
+                            launch(Dispatchers.Main) {
+                                result.error(
+                                    "Pyannote",
+                                    "Error processing audio: ${e.message}",
+                                    null
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    result.error("Pyannote", "Could not instantiate model", null)
                 }
             } else {
                 result.notImplemented()

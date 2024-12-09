@@ -109,7 +109,7 @@ class _PyannoteWidgetState extends State<PyannoteWidget> {
         lastStop = stop;
       }
       
-      final golden = kIsWeb
+      final golden = kIsWeb || Platform.isAndroid
           ? [
               {"speaker": 1, "start": 0.8044375, "stop": 4.4494375}
             ]

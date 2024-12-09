@@ -2,7 +2,7 @@ group 'com.telosnex.fonnx'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.7.10'
+    ext.kotlin_version = '1.9.21'
     repositories {
         google()
         mavenCentral()
@@ -47,7 +47,7 @@ android {
 
     defaultConfig {
         // Upgraded to 21 for ONNX ORT 1.16
-        minSdkVersion 21
+        minSdkVersion 24
     }
 
     dependencies {
