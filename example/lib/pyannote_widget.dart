@@ -108,8 +108,22 @@ class _PyannoteWidgetState extends State<PyannoteWidget> {
         }
         lastStop = stop;
       }
-
-      _verifyPassed = isValidStructure && hasValidSpeakers && isValidTiming;
+      
+      final golden = kIsWeb
+          ? [
+              {"speaker": 1, "start": 0.8044375, "stop": 4.4494375}
+            ]
+          : [
+              {'start': 0.8381875, 'speaker': 1, 'stop': 4.4831875}
+            ];
+      final matchesGolden = result.length == 1 &&
+          result[0]['speaker'] == golden[0]['speaker'] &&
+          result[0]['start'] == golden[0]['start'] &&
+          result[0]['stop'] == golden[0]['stop'];
+      _verifyPassed = isValidStructure &&
+          hasValidSpeakers &&
+          isValidTiming &&
+          matchesGolden;
 
       if (_verifyPassed != true) {
         if (kDebugMode) {
@@ -124,7 +138,7 @@ class _PyannoteWidgetState extends State<PyannoteWidget> {
   }
 
   void _runPerformanceTest() async {
-    final modelPath = await getModelPath('pyannote.onnx');
+    final modelPath = await getModelPath('pyannote_seg3.onnx');
     final pyannote = Pyannote.load(modelPath);
     final result = await testPerformance(pyannote);
     setState(() {
@@ -132,8 +146,10 @@ class _PyannoteWidgetState extends State<PyannoteWidget> {
     });
   }
 
-  static Future<String> testPerformance(Pyannote pyannote) async {
-    final wavFile = await rootBundle.load('assets/multi_speaker_test.wav');
+  Future<String> testPerformance(Pyannote pyannote) async {
+    // Get test audio file as Float32List
+    final wavFile =
+        await rootBundle.load('assets/audio_sample_ac1_ar16000.pcm');
     final audioData = wavFile.buffer.asFloat32List();
 
     const iterations = 3;

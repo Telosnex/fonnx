@@ -19,6 +19,7 @@ class OrtPyannote {
     
     /// Lazy instantiation of OrtSessionObjects used to manage the ONNX session.
     private lazy var model: OrtSessionObjects = {
+        // Note from VAD: includeOrtExtensions is needed for Pyannote
         OrtSessionObjects(modelPath: modelPath, includeOrtExtensions: true)!
     }()
     
@@ -29,15 +30,11 @@ class OrtPyannote {
     }
     
     /// Converts sample count to frame count.
-    /// - Parameter samples: Number of samples
-    /// - Returns: Number of frames
     private func sampleToFrame(_ samples: Int) -> Int {
         return (samples - 721) / 270
     }
     
     /// Converts frame count to sample count.
-    /// - Parameter frames: Number of frames
-    /// - Returns: Number of samples
     private func frameToSample(_ frames: Int) -> Int {
         return (frames * 270) + 721
     }
@@ -46,10 +43,17 @@ class OrtPyannote {
     /// - Parameter audioData: Array of audio samples as floating point values
     /// - Returns: Dictionary containing speaker segments with start/stop times
     func process(audioData: [Float]) -> [[String: Any]]? {
-        os_log("Processing audio data")
+        os_log("Processing audio data of size: %d", audioData.count)
         do {
+            guard audioData.count >= 721 else {
+                os_log("Error: Audio data too short")
+                return nil
+            }
+
             let session = model.session
-            let step = min(duration / 2, Int(0.9 * Double(duration)))
+            let actualDuration = min(duration, audioData.count)
+            let step = min(actualDuration / 2, Int(0.9 * Double(actualDuration)))
+            
             var results: [[String: Any]] = []
             var isActive = Array(repeating: false, count: numSpeakers)
             var startSamples = Array(repeating: 0, count: numSpeakers)
@@ -60,20 +64,35 @@ class OrtPyannote {
             var overlapChunk = Array(repeating: Array(repeating: 0.0, count: numSpeakers), count: overlap)
             
             // Create sliding windows
-            let windows = createSlidingWindows(audioData: audioData, windowSize: duration, stepSize: step)
+            let windows = createSlidingWindows(audioData: audioData, windowSize: actualDuration, stepSize: step)
             
             for (windowIndex, (windowSize, window)) in windows.enumerated() {
-                // Prepare input tensor
-                let inputTensor = try createORTValue(
-                    from: [window], elementType: .float,
-                    shape: [NSNumber(value: 1), NSNumber(value: 1), NSNumber(value: window.count)])
+                os_log("Processing window %d with size %d", windowIndex, windowSize)
+                
+                // Following VAD pattern for 3D tensor creation
+                let windowData = NSMutableData(
+                    bytes: window,
+                    length: window.count * MemoryLayout<Float>.size
+                )
+                
+                // Create input tensor following VAD's 3D pattern
+                let inputTensor = try ORTValue(
+                    tensorData: windowData,
+                    elementType: .float,
+                    shape: [NSNumber(value: 1), NSNumber(value: 1), NSNumber(value: window.count)]
+                )
                 
                 let inputs = ["input_values": inputTensor]
                 let outputNames = Set(["logits"])
-                os_log("Running inference for window %{public}d of %{public}d", windowIndex + 1, windows.count)
-                // Run inference
-                let outputs = try session.run(withInputs: inputs, outputNames: outputNames, runOptions: nil)
                 
+                // Run inference following VAD pattern
+                let outputs = try session.run(
+                    withInputs: inputs,
+                    outputNames: outputNames,
+                    runOptions: nil
+                )
+                
+                // Extract outputs following VAD pattern
                 guard let outputTensor = outputs["logits"],
                       let outputData = try? outputTensor.tensorData() as Data else {
                     continue
@@ -138,12 +157,6 @@ class OrtPyannote {
         }
     }
     
-    /// Creates sliding windows over the audio data
-    /// - Parameters:
-    ///   - audioData: Input audio samples
-    ///   - windowSize: Size of each window
-    ///   - stepSize: Step size between windows
-    /// - Returns: Array of tuples containing window size and window data
     private func createSlidingWindows(audioData: [Float], windowSize: Int, stepSize: Int) -> [(Int, [Float])] {
         var windows: [(Int, [Float])] = []
         var start = 0
@@ -154,7 +167,6 @@ class OrtPyannote {
             start += stepSize
         }
         
-        // Handle last window if needed
         if audioData.count < windowSize || (audioData.count - windowSize) % stepSize > 0 {
             var lastWindow = Array(audioData[start...])
             let lastWindowSize = lastWindow.count
@@ -169,9 +181,6 @@ class OrtPyannote {
         return windows
     }
     
-    /// Process raw output data into speaker probabilities
-    /// - Parameter outputData: Raw tensor output data
-    /// - Returns: Array of speaker probability arrays
     private func processOutputData(_ outputData: Data) -> [[Double]] {
         let floats = outputData.toArray(type: Float.self)
         var frameOutputs: [[Double]] = []
@@ -192,11 +201,6 @@ class OrtPyannote {
         return frameOutputs
     }
     
-    /// Reorders and blends overlapping frames
-    /// - Parameters:
-    ///   - overlapChunk: Previous overlap chunk
-    ///   - newFrames: New frames to process
-    /// - Returns: Reordered and blended frames
     private func reorderAndBlend(overlapChunk: [[Double]], newFrames: [[Double]]) -> [[Double]] {
         var reorderedFrames = reorder(x: overlapChunk, y: newFrames)
         
@@ -210,11 +214,6 @@ class OrtPyannote {
         return reorderedFrames
     }
     
-    /// Reorders speaker assignments for consistency
-    /// - Parameters:
-    ///   - x: Previous frame probabilities
-    ///   - y: Current frame probabilities
-    /// - Returns: Reordered current frame probabilities
     private func reorder(x: [[Double]], y: [[Double]]) -> [[Double]] {
         let perms = generatePermutations(n: numSpeakers)
         let yTransposed = transpose(y)
@@ -246,9 +245,6 @@ class OrtPyannote {
         return bestPerm
     }
     
-    /// Generates all possible permutations
-    /// - Parameter n: Number of elements
-    /// - Returns: Array of permutations
     private func generatePermutations(n: Int) -> [[Int]] {
         if n == 1 {
             return [[0]]
@@ -265,9 +261,6 @@ class OrtPyannote {
         return result
     }
     
-    /// Transposes a 2D array
-    /// - Parameter matrix: Input 2D array
-    /// - Returns: Transposed 2D array
     private func transpose(_ matrix: [[Double]]) -> [[Double]] {
         guard !matrix.isEmpty else { return [] }
         let rows = matrix.count

@@ -70,9 +70,10 @@ class MethodChannelFonnx extends FonnxPlatform {
     if (result == null) {
       return null;
     }
-    return result
-        .map((dynamic e) => e as Map<String, dynamic>)
-        .toList();
+    return result.map((dynamic e) {
+      final map = Map<String, dynamic>.from(e as Map);
+      return map;
+    }).toList();
   }
 
   @override

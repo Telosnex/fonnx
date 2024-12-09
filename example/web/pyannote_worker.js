@@ -235,7 +235,10 @@ self.onmessage = async e => {
                 }
             }
 
-            self.postMessage({ messageId, action: 'inferenceResult', results });
+            const jsonEncoded = JSON.stringify(results);
+            console.log("Results:", results);
+            console.log("JSON encoded:", jsonEncoded);
+            self.postMessage({ messageId, action: 'inferenceResult', jsonEncoded });
         }
     } catch (error) {
         console.error('[pyannote_worker.js] An error occurred:', error.message);

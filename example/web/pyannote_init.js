@@ -10,9 +10,9 @@ const pyannoteMessageIdToResolve = new Map();
 const pyannoteMessageIdToReject = new Map();
 
 pyannoteWorker.onmessage = function (e) {
-  const { messageId, action, results, error } = e.data;
+  const { messageId, action, jsonEncoded, error } = e.data;
   if (action === "inferenceResult" && pyannoteMessageIdToResolve.has(messageId)) {
-    pyannoteMessageIdToResolve.get(messageId)(results);
+    pyannoteMessageIdToResolve.get(messageId)(jsonEncoded);  // Now passing the JSON string
     cleanup(messageId);
   } else if (action === "error" && pyannoteMessageIdToReject.has(messageId)) {
     pyannoteMessageIdToReject.get(messageId)(new Error(error));
