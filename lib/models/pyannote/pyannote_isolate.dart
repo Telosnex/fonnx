@@ -265,9 +265,6 @@ Future<List<Map<String, dynamic>>> _processAudioInIsolate(
     List<Map<String, dynamic>> results = [];
     List<bool> isActive = List.filled(PyannoteONNX.numSpeakers, false);
     List<int> startSamples = List.filled(PyannoteONNX.numSpeakers, 0);
-    // Add near where isActive and startSamples are declared
-    final probSums = List<double>.filled(PyannoteONNX.numSpeakers, 0.0);
-    final framesCounted = List<int>.filled(PyannoteONNX.numSpeakers, 0);
     int currentSamples = 721;
 
     final overlap = sample2frame(PyannoteONNX.duration - step);
@@ -374,29 +371,18 @@ Future<List<Map<String, dynamic>>> _processAudioInIsolate(
         currentSamples += 270;
         for (int spk = 0; spk < PyannoteONNX.numSpeakers; spk++) {
           if (isActive[spk]) {
-            // Add probability tracking
-            probSums[spk] += probs[spk];
-            framesCounted[spk]++;
-            
             if (probs[spk] < 0.5) {
               results.add({
                 'speaker': spk,
                 'start': startSamples[spk] / PyannoteONNX.sampleRate,
                 'stop': currentSamples / PyannoteONNX.sampleRate,
-                'probability': probSums[spk] / framesCounted[spk], // Add average probability
               });
               isActive[spk] = false;
-              // Reset tracking for this speaker
-              probSums[spk] = 0.0;
-              framesCounted[spk] = 0;
             }
           } else {
             if (probs[spk] > 0.5) {
               startSamples[spk] = currentSamples;
               isActive[spk] = true;
-              // Start tracking probability
-              probSums[spk] = probs[spk];
-              framesCounted[spk] = 1;
             }
           }
         }
@@ -416,7 +402,6 @@ Future<List<Map<String, dynamic>>> _processAudioInIsolate(
           'speaker': spk,
           'start': startSamples[spk] / PyannoteONNX.sampleRate,
           'stop': currentSamples / PyannoteONNX.sampleRate,
-          'probability': probSums[spk] / framesCounted[spk], // Add average probability
         });
       }
     }
