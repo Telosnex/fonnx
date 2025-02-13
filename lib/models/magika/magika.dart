@@ -4,7 +4,7 @@ import 'package:fonnx/models/magika/magika_model.dart';
 
 import 'magika_none.dart'
     if (dart.library.io) 'magika_native.dart'
-    if (dart.library.js) 'magika_web.dart';
+    if (dart.library.js_interop) 'magika_web.dart';
 
 export 'magika_model.dart';
 

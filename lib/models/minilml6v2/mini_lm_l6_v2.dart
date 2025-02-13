@@ -4,7 +4,7 @@ import 'package:ml_linalg/linalg.dart';
 
 import 'mini_lm_l6_v2_abstract.dart'
     if (dart.library.io) 'mini_lm_l6_v2_native.dart'
-    if (dart.library.js) 'mini_lm_l6_v2_web.dart';
+    if (dart.library.js_interop) 'mini_lm_l6_v2_web.dart';
 
 abstract class MiniLmL6V2 {
   static MiniLmL6V2? _instance;

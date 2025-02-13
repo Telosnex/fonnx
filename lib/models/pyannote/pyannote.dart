@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'pyannote_none.dart'
     if (dart.library.io) 'pyannote_native.dart'
-    if (dart.library.js) 'pyannote_web.dart';
+    if (dart.library.js_interop) 'pyannote_web.dart';
 
 abstract class Pyannote {
   static Pyannote? _instance;

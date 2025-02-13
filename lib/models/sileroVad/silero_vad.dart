@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'silero_vad_none.dart'
     if (dart.library.io) 'silero_vad_native.dart'
-    if (dart.library.js) 'silero_vad_web.dart';
+    if (dart.library.js_interop) 'silero_vad_web.dart';
 
 abstract class SileroVad {
   static SileroVad? _instance;

@@ -4,7 +4,7 @@ import 'package:ml_linalg/linalg.dart';
 
 import 'msmarco_mini_lm_l6_v3_abstract.dart'
     if (dart.library.io) 'msmarco_mini_lm_l6_v3_native.dart'
-    if (dart.library.js) 'msmarco_mini_lm_l6_v3_web.dart';
+    if (dart.library.js_interop) 'msmarco_mini_lm_l6_v3_web.dart';
 
 abstract class MsmarcoMiniLmL6V3 {
   static MsmarcoMiniLmL6V3? _instance;

@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'whisper_none.dart'
     if (dart.library.io) 'whisper_native.dart'
-    if (dart.library.js) 'whisper_web.dart';
+    if (dart.library.js_interop) 'whisper_web.dart';
 
 abstract class Whisper {
   static Whisper? _instance;
