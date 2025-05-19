@@ -1,4 +1,3 @@
-import 'package:fonnx/tokenizers/bert_vocab.dart';
 import 'package:fonnx/tokenizers/potion_32m_vocab.dart';
 import 'package:fonnx/tokenizers/potion_base_8m_vocab.dart';
 import 'package:fonnx/tokenizers/wordpiece_tokenizer.dart';
