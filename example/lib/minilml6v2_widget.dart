@@ -111,7 +111,7 @@ class _MiniLmL6V2WidgetState extends State<MiniLmL6V2Widget> {
 
     final stopwatch = Stopwatch()..start();
     var completed = 0;
-    while (completed < 20) {
+    while (completed < 1000) {
       await model.getEmbeddingAsVector(
           textAndTokens[completed % textAndTokens.length].tokens);
       completed++;
@@ -121,7 +121,8 @@ class _MiniLmL6V2WidgetState extends State<MiniLmL6V2Widget> {
     final speed = (elapsed / completed.toDouble()).round();
     debugPrint('done');
     setState(() {
-      _speedTestResult = '$speed ms for 200 words';
+      final numberPerSecond = (1000 / (elapsed / completed)).round();
+      _speedTestResult = '$speed ms for 200 words ($numberPerSecond / sec)';
     });
   }
 }

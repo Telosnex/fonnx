@@ -22,43 +22,6 @@ class OnnxIsolateMessage {
   });
 }
 
-void ortMiniLmIsolateEntryPoint(SendPort mainSendPort) {
-  final receivePort = ReceivePort();
-  mainSendPort.send(receivePort.sendPort);
-
-  OrtSessionObjects? ortSessionObjects;
-
-  receivePort.listen((dynamic message) async {
-    if (message is OnnxIsolateMessage) {
-      try {
-        // Set the global constant because its a different global on the
-        // isolate.
-        if (message.ortDylibPathOverride != null) {
-          fonnxOrtDylibPathOverride = message.ortDylibPathOverride;
-        }
-        // Lazily create the Ort session if it's not already done.
-        ortSessionObjects ??= createOrtSession(message.modelPath);
-        // Perform the inference here using ortSessionObjects and message.tokens, retrieve result.
-        final result =
-            await _getEmbeddingFfi(ortSessionObjects!, message.tokens);
-        message.replyPort.send(result);
-      } catch (e) {
-        // Send the error message back to the main isolate.
-        message.replyPort.send(e);
-      }
-    } else if (message == 'close') {
-      // Handle any cleanup before closing the isolate.
-      if (ortSessionObjects != null) {
-        cleanupOrtSession(ortSessionObjects);
-      }
-      Isolate.exit();
-    } else {
-      debugPrint('Unknown message received in the ONNX isolate.');
-      throw Exception('Unknown message received in the ONNX isolate.');
-    }
-  });
-}
-
 void cleanupOrtSession(OrtSessionObjects? ortSessionObjects) {
   if (ortSessionObjects == null) {
     return;
@@ -68,13 +31,18 @@ void cleanupOrtSession(OrtSessionObjects? ortSessionObjects) {
   // _Maybe_ Whisper. Definitely not an LLM.
 }
 
+enum OnnxIsolateType {
+  miniLm,
+  minishLab,
+}
+
 class OnnxIsolateManager {
   SendPort? _sendPort;
   Isolate? _isolate;
   Future<void>? _starting;
 
   // Start the isolate and store its SendPort.
-  Future<void> start() async {
+  Future<void> start(OnnxIsolateType type) async {
     if (_starting != null) {
       await _starting; // Wait for the pending start to finish.
       return;
@@ -89,7 +57,10 @@ class OnnxIsolateManager {
 
     final receivePort = ReceivePort();
     _isolate = await Isolate.spawn(
-      ortMiniLmIsolateEntryPoint,
+      switch (type) {
+        OnnxIsolateType.miniLm => ortMiniLmIsolateEntryPoint,
+        OnnxIsolateType.minishLab => ortMinishLabIsolateEntryPoint,
+      },
       receivePort.sendPort,
       onError: receivePort.sendPort, // Handle isolate errors.
     );
@@ -126,7 +97,7 @@ class OnnxIsolateManager {
     } else if (result is Error) {
       throw result;
     } else {
-      throw Exception('Unknown error occurred in the ONNX isolate.');
+      throw Exception('Unknown error occurred in the ONNX isolate. Result: $result');
     }
   }
 
@@ -138,7 +109,44 @@ class OnnxIsolateManager {
   }
 }
 
-Future<Float32List> _getEmbeddingFfi(
+void ortMiniLmIsolateEntryPoint(SendPort mainSendPort) {
+  final receivePort = ReceivePort();
+  mainSendPort.send(receivePort.sendPort);
+
+  OrtSessionObjects? ortSessionObjects;
+
+  receivePort.listen((dynamic message) async {
+    if (message is OnnxIsolateMessage) {
+      try {
+        // Set the global constant because its a different global on the
+        // isolate.
+        if (message.ortDylibPathOverride != null) {
+          fonnxOrtDylibPathOverride = message.ortDylibPathOverride;
+        }
+        // Lazily create the Ort session if it's not already done.
+        ortSessionObjects ??= createOrtSession(message.modelPath);
+        // Perform the inference here using ortSessionObjects and message.tokens, retrieve result.
+        final result =
+            await _getMiniLmEmbeddingFfi(ortSessionObjects!, message.tokens);
+        message.replyPort.send(result);
+      } catch (e) {
+        // Send the error message back to the main isolate.
+        message.replyPort.send(e);
+      }
+    } else if (message == 'close') {
+      // Handle any cleanup before closing the isolate.
+      if (ortSessionObjects != null) {
+        cleanupOrtSession(ortSessionObjects);
+      }
+      Isolate.exit();
+    } else {
+      debugPrint('Unknown message received in the ONNX isolate.');
+      throw Exception('Unknown message received in the ONNX isolate.');
+    }
+  });
+}
+
+Future<Float32List> _getMiniLmEmbeddingFfi(
     OrtSessionObjects session, List<int> tokens) async {
   final memoryInfo = calloc<Pointer<OrtMemoryInfo>>();
   session.api.createCpuMemoryInfo(memoryInfo);
@@ -223,6 +231,146 @@ Future<Float32List> _getEmbeddingFfi(
   calloc.free(inputIdName);
   calloc.free(tokenTypeName);
   calloc.free(attentionMaskName);
+  calloc.free(embeddingsName);
+  session.api.releaseRunOptions(runOptionsPtr.value);
+  calloc.free(runOptionsPtr);
+  calloc.free(outputTensorDataPointer);
+  session.api.releaseTensorTypeAndShapeInfo(tensorTypeAndShape.value);
+  calloc.free(tensorTypeAndShape);
+  calloc.free(tensorShapeElementCount);
+
+  return floatList;
+}
+
+void ortMinishLabIsolateEntryPoint(SendPort mainSendPort) {
+  final receivePort = ReceivePort();
+  mainSendPort.send(receivePort.sendPort);
+
+  OrtSessionObjects? ortSessionObjects;
+
+  receivePort.listen((dynamic message) async {
+    if (message is OnnxIsolateMessage) {
+      try {
+        // Set the global constant because its a different global on the
+        // isolate.
+        if (message.ortDylibPathOverride != null) {
+          fonnxOrtDylibPathOverride = message.ortDylibPathOverride;
+        }
+        // Lazily create the Ort session if it's not already done.
+        ortSessionObjects ??= createOrtSession(message.modelPath);
+        // Perform the inference here using ortSessionObjects and message.tokens, retrieve result.
+        final result =
+            await _getMinishLabEmbeddingFfi(ortSessionObjects!, message.tokens);
+        message.replyPort.send(result);
+      } catch (e) {
+        // Send the error message back to the main isolate.
+        message.replyPort.send(e);
+      }
+    } else if (message == 'close') {
+      // Handle any cleanup before closing the isolate.
+      if (ortSessionObjects != null) {
+        cleanupOrtSession(ortSessionObjects);
+      }
+      Isolate.exit();
+    } else {
+      debugPrint('Unknown message received in the ONNX isolate. Message: $message');
+      throw Exception('Unknown message received in the ONNX isolate. Message: $message');
+    }
+  });
+}
+
+Future<Float32List> _getMinishLabEmbeddingFfi(
+    OrtSessionObjects session, List<int> tokens) async {
+  final memoryInfo = calloc<Pointer<OrtMemoryInfo>>();
+  session.api.createCpuMemoryInfo(memoryInfo);
+  final inputIdsValue = calloc<Pointer<OrtValue>>();
+  session.api.createInt64Tensor(
+    inputIdsValue,
+    memoryInfo: memoryInfo.value,
+    values: tokens,
+    // Use a 1D tensor shape as expected by the model
+    shape: [tokens.length],
+  );
+  final inputMaskValue = calloc<Pointer<OrtValue>>();
+  final attentionMaskValues =
+      List.generate(tokens.length, (index) => 1, growable: false);
+  session.api.createInt64Tensor(
+    inputMaskValue,
+    memoryInfo: memoryInfo.value,
+    values: attentionMaskValues,
+    // Use a 1D tensor shape as expected by the model
+    shape: [attentionMaskValues.length],
+  );
+  final tokenTypeValue = calloc<Pointer<OrtValue>>();
+  session.api.createInt64Tensor(
+    tokenTypeValue,
+    memoryInfo: memoryInfo.value,
+    values: List.generate(1, (index) => 0, growable: false),
+    // Use a 1D tensor shape as expected by the model
+    shape: [1],
+  );
+  final inputNamesPointer = calloc<Pointer<Pointer<Char>>>(2);
+  final inputIdName = 'input_ids'.toNativeUtf8();
+  inputNamesPointer[0] = inputIdName.cast();
+  final tokenTypeName = 'offsets'.toNativeUtf8();
+  inputNamesPointer[1] = tokenTypeName.cast();
+  // final attentionMaskName = 'attention_mask'.toNativeUtf8();
+  // inputNamesPointer[2] = attentionMaskName.cast();
+  final inputNames = inputNamesPointer.cast<Pointer<Char>>();
+  final inputValues = calloc<Pointer<OrtValue>>(2);
+  inputValues[0] = inputIdsValue.value;
+  inputValues[1] = tokenTypeValue.value;
+  // inputValues[2] = inputMaskValue.value;
+
+  final outputNamesPointer = calloc<Pointer<Char>>();
+  final embeddingsName = 'embeddings'.toNativeUtf8();
+  outputNamesPointer[0] = embeddingsName.cast();
+
+  final outputValuesPtr = calloc<Pointer<OrtValue>>();
+  final outputValues = outputValuesPtr.cast<Pointer<OrtValue>>();
+  final runOptionsPtr = calloc<Pointer<OrtRunOptions>>();
+  session.api.createRunOptions(runOptionsPtr);
+  session.api.run(
+    session: session.sessionPtr.value,
+    runOptions: runOptionsPtr.value,
+    inputNames: inputNames,
+    inputValues: inputValues,
+    inputCount: 2,
+    outputNames: outputNamesPointer,
+    outputCount: 1,
+    outputValues: outputValues,
+  );
+
+  final outputTensorDataPointer = calloc<Pointer<Void>>();
+  session.api.getTensorMutableData(outputValues.value, outputTensorDataPointer);
+  final outputTensorDataPtr = outputTensorDataPointer.value;
+  final floats = outputTensorDataPtr.cast<Float>();
+
+  final tensorTypeAndShape = calloc<Pointer<OrtTensorTypeAndShapeInfo>>();
+  session.api.getTensorTypeAndShape(outputValues.value, tensorTypeAndShape);
+  final tensorShapeElementCount = calloc<Size>();
+  session.api.getTensorShapeElementCount(
+    tensorTypeAndShape.value,
+    tensorShapeElementCount,
+  );
+  final elementCount = tensorShapeElementCount.value;
+  final floatList = floats.asTypedList(elementCount);
+
+  session.api.releaseMemoryInfo(memoryInfo.value);
+  calloc.free(memoryInfo);
+  session.api.releaseValue(inputIdsValue.value);
+  calloc.free(inputIdsValue);
+  session.api.releaseValue(inputMaskValue.value);
+  calloc.free(inputMaskValue);
+  session.api.releaseValue(tokenTypeValue.value);
+  calloc.free(tokenTypeValue);
+  calloc.free(inputNamesPointer);
+  calloc.free(inputValues);
+  calloc.free(outputNamesPointer);
+  calloc.free(outputValuesPtr);
+  calloc.free(inputIdName);
+  calloc.free(tokenTypeName);
+  // calloc.free(attentionMaskName);
   calloc.free(embeddingsName);
   session.api.releaseRunOptions(runOptionsPtr.value);
   calloc.free(runOptionsPtr);

@@ -26,7 +26,7 @@ class MiniLmL6V2Native implements MiniLmL6V2 {
   }
 
   Future<Float32List> getEmbedding(List<int> tokens) async {
-    await _onnxIsolateManager.start();
+    await _onnxIsolateManager.start(OnnxIsolateType.miniLm);
     if (!kIsWeb && Platform.environment['FLUTTER_TEST'] == 'true') {
       return _onnxIsolateManager.sendInference(modelPath, tokens);
     }

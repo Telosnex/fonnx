@@ -211,7 +211,10 @@ extension DartNativeFunctions on OrtApi {
     Pointer<Pointer<OrtValue>> inputTensorPointer, {
     required Pointer<OrtMemoryInfo> memoryInfo,
     required List<int> values,
+    List<int>? shape,
   }) {
+    // Compatibility with what method assumed prior to shape being in API.
+    shape = shape ?? [1, values.length];
     final sizeOfInt64 = sizeOf<Int64>();
     final inputTensorNative = calloc<Int64>(values.length * sizeOfInt64);
 
@@ -219,9 +222,13 @@ extension DartNativeFunctions on OrtApi {
       inputTensorNative[i] = values[i];
     }
 
-    final inputShape = calloc<Int64>(2 * sizeOfInt64);
-    inputShape[0] = 1;
-    inputShape[1] = values.length;
+    // If shape is provided, use it; otherwise default to 1D tensor with shape [values.length]
+    final inputShapeLengthInBytes = shape.length;
+    final inputShape = calloc<Int64>(inputShapeLengthInBytes * sizeOfInt64);
+
+    for (var i = 0; i < shape.length; i++) {
+      inputShape[i] = shape[i];
+    }
 
     final ptrVoid = inputTensorNative.cast<Void>();
     final status = createTensorWithDataAsOrtValue(
@@ -230,7 +237,7 @@ extension DartNativeFunctions on OrtApi {
       inputData: ptrVoid,
       inputDataLengthInBytes: values.length * sizeOfInt64,
       inputShape: inputShape,
-      inputShapeLengthInBytes: 2,
+      inputShapeLengthInBytes: inputShapeLengthInBytes,
       onnxTensorElementDataType:
           ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64.value,
     );
@@ -332,9 +339,6 @@ extension DartNativeFunctions on OrtApi {
     }
     return outputCount;
   }
-
-
-
 
   Pointer<OrtStatus> sessionGetOutputName(
     Pointer<OrtSession> session,
@@ -560,7 +564,6 @@ extension DartNativeFunctions on OrtApi {
     return status;
   }
 
-
   Pointer<OrtStatus> getDimensionsCount(
     Pointer<OrtTensorTypeAndShapeInfo> info,
     Pointer<Size> out,
@@ -696,6 +699,11 @@ extension DartNativeFunctions on OrtApi {
     if (status.isError) {
       final error = 'Run failed. Code: ${getErrorCodeMessage(status)}\n'
           'Message: ${getErrorMessage(status)}';
+      // rationale: Crucial for debugging, for some reason this
+      // isn't bubbling to UI.
+      // TODO: figure out why
+      // ignore: avoid_print
+      print('ONNX run result is an error. Error: $error');
       throw Exception(error);
     }
     return status;

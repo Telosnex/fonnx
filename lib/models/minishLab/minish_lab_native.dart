@@ -2,20 +2,19 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:fonnx/dylib_path_overrides.dart';
 import 'package:fonnx/fonnx.dart';
-import 'package:fonnx/models/msmarcoMiniLmL6V3/msmarco_mini_lm_l6_v3.dart';
+
+import 'package:fonnx/models/minishLab/minish_lab.dart';
 import 'package:fonnx/ort_minilm_isolate.dart';
 import 'package:ml_linalg/linalg.dart';
 
-MsmarcoMiniLmL6V3 getMsmarcoMiniLmL6V3(String path) =>
-    MsmarcoMiniLmL6V3Native(path);
+MinishLab getMinishLab(String path) => MinishLabNative(path);
 
-class MsmarcoMiniLmL6V3Native implements MsmarcoMiniLmL6V3 {
+class MinishLabNative implements MinishLab {
   final String modelPath;
   final OnnxIsolateManager _onnxIsolateManager = OnnxIsolateManager();
 
-  MsmarcoMiniLmL6V3Native(this.modelPath);
+  MinishLabNative(this.modelPath);
 
   Fonnx? _fonnx;
 
@@ -28,27 +27,26 @@ class MsmarcoMiniLmL6V3Native implements MsmarcoMiniLmL6V3 {
   }
 
   Future<Float32List> getEmbedding(List<int> tokens) async {
-    final ffiPlatform =
-        !kIsWeb && Platform.isLinux || Platform.isMacOS || Platform.isWindows;
-    final platformChannelPlatform =
-        !kIsWeb && Platform.isAndroid || Platform.isIOS;
-    if (ffiPlatform) {
-      await _onnxIsolateManager.start(OnnxIsolateType.miniLm);
-      return getEmbeddingViaFfi(tokens);
-    } else if (platformChannelPlatform) {
-      return getEmbeddingViaPlatformChannel(tokens);
-    } else {
-      throw UnimplementedError(
-          'Unsupported platform: ${Platform.operatingSystem}');
+    await _onnxIsolateManager.start(OnnxIsolateType.minishLab);
+    if (!kIsWeb && Platform.environment['FLUTTER_TEST'] == 'true') {
+      return _onnxIsolateManager.sendInference(modelPath, tokens);
+    }
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        return getEmbeddingViaPlatformChannel(tokens);
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return getEmbeddingViaFfi(tokens);
+      case TargetPlatform.fuchsia:
+        throw UnimplementedError();
     }
   }
 
   Future<Float32List> getEmbeddingViaFfi(List<int> tokens) {
-    return _onnxIsolateManager.sendInference(
-      modelPath,
-      tokens,
-      ortDylibPathOverride: fonnxOrtDylibPathOverride,
-    );
+    return _onnxIsolateManager.sendInference(modelPath, tokens);
   }
 
   Future<Float32List> getEmbeddingViaPlatformChannel(List<int> tokens) async {

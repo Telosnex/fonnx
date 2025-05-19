@@ -346,7 +346,7 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
     });
   });
 
-  test('Generate coders', skip: 'coder generator', () async {
+  test('Generate bert base coders', skip: 'coder generator', () async {
     String vocabPath = 'test/tokenizers/bert-base-uncased-vocab.txt';
     File file = File(vocabPath);
     final string = await file.readAsString();
@@ -383,6 +383,88 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
     final encoderString = encoder.toString();
     final decoderString = decoder.toString();
     const outputPath = 'test/outputs/bert_vocab.dart';
+    final outputFile = File(outputPath);
+    await outputFile.writeAsString('$encoderString\n\n$decoderString');
+  });
+
+   test('Generate Potion-32M coders', skip: 'coder generator', () async {
+    String vocabPath = 'test/tokenizers/potion-retrieval-32m-vocab.txt';
+    File file = File(vocabPath);
+    final string = await file.readAsString();
+    final strings = <String>[];
+    final stringToTokenIndex = <String, int>{};
+    for (final line in string.split('\n')) {
+      final string = line.trimRight();
+      if (string.isEmpty) {
+        debugPrint('WARNING: vocab has empty string');
+        continue;
+      }
+      if (stringToTokenIndex.containsKey(string)) {
+        debugPrint('WARNING: vocab has seemingly duplicate string `$string`');
+        continue;
+      }
+      strings.add(string);
+    }
+
+    final encoder = StringBuffer();
+    final decoder = StringBuffer();
+    encoder.writeln('const Map<String, int> minishLabEncoder = {');
+    decoder.writeln('const List<String> minishLabDecoder = [');
+    for (final (index, string) in strings.indexed) {
+      // Its complicated enough that it can't be auto-fixed and I do not watch
+      // to touch it right now. :^)
+      // ignore: prefer_interpolation_to_compose_strings
+      final separator = string.contains('"') ? "'''" : '"""';
+      encoder.writeln("  r$separator$string$separator: $index,");
+      decoder.writeln("  r$separator$string$separator,");
+    }
+    encoder.writeln('};');
+    decoder.writeln('];');
+
+    final encoderString = encoder.toString();
+    final decoderString = decoder.toString();
+    const outputPath = 'test/outputs/minish_lab.dart';
+    final outputFile = File(outputPath);
+    await outputFile.writeAsString('$encoderString\n\n$decoderString');
+  });
+
+  test('Generate Potion-8M coders', skip: 'coder generator', () async {
+    String vocabPath = 'test/tokenizers/potion-base-8m-vocab.txt';
+    File file = File(vocabPath);
+    final string = await file.readAsString();
+    final strings = <String>[];
+    final stringToTokenIndex = <String, int>{};
+    for (final line in string.split('\n')) {
+      final string = line.trimRight();
+      if (string.isEmpty) {
+        debugPrint('WARNING: vocab has empty string');
+        continue;
+      }
+      if (stringToTokenIndex.containsKey(string)) {
+        debugPrint('WARNING: vocab has seemingly duplicate string `$string`');
+        continue;
+      }
+      strings.add(string);
+    }
+
+    final encoder = StringBuffer();
+    final decoder = StringBuffer();
+    encoder.writeln('const Map<String, int> potionBase8mEncoder = {');
+    decoder.writeln('const List<String> potionBase8mDecoder = [');
+    for (final (index, string) in strings.indexed) {
+      // Its complicated enough that it can't be auto-fixed and I do not watch
+      // to touch it right now. :^)
+      // ignore: prefer_interpolation_to_compose_strings
+      final separator = string.contains('"') ? "'''" : '"""';
+      encoder.writeln("  r$separator$string$separator: $index,");
+      decoder.writeln("  r$separator$string$separator,");
+    }
+    encoder.writeln('};');
+    decoder.writeln('];');
+
+    final encoderString = encoder.toString();
+    final decoderString = decoder.toString();
+    const outputPath = 'test/outputs/potionBase8m_vocab.dart';
     final outputFile = File(outputPath);
     await outputFile.writeAsString('$encoderString\n\n$decoderString');
   });

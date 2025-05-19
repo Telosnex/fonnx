@@ -1,6 +1,8 @@
 PODS:
   - audioplayers_darwin (0.0.1):
     - FlutterMacOS
+  - file_picker (0.0.1):
+    - FlutterMacOS
   - FlutterMacOS (1.0.0)
   - fonnx (1.0.0):
     - FlutterMacOS
@@ -13,6 +15,7 @@ PODS:
 
 DEPENDENCIES:
   - audioplayers_darwin (from `Flutter/ephemeral/.symlinks/plugins/audioplayers_darwin/macos`)
+  - file_picker (from `Flutter/ephemeral/.symlinks/plugins/file_picker/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - fonnx (from `Flutter/ephemeral/.symlinks/plugins/fonnx/macos`)
   - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
@@ -21,6 +24,8 @@ DEPENDENCIES:
 EXTERNAL SOURCES:
   audioplayers_darwin:
     :path: Flutter/ephemeral/.symlinks/plugins/audioplayers_darwin/macos
+  file_picker:
+    :path: Flutter/ephemeral/.symlinks/plugins/file_picker/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
   fonnx:
@@ -31,11 +36,12 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/record_darwin/macos
 
 SPEC CHECKSUMS:
-  audioplayers_darwin: dcad41de4fbd0099cb3749f7ab3b0cb8f70b810c
+  audioplayers_darwin: 761f2948df701d05b5db603220c384fb55720012
+  file_picker: 7584aae6fa07a041af2b36a2655122d42f578c1a
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
-  fonnx: e8af51c8a0554da8883ff7087b00906cebc9b3e5
-  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
-  record_darwin: df0a677188e5fed18472550298e675f19ddaffbe
+  fonnx: a8a31a0932debcf2e1d124cdc3c60eaf153f56f8
+  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
+  record_darwin: 1630616226de4038fa17cec21b11403ca510ec3e
 
 PODFILE CHECKSUM: 91f0996b85caf3478dfdcf490d95bb166c22642b
 

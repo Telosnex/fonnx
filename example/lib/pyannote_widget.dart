@@ -80,7 +80,6 @@ class _PyannoteWidgetState extends State<PyannoteWidget> {
     // Get test audio file as Float32List
     final wavFile =
         await rootBundle.load('assets/audio_sample_ac1_ar16000.pcm');
-    print('wavfile size: ${wavFile.buffer.asUint8List().length}');
     final processed =
         Pyannote.int16PcmBytesToFloat32(wavFile.buffer.asUint8List());
     final result = await pyannote.process(processed);
