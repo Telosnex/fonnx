@@ -1,5 +1,5 @@
-# Ignore all ONNX model files
-*.onnx
+# Ignore only the large model files
+example/assets/models/minishLab/potion32m.onnx
 
 # Ignore the restore script
 restore_models.sh
