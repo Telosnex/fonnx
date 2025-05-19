@@ -6,7 +6,7 @@ import 'package:ml_linalg/linalg.dart';
 
 MinishLab getMinishLab(String path) => MinishLabWeb(path);
 
-@JS('window.miniLmL6V2')
+@JS('window.minishLab')
 external JSPromise<JSAny?> sbertJs(JSString modelPath, JSInt16Array wordpieces);
 
 class MinishLabWeb implements MinishLab {

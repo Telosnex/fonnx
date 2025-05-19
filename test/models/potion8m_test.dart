@@ -20,7 +20,17 @@ void main() {
   }
 
   test('Embedding works', () async {
-    final answer = await vec('');
+    final answer = await vec('quickly say this?');
+    final dartArrayString = StringBuffer();
+    dartArrayString.write('[');
+    for (var i = 0; i < answer.length; i++) {
+      dartArrayString.write(answer[i]);
+      if (i != answer.length - 1) {
+        dartArrayString.write(', ');
+      }
+    }
+    dartArrayString.write(']');
+    debugPrint(dartArrayString.toString());
     expect(answer, hasLength(256));
   });
 
