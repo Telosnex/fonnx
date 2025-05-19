@@ -1,13 +1,24 @@
 # Ignore only the large model files
 example/assets/models/minishLab/potion32m.onnx
 
-# Ignore the restore script
-restore_models.sh
+# See https://www.dartlang.org/guides/libraries/private-files
 
-# Flutter/Dart specific ignores
+# Files and directories created by pub
 .dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
 .packages
 build/
+# If you're building an application, you may want to check-in your pubspec.lock
 pubspec.lock
+
+# Directory created by dartdoc
+# If you don't generate documentation locally you can remove this line.
+doc/api/
+
+# dotenv environment variables file
+.env*
+
+# dsstore
+.DS_Store
+
+.flutter-plugins
+.flutter-plugins-dependencies
