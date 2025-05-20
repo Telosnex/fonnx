@@ -23,6 +23,12 @@ class MockFonnxPlatform
   }
 
   @override
+  Future<Float32List?> minishLab(
+      {required String modelPath, required List<int> inputs}) {
+    throw UnimplementedError();
+  }
+
+  @override
   Future<Map<String, dynamic>?> sileroVad(
       {required String modelPath,
       required List<int> audioBytes,

@@ -51,7 +51,7 @@ class MinishLabNative implements MinishLab {
 
   Future<Float32List> getEmbeddingViaPlatformChannel(List<int> tokens) async {
     final fonnx = _fonnx ??= Fonnx();
-    final embeddings = await fonnx.miniLm(
+    final embeddings = await fonnx.minishLab(
       modelPath: modelPath,
       inputs: tokens,
     );

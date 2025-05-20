@@ -47,6 +47,18 @@ class MethodChannelFonnx extends FonnxPlatform {
   }
 
   @override
+  Future<Float32List?> minishLab({
+    required String modelPath,
+    required List<int> inputs,
+  }) async {
+    final result = await methodChannel.invokeMethod<Float32List>(
+      'minishLab',
+      [modelPath, inputs],
+    );
+    return result;
+  }
+
+  @override
   Future<String?> whisper({
     required String modelPath,
     required List<int> audioBytes,

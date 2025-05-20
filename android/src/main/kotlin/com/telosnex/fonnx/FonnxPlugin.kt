@@ -15,6 +15,8 @@ class FonnxPlugin : FlutterPlugin, MethodCallHandler {
     var cachedMagika: OrtMagika? = null
     var cachedMiniLmPath: String? = null
     var cachedMiniLm: OrtMiniLm? = null
+    var cachedMinishLabPath: String? = null
+    var cachedMinishLab: OrtMinishLab? = null
     var cachedWhisperPath: String? = null
     var cachedWhisper: OrtWhisper? = null
     var cachedSileroVadPath: String? = null
@@ -73,6 +75,23 @@ class FonnxPlugin : FlutterPlugin, MethodCallHandler {
                     result.success(embedding.first())
                 } else {
                     result.error("MiniLm", "Could not instantiate model", null)
+                }
+            } else if (call.method == "minishLab") {
+                val list = call.arguments as List<Any>
+                val modelPath = list[0] as String
+                val wordpieces = list[1] as List<Int>
+
+                if (cachedMinishLabPath != modelPath) {
+                    cachedMinishLab = OrtMinishLab(modelPath)
+                    cachedMinishLabPath = modelPath
+                }
+
+                val minishLab = cachedMinishLab
+                if (minishLab != null) {
+                    val embedding = minishLab.getEmbedding(wordpieces.map { it.toLong() }.toLongArray())
+                    result.success(embedding)
+                } else {
+                    result.error("MinishLab", "Could not instantiate model", null)
                 }
             } else if (call.method == "whisper") {
                 val list = call.arguments as List<Any>

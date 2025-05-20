@@ -43,6 +43,13 @@ abstract class FonnxPlatform extends PlatformInterface {
     throw UnimplementedError('miniLm() has not been implemented.');
   }
 
+  Future<Float32List?> minishLab({
+    required String modelPath,
+    required List<int> inputs,
+  }) {
+    throw UnimplementedError('minishLab() has not been implemented.');
+  }
+
   Future<List<Map<String, dynamic>>?> pyannote({
     required String modelPath,
     required Float32List audioData,

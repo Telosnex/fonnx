@@ -31,6 +31,16 @@ class Fonnx {
       inputs: inputs,
     );
   }
+
+    Future<Float32List?> minishLab({
+    required String modelPath,
+    required List<int> inputs,
+  }) {
+    return FonnxPlatform.instance.minishLab(
+      modelPath: modelPath,
+      inputs: inputs,
+    );
+  }
  
   Future<String?> whisper({
     required String modelPath,

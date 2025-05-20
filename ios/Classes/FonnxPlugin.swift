@@ -7,6 +7,8 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
   private var cachedMagika: OrtMagika?
   private var cachedMiniLmModelPath: String?
   private var cachedMiniLm: OrtMiniLm?
+  private var cachedMinishLabModelPath: String?
+  private var cachedMinishLab: OrtMinishLab?
   private var cachedWhisperModelPath: String?
   private var cachedWhisper: OrtWhisper?
   private var cachedSileroVadModelPath: String?
@@ -28,6 +30,8 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
       doMagika(call, result: result)
     case "miniLm":
       doMiniLm(call, result: result)
+    case "minishLab":
+      doMinishLab(call, result: result)
     case "whisper":
       doWhisper(call, result: result)
     case "sileroVad":
@@ -55,6 +59,40 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
 
     let answer = model.doInference(fileBytes: fileFloats)
     result(answer)
+  }
+
+  public func doMinishLab(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    os_log("MinishLab: Method called with arguments: %@", String(describing: call.arguments))
+    
+    let path = (call.arguments as! [Any])[0] as! String
+    let tokens = (call.arguments as! [Any])[1] as! [Int64]
+    
+    os_log("MinishLab: Using model at path: %@", path)
+    os_log("MinishLab: Received %d tokens", tokens.count)
+    
+    // Always create a new instance to avoid any potential caching issues
+    cachedMinishLab = nil
+    cachedMinishLabModelPath = nil
+    
+    let minishLab = OrtMinishLab(modelPath: path)
+    cachedMinishLab = minishLab
+    cachedMinishLabModelPath = path
+    
+    os_log("MinishLab: Created new model instance")
+    
+    minishLab.getEmbedding(
+      tokens: tokens,
+      completion: { (answer, error) in
+        if let error = error {
+          os_log("MinishLab: Error getting embedding: %@", error.localizedDescription)
+          result(
+            FlutterError(code: "MinishLab", message: "Failed to get embedding", details: error)
+          )
+        } else {
+          os_log("MinishLab: Successfully got embedding")
+          result(answer)
+        }
+      })
   }
 
   public func doMiniLm(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
