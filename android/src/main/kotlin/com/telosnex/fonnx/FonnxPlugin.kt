@@ -89,7 +89,7 @@ class FonnxPlugin : FlutterPlugin, MethodCallHandler {
                 val minishLab = cachedMinishLab
                 if (minishLab != null) {
                     val embedding = minishLab.getEmbedding(wordpieces.map { it.toLong() }.toLongArray())
-                    result.success(embedding)
+                    result.success(embedding.first())
                 } else {
                     result.error("MinishLab", "Could not instantiate model", null)
                 }
