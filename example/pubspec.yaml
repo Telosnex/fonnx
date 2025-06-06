@@ -23,10 +23,11 @@ dependencies:
       url: https://github.com/Telosnex/libmonet.git
       ref: main
   audioplayers: ^6.0.0
-  file_picker: ^8.1.2
+  file_picker: ^10.1.9
   collection: ^1.18.0
-  record: '<5.2.0'
-  record_darwin: '<1.2.0'
+  record: ^6.0.0
+  record_darwin: ^1.2.2
+  ml_linalg: ^13.12.6
 dependency_overrides:
   audioplayers_web:
     git:
@@ -38,13 +39,14 @@ dev_dependencies:
     sdk: flutter
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true
   assets:
     - assets/models/magika/magika.onnx
     - assets/models/miniLmL6V2/miniLmL6V2.onnx
+    - assets/models/minishLab/potion8m.onnx
     - assets/models/minishLab/potion32m.onnx
     - assets/models/msmarcoMiniLmL6V3/msmarcoMiniLmL6V3.onnx
     - assets/models/sileroVad/silero_vad.onnx
