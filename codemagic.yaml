@@ -65,7 +65,9 @@ definitions:
     name: Linux packages
     script: |
       sudo apt-get update
-      sudo apt-get install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+      # Flutter native-assets on Linux expects an LLVM linker at
+      # /usr/lib/llvm-18/bin/ld.lld on current stable Codemagic images.
+      sudo apt-get install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev lld-18
   script_linux_build: &script_linux_build
     name: Linux build
     script: cd example && flutter build linux --verbose --no-tree-shake-icons
@@ -76,7 +78,7 @@ definitions:
   script_web_build: &script_web_build
     name: Web build
     script: |
-      cd example && flutter build web --web-renderer canvaskit --no-tree-shake-icons
+      cd example && flutter build web --no-tree-shake-icons
   script_windows_build: &script_windows_build
     name: Windows build
     script: |
