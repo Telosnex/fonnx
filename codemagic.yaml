@@ -162,6 +162,22 @@ definitions:
     - C:\Users\builder\clone\test-results\flutter.json
 
 workflows:
+  all-builds:
+    name: All Builds
+    instance_type: linux_x2
+    max_build_duration: 10
+    environment:
+      <<: *env_keys
+    scripts:
+      - name: Trigger Build Workflows
+        script: |
+          for workflow in android-build ios-build linux-build macos-build web-build windows-build; do
+            curl -H "Content-Type: application/json" \
+                  -H "x-auth-token: ${CODEMAGIC_API_TOKEN}" \
+                  --data "{\"appId\": \"652897766ee3f7af8490a79f\", \"workflowId\": \"$workflow\", \"branch\": \"main\"}" \
+                  -X POST https://api.codemagic.io/builds &
+          done
+          wait
   android-build:
     name: Android Build
     <<: *instance_mac_release_build # 31m vs. linux_x2 57m on 2023 12 22.
