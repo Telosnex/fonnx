@@ -8,7 +8,6 @@ import 'package:fonnx_example/silero_vad_widget.dart';
 import 'package:fonnx_example/tts_demo_widget.dart';
 import 'package:fonnx_example/whisper_widget.dart';
 import 'package:libmonet/libmonet.dart';
-import 'package:libmonet/theming/monet_theme_data.dart';
 
 void main() {
   runApp(const MyApp());
