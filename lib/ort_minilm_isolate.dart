@@ -5,7 +5,7 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fonnx/dylib_path_overrides.dart';
-import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free;
+import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free, malloc;
 import 'package:fonnx/onnx/ort.dart';
 
 class OnnxIsolateMessage {
@@ -23,18 +23,10 @@ class OnnxIsolateMessage {
 }
 
 void cleanupOrtSession(OrtSessionObjects? ortSessionObjects) {
-  if (ortSessionObjects == null) {
-    return;
-  }
-  // Cleanup the Ort session? Currently we assume that the session is desired
-  // for the lifetime of the application. Makes sense for embeddings models.
-  // _Maybe_ Whisper. Definitely not an LLM.
+  releaseOrtSessionObjects(ortSessionObjects);
 }
 
-enum OnnxIsolateType {
-  miniLm,
-  minishLab,
-}
+enum OnnxIsolateType { miniLm, minishLab }
 
 class OnnxIsolateManager {
   SendPort? _sendPort;
@@ -97,14 +89,16 @@ class OnnxIsolateManager {
     } else if (result is Error) {
       throw result;
     } else {
-      throw Exception('Unknown error occurred in the ONNX isolate. Result: $result');
+      throw Exception(
+        'Unknown error occurred in the ONNX isolate. Result: $result',
+      );
     }
   }
 
   // Shut down the isolate.
   void stop() {
     _sendPort?.send('close');
-    _isolate?.kill(priority: Isolate.immediate);
+    _sendPort = null;
     _isolate = null;
   }
 }
@@ -126,8 +120,10 @@ void ortMiniLmIsolateEntryPoint(SendPort mainSendPort) {
         // Lazily create the Ort session if it's not already done.
         ortSessionObjects ??= createOrtSession(message.modelPath);
         // Perform the inference here using ortSessionObjects and message.tokens, retrieve result.
-        final result =
-            await _getMiniLmEmbeddingFfi(ortSessionObjects!, message.tokens);
+        final result = await _getMiniLmEmbeddingFfi(
+          ortSessionObjects!,
+          message.tokens,
+        );
         message.replyPort.send(result);
       } catch (e) {
         // Send the error message back to the main isolate.
@@ -147,99 +143,125 @@ void ortMiniLmIsolateEntryPoint(SendPort mainSendPort) {
 }
 
 Future<Float32List> _getMiniLmEmbeddingFfi(
-    OrtSessionObjects session, List<int> tokens) async {
+  OrtSessionObjects session,
+  List<int> tokens,
+) async {
   final memoryInfo = calloc<Pointer<OrtMemoryInfo>>();
-  session.api.createCpuMemoryInfo(memoryInfo);
   final inputIdsValue = calloc<Pointer<OrtValue>>();
-  session.api.createInt64Tensor(
-    inputIdsValue,
-    memoryInfo: memoryInfo.value,
-    values: tokens,
-  );
   final inputMaskValue = calloc<Pointer<OrtValue>>();
-  session.api.createInt64Tensor(
-    inputMaskValue,
-    memoryInfo: memoryInfo.value,
-    values: List.generate(tokens.length, (index) => 1, growable: false),
-  );
   final tokenTypeValue = calloc<Pointer<OrtValue>>();
-  session.api.createInt64Tensor(
-    tokenTypeValue,
-    memoryInfo: memoryInfo.value,
-    values: List.generate(tokens.length, (index) => 0, growable: false),
-  );
-  final inputNamesPointer = calloc<Pointer<Pointer<Char>>>(3);
+  final inputNames = calloc<Pointer<Char>>(3);
   final inputIdName = 'input_ids'.toNativeUtf8();
-  inputNamesPointer[0] = inputIdName.cast();
   final tokenTypeName = 'token_type_ids'.toNativeUtf8();
-  inputNamesPointer[1] = tokenTypeName.cast();
   final attentionMaskName = 'attention_mask'.toNativeUtf8();
-  inputNamesPointer[2] = attentionMaskName.cast();
-  final inputNames = inputNamesPointer.cast<Pointer<Char>>();
   final inputValues = calloc<Pointer<OrtValue>>(3);
-  inputValues[0] = inputIdsValue.value;
-  inputValues[1] = tokenTypeValue.value;
-  inputValues[2] = inputMaskValue.value;
-
-  final outputNamesPointer = calloc<Pointer<Char>>();
+  final outputNames = calloc<Pointer<Char>>(1);
   final embeddingsName = 'embeddings'.toNativeUtf8();
-  outputNamesPointer[0] = embeddingsName.cast();
-
-  final outputValuesPtr = calloc<Pointer<OrtValue>>();
-  final outputValues = outputValuesPtr.cast<Pointer<OrtValue>>();
+  final outputValues = calloc<Pointer<OrtValue>>(1);
   final runOptionsPtr = calloc<Pointer<OrtRunOptions>>();
-  session.api.createRunOptions(runOptionsPtr);
-
-  session.api.run(
-    session: session.sessionPtr.value,
-    runOptions: runOptionsPtr.value,
-    inputNames: inputNames,
-    inputValues: inputValues,
-    inputCount: 3,
-    outputNames: outputNamesPointer,
-    outputCount: 1,
-    outputValues: outputValues,
-  );
-
   final outputTensorDataPointer = calloc<Pointer<Void>>();
-  session.api.getTensorMutableData(outputValues.value, outputTensorDataPointer);
-  final outputTensorDataPtr = outputTensorDataPointer.value;
-  final floats = outputTensorDataPtr.cast<Float>();
-
   final tensorTypeAndShape = calloc<Pointer<OrtTensorTypeAndShapeInfo>>();
-  session.api.getTensorTypeAndShape(outputValues.value, tensorTypeAndShape);
   final tensorShapeElementCount = calloc<Size>();
-  session.api.getTensorShapeElementCount(
-    tensorTypeAndShape.value,
-    tensorShapeElementCount,
-  );
-  final elementCount = tensorShapeElementCount.value;
-  final floatList = floats.asTypedList(elementCount);
 
-  session.api.releaseMemoryInfo(memoryInfo.value);
-  calloc.free(memoryInfo);
-  session.api.releaseValue(inputIdsValue.value);
-  calloc.free(inputIdsValue);
-  session.api.releaseValue(inputMaskValue.value);
-  calloc.free(inputMaskValue);
-  session.api.releaseValue(tokenTypeValue.value);
-  calloc.free(tokenTypeValue);
-  calloc.free(inputNamesPointer);
-  calloc.free(inputValues);
-  calloc.free(outputNamesPointer);
-  calloc.free(outputValuesPtr);
-  calloc.free(inputIdName);
-  calloc.free(tokenTypeName);
-  calloc.free(attentionMaskName);
-  calloc.free(embeddingsName);
-  session.api.releaseRunOptions(runOptionsPtr.value);
-  calloc.free(runOptionsPtr);
-  calloc.free(outputTensorDataPointer);
-  session.api.releaseTensorTypeAndShapeInfo(tensorTypeAndShape.value);
-  calloc.free(tensorTypeAndShape);
-  calloc.free(tensorShapeElementCount);
+  Pointer<Int64>? inputIdsTensorData;
+  Pointer<Int64>? inputMaskTensorData;
+  Pointer<Int64>? tokenTypeTensorData;
 
-  return floatList;
+  try {
+    session.api.createCpuMemoryInfo(memoryInfo);
+    inputIdsTensorData = session.api.createInt64Tensor(
+      inputIdsValue,
+      memoryInfo: memoryInfo.value,
+      values: tokens,
+    );
+    inputMaskTensorData = session.api.createInt64Tensor(
+      inputMaskValue,
+      memoryInfo: memoryInfo.value,
+      values: List.generate(tokens.length, (index) => 1, growable: false),
+    );
+    tokenTypeTensorData = session.api.createInt64Tensor(
+      tokenTypeValue,
+      memoryInfo: memoryInfo.value,
+      values: List.generate(tokens.length, (index) => 0, growable: false),
+    );
+
+    inputNames[0] = inputIdName.cast<Char>();
+    inputNames[1] = tokenTypeName.cast<Char>();
+    inputNames[2] = attentionMaskName.cast<Char>();
+    inputValues[0] = inputIdsValue.value;
+    inputValues[1] = tokenTypeValue.value;
+    inputValues[2] = inputMaskValue.value;
+    outputNames[0] = embeddingsName.cast<Char>();
+
+    session.api.createRunOptions(runOptionsPtr);
+    session.api.run(
+      session: session.sessionPtr.value,
+      runOptions: runOptionsPtr.value,
+      inputNames: inputNames,
+      inputValues: inputValues,
+      inputCount: 3,
+      outputNames: outputNames,
+      outputCount: 1,
+      outputValues: outputValues,
+    );
+
+    session.api.getTensorMutableData(
+      outputValues.value,
+      outputTensorDataPointer,
+    );
+    final floats = outputTensorDataPointer.value.cast<Float>();
+    session.api.getTensorTypeAndShape(outputValues.value, tensorTypeAndShape);
+    session.api.getTensorShapeElementCount(
+      tensorTypeAndShape.value,
+      tensorShapeElementCount,
+    );
+    return Float32List.fromList(
+      floats.asTypedList(tensorShapeElementCount.value),
+    );
+  } finally {
+    if (tensorTypeAndShape.value.address != 0) {
+      session.api.releaseTensorTypeAndShapeInfo(tensorTypeAndShape.value);
+    }
+    if (outputValues.value.address != 0) {
+      session.api.releaseValue(outputValues.value);
+    }
+    if (runOptionsPtr.value.address != 0) {
+      session.api.releaseRunOptions(runOptionsPtr.value);
+    }
+    for (final value in [inputIdsValue, inputMaskValue, tokenTypeValue]) {
+      if (value.value.address != 0) {
+        session.api.releaseValue(value.value);
+      }
+    }
+    if (memoryInfo.value.address != 0) {
+      session.api.releaseMemoryInfo(memoryInfo.value);
+    }
+    if (inputIdsTensorData != null) {
+      calloc.free(inputIdsTensorData);
+    }
+    if (inputMaskTensorData != null) {
+      calloc.free(inputMaskTensorData);
+    }
+    if (tokenTypeTensorData != null) {
+      calloc.free(tokenTypeTensorData);
+    }
+    malloc.free(inputIdName);
+    malloc.free(tokenTypeName);
+    malloc.free(attentionMaskName);
+    malloc.free(embeddingsName);
+    calloc.free(tensorShapeElementCount);
+    calloc.free(tensorTypeAndShape);
+    calloc.free(outputTensorDataPointer);
+    calloc.free(runOptionsPtr);
+    calloc.free(outputValues);
+    calloc.free(outputNames);
+    calloc.free(inputValues);
+    calloc.free(inputNames);
+    calloc.free(tokenTypeValue);
+    calloc.free(inputMaskValue);
+    calloc.free(inputIdsValue);
+    calloc.free(memoryInfo);
+  }
 }
 
 void ortMinishLabIsolateEntryPoint(SendPort mainSendPort) {
@@ -259,8 +281,10 @@ void ortMinishLabIsolateEntryPoint(SendPort mainSendPort) {
         // Lazily create the Ort session if it's not already done.
         ortSessionObjects ??= createOrtSession(message.modelPath);
         // Perform the inference here using ortSessionObjects and message.tokens, retrieve result.
-        final result =
-            await _getMinishLabEmbeddingFfi(ortSessionObjects!, message.tokens);
+        final result = await _getMinishLabEmbeddingFfi(
+          ortSessionObjects!,
+          message.tokens,
+        );
         message.replyPort.send(result);
       } catch (e) {
         // Send the error message back to the main isolate.
@@ -273,111 +297,138 @@ void ortMinishLabIsolateEntryPoint(SendPort mainSendPort) {
       }
       Isolate.exit();
     } else {
-      debugPrint('Unknown message received in the ONNX isolate. Message: $message');
-      throw Exception('Unknown message received in the ONNX isolate. Message: $message');
+      debugPrint(
+        'Unknown message received in the ONNX isolate. Message: $message',
+      );
+      throw Exception(
+        'Unknown message received in the ONNX isolate. Message: $message',
+      );
     }
   });
 }
 
 Future<Float32List> _getMinishLabEmbeddingFfi(
-    OrtSessionObjects session, List<int> tokens) async {
+  OrtSessionObjects session,
+  List<int> tokens,
+) async {
   final memoryInfo = calloc<Pointer<OrtMemoryInfo>>();
-  session.api.createCpuMemoryInfo(memoryInfo);
   final inputIdsValue = calloc<Pointer<OrtValue>>();
-  session.api.createInt64Tensor(
-    inputIdsValue,
-    memoryInfo: memoryInfo.value,
-    values: tokens,
-    // Use a 1D tensor shape as expected by the model
-    shape: [tokens.length],
-  );
   final inputMaskValue = calloc<Pointer<OrtValue>>();
-  final attentionMaskValues =
-      List.generate(tokens.length, (index) => 1, growable: false);
-  session.api.createInt64Tensor(
-    inputMaskValue,
-    memoryInfo: memoryInfo.value,
-    values: attentionMaskValues,
-    // Use a 1D tensor shape as expected by the model
-    shape: [attentionMaskValues.length],
-  );
   final tokenTypeValue = calloc<Pointer<OrtValue>>();
-  session.api.createInt64Tensor(
-    tokenTypeValue,
-    memoryInfo: memoryInfo.value,
-    values: List.generate(1, (index) => 0, growable: false),
-    // Use a 1D tensor shape as expected by the model
-    shape: [1],
-  );
-  final inputNamesPointer = calloc<Pointer<Pointer<Char>>>(2);
+  final inputNames = calloc<Pointer<Char>>(2);
   final inputIdName = 'input_ids'.toNativeUtf8();
-  inputNamesPointer[0] = inputIdName.cast();
   final tokenTypeName = 'offsets'.toNativeUtf8();
-  inputNamesPointer[1] = tokenTypeName.cast();
-  // final attentionMaskName = 'attention_mask'.toNativeUtf8();
-  // inputNamesPointer[2] = attentionMaskName.cast();
-  final inputNames = inputNamesPointer.cast<Pointer<Char>>();
   final inputValues = calloc<Pointer<OrtValue>>(2);
-  inputValues[0] = inputIdsValue.value;
-  inputValues[1] = tokenTypeValue.value;
-  // inputValues[2] = inputMaskValue.value;
-
-  final outputNamesPointer = calloc<Pointer<Char>>();
+  final outputNames = calloc<Pointer<Char>>(1);
   final embeddingsName = 'embeddings'.toNativeUtf8();
-  outputNamesPointer[0] = embeddingsName.cast();
-
-  final outputValuesPtr = calloc<Pointer<OrtValue>>();
-  final outputValues = outputValuesPtr.cast<Pointer<OrtValue>>();
+  final outputValues = calloc<Pointer<OrtValue>>(1);
   final runOptionsPtr = calloc<Pointer<OrtRunOptions>>();
-  session.api.createRunOptions(runOptionsPtr);
-  session.api.run(
-    session: session.sessionPtr.value,
-    runOptions: runOptionsPtr.value,
-    inputNames: inputNames,
-    inputValues: inputValues,
-    inputCount: 2,
-    outputNames: outputNamesPointer,
-    outputCount: 1,
-    outputValues: outputValues,
-  );
-
   final outputTensorDataPointer = calloc<Pointer<Void>>();
-  session.api.getTensorMutableData(outputValues.value, outputTensorDataPointer);
-  final outputTensorDataPtr = outputTensorDataPointer.value;
-  final floats = outputTensorDataPtr.cast<Float>();
-
   final tensorTypeAndShape = calloc<Pointer<OrtTensorTypeAndShapeInfo>>();
-  session.api.getTensorTypeAndShape(outputValues.value, tensorTypeAndShape);
   final tensorShapeElementCount = calloc<Size>();
-  session.api.getTensorShapeElementCount(
-    tensorTypeAndShape.value,
-    tensorShapeElementCount,
-  );
-  final elementCount = tensorShapeElementCount.value;
-  final floatList = floats.asTypedList(elementCount);
 
-  session.api.releaseMemoryInfo(memoryInfo.value);
-  calloc.free(memoryInfo);
-  session.api.releaseValue(inputIdsValue.value);
-  calloc.free(inputIdsValue);
-  session.api.releaseValue(inputMaskValue.value);
-  calloc.free(inputMaskValue);
-  session.api.releaseValue(tokenTypeValue.value);
-  calloc.free(tokenTypeValue);
-  calloc.free(inputNamesPointer);
-  calloc.free(inputValues);
-  calloc.free(outputNamesPointer);
-  calloc.free(outputValuesPtr);
-  calloc.free(inputIdName);
-  calloc.free(tokenTypeName);
-  // calloc.free(attentionMaskName);
-  calloc.free(embeddingsName);
-  session.api.releaseRunOptions(runOptionsPtr.value);
-  calloc.free(runOptionsPtr);
-  calloc.free(outputTensorDataPointer);
-  session.api.releaseTensorTypeAndShapeInfo(tensorTypeAndShape.value);
-  calloc.free(tensorTypeAndShape);
-  calloc.free(tensorShapeElementCount);
+  Pointer<Int64>? inputIdsTensorData;
+  Pointer<Int64>? inputMaskTensorData;
+  Pointer<Int64>? tokenTypeTensorData;
 
-  return floatList;
+  try {
+    session.api.createCpuMemoryInfo(memoryInfo);
+    inputIdsTensorData = session.api.createInt64Tensor(
+      inputIdsValue,
+      memoryInfo: memoryInfo.value,
+      values: tokens,
+      shape: [tokens.length],
+    );
+    final attentionMaskValues = List.generate(
+      tokens.length,
+      (index) => 1,
+      growable: false,
+    );
+    inputMaskTensorData = session.api.createInt64Tensor(
+      inputMaskValue,
+      memoryInfo: memoryInfo.value,
+      values: attentionMaskValues,
+      shape: [attentionMaskValues.length],
+    );
+    tokenTypeTensorData = session.api.createInt64Tensor(
+      tokenTypeValue,
+      memoryInfo: memoryInfo.value,
+      values: List.generate(1, (index) => 0, growable: false),
+      shape: [1],
+    );
+
+    inputNames[0] = inputIdName.cast<Char>();
+    inputNames[1] = tokenTypeName.cast<Char>();
+    inputValues[0] = inputIdsValue.value;
+    inputValues[1] = tokenTypeValue.value;
+    outputNames[0] = embeddingsName.cast<Char>();
+
+    session.api.createRunOptions(runOptionsPtr);
+    session.api.run(
+      session: session.sessionPtr.value,
+      runOptions: runOptionsPtr.value,
+      inputNames: inputNames,
+      inputValues: inputValues,
+      inputCount: 2,
+      outputNames: outputNames,
+      outputCount: 1,
+      outputValues: outputValues,
+    );
+
+    session.api.getTensorMutableData(
+      outputValues.value,
+      outputTensorDataPointer,
+    );
+    final floats = outputTensorDataPointer.value.cast<Float>();
+    session.api.getTensorTypeAndShape(outputValues.value, tensorTypeAndShape);
+    session.api.getTensorShapeElementCount(
+      tensorTypeAndShape.value,
+      tensorShapeElementCount,
+    );
+    return Float32List.fromList(
+      floats.asTypedList(tensorShapeElementCount.value),
+    );
+  } finally {
+    if (tensorTypeAndShape.value.address != 0) {
+      session.api.releaseTensorTypeAndShapeInfo(tensorTypeAndShape.value);
+    }
+    if (outputValues.value.address != 0) {
+      session.api.releaseValue(outputValues.value);
+    }
+    if (runOptionsPtr.value.address != 0) {
+      session.api.releaseRunOptions(runOptionsPtr.value);
+    }
+    for (final value in [inputIdsValue, inputMaskValue, tokenTypeValue]) {
+      if (value.value.address != 0) {
+        session.api.releaseValue(value.value);
+      }
+    }
+    if (memoryInfo.value.address != 0) {
+      session.api.releaseMemoryInfo(memoryInfo.value);
+    }
+    if (inputIdsTensorData != null) {
+      calloc.free(inputIdsTensorData);
+    }
+    if (inputMaskTensorData != null) {
+      calloc.free(inputMaskTensorData);
+    }
+    if (tokenTypeTensorData != null) {
+      calloc.free(tokenTypeTensorData);
+    }
+    malloc.free(inputIdName);
+    malloc.free(tokenTypeName);
+    malloc.free(embeddingsName);
+    calloc.free(tensorShapeElementCount);
+    calloc.free(tensorTypeAndShape);
+    calloc.free(outputTensorDataPointer);
+    calloc.free(runOptionsPtr);
+    calloc.free(outputValues);
+    calloc.free(outputNames);
+    calloc.free(inputValues);
+    calloc.free(inputNames);
+    calloc.free(tokenTypeValue);
+    calloc.free(inputMaskValue);
+    calloc.free(inputIdsValue);
+    calloc.free(memoryInfo);
+  }
 }

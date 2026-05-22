@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:fonnx/dylib_path_overrides.dart';
-import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free;
+import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free, malloc;
 import 'package:ffi/ffi.dart';
 
 extension DartNativeFunctions on OrtApi {
@@ -16,8 +16,10 @@ extension DartNativeFunctions on OrtApi {
   }
 
   String getErrorMessage(Pointer<OrtStatus> status) {
-    final getErrorMessageFn = GetErrorMessage.asFunction<
-        Pointer<Char> Function(Pointer<OrtStatus>)>();
+    final getErrorMessageFn =
+        GetErrorMessage.asFunction<
+          Pointer<Char> Function(Pointer<OrtStatus>)
+        >();
     final message = getErrorMessageFn(status);
     return message.toDartString();
   }
@@ -47,7 +49,8 @@ extension DartNativeFunctions on OrtApi {
           ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT.value,
     );
     if (status.isError) {
-      final error = 'Code: ${getErrorCodeMessage(status)}\n'
+      final error =
+          'Code: ${getErrorCodeMessage(status)}\n'
           'Message: ${getErrorMessage(status)}';
       calloc.free(inputTensorNative);
       calloc.free(inputShape);
@@ -96,7 +99,8 @@ extension DartNativeFunctions on OrtApi {
           ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT.value,
     );
     if (status.isError) {
-      final error = 'Code: ${getErrorCodeMessage(status)}\n'
+      final error =
+          'Code: ${getErrorCodeMessage(status)}\n'
           'Message: ${getErrorMessage(status)}';
       calloc.free(inputTensorNative);
       calloc.free(inputShape);
@@ -143,7 +147,8 @@ extension DartNativeFunctions on OrtApi {
     );
 
     if (status.isError) {
-      final error = 'Code: ${getErrorCodeMessage(status)}\n'
+      final error =
+          'Code: ${getErrorCodeMessage(status)}\n'
           'Message: ${getErrorMessage(status)}';
       calloc.free(inputTensorNative);
       calloc.free(inputShape);
@@ -178,8 +183,11 @@ extension DartNativeFunctions on OrtApi {
     inputShape[0] = values.length; // Depth: Number of 2D arrays
     inputShape[1] =
         values.first.length; // Rows: Number of rows in the first 2D array
-    inputShape[2] = values
-        .first.first.length; // Columns: Number of columns in the first row
+    inputShape[2] =
+        values
+            .first
+            .first
+            .length; // Columns: Number of columns in the first row
 
     final ptrVoid = inputTensorNative.cast<Void>();
     final status = createTensorWithDataAsOrtValue(
@@ -194,7 +202,8 @@ extension DartNativeFunctions on OrtApi {
     );
 
     if (status.isError) {
-      final error = 'Code: ${getErrorCodeMessage(status)}\n'
+      final error =
+          'Code: ${getErrorCodeMessage(status)}\n'
           'Message: ${getErrorMessage(status)}';
       calloc.free(inputTensorNative);
       calloc.free(inputShape);
@@ -242,7 +251,8 @@ extension DartNativeFunctions on OrtApi {
           ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64.value,
     );
     if (status.isError) {
-      final error = 'Code: ${getErrorCodeMessage(status)}\n'
+      final error =
+          'Code: ${getErrorCodeMessage(status)}\n'
           'Message: ${getErrorMessage(status)}';
       calloc.free(inputTensorNative);
       calloc.free(inputShape);
@@ -278,7 +288,8 @@ extension DartNativeFunctions on OrtApi {
           ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_INT32.value,
     );
     if (status.isError) {
-      final error = 'Code: ${getErrorCodeMessage(status)}\n'
+      final error =
+          'Code: ${getErrorCodeMessage(status)}\n'
           'Message: ${getErrorMessage(status)}';
       calloc.free(inputTensorNative);
       calloc.free(inputShape);
@@ -291,9 +302,10 @@ extension DartNativeFunctions on OrtApi {
   /// You MUST call [calloc.free] on the returned pointer when you are done with
   /// it, i.e. once inference is complete.
   Pointer<Uint8> createUint8Tensor(
-      Pointer<Pointer<OrtValue>> inputTensorPointer,
-      {required Pointer<OrtMemoryInfo> memoryInfo,
-      required List<int> values}) {
+    Pointer<Pointer<OrtValue>> inputTensorPointer, {
+    required Pointer<OrtMemoryInfo> memoryInfo,
+    required List<int> values,
+  }) {
     final sizeOfUint8 = sizeOf<Uint8>();
     final inputTensorNative = calloc<Uint8>(values.length * sizeOfUint8);
     for (var i = 0; i < values.length; i++) {
@@ -313,7 +325,8 @@ extension DartNativeFunctions on OrtApi {
           ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT8.value,
     );
     if (status.isError) {
-      final error = 'Code: ${getErrorCodeMessage(status)}\n'
+      final error =
+          'Code: ${getErrorCodeMessage(status)}\n'
           'Message: ${getErrorMessage(status)}';
       calloc.free(inputTensorNative);
       calloc.free(inputShape);
@@ -325,15 +338,15 @@ extension DartNativeFunctions on OrtApi {
 
   /// You MUST call [calloc.free] on the returned pointer.
   Pointer<Size> sessionGetOutputCount(Pointer<OrtSession> session) {
-    final getOutputCountFn = SessionGetOutputCount.asFunction<
-        Pointer<OrtStatus> Function(
-          Pointer<OrtSession>,
-          Pointer<Size>,
-        )>();
+    final getOutputCountFn =
+        SessionGetOutputCount.asFunction<
+          Pointer<OrtStatus> Function(Pointer<OrtSession>, Pointer<Size>)
+        >();
     final outputCount = calloc<Size>();
     final status = getOutputCountFn(session, outputCount);
     if (status.isError) {
-      final error = 'Code: ${getErrorCodeMessage(status)}\n'
+      final error =
+          'Code: ${getErrorCodeMessage(status)}\n'
           'Message: ${getErrorMessage(status)}';
       throw Exception(error);
     }
@@ -345,19 +358,22 @@ extension DartNativeFunctions on OrtApi {
     int index,
     Pointer<Pointer<Char>> out,
   ) {
-    final getFn = SessionGetOutputName.asFunction<
-        Pointer<OrtStatus> Function(
-          Pointer<OrtSession>,
-          int,
-          Pointer<OrtAllocator>,
-          Pointer<Pointer<Char>>,
-        )>();
+    final getFn =
+        SessionGetOutputName.asFunction<
+          Pointer<OrtStatus> Function(
+            Pointer<OrtSession>,
+            int,
+            Pointer<OrtAllocator>,
+            Pointer<Pointer<Char>>,
+          )
+        >();
     final allocator = calloc<Pointer<OrtAllocator>>();
     getAllocatorWithDefaultOptions(allocator);
     final status = getFn(session, index, allocator.value, out);
     calloc.free(allocator);
     if (status.isError) {
-      final error = 'Code: ${getErrorCodeMessage(status)}\n'
+      final error =
+          'Code: ${getErrorCodeMessage(status)}\n'
           'Message: ${getErrorMessage(status)}';
       throw Exception(error);
     }
@@ -368,11 +384,14 @@ extension DartNativeFunctions on OrtApi {
   Pointer<OrtStatus> createRunOptions(
     Pointer<Pointer<OrtRunOptions>> runOptions,
   ) {
-    final createRunOptionsFn = CreateRunOptions.asFunction<
-        Pointer<OrtStatus> Function(Pointer<Pointer<OrtRunOptions>>)>();
+    final createRunOptionsFn =
+        CreateRunOptions.asFunction<
+          Pointer<OrtStatus> Function(Pointer<Pointer<OrtRunOptions>>)
+        >();
     final status = createRunOptionsFn(runOptions);
     if (status.isError) {
-      final error = 'Code: ${getErrorCodeMessage(status)}\n'
+      final error =
+          'Code: ${getErrorCodeMessage(status)}\n'
           'Message: ${getErrorMessage(status)}';
       throw Exception(error);
     }
@@ -395,9 +414,18 @@ extension DartNativeFunctions on OrtApi {
     required int inputShapeLengthInBytes,
     required int onnxTensorElementDataType,
   }) {
-    final createTensorWithDataFn = CreateTensorWithDataAsOrtValue.asFunction<
-        Pointer<OrtStatus> Function(Pointer<OrtMemoryInfo>, Pointer<Void>, int,
-            Pointer<Int64>, int, int, Pointer<Pointer<OrtValue>> out)>();
+    final createTensorWithDataFn =
+        CreateTensorWithDataAsOrtValue.asFunction<
+          Pointer<OrtStatus> Function(
+            Pointer<OrtMemoryInfo>,
+            Pointer<Void>,
+            int,
+            Pointer<Int64>,
+            int,
+            int,
+            Pointer<Pointer<OrtValue>> out,
+          )
+        >();
     final status = createTensorWithDataFn(
       memoryInfo,
       inputData,
@@ -422,16 +450,14 @@ extension DartNativeFunctions on OrtApi {
     int ortAllocator = 3 /* OrtAllocatorType.OrtArenaAllocator */,
     int ortMemType = 0 /* OrtMemType.OrtMemTypeDefault */,
   }) {
-    final createCpuMemoryInfoFn = CreateCpuMemoryInfo.asFunction<
-        Pointer<OrtStatus> Function(
-            int, int, Pointer<Pointer<OrtMemoryInfo>>)>();
-    final status = createCpuMemoryInfoFn(
-      ortAllocator,
-      ortMemType,
-      memoryInfo,
-    );
+    final createCpuMemoryInfoFn =
+        CreateCpuMemoryInfo.asFunction<
+          Pointer<OrtStatus> Function(int, int, Pointer<Pointer<OrtMemoryInfo>>)
+        >();
+    final status = createCpuMemoryInfoFn(ortAllocator, ortMemType, memoryInfo);
     if (status.isError) {
-      final error = 'Code: ${getErrorCodeMessage(status)}\n'
+      final error =
+          'Code: ${getErrorCodeMessage(status)}\n'
           'Message: ${getErrorMessage(status)}';
       throw Exception(error);
     }
@@ -449,50 +475,94 @@ extension DartNativeFunctions on OrtApi {
     int logLevel = 3 /* OrtLoggingLevel.ORT_LOGGING_LEVEL_ERROR */,
     String logId = '',
   }) {
-    final createEnvFn = CreateEnv.asFunction<
-        Pointer<OrtStatus> Function(
-            int, Pointer<Char>, Pointer<Pointer<OrtEnv>>)>();
-    final status = createEnvFn(
-      logLevel,
-      logId.toNativeUtf8().cast<Char>(),
-      Pointer.fromAddress(env.address),
-    );
-    return status;
+    final createEnvFn =
+        CreateEnv.asFunction<
+          Pointer<OrtStatus> Function(
+            int,
+            Pointer<Char>,
+            Pointer<Pointer<OrtEnv>>,
+          )
+        >();
+    final logIdChars = logId.toNativeUtf8().cast<Char>();
+    try {
+      final status = createEnvFn(
+        logLevel,
+        logIdChars,
+        Pointer.fromAddress(env.address),
+      );
+      return status;
+    } finally {
+      malloc.free(logIdChars);
+    }
   }
 
-  Pointer<OrtStatus> createSession(
-      {required Pointer<OrtEnv> env,
-      required String modelPath,
-      required Pointer<OrtSessionOptions> sessionOptions,
-      required Pointer<Pointer<OrtSession>> session}) {
-    final createSessionFn = CreateSession.asFunction<
-        Pointer<OrtStatus> Function(Pointer<OrtEnv>, Pointer<Char>,
-            Pointer<OrtSessionOptions>, Pointer<Pointer<OrtSession>>)>();
+  void releaseEnv(Pointer<OrtEnv> env) {
+    final releaseEnvFn =
+        ReleaseEnv.asFunction<void Function(Pointer<OrtEnv>)>();
+    releaseEnvFn(env);
+  }
+
+  Pointer<OrtStatus> createSession({
+    required Pointer<OrtEnv> env,
+    required String modelPath,
+    required Pointer<OrtSessionOptions> sessionOptions,
+    required Pointer<Pointer<OrtSession>> session,
+  }) {
+    final createSessionFn =
+        CreateSession.asFunction<
+          Pointer<OrtStatus> Function(
+            Pointer<OrtEnv>,
+            Pointer<Char>,
+            Pointer<OrtSessionOptions>,
+            Pointer<Pointer<OrtSession>>,
+          )
+        >();
     final modelPathChars =
         defaultTargetPlatform == TargetPlatform.windows || Platform.isWindows
             ? modelPath.toNativeUtf16().cast<Char>()
             : modelPath.toNativeUtf8().cast<Char>();
-    final status = createSessionFn(
-      env,
-      modelPathChars,
-      sessionOptions,
-      session,
-    );
-    return status;
+    try {
+      final status = createSessionFn(
+        env,
+        modelPathChars,
+        sessionOptions,
+        session,
+      );
+      return status;
+    } finally {
+      malloc.free(modelPathChars);
+    }
   }
 
   Pointer<OrtStatus> createSessionOptions(
     Pointer<Pointer<OrtSessionOptions>> optionsPtr,
   ) {
-    final createSessionOptionsFn = CreateSessionOptions.asFunction<
-        Pointer<OrtStatus> Function(Pointer<Pointer<OrtSessionOptions>>)>();
+    final createSessionOptionsFn =
+        CreateSessionOptions.asFunction<
+          Pointer<OrtStatus> Function(Pointer<Pointer<OrtSessionOptions>>)
+        >();
     final status = createSessionOptionsFn(optionsPtr);
     if (status.isError) {
-      final error = 'Code: ${getErrorCodeMessage(status)}\n'
+      final error =
+          'Code: ${getErrorCodeMessage(status)}\n'
           'Message: ${getErrorMessage(status)}';
       throw Exception(error);
     }
     return status;
+  }
+
+  void releaseSessionOptions(Pointer<OrtSessionOptions> sessionOptions) {
+    final releaseSessionOptionsFn =
+        ReleaseSessionOptions.asFunction<
+          void Function(Pointer<OrtSessionOptions>)
+        >();
+    releaseSessionOptionsFn(sessionOptions);
+  }
+
+  void releaseSession(Pointer<OrtSession> session) {
+    final releaseSessionFn =
+        ReleaseSession.asFunction<void Function(Pointer<OrtSession>)>();
+    releaseSessionFn(session);
   }
 
   // external ffi.Pointer<
@@ -507,8 +577,8 @@ extension DartNativeFunctions on OrtApi {
   ) {
     final getStringTensorElementLengthFn =
         GetStringTensorElementLength.asFunction<
-            Pointer<OrtStatus> Function(
-                Pointer<OrtValue>, int, Pointer<Size>)>();
+          Pointer<OrtStatus> Function(Pointer<OrtValue>, int, Pointer<Size>)
+        >();
     final status = getStringTensorElementLengthFn(value, index, out);
     if (status.isError) {
       final error =
@@ -525,9 +595,15 @@ extension DartNativeFunctions on OrtApi {
     int index,
     Pointer<Void> s,
   ) {
-    final getStringTensorElementFn = GetStringTensorElement.asFunction<
-        Pointer<OrtStatus> Function(
-            Pointer<OrtValue>, int, int, Pointer<Void>)>();
+    final getStringTensorElementFn =
+        GetStringTensorElement.asFunction<
+          Pointer<OrtStatus> Function(
+            Pointer<OrtValue>,
+            int,
+            int,
+            Pointer<Void>,
+          )
+        >();
     final status = getStringTensorElementFn(value, stringLength, index, s);
     if (status.isError) {
       final error =
@@ -539,10 +615,12 @@ extension DartNativeFunctions on OrtApi {
   }
 
   Pointer<OrtStatus> getAllocatorWithDefaultOptions(
-      Pointer<Pointer<OrtAllocator>> out) {
+    Pointer<Pointer<OrtAllocator>> out,
+  ) {
     final getAllocatorWithDefaultOptionsFn =
         GetAllocatorWithDefaultOptions.asFunction<
-            Pointer<OrtStatus> Function(Pointer<Pointer<OrtAllocator>>)>();
+          Pointer<OrtStatus> Function(Pointer<Pointer<OrtAllocator>>)
+        >();
     final status = getAllocatorWithDefaultOptionsFn(out);
     return status;
   }
@@ -551,9 +629,10 @@ extension DartNativeFunctions on OrtApi {
     Pointer<OrtValue> value,
     Pointer<Pointer<Void>> out,
   ) {
-    final getTensorMutableDataFn = GetTensorMutableData.asFunction<
-        Pointer<OrtStatus> Function(
-            Pointer<OrtValue>, Pointer<Pointer<Void>>)>();
+    final getTensorMutableDataFn =
+        GetTensorMutableData.asFunction<
+          Pointer<OrtStatus> Function(Pointer<OrtValue>, Pointer<Pointer<Void>>)
+        >();
     final status = getTensorMutableDataFn(value, out);
     if (status.isError) {
       final error =
@@ -568,9 +647,13 @@ extension DartNativeFunctions on OrtApi {
     Pointer<OrtTensorTypeAndShapeInfo> info,
     Pointer<Size> out,
   ) {
-    final getDimensionsCountFn = GetDimensionsCount.asFunction<
-        Pointer<OrtStatus> Function(
-            Pointer<OrtTensorTypeAndShapeInfo>, Pointer<Size>)>();
+    final getDimensionsCountFn =
+        GetDimensionsCount.asFunction<
+          Pointer<OrtStatus> Function(
+            Pointer<OrtTensorTypeAndShapeInfo>,
+            Pointer<Size>,
+          )
+        >();
 
     final status = getDimensionsCountFn(info, out);
     if (status.isError) {
@@ -588,9 +671,13 @@ extension DartNativeFunctions on OrtApi {
     Pointer<OrtValue> value,
     Pointer<Pointer<OrtTensorTypeAndShapeInfo>> out,
   ) {
-    final getTensorTypeAndShapeFn = GetTensorTypeAndShape.asFunction<
-        Pointer<OrtStatus> Function(
-            Pointer<OrtValue>, Pointer<Pointer<OrtTensorTypeAndShapeInfo>>)>();
+    final getTensorTypeAndShapeFn =
+        GetTensorTypeAndShape.asFunction<
+          Pointer<OrtStatus> Function(
+            Pointer<OrtValue>,
+            Pointer<Pointer<OrtTensorTypeAndShapeInfo>>,
+          )
+        >();
     final status = getTensorTypeAndShapeFn(value, out);
     if (status.isError) {
       final error =
@@ -601,11 +688,11 @@ extension DartNativeFunctions on OrtApi {
     return status;
   }
 
-  void releaseTensorTypeAndShapeInfo(
-    Pointer<OrtTensorTypeAndShapeInfo> info,
-  ) {
-    final releaseTensorTypeAndShapeInfoFn = ReleaseTensorTypeAndShapeInfo
-        .asFunction<void Function(Pointer<OrtTensorTypeAndShapeInfo>)>();
+  void releaseTensorTypeAndShapeInfo(Pointer<OrtTensorTypeAndShapeInfo> info) {
+    final releaseTensorTypeAndShapeInfoFn =
+        ReleaseTensorTypeAndShapeInfo.asFunction<
+          void Function(Pointer<OrtTensorTypeAndShapeInfo>)
+        >();
     releaseTensorTypeAndShapeInfoFn(info);
   }
 
@@ -613,9 +700,13 @@ extension DartNativeFunctions on OrtApi {
     Pointer<OrtTensorTypeAndShapeInfo> info,
     Pointer<UnsignedInt> out,
   ) {
-    final getTensorElementTypeFn = GetTensorElementType.asFunction<
-        OrtStatusPtr Function(
-            Pointer<OrtTensorTypeAndShapeInfo>, Pointer<UnsignedInt>)>();
+    final getTensorElementTypeFn =
+        GetTensorElementType.asFunction<
+          OrtStatusPtr Function(
+            Pointer<OrtTensorTypeAndShapeInfo>,
+            Pointer<UnsignedInt>,
+          )
+        >();
     final status = getTensorElementTypeFn(info, out);
     if (status.isError) {
       final error =
@@ -630,9 +721,13 @@ extension DartNativeFunctions on OrtApi {
     Pointer<OrtTensorTypeAndShapeInfo> info,
     Pointer<Size> out,
   ) {
-    final getTensorShapeElementCountFn = GetTensorShapeElementCount.asFunction<
-        Pointer<OrtStatus> Function(
-            Pointer<OrtTensorTypeAndShapeInfo>, Pointer<Size>)>();
+    final getTensorShapeElementCountFn =
+        GetTensorShapeElementCount.asFunction<
+          Pointer<OrtStatus> Function(
+            Pointer<OrtTensorTypeAndShapeInfo>,
+            Pointer<Size>,
+          )
+        >();
     final status = getTensorShapeElementCountFn(info, out);
     if (status.isError) {
       final error =
@@ -648,9 +743,14 @@ extension DartNativeFunctions on OrtApi {
     Pointer<Char> libraryPath,
     Pointer<Pointer<Void>> libraryHandle,
   ) {
-    final registerCustomOpsLibraryFn = RegisterCustomOpsLibrary.asFunction<
-        Pointer<OrtStatus> Function(Pointer<OrtSessionOptions>, Pointer<Char>,
-            Pointer<Pointer<Void>> libraryHandle)>();
+    final registerCustomOpsLibraryFn =
+        RegisterCustomOpsLibrary.asFunction<
+          Pointer<OrtStatus> Function(
+            Pointer<OrtSessionOptions>,
+            Pointer<Char>,
+            Pointer<Pointer<Void>> libraryHandle,
+          )
+        >();
     final status = registerCustomOpsLibraryFn(
       options,
       libraryPath,
@@ -675,17 +775,19 @@ extension DartNativeFunctions on OrtApi {
     required int outputCount,
     required Pointer<Pointer<OrtValue>> outputValues,
   }) {
-    final runFn = Run.asFunction<
-        Pointer<OrtStatus> Function(
-          Pointer<OrtSession>,
-          Pointer<OrtRunOptions>,
-          Pointer<Pointer<Char>>,
-          Pointer<Pointer<OrtValue>>,
-          int,
-          Pointer<Pointer<Char>>,
-          int,
-          Pointer<Pointer<OrtValue>>,
-        )>();
+    final runFn =
+        Run.asFunction<
+          Pointer<OrtStatus> Function(
+            Pointer<OrtSession>,
+            Pointer<OrtRunOptions>,
+            Pointer<Pointer<Char>>,
+            Pointer<Pointer<OrtValue>>,
+            int,
+            Pointer<Pointer<Char>>,
+            int,
+            Pointer<Pointer<OrtValue>>,
+          )
+        >();
     final status = runFn(
       session,
       runOptions,
@@ -697,7 +799,8 @@ extension DartNativeFunctions on OrtApi {
       outputValues,
     );
     if (status.isError) {
-      final error = 'Run failed. Code: ${getErrorCodeMessage(status)}\n'
+      final error =
+          'Run failed. Code: ${getErrorCodeMessage(status)}\n'
           'Message: ${getErrorMessage(status)}';
       // rationale: Crucial for debugging, for some reason this
       // isn't bubbling to UI.
@@ -731,8 +834,10 @@ extension DartNativeFunctions on OrtApi {
     Pointer<OrtSessionOptions> options,
     int intraOpNumThreads,
   ) {
-    final fn = SetIntraOpNumThreads.asFunction<
-        Pointer<OrtStatus> Function(Pointer<OrtSessionOptions>, int)>();
+    final fn =
+        SetIntraOpNumThreads.asFunction<
+          Pointer<OrtStatus> Function(Pointer<OrtSessionOptions>, int)
+        >();
     final status = fn(options, intraOpNumThreads);
     if (status.isError) {
       final error =
@@ -747,8 +852,10 @@ extension DartNativeFunctions on OrtApi {
     Pointer<OrtSessionOptions> options,
     int interOpNumThreads,
   ) {
-    final fn = SetInterOpNumThreads.asFunction<
-        Pointer<OrtStatus> Function(Pointer<OrtSessionOptions>, int)>();
+    final fn =
+        SetInterOpNumThreads.asFunction<
+          Pointer<OrtStatus> Function(Pointer<OrtSessionOptions>, int)
+        >();
     final status = fn(options, interOpNumThreads);
     if (status.isError) {
       final error =
@@ -766,14 +873,32 @@ extension DartNativeFunctions on OrtApi {
 /// model anymore. Conversely, you must free it when you are done with it.
 class OrtSessionObjects {
   final Pointer<Pointer<OrtSession>> sessionPtr;
+  final Pointer<Pointer<OrtEnv>> envPtr;
   final OrtApiBase apiBase;
   final OrtApi api;
 
   OrtSessionObjects({
     required this.sessionPtr,
+    required this.envPtr,
     required this.apiBase,
     required this.api,
   });
+}
+
+void releaseOrtSessionObjects(OrtSessionObjects? objects) {
+  if (objects == null) {
+    return;
+  }
+
+  if (objects.sessionPtr.value.address != 0) {
+    objects.api.releaseSession(objects.sessionPtr.value);
+  }
+  calloc.free(objects.sessionPtr);
+
+  if (objects.envPtr.value.address != 0) {
+    objects.api.releaseEnv(objects.envPtr.value);
+  }
+  calloc.free(objects.envPtr);
 }
 
 String get ortDylibPath {
@@ -844,8 +969,10 @@ String get ortExtensionsDylibPath {
 ///
 /// It is reasonable to never free it in an app where you would like the model
 /// to be loaded for the lifetime of the app.
-OrtSessionObjects createOrtSession(String modelPath,
-    {bool includeOnnxExtensionsOps = false}) {
+OrtSessionObjects createOrtSession(
+  String modelPath, {
+  bool includeOnnxExtensionsOps = false,
+}) {
   // Used to have:
   //   DynamicLibrary.open(dylibPath);
   //   final baseApi = OrtGetApiBase().ref;
@@ -857,8 +984,10 @@ OrtSessionObjects createOrtSession(String modelPath,
   //   the explicit library did fix it.
   final lib = DynamicLibrary.open(ortDylibPath);
 
-  final fn = lib.lookupFunction<Pointer<OrtApiBase> Function(),
-      Pointer<OrtApiBase> Function()>('OrtGetApiBase');
+  final fn = lib.lookupFunction<
+    Pointer<OrtApiBase> Function(),
+    Pointer<OrtApiBase> Function()
+  >('OrtGetApiBase');
   final answer = fn.call();
   final baseApi = answer.ref;
   final api = baseApi.GetApi.asFunction<Pointer<OrtApi> Function(int)>();
@@ -866,7 +995,8 @@ OrtSessionObjects createOrtSession(String modelPath,
   final envPtr = calloc<Pointer<OrtEnv>>();
   final status = ortApi.createEnv(envPtr);
   if (status.isError) {
-    final error = 'Code: ${ortApi.getErrorCodeMessage(status)}\n'
+    final error =
+        'Code: ${ortApi.getErrorCodeMessage(status)}\n'
         'Message: ${ortApi.getErrorMessage(status)}';
     throw Exception(error);
   }
@@ -878,8 +1008,16 @@ OrtSessionObjects createOrtSession(String modelPath,
       DynamicLibrary.open(ortExtensionsDylibPath);
       final libraryHandle = calloc<Pointer<Void>>();
       final utf8Path = ortExtensionsDylibPath.toNativeUtf8().cast<Char>();
-      ortApi.registerCustomOpsLibrary(
-          sessionOptionsPtr.value, utf8Path, libraryHandle);
+      try {
+        ortApi.registerCustomOpsLibrary(
+          sessionOptionsPtr.value,
+          utf8Path,
+          libraryHandle,
+        );
+      } finally {
+        malloc.free(utf8Path);
+        calloc.free(libraryHandle);
+      }
     } catch (e) {
       debugPrint('Error loading ORT Extensions: $e');
       rethrow;
@@ -903,16 +1041,18 @@ OrtSessionObjects createOrtSession(String modelPath,
     session: sessionPtr,
   );
   if (sessionStatus.isError) {
-    final error = 'Code: ${ortApi.getErrorCodeMessage(sessionStatus)}\n'
+    final error =
+        'Code: ${ortApi.getErrorCodeMessage(sessionStatus)}\n'
         'Message: ${ortApi.getErrorMessage(sessionStatus)}';
     throw Exception(error);
   }
 
+  ortApi.releaseSessionOptions(sessionOptionsPtr.value);
   calloc.free(sessionOptionsPtr);
-  calloc.free(envPtr);
   debugPrint('ORT Session created');
   return OrtSessionObjects(
     sessionPtr: sessionPtr,
+    envPtr: envPtr,
     apiBase: baseApi,
     api: ortApi,
   );

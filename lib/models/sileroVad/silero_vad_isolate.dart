@@ -6,7 +6,7 @@ import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fonnx/dylib_path_overrides.dart';
 import 'package:fonnx/extensions/uint8list.dart';
-import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free;
+import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free, malloc;
 import 'package:fonnx/onnx/ort.dart';
 
 class SileroVadIsolateMessage {
@@ -40,11 +40,16 @@ void sileroVadIsolateEntryPoint(SendPort mainSendPort) {
           fonnxOrtDylibPathOverride = message.ortDylibPathOverride;
         }
         // Lazily create the Ort session if it's not already done.
-        ortSessionObjects ??=
-            createOrtSession(message.modelPath, includeOnnxExtensionsOps: true);
+        ortSessionObjects ??= createOrtSession(
+          message.modelPath,
+          includeOnnxExtensionsOps: true,
+        );
         // Perform the inference here using ortSessionObjects and message.tokens, retrieve result.
         final result = await _getTranscriptFfi(
-            ortSessionObjects!, message.audioBytes, message.previousState);
+          ortSessionObjects!,
+          message.audioBytes,
+          message.previousState,
+        );
         message.replyPort.send(result);
       } catch (e) {
         // Send the error message back to the main isolate.
@@ -64,10 +69,7 @@ void sileroVadIsolateEntryPoint(SendPort mainSendPort) {
 }
 
 void cleanupOrtSession(OrtSessionObjects? ortSessionObjects) {
-  // TODO: Unimplemented cleanupOrtSession
-  if (ortSessionObjects == null) {
-    return;
-  }
+  releaseOrtSessionObjects(ortSessionObjects);
 }
 
 class SileroVadIsolateManager {
@@ -133,14 +135,15 @@ class SileroVadIsolateManager {
       throw result;
     } else {
       throw Exception(
-          'Unknown error occurred in the ONNX isolate. Output was runtime type: ${result.runtimeType}');
+        'Unknown error occurred in the ONNX isolate. Output was runtime type: ${result.runtimeType}',
+      );
     }
   }
 
   // Shut down the isolate.
   void stop() {
     _sendPort?.send('close');
-    _isolate?.kill(priority: Isolate.immediate);
+    _sendPort = null;
     _isolate = null;
   }
 }
@@ -168,112 +171,204 @@ Future<Map<String, dynamic>> _getTranscriptFfi(
   // - output: probability of speech, float32[batch, 1]
   // - hn: LTSM hidden state, float32[2, batch, 64]
   // - cn: LTSM cell state, float32[2, batch, 64]
-  Float32List audioData = audioBytes.toAudioFloat32List();
-  final usePreviousState = previousState.length >= 2 &&
+  final audioData = audioBytes.toAudioFloat32List();
+  final usePreviousState =
+      previousState.length >= 2 &&
       previousState['hn'] is List<List<Float32List>> &&
       previousState['cn'] is List<List<Float32List>>;
 
   final memoryInfo = calloc<Pointer<OrtMemoryInfo>>();
-  session.api.createCpuMemoryInfo(memoryInfo);
   final inputValue = calloc<Pointer<OrtValue>>();
-  session.api.createFloat32Tensor2D(inputValue,
-      memoryInfo: memoryInfo.value, values: [audioData]);
   final srValue = calloc<Pointer<OrtValue>>();
-  session.api.createInt64Tensor(srValue,
-      memoryInfo: memoryInfo.value, values: [16000]);
-  const batchSize = 1;
-  List<List<List<double>>> h = usePreviousState
-      ? previousState['hn']
-      : List.generate(
-          2, (_) => List.generate(batchSize, (_) => List.filled(64, 0.0)));
-  List<List<List<double>>> c = usePreviousState ? previousState['cn'] : h;
   final hValue = calloc<Pointer<OrtValue>>();
-  session.api
-      .createFloat32Tensor3D(hValue, memoryInfo: memoryInfo.value, values: h);
   final cValue = calloc<Pointer<OrtValue>>();
-  session.api
-      .createFloat32Tensor3D(cValue, memoryInfo: memoryInfo.value, values: c);
 
   const kInputCount = 4;
-  final inputNamesPointer = calloc<Pointer<Pointer<Char>>>(kInputCount);
-  inputNamesPointer[0] = 'input'.toNativeUtf8().cast();
-  inputNamesPointer[1] = 'sr'.toNativeUtf8().cast();
-  inputNamesPointer[2] = 'h'.toNativeUtf8().cast();
-  inputNamesPointer[3] = 'c'.toNativeUtf8().cast();
-  final inputNames = inputNamesPointer.cast<Pointer<Char>>();
+  final inputNames = calloc<Pointer<Char>>(kInputCount);
+  final inputNameInput = 'input'.toNativeUtf8();
+  final inputNameSr = 'sr'.toNativeUtf8();
+  final inputNameH = 'h'.toNativeUtf8();
+  final inputNameC = 'c'.toNativeUtf8();
   final inputValues = calloc<Pointer<OrtValue>>(kInputCount);
-  inputValues[0] = inputValue.value;
-  inputValues[1] = srValue.value;
-  inputValues[2] = hValue.value;
-  inputValues[3] = cValue.value;
 
   const kOutputCount = 3;
-  final outputNamesPointer = calloc<Pointer<Pointer<Char>>>(kOutputCount);
-  outputNamesPointer[0] = 'output'.toNativeUtf8().cast();
-  outputNamesPointer[1] = 'hn'.toNativeUtf8().cast();
-  outputNamesPointer[2] = 'cn'.toNativeUtf8().cast();
-  final outputNames = outputNamesPointer.cast<Pointer<Char>>();
+  final outputNames = calloc<Pointer<Char>>(kOutputCount);
+  final outputNameOutput = 'output'.toNativeUtf8();
+  final outputNameHn = 'hn'.toNativeUtf8();
+  final outputNameCn = 'cn'.toNativeUtf8();
   final outputValues = calloc<Pointer<OrtValue>>(kOutputCount);
   final runOptionsPtr = calloc<Pointer<OrtRunOptions>>();
-  session.api.createRunOptions(runOptionsPtr);
-  session.api.run(
-    session: session.sessionPtr.value,
-    runOptions: runOptionsPtr.value,
-    inputNames: inputNames,
-    inputValues: inputValues,
-    inputCount: kInputCount,
-    outputNames: outputNames,
-    outputValues: outputValues,
-    outputCount: kOutputCount,
-  );
 
-  List<Pointer<OrtValue>> outputValuesList = [
-    outputValues[0],
-    outputValues[1],
-    outputValues[2],
-  ];
-  final result = extractOutputs(session.api, outputValuesList);
-  return result;
+  Pointer<Float>? inputTensorData;
+  Pointer<Int64>? srTensorData;
+  Pointer<Float>? hTensorData;
+  Pointer<Float>? cTensorData;
+
+  try {
+    session.api.createCpuMemoryInfo(memoryInfo);
+    inputTensorData = session.api.createFloat32Tensor2D(
+      inputValue,
+      memoryInfo: memoryInfo.value,
+      values: [audioData],
+    );
+    srTensorData = session.api.createInt64Tensor(
+      srValue,
+      memoryInfo: memoryInfo.value,
+      values: [16000],
+    );
+    const batchSize = 1;
+    final List<List<List<double>>> h =
+        usePreviousState
+            ? previousState['hn']
+            : List.generate(
+              2,
+              (_) => List.generate(batchSize, (_) => List.filled(64, 0.0)),
+            );
+    final List<List<List<double>>> c =
+        usePreviousState ? previousState['cn'] : h;
+    hTensorData = session.api.createFloat32Tensor3D(
+      hValue,
+      memoryInfo: memoryInfo.value,
+      values: h,
+    );
+    cTensorData = session.api.createFloat32Tensor3D(
+      cValue,
+      memoryInfo: memoryInfo.value,
+      values: c,
+    );
+
+    inputNames[0] = inputNameInput.cast<Char>();
+    inputNames[1] = inputNameSr.cast<Char>();
+    inputNames[2] = inputNameH.cast<Char>();
+    inputNames[3] = inputNameC.cast<Char>();
+    inputValues[0] = inputValue.value;
+    inputValues[1] = srValue.value;
+    inputValues[2] = hValue.value;
+    inputValues[3] = cValue.value;
+
+    outputNames[0] = outputNameOutput.cast<Char>();
+    outputNames[1] = outputNameHn.cast<Char>();
+    outputNames[2] = outputNameCn.cast<Char>();
+
+    session.api.createRunOptions(runOptionsPtr);
+    session.api.run(
+      session: session.sessionPtr.value,
+      runOptions: runOptionsPtr.value,
+      inputNames: inputNames,
+      inputValues: inputValues,
+      inputCount: kInputCount,
+      outputNames: outputNames,
+      outputValues: outputValues,
+      outputCount: kOutputCount,
+    );
+
+    return extractOutputs(session.api, [
+      outputValues[0],
+      outputValues[1],
+      outputValues[2],
+    ]);
+  } finally {
+    for (var i = 0; i < kOutputCount; i++) {
+      if (outputValues[i].address != 0) {
+        session.api.releaseValue(outputValues[i]);
+      }
+    }
+    if (runOptionsPtr.value.address != 0) {
+      session.api.releaseRunOptions(runOptionsPtr.value);
+    }
+    for (final value in [inputValue, srValue, hValue, cValue]) {
+      if (value.value.address != 0) {
+        session.api.releaseValue(value.value);
+      }
+    }
+    if (memoryInfo.value.address != 0) {
+      session.api.releaseMemoryInfo(memoryInfo.value);
+    }
+
+    if (inputTensorData != null) {
+      calloc.free(inputTensorData);
+    }
+    if (srTensorData != null) {
+      calloc.free(srTensorData);
+    }
+    if (hTensorData != null) {
+      calloc.free(hTensorData);
+    }
+    if (cTensorData != null) {
+      calloc.free(cTensorData);
+    }
+
+    malloc.free(inputNameInput);
+    malloc.free(inputNameSr);
+    malloc.free(inputNameH);
+    malloc.free(inputNameC);
+    malloc.free(outputNameOutput);
+    malloc.free(outputNameHn);
+    malloc.free(outputNameCn);
+
+    calloc.free(runOptionsPtr);
+    calloc.free(outputValues);
+    calloc.free(outputNames);
+    calloc.free(inputValues);
+    calloc.free(inputNames);
+    calloc.free(cValue);
+    calloc.free(hValue);
+    calloc.free(srValue);
+    calloc.free(inputValue);
+    calloc.free(memoryInfo);
+  }
 }
 
 Map<String, dynamic> extractOutputs(
-    OrtApi api, List<Pointer<OrtValue>> outputValues) {
-  Map<String, dynamic> result = {};
+  OrtApi api,
+  List<Pointer<OrtValue>> outputValues,
+) {
+  final result = <String, dynamic>{};
 
-  for (int i = 0; i < 3; i++) {
+  for (var i = 0; i < 3; i++) {
     // Iterate through output, hn, cn
     final tensorDataPointer = calloc<Pointer<Void>>();
-    api.getTensorMutableData(outputValues[i], tensorDataPointer);
-    final floatsPtr = tensorDataPointer.value.cast<Float>();
-
     final tensorTypeAndShape = calloc<Pointer<OrtTensorTypeAndShapeInfo>>();
-    api.getTensorTypeAndShape(outputValues[i], tensorTypeAndShape);
     final tensorShapeElementCount = calloc<Size>();
-    api.getTensorShapeElementCount(
-        tensorTypeAndShape.value, tensorShapeElementCount);
-    final elementCount = tensorShapeElementCount.value;
-    final floatList = floatsPtr.asTypedList(elementCount);
+    try {
+      api.getTensorMutableData(outputValues[i], tensorDataPointer);
+      final floatsPtr = tensorDataPointer.value.cast<Float>();
 
-    // Based on the assumption of shape [2, batch size (1), 64] for hn and cn
-    if (i > 0) {
-      // For hn and cn
-      // Reshape the flat list into [2, 1, 64] - Since the batch size is known to be 1, we simplify
-      List<List<Float32List>> reshaped = List.generate(
+      api.getTensorTypeAndShape(outputValues[i], tensorTypeAndShape);
+      api.getTensorShapeElementCount(
+        tensorTypeAndShape.value,
+        tensorShapeElementCount,
+      );
+      final floatList = floatsPtr.asTypedList(tensorShapeElementCount.value);
+
+      // Based on the assumption of shape [2, batch size (1), 64] for hn and cn
+      if (i > 0) {
+        // For hn and cn
+        // Reshape the flat list into [2, 1, 64] - Since the batch size is known to be 1, we simplify
+        final reshaped = List.generate(
           2,
           (dim1) => List.generate(
-              1,
-              (dim2) => Float32List.fromList(floatList.sublist(
-                  (dim1 * 64) + (dim2 * 64),
-                  (dim1 * 64) + ((dim2 + 1) * 64)))));
-      result[i == 1 ? 'hn' : 'cn'] = reshaped;
-    } else {
-      result['output'] = floatList;
+            1,
+            (dim2) => Float32List.fromList(
+              floatList.sublist(
+                (dim1 * 64) + (dim2 * 64),
+                (dim1 * 64) + ((dim2 + 1) * 64),
+              ),
+            ),
+          ),
+        );
+        result[i == 1 ? 'hn' : 'cn'] = reshaped;
+      } else {
+        result['output'] = Float32List.fromList(floatList);
+      }
+    } finally {
+      if (tensorTypeAndShape.value.address != 0) {
+        api.releaseTensorTypeAndShapeInfo(tensorTypeAndShape.value);
+      }
+      calloc.free(tensorDataPointer);
+      calloc.free(tensorTypeAndShape);
+      calloc.free(tensorShapeElementCount);
     }
-
-    // Cleanup
-    calloc.free(tensorDataPointer);
-    calloc.free(tensorTypeAndShape);
-    calloc.free(tensorShapeElementCount);
   }
 
   return result;

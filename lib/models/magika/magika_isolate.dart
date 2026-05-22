@@ -5,7 +5,7 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fonnx/dylib_path_overrides.dart';
-import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free;
+import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free, malloc;
 import 'package:fonnx/onnx/ort.dart';
 
 class MagikaIsolateMessage {
@@ -37,11 +37,15 @@ void magikaIsolateEntryPoint(SendPort mainSendPort) {
           fonnxOrtDylibPathOverride = message.ortDylibPathOverride;
         }
         // Lazily create the Ort session if it's not already done.
-        ortSessionObjects ??=
-            createOrtSession(message.modelPath, includeOnnxExtensionsOps: true);
+        ortSessionObjects ??= createOrtSession(
+          message.modelPath,
+          includeOnnxExtensionsOps: true,
+        );
         // Perform the inference here using ortSessionObjects and message.tokens, retrieve result.
-        final result =
-            await _getMagikaResultVector(ortSessionObjects!, message.bytes);
+        final result = await _getMagikaResultVector(
+          ortSessionObjects!,
+          message.bytes,
+        );
         message.replyPort.send(result);
       } catch (e) {
         // Send the error message back to the main isolate.
@@ -61,9 +65,7 @@ void magikaIsolateEntryPoint(SendPort mainSendPort) {
 }
 
 void cleanupOrtSession(OrtSessionObjects? ortSessionObjects) {
-  if (ortSessionObjects == null) {
-    return;
-  }
+  releaseOrtSessionObjects(ortSessionObjects);
 }
 
 class MagikaIsolateManager {
@@ -126,14 +128,15 @@ class MagikaIsolateManager {
       throw result;
     } else {
       throw Exception(
-          'Unknown error occurred in the ONNX isolate. Output was runtime type: ${result.runtimeType}');
+        'Unknown error occurred in the ONNX isolate. Output was runtime type: ${result.runtimeType}',
+      );
     }
   }
 
   // Shut down the isolate.
   void stop() {
     _sendPort?.send('close');
-    _isolate?.kill(priority: Isolate.immediate);
+    _sendPort = null;
     _isolate = null;
   }
 }
@@ -148,44 +151,85 @@ Future<Float32List> _getMagikaResultVector(
   // Outputs:
   // - target_label: float32[batch, 113]
   final memoryInfo = calloc<Pointer<OrtMemoryInfo>>();
-  session.api.createCpuMemoryInfo(memoryInfo);
   final inputValue = calloc<Pointer<OrtValue>>();
-  session.api.createFloat32Tensor2DFromInts(inputValue,
-      memoryInfo: memoryInfo.value, values: [bytes]);
   const kInputCount = 1;
-  final inputNamesPointer = calloc<Pointer<Pointer<Char>>>(kInputCount);
-  inputNamesPointer[0] = 'bytes'.toNativeUtf8().cast();
-  final inputNames = inputNamesPointer.cast<Pointer<Char>>();
+  final inputNames = calloc<Pointer<Char>>(kInputCount);
+  final inputName = 'bytes'.toNativeUtf8();
   final inputValues = calloc<Pointer<OrtValue>>(kInputCount);
-  inputValues[0] = inputValue.value;
-
   const kOutputCount = 1;
-  final outputNamesPointer = calloc<Pointer<Pointer<Char>>>(kOutputCount);
-  outputNamesPointer[0] = 'target_label'.toNativeUtf8().cast();
-  final outputNames = outputNamesPointer.cast<Pointer<Char>>();
+  final outputNames = calloc<Pointer<Char>>(kOutputCount);
+  final outputName = 'target_label'.toNativeUtf8();
   final outputValues = calloc<Pointer<OrtValue>>(kOutputCount);
   final runOptionsPtr = calloc<Pointer<OrtRunOptions>>();
-  session.api.createRunOptions(runOptionsPtr);
-  session.api.run(
-    session: session.sessionPtr.value,
-    runOptions: runOptionsPtr.value,
-    inputNames: inputNames,
-    inputValues: inputValues,
-    inputCount: kInputCount,
-    outputNames: outputNames,
-    outputValues: outputValues,
-    outputCount: kOutputCount,
-  );
-
   final tensorDataPointer = calloc<Pointer<Void>>();
-  session.api.getTensorMutableData(outputValues[0], tensorDataPointer);
-  final floatsPtr = tensorDataPointer.value.cast<Float>();
   final tensorTypeAndShape = calloc<Pointer<OrtTensorTypeAndShapeInfo>>();
-  session.api.getTensorTypeAndShape(outputValues[0], tensorTypeAndShape);
   final tensorShapeElementCount = calloc<Size>();
-  session.api.getTensorShapeElementCount(
-      tensorTypeAndShape.value, tensorShapeElementCount);
-  final elementCount = tensorShapeElementCount.value;
-  final floatList = floatsPtr.asTypedList(elementCount);
-  return floatList;
+
+  Pointer<Float>? inputTensorData;
+
+  try {
+    session.api.createCpuMemoryInfo(memoryInfo);
+    inputTensorData = session.api.createFloat32Tensor2DFromInts(
+      inputValue,
+      memoryInfo: memoryInfo.value,
+      values: [bytes],
+    );
+    inputNames[0] = inputName.cast<Char>();
+    inputValues[0] = inputValue.value;
+    outputNames[0] = outputName.cast<Char>();
+
+    session.api.createRunOptions(runOptionsPtr);
+    session.api.run(
+      session: session.sessionPtr.value,
+      runOptions: runOptionsPtr.value,
+      inputNames: inputNames,
+      inputValues: inputValues,
+      inputCount: kInputCount,
+      outputNames: outputNames,
+      outputValues: outputValues,
+      outputCount: kOutputCount,
+    );
+
+    session.api.getTensorMutableData(outputValues[0], tensorDataPointer);
+    final floatsPtr = tensorDataPointer.value.cast<Float>();
+    session.api.getTensorTypeAndShape(outputValues[0], tensorTypeAndShape);
+    session.api.getTensorShapeElementCount(
+      tensorTypeAndShape.value,
+      tensorShapeElementCount,
+    );
+    return Float32List.fromList(
+      floatsPtr.asTypedList(tensorShapeElementCount.value),
+    );
+  } finally {
+    if (tensorTypeAndShape.value.address != 0) {
+      session.api.releaseTensorTypeAndShapeInfo(tensorTypeAndShape.value);
+    }
+    if (outputValues[0].address != 0) {
+      session.api.releaseValue(outputValues[0]);
+    }
+    if (runOptionsPtr.value.address != 0) {
+      session.api.releaseRunOptions(runOptionsPtr.value);
+    }
+    if (inputValue.value.address != 0) {
+      session.api.releaseValue(inputValue.value);
+    }
+    if (memoryInfo.value.address != 0) {
+      session.api.releaseMemoryInfo(memoryInfo.value);
+    }
+    if (inputTensorData != null) {
+      calloc.free(inputTensorData);
+    }
+    malloc.free(inputName);
+    malloc.free(outputName);
+    calloc.free(tensorShapeElementCount);
+    calloc.free(tensorTypeAndShape);
+    calloc.free(tensorDataPointer);
+    calloc.free(runOptionsPtr);
+    calloc.free(outputValues);
+    calloc.free(outputNames);
+    calloc.free(inputValues);
+    calloc.free(inputNames);
+    calloc.free(inputValue);
+    calloc.free(memoryInfo);
+  }
 }

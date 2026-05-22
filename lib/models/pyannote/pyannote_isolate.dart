@@ -6,7 +6,7 @@ import 'dart:math';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fonnx/dylib_path_overrides.dart';
-import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free;
+import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free, malloc;
 import 'package:fonnx/onnx/ort.dart';
 
 /// Message class for Pyannote isolate communication.
@@ -24,7 +24,6 @@ class PyannoteIsolateMessage {
 
   /// Raw audio data as float32 samples
   final Float32List audioData;
-
 
   /// Creates a new isolate message.
   ///
@@ -76,11 +75,9 @@ class PyannoteONNX {
   final PyannoteIsolateManager _isolateManager;
 
   /// Creates a new PyannoteONNX instance from a model file.
-  PyannoteONNX({
-    required String modelPath,
-    this.showProgress = false,
-  })  : _modelPath = modelPath,
-        _isolateManager = PyannoteIsolateManager();
+  PyannoteONNX({required String modelPath, this.showProgress = false})
+    : _modelPath = modelPath,
+      _isolateManager = PyannoteIsolateManager();
 
   /// Processes audio data and returns speaker segments.
   ///
@@ -192,7 +189,7 @@ class PyannoteIsolateManager {
   /// Stops the processing isolate.
   void stop() {
     _sendPort?.send('close');
-    _isolate?.kill(priority: Isolate.immediate);
+    _sendPort = null;
     _isolate = null;
   }
 }
@@ -242,10 +239,7 @@ void pyannoteIsolateEntryPoint(SendPort mainSendPort) {
 ///
 /// Ensures proper deallocation of memory used by the ONNX Runtime session.
 void cleanupOrtSession(OrtSessionObjects? ortSessionObjects) {
-  if (ortSessionObjects == null) {
-    return;
-  }
-  // TODO: Implement cleanup
+  releaseOrtSessionObjects(ortSessionObjects);
 }
 
 /// Processes audio data in the isolate.
@@ -273,127 +267,150 @@ Future<List<Map<String, dynamic>>> _processAudioInIsolate(
       (_) => List.filled(PyannoteONNX.numSpeakers, 0.0),
     );
 
-    final windows = slidingWindow(
-      audioData,
-      PyannoteONNX.duration,
-      step,
-    ).toList();
+    final windows =
+        slidingWindow(audioData, PyannoteONNX.duration, step).toList();
 
     for (int idx = 0; idx < windows.length; idx++) {
       final (windowSize, window) = windows[idx];
-      // Prepare input tensor
+      // Prepare input/output tensors and run inference.
       final inputValue = calloc<Pointer<OrtValue>>();
-      session.api.createFloat32Tensor3D(
-        inputValue,
-        memoryInfo: memoryInfo.value,
-        values: [
-          [window]
-        ],
-      );
-
-      // Run inference
       final outputValue = calloc<Pointer<OrtValue>>();
-      final inputNamesPtr = calloc<Pointer<Pointer<Char>>>();
-      inputNamesPtr.value = calloc<Pointer<Char>>();
-      inputNamesPtr.value[0] = 'input_values'.toNativeUtf8().cast();
-
-      final inputValuesPtr = calloc<Pointer<OrtValue>>();
-      inputValuesPtr[0] = inputValue.value;
-
-      final outputNamesPtr = calloc<Pointer<Pointer<Char>>>();
-      outputNamesPtr.value = calloc<Pointer<Char>>();
-      outputNamesPtr.value[0] = 'logits'.toNativeUtf8().cast();
-
+      final inputNames = calloc<Pointer<Char>>(1);
+      final inputName = 'input_values'.toNativeUtf8();
+      final inputValues = calloc<Pointer<OrtValue>>(1);
+      final outputNames = calloc<Pointer<Char>>(1);
+      final outputName = 'logits'.toNativeUtf8();
       final runOptionsPtr = calloc<Pointer<OrtRunOptions>>();
-      session.api.createRunOptions(runOptionsPtr);
-
-      session.api.run(
-        session: session.sessionPtr.value,
-        runOptions: runOptionsPtr.value,
-        inputNames: inputNamesPtr.value,
-        inputValues: inputValuesPtr,
-        inputCount: 1,
-        outputNames: outputNamesPtr.value,
-        outputValues: outputValue,
-        outputCount: 1,
-      );
-
-      // Extract output data
       final tensorDataPointer = calloc<Pointer<Void>>();
-      session.api.getTensorMutableData(outputValue.value, tensorDataPointer);
-      final floatsPtr = tensorDataPointer.value.cast<Float>();
       final tensorTypeAndShape = calloc<Pointer<OrtTensorTypeAndShapeInfo>>();
-      session.api.getTensorTypeAndShape(outputValue.value, tensorTypeAndShape);
-
       final tensorShapeElementCount = calloc<Size>();
-      session.api.getTensorShapeElementCount(
-        tensorTypeAndShape.value,
-        tensorShapeElementCount,
-      );
 
-      var outputData = floatsPtr.asTypedList(tensorShapeElementCount.value);
-      List<List<double>> frameOutputs = [];
+      Pointer<Float>? inputTensorData;
 
-      final numCompleteFrames = outputData.length ~/ 7;
-      for (int frame = 0; frame < numCompleteFrames; frame++) {
-        final i = frame * 7;
-        var probs = outputData.sublist(i, i + 7).map((x) => exp(x)).toList();
-
-        var speakerProbs = List<double>.filled(3, 0.0);
-        speakerProbs[0] = probs[1] + probs[4] + probs[5]; // spk1
-        speakerProbs[1] = probs[2] + probs[4] + probs[6]; // spk2
-        speakerProbs[2] = probs[3] + probs[5] + probs[6]; // spk3
-
-        frameOutputs.add(speakerProbs);
-      }
-
-      if (idx > 0) {
-        frameOutputs = reorder(overlapChunk, frameOutputs);
-        for (int i = 0; i < overlap; i++) {
-          for (int j = 0; j < PyannoteONNX.numSpeakers; j++) {
-            frameOutputs[i][j] = (frameOutputs[i][j] + overlapChunk[i][j]) / 2;
-          }
-        }
-      }
-
-      if (idx < windows.length - 1) {
-        overlapChunk = frameOutputs.sublist(frameOutputs.length - overlap);
-        frameOutputs = frameOutputs.sublist(0, frameOutputs.length - overlap);
-      } else {
-        frameOutputs = frameOutputs.sublist(
-          0,
-          min(frameOutputs.length, sample2frame(windowSize)),
+      try {
+        inputTensorData = session.api.createFloat32Tensor3D(
+          inputValue,
+          memoryInfo: memoryInfo.value,
+          values: [
+            [window],
+          ],
         );
-      }
 
-      // Process frames and track speaker segments
-      for (var probs in frameOutputs) {
-        currentSamples += 270;
-        for (int spk = 0; spk < PyannoteONNX.numSpeakers; spk++) {
-          if (isActive[spk]) {
-            if (probs[spk] < 0.5) {
-              results.add({
-                'speaker': spk,
-                'start': startSamples[spk] / PyannoteONNX.sampleRate,
-                'stop': currentSamples / PyannoteONNX.sampleRate,
-              });
-              isActive[spk] = false;
-            }
-          } else {
-            if (probs[spk] > 0.5) {
-              startSamples[spk] = currentSamples;
-              isActive[spk] = true;
+        inputNames[0] = inputName.cast<Char>();
+        inputValues[0] = inputValue.value;
+        outputNames[0] = outputName.cast<Char>();
+
+        session.api.createRunOptions(runOptionsPtr);
+        session.api.run(
+          session: session.sessionPtr.value,
+          runOptions: runOptionsPtr.value,
+          inputNames: inputNames,
+          inputValues: inputValues,
+          inputCount: 1,
+          outputNames: outputNames,
+          outputValues: outputValue,
+          outputCount: 1,
+        );
+
+        // Extract output data
+        session.api.getTensorMutableData(outputValue.value, tensorDataPointer);
+        final floatsPtr = tensorDataPointer.value.cast<Float>();
+        session.api.getTensorTypeAndShape(
+          outputValue.value,
+          tensorTypeAndShape,
+        );
+        session.api.getTensorShapeElementCount(
+          tensorTypeAndShape.value,
+          tensorShapeElementCount,
+        );
+
+        final outputData = floatsPtr.asTypedList(tensorShapeElementCount.value);
+        List<List<double>> frameOutputs = [];
+
+        final numCompleteFrames = outputData.length ~/ 7;
+        for (int frame = 0; frame < numCompleteFrames; frame++) {
+          final i = frame * 7;
+          final probs =
+              outputData.sublist(i, i + 7).map((x) => exp(x)).toList();
+
+          final speakerProbs = List<double>.filled(3, 0.0);
+          speakerProbs[0] = probs[1] + probs[4] + probs[5]; // spk1
+          speakerProbs[1] = probs[2] + probs[4] + probs[6]; // spk2
+          speakerProbs[2] = probs[3] + probs[5] + probs[6]; // spk3
+
+          frameOutputs.add(speakerProbs);
+        }
+
+        if (idx > 0) {
+          frameOutputs = reorder(overlapChunk, frameOutputs);
+          for (int i = 0; i < overlap; i++) {
+            for (int j = 0; j < PyannoteONNX.numSpeakers; j++) {
+              frameOutputs[i][j] =
+                  (frameOutputs[i][j] + overlapChunk[i][j]) / 2;
             }
           }
         }
-      }
 
-      // Cleanup ONNX resources
-      calloc.free(tensorDataPointer);
-      calloc.free(tensorTypeAndShape);
-      calloc.free(tensorShapeElementCount);
-      calloc.free(inputValue);
-      calloc.free(outputValue);
+        if (idx < windows.length - 1) {
+          overlapChunk = frameOutputs.sublist(frameOutputs.length - overlap);
+          frameOutputs = frameOutputs.sublist(0, frameOutputs.length - overlap);
+        } else {
+          frameOutputs = frameOutputs.sublist(
+            0,
+            min(frameOutputs.length, sample2frame(windowSize)),
+          );
+        }
+
+        // Process frames and track speaker segments
+        for (final probs in frameOutputs) {
+          currentSamples += 270;
+          for (int spk = 0; spk < PyannoteONNX.numSpeakers; spk++) {
+            if (isActive[spk]) {
+              if (probs[spk] < 0.5) {
+                results.add({
+                  'speaker': spk,
+                  'start': startSamples[spk] / PyannoteONNX.sampleRate,
+                  'stop': currentSamples / PyannoteONNX.sampleRate,
+                });
+                isActive[spk] = false;
+              }
+            } else {
+              if (probs[spk] > 0.5) {
+                startSamples[spk] = currentSamples;
+                isActive[spk] = true;
+              }
+            }
+          }
+        }
+      } finally {
+        if (tensorTypeAndShape.value.address != 0) {
+          session.api.releaseTensorTypeAndShapeInfo(tensorTypeAndShape.value);
+        }
+        if (outputValue.value.address != 0) {
+          session.api.releaseValue(outputValue.value);
+        }
+        if (runOptionsPtr.value.address != 0) {
+          session.api.releaseRunOptions(runOptionsPtr.value);
+        }
+        if (inputValue.value.address != 0) {
+          session.api.releaseValue(inputValue.value);
+        }
+        if (inputTensorData != null) {
+          calloc.free(inputTensorData);
+        }
+
+        malloc.free(inputName);
+        malloc.free(outputName);
+        calloc.free(tensorDataPointer);
+        calloc.free(tensorTypeAndShape);
+        calloc.free(tensorShapeElementCount);
+        calloc.free(runOptionsPtr);
+        calloc.free(outputNames);
+        calloc.free(inputValues);
+        calloc.free(inputNames);
+        calloc.free(outputValue);
+        calloc.free(inputValue);
+      }
     }
 
     for (int spk = 0; spk < PyannoteONNX.numSpeakers; spk++) {
@@ -406,6 +423,7 @@ Future<List<Map<String, dynamic>>> _processAudioInIsolate(
       }
     }
 
+    session.api.releaseMemoryInfo(memoryInfo.value);
     calloc.free(memoryInfo);
     return results;
   } catch (e, s) {
@@ -508,7 +526,7 @@ List<List<double>> reorder(List<List<double>> x, List<List<double>> y) {
 List<List<int>> _generatePermutations(int n) {
   if (n == 1) {
     return [
-      [0]
+      [0],
     ];
   }
 
