@@ -1,24 +1,28 @@
 import 'dart:isolate';
 import 'dart:async';
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fonnx/dylib_path_overrides.dart';
 import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free;
 import 'package:fonnx/onnx/ort.dart';
+import 'package:fonnx/fonnx.dart';
 
 class OnnxIsolateMessage {
   final SendPort replyPort;
   final String modelPath;
   final String? ortDylibPathOverride;
   final List<int> tokens;
+  final String? outputName; // Optional: allows client to specify output name
 
   OnnxIsolateMessage({
     required this.replyPort,
     required this.modelPath,
     required this.tokens,
     this.ortDylibPathOverride,
+    this.outputName,
   });
 }
 
@@ -31,18 +35,25 @@ void cleanupOrtSession(OrtSessionObjects? ortSessionObjects) {
   // _Maybe_ Whisper. Definitely not an LLM.
 }
 
-enum OnnxIsolateType {
-  miniLm,
-  minishLab,
-}
+enum OnnxIsolateType { miniLm, minishLab }
 
 class OnnxIsolateManager {
   SendPort? _sendPort;
   Isolate? _isolate;
   Future<void>? _starting;
+  Fonnx? _fonnx; // For Android/iOS method channel usage
+  OnnxIsolateType? _type; // Track the type for Android/iOS method channel selection
 
   // Start the isolate and store its SendPort.
+  // On Android/iOS, this is a no-op since we use method channels instead.
   Future<void> start(OnnxIsolateType type) async {
+    _type = type; // Store type for later use
+    // On Android/iOS, use method channels instead of isolates
+    if (Platform.isAndroid || Platform.isIOS) {
+      _fonnx = Fonnx();
+      return; // No isolate needed on these platforms
+    }
+    
     if (_starting != null) {
       await _starting; // Wait for the pending start to finish.
       return;
@@ -75,17 +86,51 @@ class OnnxIsolateManager {
   }
 
   // Send data to the isolate and get a result.
+  // On Android/iOS, uses method channels instead of isolates.
   Future<Float32List> sendInference(
     String modelPath,
     List<int> tokens, {
     String? ortDylibPathOverride,
+    String? outputName, // Optional: specify model output name (e.g., 'embeddings', 'sentence_embedding', 'last_hidden_state')
   }) async {
+    // On Android/iOS, use method channels instead of isolates
+    if (Platform.isAndroid || Platform.isIOS) {
+      // Ensure Fonnx instance is initialized (should have been done in start())
+      final fonnx = _fonnx ??= Fonnx();
+      // Use the appropriate method based on isolate type
+      // Default to miniLm if type is not set (shouldn't happen, but be safe)
+      // Note: outputName is ignored on Android/iOS as method channels don't support it
+      // The native implementation should handle the correct output name
+      final result = (_type == OnnxIsolateType.minishLab)
+          ? await fonnx.minishLab(
+              modelPath: modelPath,
+              inputs: tokens,
+            )
+          : await fonnx.miniLm(
+              modelPath: modelPath,
+              inputs: tokens,
+            );
+      if (result == null) {
+        throw Exception('Embeddings returned from platform code are null');
+      }
+      return result;
+    }
+    
+    // On desktop platforms, ensure isolate is started
+    if (_sendPort == null) {
+      throw StateError(
+        'OnnxIsolateManager not started. Call start() before sendInference().'
+      );
+    }
+    
+    // On desktop platforms, use the isolate
     final response = ReceivePort();
     final message = OnnxIsolateMessage(
       replyPort: response.sendPort,
       modelPath: modelPath,
       tokens: tokens,
       ortDylibPathOverride: ortDylibPathOverride,
+      outputName: outputName,
     );
 
     _sendPort!.send(message);
@@ -97,7 +142,9 @@ class OnnxIsolateManager {
     } else if (result is Error) {
       throw result;
     } else {
-      throw Exception('Unknown error occurred in the ONNX isolate. Result: $result');
+      throw Exception(
+        'Unknown error occurred in the ONNX isolate. Result: $result',
+      );
     }
   }
 
@@ -118,6 +165,15 @@ void ortMiniLmIsolateEntryPoint(SendPort mainSendPort) {
   receivePort.listen((dynamic message) async {
     if (message is OnnxIsolateMessage) {
       try {
+        // On Android/iOS, the isolate should not be used - use platform channels instead
+        // This check prevents FFI errors on Android
+        if (Platform.isAndroid || Platform.isIOS) {
+          throw Exception(
+            'Android and iOS run using platform-specific implementations via method channels, not FFI isolates. '
+            'Use Fonnx().miniLm() instead of OnnxIsolateManager on these platforms.'
+          );
+        }
+        
         // Set the global constant because its a different global on the
         // isolate.
         if (message.ortDylibPathOverride != null) {
@@ -126,8 +182,11 @@ void ortMiniLmIsolateEntryPoint(SendPort mainSendPort) {
         // Lazily create the Ort session if it's not already done.
         ortSessionObjects ??= createOrtSession(message.modelPath);
         // Perform the inference here using ortSessionObjects and message.tokens, retrieve result.
-        final result =
-            await _getMiniLmEmbeddingFfi(ortSessionObjects!, message.tokens);
+        final result = await _getMiniLmEmbeddingFfi(
+          ortSessionObjects!,
+          message.tokens,
+          outputName: message.outputName,
+        );
         message.replyPort.send(result);
       } catch (e) {
         // Send the error message back to the main isolate.
@@ -147,7 +206,10 @@ void ortMiniLmIsolateEntryPoint(SendPort mainSendPort) {
 }
 
 Future<Float32List> _getMiniLmEmbeddingFfi(
-    OrtSessionObjects session, List<int> tokens) async {
+  OrtSessionObjects session,
+  List<int> tokens, {
+  String? outputName,
+}) async {
   final memoryInfo = calloc<Pointer<OrtMemoryInfo>>();
   session.api.createCpuMemoryInfo(memoryInfo);
   final inputIdsValue = calloc<Pointer<OrtValue>>();
@@ -182,7 +244,8 @@ Future<Float32List> _getMiniLmEmbeddingFfi(
   inputValues[2] = inputMaskValue.value;
 
   final outputNamesPointer = calloc<Pointer<Char>>();
-  final embeddingsName = 'embeddings'.toNativeUtf8();
+  // Use provided output name, or default to 'last_hidden_state' for backward compatibility
+  final embeddingsName = (outputName ?? 'last_hidden_state').toNativeUtf8();
   outputNamesPointer[0] = embeddingsName.cast();
 
   final outputValuesPtr = calloc<Pointer<OrtValue>>();
@@ -251,6 +314,15 @@ void ortMinishLabIsolateEntryPoint(SendPort mainSendPort) {
   receivePort.listen((dynamic message) async {
     if (message is OnnxIsolateMessage) {
       try {
+        // On Android/iOS, the isolate should not be used - use platform channels instead
+        // This check prevents FFI errors on Android
+        if (Platform.isAndroid || Platform.isIOS) {
+          throw Exception(
+            'Android and iOS run using platform-specific implementations via method channels, not FFI isolates. '
+            'Use Fonnx().minishLab() instead of OnnxIsolateManager on these platforms.'
+          );
+        }
+        
         // Set the global constant because its a different global on the
         // isolate.
         if (message.ortDylibPathOverride != null) {
@@ -259,8 +331,11 @@ void ortMinishLabIsolateEntryPoint(SendPort mainSendPort) {
         // Lazily create the Ort session if it's not already done.
         ortSessionObjects ??= createOrtSession(message.modelPath);
         // Perform the inference here using ortSessionObjects and message.tokens, retrieve result.
-        final result =
-            await _getMinishLabEmbeddingFfi(ortSessionObjects!, message.tokens);
+        final result = await _getMinishLabEmbeddingFfi(
+          ortSessionObjects!,
+          message.tokens,
+          outputName: message.outputName,
+        );
         message.replyPort.send(result);
       } catch (e) {
         // Send the error message back to the main isolate.
@@ -273,14 +348,21 @@ void ortMinishLabIsolateEntryPoint(SendPort mainSendPort) {
       }
       Isolate.exit();
     } else {
-      debugPrint('Unknown message received in the ONNX isolate. Message: $message');
-      throw Exception('Unknown message received in the ONNX isolate. Message: $message');
+      debugPrint(
+        'Unknown message received in the ONNX isolate. Message: $message',
+      );
+      throw Exception(
+        'Unknown message received in the ONNX isolate. Message: $message',
+      );
     }
   });
 }
 
 Future<Float32List> _getMinishLabEmbeddingFfi(
-    OrtSessionObjects session, List<int> tokens) async {
+  OrtSessionObjects session,
+  List<int> tokens, {
+  String? outputName,
+}) async {
   final memoryInfo = calloc<Pointer<OrtMemoryInfo>>();
   session.api.createCpuMemoryInfo(memoryInfo);
   final inputIdsValue = calloc<Pointer<OrtValue>>();
@@ -292,8 +374,11 @@ Future<Float32List> _getMinishLabEmbeddingFfi(
     shape: [tokens.length],
   );
   final inputMaskValue = calloc<Pointer<OrtValue>>();
-  final attentionMaskValues =
-      List.generate(tokens.length, (index) => 1, growable: false);
+  final attentionMaskValues = List.generate(
+    tokens.length,
+    (index) => 1,
+    growable: false,
+  );
   session.api.createInt64Tensor(
     inputMaskValue,
     memoryInfo: memoryInfo.value,
@@ -323,7 +408,8 @@ Future<Float32List> _getMinishLabEmbeddingFfi(
   // inputValues[2] = inputMaskValue.value;
 
   final outputNamesPointer = calloc<Pointer<Char>>();
-  final embeddingsName = 'embeddings'.toNativeUtf8();
+  // Use provided output name, or default to 'last_hidden_state' for backward compatibility
+  final embeddingsName = (outputName ?? 'last_hidden_state').toNativeUtf8();
   outputNamesPointer[0] = embeddingsName.cast();
 
   final outputValuesPtr = calloc<Pointer<OrtValue>>();
