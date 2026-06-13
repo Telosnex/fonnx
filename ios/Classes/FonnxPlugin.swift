@@ -109,17 +109,21 @@ public class FonnxPlugin: NSObject, FlutterPlugin {
       return
     }
 
-    model.getEmbedding(
-      tokens: tokens,
-      completion: { (answer, error) in
-        if let error = error {
-          result(
-            FlutterError(code: "MiniLm", message: "Failed to get embedding", details: error)
-          )
-        } else {
-          result(answer)
-        }
-      })
+    DispatchQueue.global(qos: .userInitiated).async {
+      model.getEmbedding(
+        tokens: tokens,
+        completion: { (answer, error) in
+          DispatchQueue.main.async {
+            if let error = error {
+              result(
+                FlutterError(code: "MiniLm", message: "Failed to get embedding", details: error)
+              )
+            } else {
+              result(answer)
+            }
+          }
+        })
+    }
   }
 
   public func doPyannote(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
