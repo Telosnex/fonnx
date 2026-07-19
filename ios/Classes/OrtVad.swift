@@ -19,111 +19,102 @@ class OrtVad {
     self.modelPath = modelPath
   }
 
-  /// Performs inference using the ONNX model.
-  /// - Parameters:
-  ///   - audioBytes: The raw audio data.
-  ///   - previousState: The state from previous inference, if any.
-  /// - Returns: A dictionary representing the output of the model and the new state.
   func doInference(audioBytes: [UInt8], previousState: [String: Any] = [:]) -> [String: Any]? {
     do {
-      let session = model.session
-      let audioData = convertAudioBytesToFloats(audioBytes: audioBytes)
-      let sampleRate: Int64 = 16000
-      let batchSize = 1
-
-      var h: [Float]?
-      var c: [Float]?
-
-      if let hData = previousState["hn"] as? FlutterStandardTypedData {
-        let myData = Data(hData.data)
-        h = myData.toArray(type: Float.self)
-      } else {
-        os_log(
-          "Previous LSTM state 'hn' is null or not FlutterStandardTypedData, initializing it to zero arrays."
-        )
-        h = Array(repeating: 0, count: 2 * batchSize * 64)
+      guard !audioBytes.isEmpty && audioBytes.count.isMultiple(of: 2) else {
+        throw VadError.invalidPcmLength
       }
 
-      if let cData = previousState["cn"] as? FlutterStandardTypedData {
-        let myData = Data(cData.data)
-        c = myData.toArray(type: Float.self)
-      } else {
-        os_log(
-          "Previous LSTM state 'cn' is null or not FlutterStandardTypedData, initializing it to zero arrays."
+      let audio = convertAudioBytesToFloats(audioBytes: audioBytes)
+      var state = restore(previousState["state"], count: 256)
+      var context = restore(previousState["context"], count: 64)
+      var probabilities = [Float]()
+
+      for offset in stride(from: 0, to: audio.count, by: 512) {
+        let count = min(512, audio.count - offset)
+        var chunk = [Float](repeating: 0, count: 512)
+        chunk.replaceSubrange(0..<count, with: audio[offset..<(offset + count)])
+        let input = context + chunk
+
+        let inputTensor = try createORTValue(
+          from: input,
+          elementType: .float,
+          shape: [1, NSNumber(value: input.count)]
         )
-        c = Array(repeating: 0, count: 2 * batchSize * 64)
+        let stateData = NSMutableData(
+          bytes: state,
+          length: state.count * MemoryLayout<Float>.size
+        )
+        let stateTensor = try ORTValue(
+          tensorData: stateData,
+          elementType: .float,
+          shape: [2, 1, 128]
+        )
+        let sampleRateTensor = try createORTValue(
+          from: [Int64(16000)],
+          elementType: .int64,
+          shape: [1]
+        )
+
+        let outputs = try model.session.run(
+          withInputs: [
+            "input": inputTensor,
+            "state": stateTensor,
+            "sr": sampleRateTensor,
+          ],
+          outputNames: Set(["output", "stateN"]),
+          runOptions: nil
+        )
+        guard
+          let outputData = try outputs["output"]?.tensorData() as Data?,
+          let stateData = try outputs["stateN"]?.tensorData() as Data?
+        else {
+          throw VadError.missingOutput
+        }
+        probabilities.append(outputData.toArray(type: Float.self)[0])
+        state = stateData.toArray(type: Float.self)
+        guard state.count == 256 else { throw VadError.invalidState }
+        context = Array(chunk.suffix(64))
       }
 
-      let inputTensor = try createORTValue(
-        from: audioData, elementType: .float,
-        shape: [NSNumber(value: 1), NSNumber(value: audioData.count)])
-      let sampleRateTensor = try createORTValue(
-        from: [sampleRate], elementType: .int64, shape: [NSNumber(value: 1)])
-      let hData = NSMutableData(bytes: h, length: h!.count * MemoryLayout<Float>.size)
-      let cData = NSMutableData(bytes: c, length: c!.count * MemoryLayout<Float>.size)
-      let hTensor = try ORTValue(
-        tensorData: hData, elementType: .float,
-        shape: [NSNumber(value: 2), NSNumber(value: 1), NSNumber(value: 64)])
-      let cTensor = try ORTValue(
-        tensorData: cData, elementType: .float,
-        shape: [NSNumber(value: 2), NSNumber(value: 1), NSNumber(value: 64)])
-      let inputs = [
-        "input": inputTensor,
-        "sr": sampleRateTensor,
-        "h": hTensor,
-        "c": cTensor,
+      return [
+        "output": float32Data(probabilities),
+        "state": float32Data(state),
+        "context": float32Data(context),
       ]
-      let outputNames = Set(["output", "hn", "cn"])
-
-      let outputs = try session.run(withInputs: inputs, outputNames: outputNames, runOptions: nil)
-
-      var processedMap = [String: Any]()
-
-      if let outputTensor = outputs["output"],
-        let outputData = try? outputTensor.tensorData() as Data
-      {
-        let outputArray = FlutterStandardTypedData(float32: outputData)
-        processedMap["output"] = outputArray
-      }
-
-      if let hnTensor = outputs["hn"], let hnData = try? hnTensor.tensorData() as Data {
-        let hnArray = FlutterStandardTypedData(float32: hnData)
-        processedMap["hn"] = hnArray
-      }
-
-      if let cnTensor = outputs["cn"], let cnData = try? cnTensor.tensorData() as Data {
-        let cnArray = FlutterStandardTypedData(float32: cnData)
-        processedMap["cn"] = cnArray
-      }
-
-      return processedMap
     } catch {
-      os_log("Error in doInference: %{public}s", error.localizedDescription)
-      for symbol in Thread.callStackSymbols {
-        os_log("Stack trace: %{public}s", symbol)
-      }
+      os_log("Silero VAD v6 inference failed: %{public}s", error.localizedDescription)
       return nil
     }
   }
-}
 
-extension Int64 {
-  /// Converts Int64 to Data.
-  var asData: Data {
-    var value = self
-    return Data(bytes: &value, count: MemoryLayout<Self>.size)
+  private func restore(_ value: Any?, count: Int) -> [Float] {
+    if let typed = value as? FlutterStandardTypedData {
+      let floats = Data(typed.data).toArray(type: Float.self)
+      if floats.count == count { return floats }
+    }
+    if let numbers = value as? [NSNumber], numbers.count == count {
+      return numbers.map { $0.floatValue }
+    }
+    return [Float](repeating: 0, count: count)
+  }
+
+  private func float32Data(_ values: [Float]) -> FlutterStandardTypedData {
+    let data = values.withUnsafeBufferPointer { Data(buffer: $0) }
+    return FlutterStandardTypedData(float32: data)
+  }
+
+  private enum VadError: Error {
+    case invalidPcmLength
+    case missingOutput
+    case invalidState
   }
 }
 
 extension Data {
-  /// Converts Data to an array of a given type. 
-  /// - Parameter type: The type of the array elements.
-  /// - Returns: An array of the given type.
-  /// via https://stackoverflow.com/questions/24196820/nsdata-from-byte-array-in-swift
   func toArray<T>(type: T.Type) -> [T] {
-    let value = self.withUnsafeBytes {
-      $0.baseAddress?.assumingMemoryBound(to: T.self)
+    return withUnsafeBytes { bytes in
+      Array(bytes.bindMemory(to: T.self))
     }
-    return [T](UnsafeBufferPointer(start: value, count: self.count / MemoryLayout<T>.stride))
   }
 }

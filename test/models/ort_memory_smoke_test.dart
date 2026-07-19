@@ -175,7 +175,8 @@ void main() {
   test(
     'Silero VAD repeated inference RSS smoke test',
     () async {
-      const modelPath = 'example/assets/models/sileroVad/silero_vad.onnx';
+      const modelPath =
+          'example/assets/models/sileroVad/silero_vad_v6.2.1.onnx';
       final bytes =
           await File('test/data/audio_sample_ac1_ar16000.pcm').readAsBytes();
       final vad = SileroVadNative(modelPath);

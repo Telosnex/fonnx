@@ -1,8 +1,9 @@
 package com.telosnex.fonnx
 
-import ai.onnxruntime.*
+import ai.onnxruntime.OnnxTensor
 import android.util.Log
 
+/** Official Silero VAD v6.2.1 streaming inference. */
 class OrtVad(private val modelPath: String) {
     private val model: OrtSessionObjects by lazy {
         OrtSessionObjects(modelPath, false)
@@ -12,93 +13,89 @@ class OrtVad(private val modelPath: String) {
         audioBytes: ByteArray,
         previousState: HashMap<String, Any> = HashMap(),
     ): HashMap<String, Any>? {
-        try {
-            val ortEnv = model.ortEnv
-            val session = model.ortSession
-            val resultMap = HashMap<String, Any>()
+        return try {
+            require(audioBytes.isNotEmpty() && audioBytes.size % 2 == 0) {
+                "Audio must contain a non-empty, even number of PCM16 bytes"
+            }
+            val audio = pcm16ToFloats(audioBytes)
+            var state = previousState.floatArray("state", STATE_SIZE)
+            var context = previousState.floatArray("context", CONTEXT_SAMPLES)
+            val probabilities = ArrayList<Float>((audio.size + CHUNK_SAMPLES - 1) / CHUNK_SAMPLES)
 
-            fun convertAudioBytesToFloats(audioBytes: ByteArray): FloatArray {
-                // Initialize a FloatArray of half the size of audioBytes,
-                // since we're combining each pair of bytes into one float.
-                val audioData = FloatArray(audioBytes.size / 2)
+            var offset = 0
+            while (offset < audio.size) {
+                val chunk = FloatArray(CHUNK_SAMPLES)
+                val count = minOf(CHUNK_SAMPLES, audio.size - offset)
+                audio.copyInto(chunk, 0, offset, offset + count)
+                val input = FloatArray(CONTEXT_SAMPLES + CHUNK_SAMPLES)
+                context.copyInto(input, 0)
+                chunk.copyInto(input, CONTEXT_SAMPLES)
 
-                for (i in audioData.indices) {
-                    // Combine two bytes to form a 16-bit integer value
-                    var valInt = (
-                        (audioBytes[i * 2].toInt() and 0xFF) or
-                            (audioBytes[i * 2 + 1].toInt() shl 8)
-                    )
+                val inputs = mutableMapOf<String, OnnxTensor>()
+                inputs["input"] = OnnxTensor.createTensor(model.ortEnv, arrayOf(input))
+                inputs["state"] = OnnxTensor.createTensor(
+                    model.ortEnv,
+                    arrayOf(arrayOf(state.copyOfRange(0, 128)), arrayOf(state.copyOfRange(128, 256))),
+                )
+                // The graph declares a scalar but accepts this one-value tensor.
+                inputs["sr"] = OnnxTensor.createTensor(model.ortEnv, longArrayOf(SAMPLE_RATE.toLong()))
 
-                    // Interpret the 16-bit integer as a signed value and normalize
-                    if (valInt > 0x7FFF) {
-                        valInt -= 0x10000
+                inputs.values.useAll {
+                    model.ortSession!!.run(inputs, setOf("output", "stateN")).use { result ->
+                        val output = result.get("output").get().value as Array<FloatArray>
+                        val stateN = result.get("stateN").get().value as Array<Array<FloatArray>>
+                        probabilities.add(output[0][0])
+                        state = FloatArray(STATE_SIZE)
+                        stateN[0][0].copyInto(state, 0)
+                        stateN[1][0].copyInto(state, 128)
                     }
-
-                    // Normalize to [-1.0, 1.0] range for float32 representation
-                    audioData[i] = valInt / 32767.0f
                 }
-
-                return audioData
+                context = chunk.copyOfRange(CHUNK_SAMPLES - CONTEXT_SAMPLES, CHUNK_SAMPLES)
+                offset += CHUNK_SAMPLES
             }
 
-            val audioData = convertAudioBytesToFloats(audioBytes)
-            val batchSize = 1
-            val sampleRate = longArrayOf(16000)
-            var h: Array<Array<FloatArray>>? = transformToFloatArray3D(previousState["hn"])
-            var c: Array<Array<FloatArray>>? = transformToFloatArray3D(previousState["cn"])
-
-            if (h == null || c == null) {
-                Log.d("[OrtVad.kt]", "previous LTSM state is null, initializing them to zero arrays.")
-                Log.d("[OrtVad.kt]", "keys: ${previousState.keys}")
-                Log.d("[OrtVad.kt]", "runtime types: ${previousState["hn"]?.javaClass?.name}, ${previousState["cn"]?.javaClass?.name}")
-                h = Array(2) { Array(batchSize) { FloatArray(64) { 0f } } } // Assuming h and c have same dimensions
-                c = h.clone()
-            }
-
-            val inputs = mutableMapOf<String, OnnxTensor>()
-            inputs["input"] = OnnxTensor.createTensor(ortEnv, arrayOf(audioData))
-            inputs["sr"] = OnnxTensor.createTensor(ortEnv, longArrayOf(16000))
-            inputs["h"] = OnnxTensor.createTensor(ortEnv, h)
-            inputs["c"] = OnnxTensor.createTensor(ortEnv, c)
-
-            val outputNames = setOf("output", "hn", "cn")
-
-            session?.let {
-                val startTime = System.currentTimeMillis()
-                val rawResult = it.run(inputs, outputNames)
-                val endTime = System.currentTimeMillis()
-                Log.d("[OrtVad.kt]", "Inference time: ${endTime - startTime} ms")
-
-                // Directly extracting values using keys from 'outputNames' to avoid 'keys' reference issue
-                val output = rawResult.get("output").get().value as? Array<FloatArray>
-                val hn = rawResult.get("hn").get().value as? Array<Array<FloatArray>>
-                val cn = rawResult.get("cn").get().value as? Array<Array<FloatArray>>
-
-                val processedMap = hashMapOf<String, Any>()
-                output?.let { processedMap["output"] = it.toList().first() }
-                hn?.let { processedMap["hn"] = it.toList().map { it.toList().map { it.toList() } } } // Adjust as per the reshaping logic
-                cn?.let { processedMap["cn"] = it.toList().map { it.toList().map { it.toList() } } } // Adjust as per the reshaping logic
-
-                return processedMap
-            }
-
-            return resultMap
-        } catch (e: Exception) {
-            Log.e("[OrtVad.kt]", "Error in doInference: ${e.message}")
-            return null
+            hashMapOf(
+                "output" to probabilities.toFloatArray(),
+                "state" to state,
+                "context" to context,
+            )
+        } catch (error: Exception) {
+            Log.e("[OrtVad.kt]", "Silero VAD v6 inference failed", error)
+            null
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
-fun transformToFloatArray3D(list: Any?): Array<Array<FloatArray>>? {
-    return try {
-        (list as? List<List<List<Float>>>)?.map { layer2 ->
-            layer2.map { layer1 ->
-                layer1.toFloatArray()
-            }.toTypedArray()
-        }?.toTypedArray()
-    } catch (e: Exception) {
-        null // Return null if the conversion fails
+    private fun pcm16ToFloats(bytes: ByteArray): FloatArray {
+        return FloatArray(bytes.size / 2) { index ->
+            val low = bytes[index * 2].toInt() and 0xff
+            val high = bytes[index * 2 + 1].toInt()
+            val signed = (high shl 8) or low
+            signed.toShort().toFloat() / 32767.0f
+        }
     }
-}
+
+    private fun HashMap<String, Any>.floatArray(key: String, length: Int): FloatArray {
+        val value = this[key]
+        val result = when (value) {
+            is FloatArray -> value.copyOf()
+            is List<*> -> value.map { (it as Number).toFloat() }.toFloatArray()
+            else -> FloatArray(length)
+        }
+        return if (result.size == length) result else FloatArray(length)
+    }
+
+    private inline fun Collection<AutoCloseable>.useAll(block: () -> Unit) {
+        try {
+            block()
+        } finally {
+            forEach { it.close() }
+        }
+    }
+
+    private companion object {
+        const val SAMPLE_RATE = 16000
+        const val CHUNK_SAMPLES = 512
+        const val CONTEXT_SAMPLES = 64
+        const val STATE_SIZE = 256
+    }
 }

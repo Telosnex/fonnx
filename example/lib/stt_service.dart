@@ -75,8 +75,8 @@ class SttService {
   /// Bits per sample, assuming 16-bit PCM audio
   static const int kBitsPerSample = 16;
 
-  /// Maximum VAD frame duration in milliseconds
-  static const int kMaxVadFrameMs = 30;
+  /// Silero VAD v6 frame duration: 512 samples at 16 kHz.
+  static const int kMaxVadFrameMs = 32;
 
   /// Recommended VAD probability threshold for speech.
   /// Tuned to accept whispering.

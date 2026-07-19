@@ -14,6 +14,10 @@ framework."
 
 # Changelog
 
+## 2026 Jul 19
+- Upgraded voice activity detection to the official Silero VAD v6.2.1 model.
+- Added the v6 streaming state/context contract on native, mobile, and web.
+
 ## 2024 Apr 22
 - CI builds for all platforms are now running on Codemagic..
 

@@ -1,11 +1,12 @@
+import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fonnx/models/sileroVad/silero_vad.dart';
 import 'package:fonnx_example/padding.dart';
-import 'dart:async';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:path/path.dart' as path;
 
@@ -30,7 +31,7 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
           style: Theme.of(context).textTheme.headlineLarge,
         ),
         const Text(
-            '1 MB model detects when speech is present in audio. By Silero.'),
+            '2 MB model detects when speech is present in audio. By Silero.'),
         heightPadding,
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -68,36 +69,30 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
               ),
           ],
         ),
-    
       ],
     );
   }
 
   void _runVerificationTest() async {
-    final modelPath = await getModelPath('silero_vad.onnx');
+    final modelPath = await getModelPath('silero_vad_v6.2.1.onnx');
     final silero = SileroVad.load(modelPath);
-    final wavFile = await rootBundle.load('assets/audio_sample_16khz.wav');
-    final result = await silero.doInference(wavFile.buffer.asUint8List());
+    final pcm = await rootBundle.load('assets/audio_sample_ac1_ar16000.pcm');
+    final result = await silero.doInference(pcm.buffer.asUint8List());
+    final probabilities = result['output'] as Float32List;
     setState(() {
-      // obtained on macOS M2 9 Feb 2024.
-      final acceptableAnswers = {
-        0.4739372134208679, // macOS MBP M2 10 Feb 2024
-        0.4739373028278351, // Android Pixel Fold 10 Feb 2024
-        0.4739360809326172, // Web 15 Feb 2024
-      };
-      _verifyPassed = result.length == 3 &&
-          acceptableAnswers.contains(result['output'].first);
-      if (_verifyPassed != true) {
-        if (kDebugMode) {
-          print(
-              'verification of Silero output failed, got ${result['output']}');
-        }
+      _verifyPassed =
+          result.length == 3 &&
+          probabilities.length == 155 &&
+          probabilities.first < 0.1 &&
+          probabilities.reduce(math.max) > 0.99;
+      if (_verifyPassed != true && kDebugMode) {
+        debugPrint('verification of Silero v6 output failed, got $result');
       }
     });
   }
 
   void _runPerformanceTest() async {
-    final modelPath = await getModelPath('silero_vad.onnx');
+    final modelPath = await getModelPath('silero_vad_v6.2.1.onnx');
     final sileroVad = SileroVad.load(modelPath);
     final result = await testPerformance(sileroVad);
     setState(() {
@@ -106,8 +101,9 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
   }
 
   static Future<String> testPerformance(SileroVad sileroVad) async {
-    final vadPerfWavFile =
-        await rootBundle.load('assets/audio_sample_16khz.wav');
+    final vadPerfWavFile = await rootBundle.load(
+      'assets/audio_sample_ac1_ar16000.pcm',
+    );
     final bytes = vadPerfWavFile.buffer.asUint8List();
     const iterations = 3;
     final Stopwatch sw = Stopwatch();
@@ -123,7 +119,7 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
         sw.elapsedMilliseconds.toDouble() / (iterations - 1).toDouble();
     debugPrint('  Average: ${average.toStringAsFixed(0)} ms');
     debugPrint('  Total: ${sw.elapsedMilliseconds} ms');
-    const fileDurationMs = 5000;
+    const fileDurationMs = 4948;
     final speedMultilper = fileDurationMs.toDouble() / average;
     debugPrint('  Speed multiplier: ${speedMultilper.toStringAsFixed(2)}x');
     debugPrint('  Model path: ${sileroVad.modelPath}');

@@ -2,114 +2,101 @@ import * as ort from 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.1/dist/e
 
 let session = null;
 
-// Ensure at least 1 and at most half the number of hardeareConcurrency.
-// Testing showed using all cores was 15% slower than using half.
-// Tested on MBA M2 with a value of 8 for navigator.hardwareConcurrency.
 const cores = navigator.hardwareConcurrency;
 ort.env.wasm.numThreads = Math.max(1, Math.min(Math.floor(cores / 2), cores));
-ort.env.wasm.wasmPaths = "";
+ort.env.wasm.wasmPaths = '';
+
+const chunkSamples = 512;
+const contextSamples = 64;
+const stateSize = 2 * 1 * 128;
 
 function convertAudioBytesToFloats(audioBytes) {
-    // Assuming 'audioBytes' is a Uint8Array.
-    // Initialize a Float32Array of half the size of 'audioBytes'
-    // since we're combining every two bytes into one float.
-    const audioData = new Float32Array(audioBytes.length / 2);
-
-    // Create a DataView for handling the 16-bit short conversion.
-    const dataView = new DataView(audioBytes.buffer, audioBytes.byteOffset, audioBytes.byteLength);
-
-    for (let i = 0; i < audioData.length; i++) {
-        // Combine two bytes to form a 16-bit integer value
-        // 'true' in getUint16 denotes little-endian byte order.
-        let valInt = dataView.getUint16(i * 2, true);
-
-        // If the signed bit (bit 15) is set, convert 16-bit unsigned integer to a signed integer
-        if (valInt >= 0x8000) {
-            valInt = valInt - 0x10000;
-        }
-
-        // Normalize to the range [-1.0, 1.0] for Float32 representation
-        audioData[i] = valInt / 32767.0;
-    }
-
-    return audioData;
+  const audioData = new Float32Array(audioBytes.length / 2);
+  const dataView = new DataView(
+    audioBytes.buffer,
+    audioBytes.byteOffset,
+    audioBytes.byteLength,
+  );
+  for (let i = 0; i < audioData.length; i++) {
+    audioData[i] = dataView.getInt16(i * 2, true) / 32767.0;
+  }
+  return audioData;
 }
 
-self.onmessage = async e => {
-    const { action, modelArrayBuffer, audioBytes, previousStateAsJsonString, messageId } = e.data;
-    try {
-        if (action === 'loadModel' && modelArrayBuffer) {
-            console.log('SileroVad loading model');
-            session = await ort.InferenceSession.create(modelArrayBuffer, {
-                executionProviders: ['wasm', 'cpu'],
-            });
-            console.log('SileroVad model loaded');
-            self.postMessage({ messageId, action: 'modelLoaded' });
-        } else if (action === 'runInference') {
-            if (!session) {
-                console.error('Session does not exist');
-                self.postMessage({ messageId, action: 'error', error: 'Session does not exist' });
-                return;
-            }
-            if (!audioBytes) {
-                console.error('audioBytes were not provided');
-                self.postMessage({ messageId, action: 'error', error: 'Audio bytes were not provided' });
-                return;
-            }
+function restore(values, length) {
+  return Array.isArray(values) && values.length === length
+    ? new Float32Array(values)
+    : new Float32Array(length);
+}
 
-            // Check for previous h and c
-            const batchSize = 1;
-            const stateSize = 2 * batchSize * 64;
-            let h, c;
-            const previousState = JSON.parse(previousStateAsJsonString);
-            if (previousState != null && previousState.hn) {
-                h = new Float32Array(previousState.hn);
-            } else {
-                h = new Float32Array(stateSize).fill(0);
-            }
-            if (previousState != null && previousState.cn) {
-                c = new Float32Array(previousState.cn);
-            } else {
-                c = new Float32Array(stateSize).fill(0);
-            }
-            const hTensor = new ort.Tensor('float32', h, [2, 1, 64]);
-            const cTensor = new ort.Tensor('float32', c, [2, 1, 64]);
+async function runInference(audioBytes, previousStateAsJsonString) {
+  if (!audioBytes || audioBytes.length === 0 || audioBytes.length % 2 !== 0) {
+    throw new Error('Audio must contain a non-empty, even number of PCM16 bytes');
+  }
+  const previous = JSON.parse(previousStateAsJsonString || '{}');
+  let state = restore(previous.state, stateSize);
+  let context = restore(previous.context, contextSamples);
+  const audio = convertAudioBytesToFloats(audioBytes);
+  const output = [];
 
-            // Prepare tensors and run the inference session
-            const audioBytesFloat32 = new convertAudioBytesToFloats(audioBytes);
-            const shape = [1, audioBytesFloat32.length];
-            const audioStreamTensor = new ort.Tensor('float32', audioBytesFloat32, shape);
-            const sampleRateTensor = new ort.Tensor('int64', [16000], [1]);
-            const results = await session.run({
-                input: audioStreamTensor,
-                sr: sampleRateTensor,
-                h: hTensor,
-                c: cTensor
-            });
-            let resultMap = {};
+  for (let offset = 0; offset < audio.length; offset += chunkSamples) {
+    const chunk = new Float32Array(chunkSamples);
+    chunk.set(audio.subarray(offset, Math.min(offset + chunkSamples, audio.length)));
+    const input = new Float32Array(contextSamples + chunkSamples);
+    input.set(context);
+    input.set(chunk, contextSamples);
+    const results = await session.run({
+      input: new ort.Tensor('float32', input, [1, input.length]),
+      state: new ort.Tensor('float32', state, [2, 1, 128]),
+      // The model declares a scalar but also accepts this one-value tensor.
+      sr: new ort.Tensor('int64', [16000], [1]),
+    });
+    output.push(results.output.data[0]);
+    state = new Float32Array(results.stateN.data);
+    context = chunk.slice(chunkSamples - contextSamples);
+  }
 
-            // Loop through the results object to process each result tensor
-            for (const [key, tensor] of Object.entries(results)) {
-                // Cast down outputs to Array.
-                //
-                // They are Float32Arrays by default.
-                //
-                // However, JS objects don't transfer to Dart as Map<String, dynamic>.
-                //
-                // So the resultMap needs to be JSON.stringify'd to return to Dart.
-                //
-                // However, JSON.stringify will turn typed arrays into objects with
-                // keys of indices and values of the array values.
-                resultMap[key] = Array.from(tensor.data);
-            }
+  return JSON.stringify({
+    output,
+    state: Array.from(state),
+    context: Array.from(context),
+  });
+}
 
-            const resultMapAsJsonString = JSON.stringify(resultMap);
-            const message = { messageId, action: 'inferenceResult', resultMapAsJsonString };
-            self.postMessage(message);
-        }
-    } catch (error) {
-        console.error('[silero_vad_worker.js] An error occurred:', error.message);
-        console.error('[silero_vad_worker.js] Stack trace:', error.stack);
-        self.postMessage({ messageId, action: 'error', error: error.toString() });
+self.onmessage = async (event) => {
+  const {
+    action,
+    modelArrayBuffer,
+    audioBytes,
+    previousStateAsJsonString,
+    messageId,
+  } = event.data;
+  try {
+    if (action === 'loadModel' && modelArrayBuffer) {
+      session = await ort.InferenceSession.create(modelArrayBuffer, {
+        executionProviders: ['wasm', 'cpu'],
+      });
+      self.postMessage({ messageId, action: 'modelLoaded' });
+      return;
     }
+    if (action === 'runInference') {
+      if (!session) throw new Error('Session does not exist');
+      const resultMapAsJsonString = await runInference(
+        audioBytes,
+        previousStateAsJsonString,
+      );
+      self.postMessage({
+        messageId,
+        action: 'inferenceResult',
+        resultMapAsJsonString,
+      });
+    }
+  } catch (error) {
+    console.error('[silero_vad_worker.js]', error);
+    self.postMessage({
+      messageId,
+      action: 'error',
+      error: error.toString(),
+    });
+  }
 };

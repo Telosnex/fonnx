@@ -156,7 +156,7 @@ class _TtsDemoWidgetState extends State<TtsDemoWidget> {
         lastFrameIndex = i;
       }
     }
-// Return or perform further actions only if both first and last non-silent frames are found
+    // Return or perform further actions only if both first and last non-silent frames are found
     if (firstFrameIndex == null || lastFrameIndex == null) {
       return;
     }
@@ -181,7 +181,8 @@ class _TtsDemoWidgetState extends State<TtsDemoWidget> {
       required int numChannels,
       required int sampleRate,
     }) {
-      int fileSize = pcmDataLength +
+      int fileSize =
+          pcmDataLength +
           44 -
           8; // Add WAV header size except for 'RIFF' and its size field
       int byteRate = sampleRate * numChannels * bitsPerSample ~/ 8;
@@ -286,7 +287,7 @@ class _TtsDemoWidgetState extends State<TtsDemoWidget> {
       });
       return;
     }
-    final vadModelPath = await getModelPath('silero_vad.onnx');
+    final vadModelPath = await getModelPath('silero_vad_v6.2.1.onnx');
     final whisperModelPath = await getWhisperModelPath('whisper_tiny.onnx');
     final service = SttService(
       vadModelPath: vadModelPath,
@@ -315,8 +316,10 @@ class _TtsDemoWidgetState extends State<TtsDemoWidget> {
     }
     final assetCacheDirectory =
         await path_provider.getApplicationSupportDirectory();
-    final modelPath =
-        path.join(assetCacheDirectory.path, modelFilenameWithExtension);
+    final modelPath = path.join(
+      assetCacheDirectory.path,
+      modelFilenameWithExtension,
+    );
 
     File file = File(modelPath);
     bool fileExists = await file.exists();
@@ -332,9 +335,10 @@ class _TtsDemoWidgetState extends State<TtsDemoWidget> {
     final fileSameSize = fileLength == assetLength;
     if (!fileExists || !fileSameSize) {
       debugPrint(
-          'Copying model to $modelPath. Why? Either the file does not exist (${!fileExists}), '
-          'or it does exist but is not the same size as the one in the assets '
-          'directory. (${!fileSameSize})');
+        'Copying model to $modelPath. Why? Either the file does not exist (${!fileExists}), '
+        'or it does exist but is not the same size as the one in the assets '
+        'directory. (${!fileSameSize})',
+      );
       debugPrint('About to get byte data for $modelPath');
 
       List<int> bytes = assetByteData.buffer.asUint8List(

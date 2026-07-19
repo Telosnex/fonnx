@@ -18,8 +18,10 @@ class SileroVadNative implements SileroVad {
   SileroVadNative(this.modelPath);
 
   @override
-  Future<Map<String, dynamic>> doInference(Uint8List bytes,
-      {Map<String, dynamic> previousState = const {}}) async {
+  Future<Map<String, dynamic>> doInference(
+    Uint8List bytes, {
+    Map<String, dynamic> previousState = const {},
+  }) async {
     await _sileroVadIsolateManager.start();
     if (!kIsWeb && Platform.environment['FLUTTER_TEST'] == 'true') {
       return _sileroVadIsolateManager.sendInference(
@@ -43,7 +45,6 @@ class SileroVadNative implements SileroVad {
         throw UnimplementedError();
     }
   }
-
 
   Future<Map<String, dynamic>> _doInferenceFfi(
     List<int> audio,
@@ -70,6 +71,19 @@ class SileroVadNative implements SileroVad {
     if (result == null) {
       throw Exception('Result returned from platform code is null');
     }
-    return result;
+    return result.map((key, value) {
+      if (value is Float32List) return MapEntry(key, value);
+      if (value is List) {
+        return MapEntry(
+          key,
+          Float32List.fromList(
+            value.map((item) => (item as num).toDouble()).toList(),
+          ),
+        );
+      }
+      throw StateError(
+        'Unexpected Silero VAD value for "$key": ${value.runtimeType}',
+      );
+    });
   }
 }

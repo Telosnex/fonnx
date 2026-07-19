@@ -34,7 +34,7 @@ class SileroVadWeb implements SileroVad {
     }
 
     final recasted = <String, dynamic>{};
-    final keysToRecast = ['cn', 'hn', 'output'];
+    final keysToRecast = ['output', 'state', 'context'];
 
     for (final key in keysToRecast) {
       if (!dartObject.containsKey(key)) {
