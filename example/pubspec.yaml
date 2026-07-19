@@ -49,7 +49,7 @@ flutter:
     - assets/models/minishLab/potion8m.onnx
     - assets/models/minishLab/potion32m.onnx
     - assets/models/msmarcoMiniLmL6V3/msmarcoMiniLmL6V3.onnx
-    - assets/models/sileroVad/silero_vad.onnx
+    - assets/models/sileroVad/silero_vad_v6.2.1.onnx
     - assets/models/whisper/whisper_tiny.onnx
     - assets/models/pyannote/pyannote_seg3.onnx
     - assets/text_sample.txt
