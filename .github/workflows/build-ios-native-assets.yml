@@ -10,6 +10,7 @@ on:
     paths:
       - '.github/workflows/build-ios-native-assets.yml'
       - 'tool/apple/**'
+      - 'tool/extensions/bpe_decoder_only.patch'
 
 permissions:
   contents: write
