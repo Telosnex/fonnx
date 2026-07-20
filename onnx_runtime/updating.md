@@ -32,10 +32,14 @@ part of the runtime path.
    glob of every SDK header. Provider headers contain C++ declarations that
    are not valid Dart FFI input.
 5. Update `ORT_VERSION` in both producer workflows and build scripts.
-6. Run the Apple producer. It invokes Microsoft's first-party
-   `build_apple_framework.py --build_dynamic_framework` for arm64 iPhone and
-   arm64 simulator. Microsoft publishes only static iOS artifacts; FONNX's
-   release asset is the dynamic code-asset input.
+6. Run the full Apple producer when ORT changes. Its fallback path invokes
+   Microsoft's first-party `build_apple_framework.py --build_dynamic_framework`
+   for arm64 iPhone and arm64 simulator. Publish
+   that verified archive as the immutable Apple ORT base. Subsequent
+   Extensions-only recipe changes set `ORT_PREBUILT_ARCHIVE_URL` and its
+   SHA-256: the producer extracts only the unchanged ORT slices and rebuilds
+   Extensions, avoiding another long ORT compile. Microsoft publishes only
+   static iOS artifacts; FONNX's base fills that dynamic publishing gap.
 7. Publish new producer outputs under a **new immutable prerelease tag**, then
    pin their downloaded SHA-256 values in `hook/build.dart`. Never use
    `gh release upload --clobber` on an asset referenced by a checked-in hash:

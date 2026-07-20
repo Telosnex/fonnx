@@ -2,13 +2,19 @@
 # Build the two dynamic native assets required by fonnx on iOS.
 #
 # Required environment variables:
-#   ORT_ROOT             onnxruntime checkout at ORT_VERSION
 #   ORT_EXTENSIONS_ROOT  onnxruntime-extensions checkout at ORTX_COMMIT
+#
+# Supply either:
+#   ORT_PREBUILT_ARCHIVE_URL + ORT_PREBUILT_ARCHIVE_SHA256
+#     Immutable Apple ORT base previously built by this script, or
+#   ORT_ROOT
+#     onnxruntime checkout at ORT_VERSION; builds a new dynamic base.
 #
 # Optional:
 #   OUTPUT_DIR           final artifact directory (default: ./dist)
 #   BUILD_ROOT           disposable build root (default: $RUNNER_TEMP/fonnx-ios)
 #   ORT_VERSION          default 1.27.0
+#   ORT_COMMIT           provenance when consuming an immutable base
 #   ORTX_COMMIT          provenance label; default is the pinned commit below
 
 set -euo pipefail
@@ -17,32 +23,76 @@ readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly FONNX_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 readonly ORT_VERSION="${ORT_VERSION:-1.27.0}"
 readonly ORTX_COMMIT="${ORTX_COMMIT:-fe4e13f46b19fb490c90b09fe280277308bd5bb7}"
+readonly ORT_COMMIT="${ORT_COMMIT:-8f0278c77bf44b0cc83c098c6c722b92a36ac4b5}"
+readonly ORT_PREBUILT_ARCHIVE_URL="${ORT_PREBUILT_ARCHIVE_URL:-}"
+readonly ORT_PREBUILT_ARCHIVE_SHA256="${ORT_PREBUILT_ARCHIVE_SHA256:-}"
 readonly IOS_DEPLOYMENT_TARGET="15.1"
 readonly BUILD_ROOT="${BUILD_ROOT:-${RUNNER_TEMP:-/tmp}/fonnx-ios-native-assets}"
 readonly OUTPUT_DIR="${OUTPUT_DIR:-$FONNX_ROOT/dist}"
 readonly ASSET_NAME="fonnx-ios-arm64-ort-${ORT_VERSION}-ortx-${ORTX_COMMIT:0:8}.zip"
 
-: "${ORT_ROOT:?Set ORT_ROOT to an onnxruntime checkout at v$ORT_VERSION}"
 : "${ORT_EXTENSIONS_ROOT:?Set ORT_EXTENSIONS_ROOT to the pinned onnxruntime-extensions checkout}"
+readonly ACTUAL_ORTX_COMMIT="$(git -C "$ORT_EXTENSIONS_ROOT" rev-parse HEAD)"
+if [[ "$ACTUAL_ORTX_COMMIT" != "$ORTX_COMMIT" ]]; then
+  echo "ORT Extensions checkout mismatch: expected $ORTX_COMMIT, got $ACTUAL_ORTX_COMMIT" >&2
+  exit 1
+fi
+if [[ -z "$ORT_PREBUILT_ARCHIVE_URL" ]]; then
+  : "${ORT_ROOT:?Set ORT_ROOT or an immutable ORT_PREBUILT_ARCHIVE_URL}"
+  readonly ACTUAL_ORT_COMMIT="$(git -C "$ORT_ROOT" rev-parse HEAD)"
+  if [[ "$ACTUAL_ORT_COMMIT" != "$ORT_COMMIT" ]]; then
+    echo "ORT checkout mismatch: expected $ORT_COMMIT, got $ACTUAL_ORT_COMMIT" >&2
+    exit 1
+  fi
+else
+  : "${ORT_PREBUILT_ARCHIVE_SHA256:?Pin ORT_PREBUILT_ARCHIVE_SHA256}"
+fi
 
 rm -rf "$BUILD_ROOT"
 mkdir -p "$BUILD_ROOT" "$OUTPUT_DIR"
 
-# Microsoft's first-party packaging script. --build_dynamic_framework is a
-# supported mode even though Microsoft publishes only the static iOS output.
-python3 "$ORT_ROOT/tools/ci_build/github/apple/build_apple_framework.py" \
-  "$SCRIPT_DIR/ios_dynamic_build_settings.json" \
-  --build_dir "$BUILD_ROOT/ort" \
-  --config Release \
-  --build_dynamic_framework
+readonly ORT_BINARIES="$BUILD_ROOT/ort-binaries"
+mkdir -p "$ORT_BINARIES/iphoneos" "$ORT_BINARIES/iphonesimulator"
+if [[ -n "$ORT_PREBUILT_ARCHIVE_URL" ]]; then
+  # Reuse only ORT from an immutable artifact previously produced by the full
+  # Microsoft-script path below. This keeps Extensions recipe changes fast
+  # without turning the consumer hook into a compiler build.
+  readonly ORT_PREBUILT_ARCHIVE="$BUILD_ROOT/ort-apple-base.zip"
+  curl --fail --location --retry 3 --output "$ORT_PREBUILT_ARCHIVE" \
+    "$ORT_PREBUILT_ARCHIVE_URL"
+  readonly ACTUAL_ORT_PREBUILT_SHA256="$(
+    shasum -a 256 "$ORT_PREBUILT_ARCHIVE" | awk '{print $1}'
+  )"
+  if [[ "$ACTUAL_ORT_PREBUILT_SHA256" != "$ORT_PREBUILT_ARCHIVE_SHA256" ]]; then
+    echo "Apple ORT base SHA-256 mismatch: expected $ORT_PREBUILT_ARCHIVE_SHA256, got $ACTUAL_ORT_PREBUILT_SHA256" >&2
+    exit 1
+  fi
+  unzip -p "$ORT_PREBUILT_ARCHIVE" iphoneos/libonnxruntime.dylib \
+    > "$ORT_BINARIES/iphoneos/libonnxruntime.dylib"
+  unzip -p "$ORT_PREBUILT_ARCHIVE" iphonesimulator/libonnxruntime.dylib \
+    > "$ORT_BINARIES/iphonesimulator/libonnxruntime.dylib"
+else
+  # Microsoft's first-party packaging script. --build_dynamic_framework is a
+  # supported mode even though Microsoft publishes only static iOS output.
+  python3 "$ORT_ROOT/tools/ci_build/github/apple/build_apple_framework.py" \
+    "$SCRIPT_DIR/ios_dynamic_build_settings.json" \
+    --build_dir "$BUILD_ROOT/ort" \
+    --config Release \
+    --build_dynamic_framework
+  readonly ORT_XCFRAMEWORK="$BUILD_ROOT/ort/framework_out/onnxruntime.xcframework"
+  cp "$ORT_XCFRAMEWORK/ios-arm64/onnxruntime.framework/onnxruntime" \
+    "$ORT_BINARIES/iphoneos/libonnxruntime.dylib"
+  cp "$ORT_XCFRAMEWORK/ios-arm64-simulator/onnxruntime.framework/onnxruntime" \
+    "$ORT_BINARIES/iphonesimulator/libonnxruntime.dylib"
+fi
 
-readonly ORT_XCFRAMEWORK="$BUILD_ROOT/ort/framework_out/onnxruntime.xcframework"
-for slice in ios-arm64 ios-arm64-simulator; do
-  test -x "$ORT_XCFRAMEWORK/$slice/onnxruntime.framework/onnxruntime"
+for binary in \
+  "$ORT_BINARIES/iphoneos/libonnxruntime.dylib" \
+  "$ORT_BINARIES/iphonesimulator/libonnxruntime.dylib"; do
+  test -s "$binary"
   # Do not use grep -q under pipefail: it closes early after the match and
   # causes nm to fail with SIGPIPE on large symbol tables.
-  nm -gU "$ORT_XCFRAMEWORK/$slice/onnxruntime.framework/onnxruntime" \
-    | grep ' _OrtGetApiBase$' >/dev/null
+  nm -gU "$binary" | grep ' _OrtGetApiBase$' >/dev/null
 done
 
 # Extensions needs ORT headers but does not link against ORT: RegisterCustomOps
@@ -50,8 +100,7 @@ done
 # real model inventory (Whisper's ai.onnx.contrib:BpeDecoder).
 readonly ORT_HEADERS="$BUILD_ROOT/ort-headers"
 mkdir -p "$ORT_HEADERS/include"
-cp "$ORT_XCFRAMEWORK/ios-arm64/onnxruntime.framework/Headers/"* \
-  "$ORT_HEADERS/include/"
+cp -R "$FONNX_ROOT/onnx_runtime/headers/." "$ORT_HEADERS/include/"
 
 readonly SELECTED_OPS_FILE="$ORT_EXTENSIONS_ROOT/cmake/_selectedoplist.cmake"
 readonly BPE_DECODER_ONLY_PATCH="$FONNX_ROOT/tool/extensions/bpe_decoder_only.patch"
@@ -114,9 +163,9 @@ readonly ORTX_SIMULATOR="$(find "$BUILD_ROOT/ortextensions-simulator/lib/Release
 
 readonly STAGING="$BUILD_ROOT/staging"
 mkdir -p "$STAGING/iphoneos" "$STAGING/iphonesimulator"
-cp "$ORT_XCFRAMEWORK/ios-arm64/onnxruntime.framework/onnxruntime" \
+cp "$ORT_BINARIES/iphoneos/libonnxruntime.dylib" \
   "$STAGING/iphoneos/libonnxruntime.dylib"
-cp "$ORT_XCFRAMEWORK/ios-arm64-simulator/onnxruntime.framework/onnxruntime" \
+cp "$ORT_BINARIES/iphonesimulator/libonnxruntime.dylib" \
   "$STAGING/iphonesimulator/libonnxruntime.dylib"
 cp "$ORTX_DEVICE" "$STAGING/iphoneos/libortextensions.dylib"
 cp "$ORTX_SIMULATOR" "$STAGING/iphonesimulator/libortextensions.dylib"
@@ -139,8 +188,10 @@ printf '%s  %s\n' "$asset_sha256" "$(basename "$ASSET_PATH")" \
 
 cat > "$OUTPUT_DIR/provenance.txt" <<EOF
 ORT_VERSION=$ORT_VERSION
-ORT_COMMIT=$(git -C "$ORT_ROOT" rev-parse HEAD)
-ORTX_COMMIT=$(git -C "$ORT_EXTENSIONS_ROOT" rev-parse HEAD)
+ORT_COMMIT=$ORT_COMMIT
+ORT_PREBUILT_ARCHIVE_URL=$ORT_PREBUILT_ARCHIVE_URL
+ORT_PREBUILT_ARCHIVE_SHA256=$ORT_PREBUILT_ARCHIVE_SHA256
+ORTX_COMMIT=$ACTUAL_ORTX_COMMIT
 IOS_DEPLOYMENT_TARGET=$IOS_DEPLOYMENT_TARGET
 XCODE_VERSION=$(xcodebuild -version | tr '\n' ' ')
 CMAKE_VERSION=$(cmake --version | head -1)

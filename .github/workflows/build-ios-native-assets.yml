@@ -11,6 +11,7 @@ on:
       - '.github/workflows/build-ios-native-assets.yml'
       - 'tool/apple/**'
       - 'tool/extensions/bpe_decoder_only.patch'
+      - 'onnx_runtime/headers/**'
 
 permissions:
   contents: write
@@ -21,7 +22,10 @@ concurrency:
 
 env:
   ORT_VERSION: 1.27.0
+  ORT_COMMIT: 8f0278c77bf44b0cc83c098c6c722b92a36ac4b5
   ORTX_COMMIT: fe4e13f46b19fb490c90b09fe280277308bd5bb7
+  ORT_PREBUILT_ARCHIVE_URL: https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.27.0-ortx-fe4e13f/fonnx-ios-arm64-ort-1.27.0-ortx-fe4e13f4.zip
+  ORT_PREBUILT_ARCHIVE_SHA256: 55729f13604eb3e7fb8899737da90434306e0f7b5695425f427bc36128bddb58
   RELEASE_TAG: native-assets-ort-1.27.0-ortx-fe4e13f-bpe-only-v1
 
 jobs:
@@ -34,14 +38,6 @@ jobs:
     steps:
       - name: Checkout fonnx build recipe
         uses: actions/checkout@v4
-
-      - name: Checkout ONNX Runtime
-        uses: actions/checkout@v4
-        with:
-          repository: microsoft/onnxruntime
-          ref: v1.27.0
-          path: _native_deps/onnxruntime
-          submodules: recursive
 
       - name: Checkout ONNX Runtime Extensions
         uses: actions/checkout@v4
@@ -57,7 +53,6 @@ jobs:
 
       - name: Build and package dynamic iOS assets
         env:
-          ORT_ROOT: ${{ github.workspace }}/_native_deps/onnxruntime
           ORT_EXTENSIONS_ROOT: ${{ github.workspace }}/_native_deps/onnxruntime-extensions
           OUTPUT_DIR: ${{ github.workspace }}/dist
           BUILD_ROOT: ${{ runner.temp }}/fonnx-ios-native-assets
