@@ -41,7 +41,7 @@ final class _Artifact {
 
 const _nativeAssetsReleaseUrl =
     'https://github.com/Telosnex/fonnx/releases/download/'
-    'native-assets-ort-1.27.0-ortx-fe4e13f-bpe-only-v1';
+    'native-assets-ort-1.27.0-ortx-fe4e13f-bpe-only-v2';
 const _iosNativeAssetsUrl =
     '$_nativeAssetsReleaseUrl/'
     'fonnx-ios-arm64-ort-1.27.0-ortx-fe4e13f4.zip';
@@ -73,12 +73,12 @@ const _ortArtifacts = <String, _Artifact>{
   ),
   'ios-arm64-iphoneos': _Artifact(
     url: _iosNativeAssetsUrl,
-    sha256: '55729f13604eb3e7fb8899737da90434306e0f7b5695425f427bc36128bddb58',
+    sha256: 'dfa6edf1a35e0679070b69384191e0747f79dfef948edb7408eacdc2f417d510',
     libraryEntrySuffix: 'iphoneos/libonnxruntime.dylib',
   ),
   'ios-arm64-iphonesimulator': _Artifact(
     url: _iosNativeAssetsUrl,
-    sha256: '55729f13604eb3e7fb8899737da90434306e0f7b5695425f427bc36128bddb58',
+    sha256: 'dfa6edf1a35e0679070b69384191e0747f79dfef948edb7408eacdc2f417d510',
     libraryEntrySuffix: 'iphonesimulator/libonnxruntime.dylib',
   ),
   'linux-arm64': _Artifact(
@@ -144,12 +144,12 @@ const _ortExtensionsArtifacts = <String, _Artifact>{
   ),
   'ios-arm64-iphoneos': _Artifact(
     url: _iosNativeAssetsUrl,
-    sha256: '55729f13604eb3e7fb8899737da90434306e0f7b5695425f427bc36128bddb58',
+    sha256: 'dfa6edf1a35e0679070b69384191e0747f79dfef948edb7408eacdc2f417d510',
     libraryEntrySuffix: 'iphoneos/libortextensions.dylib',
   ),
   'ios-arm64-iphonesimulator': _Artifact(
     url: _iosNativeAssetsUrl,
-    sha256: '55729f13604eb3e7fb8899737da90434306e0f7b5695425f427bc36128bddb58',
+    sha256: 'dfa6edf1a35e0679070b69384191e0747f79dfef948edb7408eacdc2f417d510',
     libraryEntrySuffix: 'iphonesimulator/libortextensions.dylib',
   ),
   'linux-arm64': _Artifact(

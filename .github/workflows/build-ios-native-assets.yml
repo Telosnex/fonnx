@@ -26,7 +26,7 @@ env:
   ORTX_COMMIT: fe4e13f46b19fb490c90b09fe280277308bd5bb7
   ORT_PREBUILT_ARCHIVE_URL: https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.27.0-ortx-fe4e13f/fonnx-ios-arm64-ort-1.27.0-ortx-fe4e13f4.zip
   ORT_PREBUILT_ARCHIVE_SHA256: 55729f13604eb3e7fb8899737da90434306e0f7b5695425f427bc36128bddb58
-  RELEASE_TAG: native-assets-ort-1.27.0-ortx-fe4e13f-bpe-only-v1
+  RELEASE_TAG: native-assets-ort-1.27.0-ortx-fe4e13f-bpe-only-v2
 
 jobs:
   apple:

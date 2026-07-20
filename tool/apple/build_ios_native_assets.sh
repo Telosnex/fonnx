@@ -170,9 +170,11 @@ cp "$ORT_BINARIES/iphonesimulator/libonnxruntime.dylib" \
 cp "$ORTX_DEVICE" "$STAGING/iphoneos/libortextensions.dylib"
 cp "$ORTX_SIMULATOR" "$STAGING/iphonesimulator/libortextensions.dylib"
 
-# Avoid carrying local signatures into a release artifact. Flutter's native
-# asset embedding signs the final frameworks as part of the app build.
-find "$STAGING" -type f -exec codesign --remove-signature {} \; 2>/dev/null || true
+# Keep Xcode's linker-generated ad-hoc signature on Extensions. Removing it
+# leaves alignment padding at the end of __LINKEDIT for this tiny selected-op
+# binary, and install_name_tool then refuses Flutter's framework-ID rewrite.
+# Flutter invalidates/replaces the ad-hoc signature while embedding the final
+# framework. The reused ORT base is already unsigned and rewrite-safe.
 
 readonly ASSET_PATH="$OUTPUT_DIR/$ASSET_NAME"
 rm -f "$ASSET_PATH" "$ASSET_PATH.sha256"
