@@ -20,8 +20,10 @@ class MiniLmL6V2Native implements MiniLmL6V2 {
   @override
   Future<Vector> getEmbeddingAsVector(List<int> tokens) async {
     final embeddings = await getEmbedding(tokens);
-    final vector =
-        Vector.fromList(embeddings, dtype: DType.float32).normalize();
+    final vector = Vector.fromList(
+      embeddings,
+      dtype: DType.float32,
+    ).normalize();
     return vector;
   }
 
@@ -33,12 +35,12 @@ class MiniLmL6V2Native implements MiniLmL6V2 {
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-      case TargetPlatform.iOS:
-        return getEmbeddingViaPlatformChannel(tokens);
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         return getEmbeddingViaFfi(tokens);
+      case TargetPlatform.iOS:
+        return getEmbeddingViaPlatformChannel(tokens);
       case TargetPlatform.fuchsia:
         throw UnimplementedError();
     }
@@ -50,10 +52,7 @@ class MiniLmL6V2Native implements MiniLmL6V2 {
 
   Future<Float32List> getEmbeddingViaPlatformChannel(List<int> tokens) async {
     final fonnx = _fonnx ??= Fonnx();
-    final embeddings = await fonnx.miniLm(
-      modelPath: modelPath,
-      inputs: tokens,
-    );
+    final embeddings = await fonnx.miniLm(modelPath: modelPath, inputs: tokens);
     if (embeddings == null) {
       throw Exception('Embeddings returned from platform code are null');
     }

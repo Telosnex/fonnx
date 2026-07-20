@@ -37,10 +37,7 @@ void magikaIsolateEntryPoint(SendPort mainSendPort) {
           fonnxOrtDylibPathOverride = message.ortDylibPathOverride;
         }
         // Lazily create the Ort session if it's not already done.
-        ortSessionObjects ??= createOrtSession(
-          message.modelPath,
-          includeOnnxExtensionsOps: true,
-        );
+        ortSessionObjects ??= createOrtSession(message.modelPath);
         // Perform the inference here using ortSessionObjects and message.tokens, retrieve result.
         final result = await _getMagikaResultVector(
           ortSessionObjects!,

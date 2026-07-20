@@ -21,8 +21,10 @@ class MinishLabNative implements MinishLab {
   @override
   Future<Vector> getEmbeddingAsVector(List<int> tokens) async {
     final embeddings = await getEmbedding(tokens);
-    final vector =
-        Vector.fromList(embeddings, dtype: DType.float32).normalize();
+    final vector = Vector.fromList(
+      embeddings,
+      dtype: DType.float32,
+    ).normalize();
     return vector;
   }
 
@@ -34,12 +36,12 @@ class MinishLabNative implements MinishLab {
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-      case TargetPlatform.iOS:
-        return getEmbeddingViaPlatformChannel(tokens);
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         return getEmbeddingViaFfi(tokens);
+      case TargetPlatform.iOS:
+        return getEmbeddingViaPlatformChannel(tokens);
       case TargetPlatform.fuchsia:
         throw UnimplementedError();
     }

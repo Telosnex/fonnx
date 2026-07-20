@@ -22,25 +22,28 @@ class MsmarcoMiniLmL6V3Native implements MsmarcoMiniLmL6V3 {
   @override
   Future<Vector> getEmbeddingAsVector(List<int> tokens) async {
     final embeddings = await getEmbedding(tokens);
-    final vector =
-        Vector.fromList(embeddings, dtype: DType.float32).normalize();
+    final vector = Vector.fromList(
+      embeddings,
+      dtype: DType.float32,
+    ).normalize();
     return vector;
   }
 
   Future<Float32List> getEmbedding(List<int> tokens) async {
-    final ffiPlatform =
-        !kIsWeb && Platform.isLinux || Platform.isMacOS || Platform.isWindows;
-    final platformChannelPlatform =
-        !kIsWeb && Platform.isAndroid || Platform.isIOS;
-    if (ffiPlatform) {
+    if (!kIsWeb && Platform.isIOS) {
+      return getEmbeddingViaPlatformChannel(tokens);
+    }
+    if (!kIsWeb &&
+        (Platform.isAndroid ||
+            Platform.isLinux ||
+            Platform.isMacOS ||
+            Platform.isWindows)) {
       await _onnxIsolateManager.start(OnnxIsolateType.miniLm);
       return getEmbeddingViaFfi(tokens);
-    } else if (platformChannelPlatform) {
-      return getEmbeddingViaPlatformChannel(tokens);
-    } else {
-      throw UnimplementedError(
-          'Unsupported platform: ${Platform.operatingSystem}');
     }
+    throw UnimplementedError(
+      'Unsupported platform: ${Platform.operatingSystem}',
+    );
   }
 
   Future<Float32List> getEmbeddingViaFfi(List<int> tokens) {
@@ -53,10 +56,7 @@ class MsmarcoMiniLmL6V3Native implements MsmarcoMiniLmL6V3 {
 
   Future<Float32List> getEmbeddingViaPlatformChannel(List<int> tokens) async {
     final fonnx = _fonnx ??= Fonnx();
-    final embeddings = await fonnx.miniLm(
-      modelPath: modelPath,
-      inputs: tokens,
-    );
+    final embeddings = await fonnx.miniLm(modelPath: modelPath, inputs: tokens);
     if (embeddings == null) {
       throw Exception('Embeddings returned from platform code are null');
     }

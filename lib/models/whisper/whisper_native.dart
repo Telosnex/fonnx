@@ -25,12 +25,12 @@ class WhisperNative implements Whisper {
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-      case TargetPlatform.iOS:
-        return _getTranscriptPlatformChannel(bytes);
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         return _getTranscriptFfi(bytes);
+      case TargetPlatform.iOS:
+        return _getTranscriptPlatformChannel(bytes);
       case TargetPlatform.fuchsia:
         throw UnimplementedError();
     }

@@ -1,0 +1,78 @@
+name: Build iOS native assets
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fonnx-ios-native-assets
+  cancel-in-progress: false
+
+env:
+  ORT_VERSION: 1.27.0
+  ORTX_COMMIT: fe4e13f46b19fb490c90b09fe280277308bd5bb7
+  RELEASE_TAG: native-assets-ort-1.27.0-ortx-fe4e13f
+
+jobs:
+  apple:
+    # The output targets arm64 device/simulator. The build itself is a normal
+    # Xcode cross-compile and does not depend on the runner CPU architecture.
+    runs-on: macos-15
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout fonnx build recipe
+        uses: actions/checkout@v4
+
+      - name: Checkout ONNX Runtime
+        uses: actions/checkout@v4
+        with:
+          repository: microsoft/onnxruntime
+          ref: v1.27.0
+          path: _native_deps/onnxruntime
+          submodules: recursive
+
+      - name: Checkout ONNX Runtime Extensions
+        uses: actions/checkout@v4
+        with:
+          repository: microsoft/onnxruntime-extensions
+          ref: ${{ env.ORTX_COMMIT }}
+          path: _native_deps/onnxruntime-extensions
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Build and package dynamic iOS assets
+        env:
+          ORT_ROOT: ${{ github.workspace }}/_native_deps/onnxruntime
+          ORT_EXTENSIONS_ROOT: ${{ github.workspace }}/_native_deps/onnxruntime-extensions
+          OUTPUT_DIR: ${{ github.workspace }}/dist
+          BUILD_ROOT: ${{ runner.temp }}/fonnx-ios-native-assets
+        run: tool/apple/build_ios_native_assets.sh
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fonnx-ios-native-assets
+          path: |
+            dist/*.zip
+            dist/*.sha256
+            dist/provenance.txt
+          if-no-files-found: error
+
+      - name: Publish pinned release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" \
+              --target "$GITHUB_SHA" \
+              --prerelease \
+              --title "FONNX native assets: ORT $ORT_VERSION / ORTX ${ORTX_COMMIT:0:8}" \
+              --notes "Reproducible dynamic iOS device/simulator assets. See provenance.txt and tool/apple/build_ios_native_assets.sh."
+          fi
+          gh release upload "$RELEASE_TAG" dist/* --clobber

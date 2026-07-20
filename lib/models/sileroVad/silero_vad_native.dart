@@ -35,12 +35,12 @@ class SileroVadNative implements SileroVad {
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-      case TargetPlatform.iOS:
-        return _doInferencePlatformChannel(bytes, previousState);
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         return _doInferenceFfi(bytes, previousState);
+      case TargetPlatform.iOS:
+        return _doInferencePlatformChannel(bytes, previousState);
       case TargetPlatform.fuchsia:
         throw UnimplementedError();
     }

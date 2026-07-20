@@ -24,12 +24,12 @@ class MagikaNative implements Magika {
     } else {
       switch (defaultTargetPlatform) {
         case TargetPlatform.android:
-        case TargetPlatform.iOS:
-          resultVector = await _getMagikaResultVectorViaPlatformChannel(bytes);
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
         case TargetPlatform.windows:
           resultVector = await _getMagikaResultVectorViaFfi(bytes);
+        case TargetPlatform.iOS:
+          resultVector = await _getMagikaResultVectorViaPlatformChannel(bytes);
         case TargetPlatform.fuchsia:
           throw UnimplementedError();
       }
@@ -39,11 +39,14 @@ class MagikaNative implements Magika {
 
   Future<Float32List> _getMagikaResultVectorViaFfi(List<int> bytes) {
     return _isolate.sendInference(
-        modelPath, extractFeaturesFromBytes(Uint8List.fromList(bytes)).all);
+      modelPath,
+      extractFeaturesFromBytes(Uint8List.fromList(bytes)).all,
+    );
   }
 
   Future<Float32List> _getMagikaResultVectorViaPlatformChannel(
-      List<int> bytes) async {
+    List<int> bytes,
+  ) async {
     final fonnx = _fonnx ??= Fonnx();
     final type = await fonnx.magika(
       modelPath: modelPath,
