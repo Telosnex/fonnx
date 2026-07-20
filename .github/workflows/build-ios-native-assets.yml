@@ -2,6 +2,14 @@ name: Build iOS native assets
 
 on:
   workflow_dispatch:
+  # Bootstrap and recipe verification: GitHub only exposes workflow_dispatch
+  # after a workflow exists on the default branch. A same-repository PR can
+  # build/upload the artifact first; publishing remains dispatch-only.
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/build-ios-native-assets.yml'
+      - 'tool/apple/**'
 
 permissions:
   contents: write
@@ -65,6 +73,7 @@ jobs:
           if-no-files-found: error
 
       - name: Publish pinned release asset
+        if: github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
