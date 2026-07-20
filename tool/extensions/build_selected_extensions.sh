@@ -141,13 +141,13 @@ if ! strings "$library" | grep 'RegisterCustomOps' >/dev/null; then
   echo "RegisterCustomOps is not exported by $library" >&2
   exit 1
 fi
-if ! strings "$library" | grep -x 'BpeDecoder' >/dev/null; then
+if ! strings "$library" | grep -F 'BpeDecoder' >/dev/null; then
   echo "BpeDecoder is missing from $library" >&2
   exit 1
 fi
 for unexpected_op in \
   GPT2Tokenizer CLIPTokenizer RobertaTokenizer SpmTokenizer HfJsonTokenizer; do
-  if strings "$library" | grep -x "$unexpected_op" >/dev/null; then
+  if strings "$library" | grep -F "$unexpected_op" >/dev/null; then
     echo "Unexpected custom op $unexpected_op is present in $library" >&2
     exit 1
   fi
