@@ -517,8 +517,7 @@ extension DartNativeFunctions on OrtApi {
             Pointer<Pointer<OrtSession>>,
           )
         >();
-    final modelPathChars =
-        defaultTargetPlatform == TargetPlatform.windows || Platform.isWindows
+    final modelPathChars = Platform.isWindows
         ? modelPath.toNativeUtf16().cast<Char>()
         : modelPath.toNativeUtf8().cast<Char>();
     try {
@@ -812,24 +811,6 @@ extension DartNativeFunctions on OrtApi {
     return status;
   }
 
-  Pointer<OrtStatus> sessionOptionsAppendExecutionProviderCoreML(
-    Pointer<OrtSessionOptions> options,
-    int coremlFlags,
-  ) {
-    final status = OrtSessionOptionsAppendExecutionProvider_CoreML(
-      options,
-      coremlFlags,
-    );
-
-    if (status.isError) {
-      final error =
-          'SessionOptionsAppendExecutionProvider_CoreML failed. Code: ${getErrorCodeMessage(status)}\n'
-          'Message: ${getErrorMessage(status)}';
-      throw Exception(error);
-    }
-    return status;
-  }
-
   Pointer<OrtStatus> setIntraOpNumThreads(
     Pointer<OrtSessionOptions> options,
     int intraOpNumThreads,
@@ -901,57 +882,6 @@ void releaseOrtSessionObjects(OrtSessionObjects? objects) {
   calloc.free(objects.envPtr);
 }
 
-/// The path used to open ONNX Runtime.
-///
-/// In normal builds this is the stable native-assets name rather than a
-/// versioned, repository-relative path. The override remains available for
-/// embedding environments and diagnostics that intentionally supply ORT.
-String get ortDylibPath {
-  if (fonnxOrtDylibPathOverride != null) {
-    return fonnxOrtDylibPathOverride!;
-  }
-  if (Platform.isMacOS || Platform.isIOS) {
-    return 'onnxruntime.framework/onnxruntime';
-  }
-  if (Platform.isAndroid || Platform.isLinux) {
-    return 'libonnxruntime.so';
-  }
-  if (Platform.isWindows) return 'onnxruntime.dll';
-  throw UnsupportedError(
-    'ONNX Runtime is not supported on ${Platform.operatingSystem}.',
-  );
-}
-
-String get ortExtensionsDylibPath {
-  if (fonnxOrtExtensionsDylibPathOverride != null) {
-    return fonnxOrtExtensionsDylibPathOverride!;
-  }
-  final isTesting = !kIsWeb && Platform.environment['FLUTTER_TEST'] == 'true';
-  if (isTesting) {
-    if (Platform.isMacOS) {
-      return 'macos/onnx_runtime/osx/libortextensions.0.9.0.dylib';
-    } else if (Platform.isLinux) {
-      return 'linux/onnx_runtime/libortextensions.so.0.9.0';
-    } else {
-      throw 'Unsure how to load ORT during testing for this platform (${Platform.operatingSystem})';
-    }
-  }
-  switch (defaultTargetPlatform) {
-    case TargetPlatform.android:
-      throw UnimplementedError();
-    case TargetPlatform.fuchsia:
-      throw UnimplementedError();
-    case TargetPlatform.iOS:
-      throw UnimplementedError();
-    case TargetPlatform.linux:
-      return 'libortextensions.so.0.9.0';
-    case TargetPlatform.macOS:
-      return 'libortextensions.0.9.0.dylib';
-    case TargetPlatform.windows:
-      return 'ortextensions-x64.dll';
-  }
-}
-
 /// You MUST call [calloc.free] on the returned pointer when you are done with it.
 ///
 /// It is reasonable to never free it in an app where you would like the model
@@ -960,15 +890,8 @@ OrtSessionObjects createOrtSession(
   String modelPath, {
   bool includeOnnxExtensionsOps = false,
 }) {
-  // Used to have:
-  //   DynamicLibrary.open(dylibPath);
-  //   final baseApi = OrtGetApiBase().ref;
-  // That led to an error that said:
-  //
-  // After reading [this Github issue](https://github.com/dart-lang/sdk/issues/50551)
-  //   my instinct was there may be an issue with global static functions and ffi,
-  //   and Linux may be lagging in support. Explicitly looking the function up in
-  //   the explicit library did fix it.
+  // Normal builds resolve the hook's code asset through @Native. The explicit
+  // lookup exists only for diagnostic hosts that intentionally override ORT.
   final answer = switch (fonnxOrtDylibPathOverride) {
     final path? =>
       DynamicLibrary.open(path).lookupFunction<
@@ -993,34 +916,17 @@ OrtSessionObjects createOrtSession(
   ortApi.createSessionOptions(sessionOptionsPtr);
   if (includeOnnxExtensionsOps) {
     try {
-      if (Platform.isAndroid && fonnxOrtExtensionsDylibPathOverride == null) {
-        final extensionsStatus = registerOrtExtensions(
-          sessionOptionsPtr.value,
-          answer,
+      final extensionsStatus = registerOrtExtensions(
+        options: sessionOptionsPtr.value,
+        apiBase: answer,
+        libraryPathOverride: fonnxOrtExtensionsDylibPathOverride,
+      );
+      if (extensionsStatus.isError) {
+        throw Exception(
+          'Register custom ops failed. '
+          'Code: ${ortApi.getErrorCodeMessage(extensionsStatus)}\n'
+          'Message: ${ortApi.getErrorMessage(extensionsStatus)}',
         );
-        if (extensionsStatus.isError) {
-          throw Exception(
-            'Register custom ops failed. '
-            'Code: ${ortApi.getErrorCodeMessage(extensionsStatus)}\n'
-            'Message: ${ortApi.getErrorMessage(extensionsStatus)}',
-          );
-        }
-      } else {
-        // Transitional desktop path. This is removed once fork CI publishes
-        // selected-op Extensions code assets for desktop and iOS.
-        DynamicLibrary.open(ortExtensionsDylibPath);
-        final libraryHandle = calloc<Pointer<Void>>();
-        final utf8Path = ortExtensionsDylibPath.toNativeUtf8().cast<Char>();
-        try {
-          ortApi.registerCustomOpsLibrary(
-            sessionOptionsPtr.value,
-            utf8Path,
-            libraryHandle,
-          );
-        } finally {
-          malloc.free(utf8Path);
-          calloc.free(libraryHandle);
-        }
       }
     } catch (e) {
       debugPrint('Error loading ORT Extensions: $e');

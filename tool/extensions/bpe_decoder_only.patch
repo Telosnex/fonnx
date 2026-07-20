@@ -1,0 +1,16 @@
+diff --git a/operators/tokenizer/tokenizers.cc b/operators/tokenizer/tokenizers.cc
+index 4d36f7b..cb115c2 100644
+--- a/operators/tokenizer/tokenizers.cc
++++ b/operators/tokenizer/tokenizers.cc
+@@ -38,11 +38,6 @@ FxLoadCustomOpFactory LoadCustomOpClasses_Tokenizer = []() -> CustomOpArray& {
+   static OrtOpLoader op_loader(
+ #ifdef ENABLE_GPT2_TOKENIZER
+-      CustomCpuStructV2("GPT2Tokenizer", GPT2Tokenizer),
+-      CustomCpuStructV2("CLIPTokenizer", CLIPTokenizer),
+-      CustomCpuStructV2("RobertaTokenizer", RobertaTokenizer),
+       CustomCpuStructV2("BpeDecoder", KernelBpeDecoder),
+-      CustomCpuStructV2("SpmTokenizer", SpmTokenizer),
+-      CustomCpuStructV2("HfJsonTokenizer", JsonTokenizerOpKernel),
+ #endif
+ 
+ #ifdef ENABLE_SPM_TOKENIZER

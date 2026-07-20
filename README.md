@@ -14,6 +14,18 @@ framework."
 
 # Changelog
 
+## 2026 Jul 20
+- Upgraded ONNX Runtime from 1.16.1 to 1.27.0 on every native platform.
+- Replaced vendored binaries, CocoaPods, Maven runtime dependencies, and
+  Kotlin/Swift platform channels with SHA-256-verified native code assets and
+  one Dart FFI inference implementation.
+- Added Linux aarch64 support for Raspberry Pi/flutter-pi.
+- Pinned a selected-op ONNX Runtime Extensions build for Whisper's
+  `ai.onnx.contrib:BpeDecoder`; Magika and Pyannote were verified as core-ORT
+  models and no longer register Extensions.
+- Native support is Android armv7/arm64/x64, iOS arm64 device/simulator, Linux
+  x64/aarch64, macOS arm64, and Windows x64/arm64. Intel macOS is dropped.
+
 ## 2026 Jul 19
 - Upgraded voice activity detection to the official Silero VAD v6.2.1 model.
 - Added the v6 streaming state/context contract on native, mobile, and web.
@@ -109,20 +121,23 @@ Avg. ms for 1 Mini LM L6 V2 embedding / 200 words.
 
 # Integrating FONNX
 
-## macOS, Windows, Linux via FFI
+## Native platforms via Dart FFI and code assets
 
-The ONNX C library is used for macOS, Windows, and Linux.
-Flutter can call into it via FFI. Nothing special is required to use FFI on these platforms.
+Android, iOS, Linux, macOS, and Windows use the same Dart FFI implementation.
+`hook/build.dart` selects the target artifact, downloads it into a
+content-addressed cache, verifies its pinned SHA-256, extracts the library, and
+emits a bundled Flutter code asset. There are no FONNX CocoaPods/Gradle native
+dependencies and no platform channels.
 
-## iOS via ONNX pods
+Microsoft's published iOS artifact is static and cannot be loaded as a Dart
+code asset. FONNX release CI runs Microsoft's official Apple framework script
+in its supported dynamic mode and publishes arm64 device/simulator artifacts
+for the hook. iOS 15.1 or newer is required. macOS supports Apple Silicon only;
+Intel support was intentionally dropped.
 
-iOS uses the official ONNX Objective-C library. No additional tasks besides adding FONNX to your Flutter project are required.
-
-iOS build fails when linked against .dylib provided with ONNX releases. They are explicitly marked as for macOS.
-
-## Android via ONNX AAR
-
-Android uses the official ONNX Android dependencies from a Maven repository. Note that ProGuard rules are required to prevent the ONNX library from being stripped.
+ONNX Runtime Extensions is also a separately bundled code asset. The build is
+selected to the one custom operator in the current model inventory:
+Whisper's `ai.onnx.contrib:BpeDecoder`.
 
 ## Web
 

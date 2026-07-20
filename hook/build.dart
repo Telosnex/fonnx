@@ -1,9 +1,10 @@
 // Native-assets build hook for fonnx.
 //
 // ONNX Runtime is expensive to compile but Microsoft publishes dynamic
-// libraries for Linux, macOS, Windows, and Android. This hook downloads the
-// exact artifact selected by target OS/architecture, verifies its SHA-256,
-// extracts only libonnxruntime, and registers it as a bundled code asset.
+// libraries for Linux, macOS, Windows, and Android. FONNX release CI fills
+// the dynamic-iOS and selected-op Extensions publishing gaps. This hook
+// downloads the exact artifact selected by target OS/architecture, verifies
+// its SHA-256, extracts only the libraries, and emits bundled code assets.
 //
 // Downloads and extracted files live in a content-addressed cache outside
 // hooks_runner's environment-sensitive cache. A cold build downloads once;
@@ -55,14 +56,6 @@ const _ortArtifacts = <String, _Artifact>{
     sha256: '077dec5e2d821234c7dc0aba584bec8f999854b546c754cab93a90741c56fbeb',
     libraryEntrySuffix: 'jni/arm64-v8a/libonnxruntime.so',
   ),
-  'android-ia32': _Artifact(
-    url:
-        'https://repo.maven.apache.org/maven2/com/microsoft/onnxruntime/'
-        'onnxruntime-android/$_ortVersion/'
-        'onnxruntime-android-$_ortVersion.aar',
-    sha256: '077dec5e2d821234c7dc0aba584bec8f999854b546c754cab93a90741c56fbeb',
-    libraryEntrySuffix: 'jni/x86/libonnxruntime.so',
-  ),
   'android-x64': _Artifact(
     url:
         'https://repo.maven.apache.org/maven2/com/microsoft/onnxruntime/'
@@ -108,34 +101,67 @@ const _ortArtifacts = <String, _Artifact>{
   ),
 };
 
-const _androidExtensionsVersion = '0.13.0';
-const _androidExtensionsSha256 =
-    'cb98c6fbeac1a9707228c4b76cfbb395b4dc4d310900aefaa672561d17fd6d9d';
-const _androidExtensionsBaseUrl =
-    'https://repo.maven.apache.org/maven2/com/microsoft/onnxruntime/'
-    'onnxruntime-extensions-android/$_androidExtensionsVersion/'
-    'onnxruntime-extensions-android-$_androidExtensionsVersion.aar';
+const _ortExtensionsCommitShort = 'fe4e13f4';
+const _nativeAssetsReleaseUrl =
+    'https://github.com/Telosnex/fonnx/releases/download/'
+    'native-assets-ort-1.27.0-ortx-fe4e13f';
 
 const _ortExtensionsArtifacts = <String, _Artifact>{
   'android-arm': _Artifact(
-    url: _androidExtensionsBaseUrl,
-    sha256: _androidExtensionsSha256,
-    libraryEntrySuffix: 'jni/armeabi-v7a/libortextensions.so',
+    url:
+        '$_nativeAssetsReleaseUrl/'
+        'fonnx-ortextensions-$_ortExtensionsCommitShort-android-arm.zip',
+    sha256: 'e24e5676fe54902b0e2447fc18b03193cfeaf917446d6a7a33b3242b93bdafa2',
+    libraryEntrySuffix: 'libortextensions.so',
   ),
   'android-arm64': _Artifact(
-    url: _androidExtensionsBaseUrl,
-    sha256: _androidExtensionsSha256,
-    libraryEntrySuffix: 'jni/arm64-v8a/libortextensions.so',
-  ),
-  'android-ia32': _Artifact(
-    url: _androidExtensionsBaseUrl,
-    sha256: _androidExtensionsSha256,
-    libraryEntrySuffix: 'jni/x86/libortextensions.so',
+    url:
+        '$_nativeAssetsReleaseUrl/'
+        'fonnx-ortextensions-$_ortExtensionsCommitShort-android-arm64.zip',
+    sha256: 'a71acaaccaa8f243afc0a21e27f5f88d3fbf161499bf1e4bb0160fa56e8f94a6',
+    libraryEntrySuffix: 'libortextensions.so',
   ),
   'android-x64': _Artifact(
-    url: _androidExtensionsBaseUrl,
-    sha256: _androidExtensionsSha256,
-    libraryEntrySuffix: 'jni/x86_64/libortextensions.so',
+    url:
+        '$_nativeAssetsReleaseUrl/'
+        'fonnx-ortextensions-$_ortExtensionsCommitShort-android-x64.zip',
+    sha256: 'dbd12c2418094313e1805f61e7ca0bfab9d5bac778d0c1c543d6f79fb4259101',
+    libraryEntrySuffix: 'libortextensions.so',
+  ),
+  'linux-arm64': _Artifact(
+    url:
+        '$_nativeAssetsReleaseUrl/'
+        'fonnx-ortextensions-$_ortExtensionsCommitShort-linux-arm64.zip',
+    sha256: '5a8aaa4ad4ad58c8be4d364d081b07eb81f6e8ad0fe40b1aeddd98df205e00c6',
+    libraryEntrySuffix: 'libortextensions.so',
+  ),
+  'linux-x64': _Artifact(
+    url:
+        '$_nativeAssetsReleaseUrl/'
+        'fonnx-ortextensions-$_ortExtensionsCommitShort-linux-x64.zip',
+    sha256: '9fed7d4d8a8cd73223428fb31088d714103a3a146038d76461039df65640ac13',
+    libraryEntrySuffix: 'libortextensions.so',
+  ),
+  'macos-arm64': _Artifact(
+    url:
+        '$_nativeAssetsReleaseUrl/'
+        'fonnx-ortextensions-$_ortExtensionsCommitShort-macos-arm64.zip',
+    sha256: 'b6560134d7503bc2a00d9350afbf278cccd0706270e90819793eb28df29fba01',
+    libraryEntrySuffix: 'libortextensions.dylib',
+  ),
+  'windows-arm64': _Artifact(
+    url:
+        '$_nativeAssetsReleaseUrl/'
+        'fonnx-ortextensions-$_ortExtensionsCommitShort-windows-arm64.zip',
+    sha256: 'b42d856bc2fb3c7904c1b12cc36ec1c5f151ce71f94be6b1e025a9a2f399f0d6',
+    libraryEntrySuffix: 'ortextensions.dll',
+  ),
+  'windows-x64': _Artifact(
+    url:
+        '$_nativeAssetsReleaseUrl/'
+        'fonnx-ortextensions-$_ortExtensionsCommitShort-windows-x64.zip',
+    sha256: '04d6571cf4c91b7bdf873adea18d2bf9495848603ba6a32b9bdd2f92c08af7d0',
+    libraryEntrySuffix: 'ortextensions.dll',
   ),
 };
 
@@ -145,10 +171,6 @@ void main(List<String> args) async {
 
     final os = input.config.code.targetOS;
 
-    // iOS continues to use its existing plugin integration until the fork-CI
-    // dynamic framework is available. Returning keeps that build working
-    // while this hook lands incrementally.
-    if (os == OS.iOS) return;
     if (os == OS.fuchsia) {
       throw UnsupportedError('fonnx does not support ONNX Runtime on Fuchsia.');
     }

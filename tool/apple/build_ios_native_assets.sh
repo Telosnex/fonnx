@@ -54,8 +54,13 @@ cp "$ORT_XCFRAMEWORK/ios-arm64/onnxruntime.framework/Headers/"* \
   "$ORT_HEADERS/include/"
 
 readonly SELECTED_OPS_FILE="$ORT_EXTENSIONS_ROOT/cmake/_selectedoplist.cmake"
+readonly BPE_DECODER_ONLY_PATCH="$FONNX_ROOT/tool/extensions/bpe_decoder_only.patch"
+git -C "$ORT_EXTENSIONS_ROOT" apply --check "$BPE_DECODER_ONLY_PATCH"
+git -C "$ORT_EXTENSIONS_ROOT" apply "$BPE_DECODER_ONLY_PATCH"
 cleanup() {
   rm -f "$SELECTED_OPS_FILE"
+  git -C "$ORT_EXTENSIONS_ROOT" apply -R "$BPE_DECODER_ONLY_PATCH" \
+    >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 cat > "$SELECTED_OPS_FILE" <<'CMAKE'
@@ -89,6 +94,15 @@ build_extensions_slice() {
     -name 'libortextensions.*.dylib' | head -1)"
   test -n "$dylib"
   nm -gU "$dylib" | grep ' _RegisterCustomOps$' >/dev/null
+  strings "$dylib" | grep -x 'BpeDecoder' >/dev/null
+  local unexpected_op
+  for unexpected_op in \
+    GPT2Tokenizer CLIPTokenizer RobertaTokenizer SpmTokenizer HfJsonTokenizer; do
+    if strings "$dylib" | grep -x "$unexpected_op" >/dev/null; then
+      echo "Unexpected custom op $unexpected_op is present in $dylib" >&2
+      exit 1
+    fi
+  done
 }
 
 build_extensions_slice iphoneos device
@@ -119,7 +133,9 @@ rm -f "$ASSET_PATH" "$ASSET_PATH.sha256"
   # is pinned from the uploaded release asset, not predicted in source.
   zip -X -9 -r "$ASSET_PATH" iphoneos iphonesimulator
 )
-shasum -a 256 "$ASSET_PATH" | tee "$ASSET_PATH.sha256"
+asset_sha256="$(shasum -a 256 "$ASSET_PATH" | awk '{print $1}')"
+printf '%s  %s\n' "$asset_sha256" "$(basename "$ASSET_PATH")" \
+  | tee "$ASSET_PATH.sha256"
 
 cat > "$OUTPUT_DIR/provenance.txt" <<EOF
 ORT_VERSION=$ORT_VERSION

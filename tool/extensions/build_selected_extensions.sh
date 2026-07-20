@@ -15,14 +15,19 @@ readonly BUILD_ROOT="${BUILD_ROOT:-${RUNNER_TEMP:-/tmp}/fonnx-ortextensions-${TA
 readonly OUTPUT_DIR="${OUTPUT_DIR:-$FONNX_ROOT/dist}"
 readonly ORT_HEADERS_PACKAGE="$BUILD_ROOT/ort-package"
 readonly SELECTED_OPS_FILE="$ORT_EXTENSIONS_ROOT/cmake/_selectedoplist.cmake"
+readonly BPE_DECODER_ONLY_PATCH="$FONNX_ROOT/tool/extensions/bpe_decoder_only.patch"
 readonly ASSET_BASENAME="fonnx-ortextensions-${ORTX_COMMIT:0:8}-${TARGET_OS}-${TARGET_ARCH}"
 
 rm -rf "$BUILD_ROOT"
 mkdir -p "$BUILD_ROOT" "$OUTPUT_DIR" "$ORT_HEADERS_PACKAGE/include"
 cp -R "$FONNX_ROOT/onnx_runtime/headers/." "$ORT_HEADERS_PACKAGE/include/"
 
+git -C "$ORT_EXTENSIONS_ROOT" apply --check "$BPE_DECODER_ONLY_PATCH"
+git -C "$ORT_EXTENSIONS_ROOT" apply "$BPE_DECODER_ONLY_PATCH"
 cleanup() {
   rm -f "$SELECTED_OPS_FILE"
+  git -C "$ORT_EXTENSIONS_ROOT" apply -R "$BPE_DECODER_ONLY_PATCH" \
+    >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 cat > "$SELECTED_OPS_FILE" <<'CMAKE'
@@ -136,6 +141,17 @@ if ! strings "$library" | grep 'RegisterCustomOps' >/dev/null; then
   echo "RegisterCustomOps is not exported by $library" >&2
   exit 1
 fi
+if ! strings "$library" | grep -x 'BpeDecoder' >/dev/null; then
+  echo "BpeDecoder is missing from $library" >&2
+  exit 1
+fi
+for unexpected_op in \
+  GPT2Tokenizer CLIPTokenizer RobertaTokenizer SpmTokenizer HfJsonTokenizer; do
+  if strings "$library" | grep -x "$unexpected_op" >/dev/null; then
+    echo "Unexpected custom op $unexpected_op is present in $library" >&2
+    exit 1
+  fi
+done
 
 readonly STAGING="$BUILD_ROOT/staging"
 mkdir -p "$STAGING"
@@ -153,5 +169,7 @@ rm -f "$ASSET_PATH" "$ASSET_PATH.sha256"
   cd "$STAGING"
   cmake -E tar cf "$ASSET_PATH" --format=zip "$output_name" provenance.txt
 )
-cmake -E sha256sum "$ASSET_PATH" | tee "$ASSET_PATH.sha256"
+asset_sha256="$(cmake -E sha256sum "$ASSET_PATH" | awk '{print $1}')"
+printf '%s  %s\n' "$asset_sha256" "$(basename "$ASSET_PATH")" \
+  | tee "$ASSET_PATH.sha256"
 printf 'Built %s\n' "$ASSET_PATH"

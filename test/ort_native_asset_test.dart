@@ -12,7 +12,16 @@ void main() {
   });
 
   test('bundled ONNX Runtime creates a core-only model session', () {
-    final session = createOrtSession('test/models/magika.onnx');
+    final session = createOrtSession('test/models/identity.onnx');
+    expect(session.sessionPtr.value, isNot(nullptr));
+    releaseOrtSessionObjects(session);
+  });
+
+  test('bundled Extensions registers Whisper BpeDecoder', () {
+    final session = createOrtSession(
+      'test/models/bpe_decoder.onnx',
+      includeOnnxExtensionsOps: true,
+    );
     expect(session.sessionPtr.value, isNot(nullptr));
     releaseOrtSessionObjects(session);
   });

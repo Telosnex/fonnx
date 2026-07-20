@@ -1,26 +1,20 @@
 PODS:
   - FlutterMacOS (1.0.0)
-  - fonnx (1.0.0):
-    - FlutterMacOS
   - record_darwin (1.0.0):
     - FlutterMacOS
 
 DEPENDENCIES:
   - FlutterMacOS (from `Flutter/ephemeral`)
-  - fonnx (from `Flutter/ephemeral/.symlinks/plugins/fonnx/macos`)
   - record_darwin (from `Flutter/ephemeral/.symlinks/plugins/record_darwin/macos`)
 
 EXTERNAL SOURCES:
   FlutterMacOS:
     :path: Flutter/ephemeral
-  fonnx:
-    :path: Flutter/ephemeral/.symlinks/plugins/fonnx/macos
   record_darwin:
     :path: Flutter/ephemeral/.symlinks/plugins/record_darwin/macos
 
 SPEC CHECKSUMS:
   FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
-  fonnx: a8a31a0932debcf2e1d124cdc3c60eaf153f56f8
   record_darwin: 30509266ae213af8afdb09a8ae7467cb64c1377e
 
 PODFILE CHECKSUM: 91f0996b85caf3478dfdcf490d95bb166c22642b

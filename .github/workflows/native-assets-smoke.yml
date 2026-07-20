@@ -1,0 +1,48 @@
+name: Native assets smoke
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'hook/**'
+      - 'lib/**'
+      - 'test/ort_native_asset_test.dart'
+      - 'test/models/bpe_decoder.onnx'
+      - 'test/models/identity.onnx'
+      - 'pubspec.yaml'
+      - '.github/workflows/native-assets-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fonnx-native-assets-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  desktop:
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux x64
+            runner: ubuntu-24.04
+          - name: macOS arm64
+            runner: macos-15
+          - name: Windows x64
+            runner: windows-2025
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      - name: Resolve ORT + Extensions and create real sessions
+        run: flutter test test/ort_native_asset_test.dart --reporter expanded
