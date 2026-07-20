@@ -39,8 +39,10 @@ python3 "$ORT_ROOT/tools/ci_build/github/apple/build_apple_framework.py" \
 readonly ORT_XCFRAMEWORK="$BUILD_ROOT/ort/framework_out/onnxruntime.xcframework"
 for slice in ios-arm64 ios-arm64-simulator; do
   test -x "$ORT_XCFRAMEWORK/$slice/onnxruntime.framework/onnxruntime"
+  # Do not use grep -q under pipefail: it closes early after the match and
+  # causes nm to fail with SIGPIPE on large symbol tables.
   nm -gU "$ORT_XCFRAMEWORK/$slice/onnxruntime.framework/onnxruntime" \
-    | grep -q ' _OrtGetApiBase$'
+    | grep ' _OrtGetApiBase$' >/dev/null
 done
 
 # Extensions needs ORT headers but does not link against ORT: RegisterCustomOps
@@ -86,7 +88,7 @@ build_extensions_slice() {
   dylib="$(find "$build_dir/lib/Release" -type f \
     -name 'libortextensions.*.dylib' | head -1)"
   test -n "$dylib"
-  nm -gU "$dylib" | grep -q ' _RegisterCustomOps$'
+  nm -gU "$dylib" | grep ' _RegisterCustomOps$' >/dev/null
 }
 
 build_extensions_slice iphoneos device
