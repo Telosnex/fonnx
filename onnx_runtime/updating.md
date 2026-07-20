@@ -80,9 +80,14 @@ flutter test test/ort_native_asset_test.dart
 `OrtGetApiBase`, core-model session creation, and Extensions registration by
 creating a minimal graph containing `ai.onnx.contrib:BpeDecoder`.
 
-Also run hydrated-model goldens. This checkout may contain raw Git LFS pointer
-files rather than model bytes; `Invalid protobuf` against a ~130-byte `.onnx`
-is an LFS checkout failure, not an ORT regression.
+Also run hydrated-model goldens with `flutter test --concurrency=1`. The suite
+contains process-RSS smoke tests, so parallel test-file execution contaminates
+their measurements with other concurrently loaded models. This checkout may
+contain raw Git LFS pointer files rather than model bytes; `Invalid protobuf`
+against a ~130-byte `.onnx` is an LFS checkout failure, not an ORT regression.
+Re-baseline numerical goldens only after recording and reviewing the complete
+before/after score set; ORT graph-optimizer upgrades can legitimately shift
+cosine scores while preserving model ranking.
 
 Audit outputs:
 
