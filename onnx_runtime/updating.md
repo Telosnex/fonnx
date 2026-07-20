@@ -96,4 +96,5 @@ Audit outputs:
 - no `.so`, `.dylib`, or `.dll` is tracked by Git;
 - iOS deployment target is at least the upstream ORT requirement (15.1 for
   ORT 1.27.0);
-- Intel macOS is intentionally unsupported.
+- macOS deployment target is at least 14.0 and Release builds request arm64
+  only; Intel Apple targets are intentionally unsupported.

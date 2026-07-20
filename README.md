@@ -132,8 +132,8 @@ dependencies and no platform channels.
 Microsoft's published iOS artifact is static and cannot be loaded as a Dart
 code asset. FONNX release CI runs Microsoft's official Apple framework script
 in its supported dynamic mode and publishes arm64 device/simulator artifacts
-for the hook. iOS 15.1 or newer is required. macOS supports Apple Silicon only;
-Intel support was intentionally dropped.
+for the hook. iOS 15.1 or newer is required. macOS 14 or newer and Apple
+Silicon are required; Intel support was intentionally dropped.
 
 ONNX Runtime Extensions is also a separately bundled code asset. The build is
 selected to the one custom operator in the current model inventory:
