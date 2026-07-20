@@ -56,7 +56,11 @@ definitions:
       cd example && flutter build appbundle --verbose --no-tree-shake-icons
   script_android_setup: &script_android_setup
     name: Android setup
-    script: echo "flutter.sdk=$HOME/programs/flutter" > "$CM_BUILD_DIR/android/local.properties"
+    script: |
+      # fonnx is now a pure native-assets package, so its former top-level
+      # android/ plugin directory no longer exists. Configure the example app.
+      echo "flutter.sdk=$HOME/programs/flutter" \
+        > "$CM_BUILD_DIR/example/android/local.properties"
   script_ios_build: &script_ios_build
     name: Build IPA
     script: |

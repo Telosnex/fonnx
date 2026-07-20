@@ -1,7 +1,7 @@
 name: fonnx
-description: A new Flutter plugin project.
+description: Cross-platform ONNX inference for Flutter using Dart FFI and Web Workers.
 version: 0.0.1
-homepage:
+homepage: https://github.com/Telosnex/fonnx
 
 environment:
   # Native-assets hooks require Dart 3.9 or newer.
