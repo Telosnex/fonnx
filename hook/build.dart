@@ -73,12 +73,12 @@ const _ortArtifacts = <String, _Artifact>{
   ),
   'ios-arm64-iphoneos': _Artifact(
     url: _iosNativeAssetsUrl,
-    sha256: 'dfa6edf1a35e0679070b69384191e0747f79dfef948edb7408eacdc2f417d510',
+    sha256: '0ce93d30e305b1331a73c54b4739fde473f28270037a7d908838ff5c8b87a369',
     libraryEntrySuffix: 'iphoneos/libonnxruntime.dylib',
   ),
   'ios-arm64-iphonesimulator': _Artifact(
     url: _iosNativeAssetsUrl,
-    sha256: 'dfa6edf1a35e0679070b69384191e0747f79dfef948edb7408eacdc2f417d510',
+    sha256: '0ce93d30e305b1331a73c54b4739fde473f28270037a7d908838ff5c8b87a369',
     libraryEntrySuffix: 'iphonesimulator/libonnxruntime.dylib',
   ),
   'linux-arm64': _Artifact(
@@ -144,12 +144,12 @@ const _ortExtensionsArtifacts = <String, _Artifact>{
   ),
   'ios-arm64-iphoneos': _Artifact(
     url: _iosNativeAssetsUrl,
-    sha256: 'dfa6edf1a35e0679070b69384191e0747f79dfef948edb7408eacdc2f417d510',
+    sha256: '0ce93d30e305b1331a73c54b4739fde473f28270037a7d908838ff5c8b87a369',
     libraryEntrySuffix: 'iphoneos/libortextensions.dylib',
   ),
   'ios-arm64-iphonesimulator': _Artifact(
     url: _iosNativeAssetsUrl,
-    sha256: 'dfa6edf1a35e0679070b69384191e0747f79dfef948edb7408eacdc2f417d510',
+    sha256: '0ce93d30e305b1331a73c54b4739fde473f28270037a7d908838ff5c8b87a369',
     libraryEntrySuffix: 'iphonesimulator/libortextensions.dylib',
   ),
   'linux-arm64': _Artifact(
