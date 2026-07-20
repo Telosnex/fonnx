@@ -36,8 +36,10 @@ part of the runtime path.
    `build_apple_framework.py --build_dynamic_framework` for arm64 iPhone and
    arm64 simulator. Microsoft publishes only static iOS artifacts; FONNX's
    release asset is the dynamic code-asset input.
-7. Publish new producer outputs under a new immutable prerelease tag, then pin
-   their downloaded SHA-256 values in `hook/build.dart`.
+7. Publish new producer outputs under a **new immutable prerelease tag**, then
+   pin their downloaded SHA-256 values in `hook/build.dart`. Never use
+   `gh release upload --clobber` on an asset referenced by a checked-in hash:
+   old commits must remain buildable.
 
 ## Updating ONNX Runtime Extensions
 
@@ -51,7 +53,10 @@ part of the runtime path.
    - `tool/apple/build_ios_native_assets.sh`;
    - `tool/extensions/build_selected_extensions.sh`.
 3. Update the generated `cmake/_selectedoplist.cmake` content in both scripts
-   if the model inventory changed.
+   if the model inventory changed. Upstream's GPT-2 selected feature is broader
+   than `BpeDecoder`; `tool/extensions/bpe_decoder_only.patch` narrows both the
+   compiled source list and registered factory. Update that pinned-source patch
+   as needed, and keep its `git apply --check` producer gate.
 4. Run the Extensions matrix. It produces selected-op dynamic libraries for
    Android armv7/arm64/x64, Linux x64/aarch64, macOS arm64, and Windows
    x64/arm64. The Apple producer creates iOS device/simulator output.

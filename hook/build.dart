@@ -39,6 +39,13 @@ final class _Artifact {
   }
 }
 
+const _nativeAssetsReleaseUrl =
+    'https://github.com/Telosnex/fonnx/releases/download/'
+    'native-assets-ort-1.27.0-ortx-fe4e13f-bpe-only-v1';
+const _iosNativeAssetsUrl =
+    '$_nativeAssetsReleaseUrl/'
+    'fonnx-ios-arm64-ort-1.27.0-ortx-fe4e13f4.zip';
+
 const _ortArtifacts = <String, _Artifact>{
   'android-arm': _Artifact(
     url:
@@ -63,6 +70,16 @@ const _ortArtifacts = <String, _Artifact>{
         'onnxruntime-android-$_ortVersion.aar',
     sha256: '077dec5e2d821234c7dc0aba584bec8f999854b546c754cab93a90741c56fbeb',
     libraryEntrySuffix: 'jni/x86_64/libonnxruntime.so',
+  ),
+  'ios-arm64-iphoneos': _Artifact(
+    url: _iosNativeAssetsUrl,
+    sha256: '55729f13604eb3e7fb8899737da90434306e0f7b5695425f427bc36128bddb58',
+    libraryEntrySuffix: 'iphoneos/libonnxruntime.dylib',
+  ),
+  'ios-arm64-iphonesimulator': _Artifact(
+    url: _iosNativeAssetsUrl,
+    sha256: '55729f13604eb3e7fb8899737da90434306e0f7b5695425f427bc36128bddb58',
+    libraryEntrySuffix: 'iphonesimulator/libonnxruntime.dylib',
   ),
   'linux-arm64': _Artifact(
     url:
@@ -102,65 +119,72 @@ const _ortArtifacts = <String, _Artifact>{
 };
 
 const _ortExtensionsCommitShort = 'fe4e13f4';
-const _nativeAssetsReleaseUrl =
-    'https://github.com/Telosnex/fonnx/releases/download/'
-    'native-assets-ort-1.27.0-ortx-fe4e13f';
 
 const _ortExtensionsArtifacts = <String, _Artifact>{
   'android-arm': _Artifact(
     url:
         '$_nativeAssetsReleaseUrl/'
         'fonnx-ortextensions-$_ortExtensionsCommitShort-android-arm.zip',
-    sha256: 'e24e5676fe54902b0e2447fc18b03193cfeaf917446d6a7a33b3242b93bdafa2',
+    sha256: '23fb7f372ed77386424584e14a7718674e05bc35ee76b74436527ebd88bddcdc',
     libraryEntrySuffix: 'libortextensions.so',
   ),
   'android-arm64': _Artifact(
     url:
         '$_nativeAssetsReleaseUrl/'
         'fonnx-ortextensions-$_ortExtensionsCommitShort-android-arm64.zip',
-    sha256: 'a71acaaccaa8f243afc0a21e27f5f88d3fbf161499bf1e4bb0160fa56e8f94a6',
+    sha256: 'ab796237516e98968d84d02772689d9d67ca1ba87ec088292332ba44671c5627',
     libraryEntrySuffix: 'libortextensions.so',
   ),
   'android-x64': _Artifact(
     url:
         '$_nativeAssetsReleaseUrl/'
         'fonnx-ortextensions-$_ortExtensionsCommitShort-android-x64.zip',
-    sha256: 'dbd12c2418094313e1805f61e7ca0bfab9d5bac778d0c1c543d6f79fb4259101',
+    sha256: '27c1ecd5673c57631d98bb6856a9684c820ae11e4117dd24a26dd4f4be22decf',
     libraryEntrySuffix: 'libortextensions.so',
+  ),
+  'ios-arm64-iphoneos': _Artifact(
+    url: _iosNativeAssetsUrl,
+    sha256: '55729f13604eb3e7fb8899737da90434306e0f7b5695425f427bc36128bddb58',
+    libraryEntrySuffix: 'iphoneos/libortextensions.dylib',
+  ),
+  'ios-arm64-iphonesimulator': _Artifact(
+    url: _iosNativeAssetsUrl,
+    sha256: '55729f13604eb3e7fb8899737da90434306e0f7b5695425f427bc36128bddb58',
+    libraryEntrySuffix: 'iphonesimulator/libortextensions.dylib',
   ),
   'linux-arm64': _Artifact(
     url:
         '$_nativeAssetsReleaseUrl/'
         'fonnx-ortextensions-$_ortExtensionsCommitShort-linux-arm64.zip',
-    sha256: '5a8aaa4ad4ad58c8be4d364d081b07eb81f6e8ad0fe40b1aeddd98df205e00c6',
+    sha256: 'a4785c95de8a102362a9765c61a5f6cc01bedefbd1453d9667cd6345d719b0cf',
     libraryEntrySuffix: 'libortextensions.so',
   ),
   'linux-x64': _Artifact(
     url:
         '$_nativeAssetsReleaseUrl/'
         'fonnx-ortextensions-$_ortExtensionsCommitShort-linux-x64.zip',
-    sha256: '9fed7d4d8a8cd73223428fb31088d714103a3a146038d76461039df65640ac13',
+    sha256: '6a7aa5a33926e797e205a6925fbbbfe26bb0314ff333886e5ad78f4383c3993b',
     libraryEntrySuffix: 'libortextensions.so',
   ),
   'macos-arm64': _Artifact(
     url:
         '$_nativeAssetsReleaseUrl/'
         'fonnx-ortextensions-$_ortExtensionsCommitShort-macos-arm64.zip',
-    sha256: 'b6560134d7503bc2a00d9350afbf278cccd0706270e90819793eb28df29fba01',
+    sha256: '92f03c220720a1a902283f6b720039d48335c4251138af78468a8e436cec2d9c',
     libraryEntrySuffix: 'libortextensions.dylib',
   ),
   'windows-arm64': _Artifact(
     url:
         '$_nativeAssetsReleaseUrl/'
         'fonnx-ortextensions-$_ortExtensionsCommitShort-windows-arm64.zip',
-    sha256: 'b42d856bc2fb3c7904c1b12cc36ec1c5f151ce71f94be6b1e025a9a2f399f0d6',
+    sha256: '8fea38110b79c6b6777ae84e970e6b115674a855c9856659499f219e05e63e87',
     libraryEntrySuffix: 'ortextensions.dll',
   ),
   'windows-x64': _Artifact(
     url:
         '$_nativeAssetsReleaseUrl/'
         'fonnx-ortextensions-$_ortExtensionsCommitShort-windows-x64.zip',
-    sha256: '04d6571cf4c91b7bdf873adea18d2bf9495848603ba6a32b9bdd2f92c08af7d0',
+    sha256: '8cd742345c48e3502b124f3b21bd06a0010ebe8a9ea33b021f2a082aa0691a5d',
     libraryEntrySuffix: 'ortextensions.dll',
   ),
 };
@@ -176,13 +200,20 @@ void main(List<String> args) async {
     }
 
     final architecture = input.config.code.targetArchitecture;
-    final key = '${os.name}-${architecture.name}';
+    final sdkSuffix = os == OS.iOS
+        ? switch (input.config.code.iOS.targetSdk) {
+            IOSSdk.iPhoneOS => '-iphoneos',
+            IOSSdk.iPhoneSimulator => '-iphonesimulator',
+            final sdk => throw UnsupportedError('Unsupported iOS SDK: $sdk.'),
+          }
+        : '';
+    final key = '${os.name}-${architecture.name}$sdkSuffix';
     final artifact = _ortArtifacts[key];
     if (artifact == null) {
       throw UnsupportedError(
         'No fonnx ONNX Runtime artifact for $key. Supported targets: '
-        '${_ortArtifacts.keys.join(', ')}. Intel macOS is intentionally not '
-        'supported.',
+        '${_ortArtifacts.keys.join(', ')}. Intel Apple targets are '
+        'intentionally not supported.',
       );
     }
 

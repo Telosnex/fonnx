@@ -22,7 +22,7 @@ concurrency:
 env:
   ORT_VERSION: 1.27.0
   ORTX_COMMIT: fe4e13f46b19fb490c90b09fe280277308bd5bb7
-  RELEASE_TAG: native-assets-ort-1.27.0-ortx-fe4e13f
+  RELEASE_TAG: native-assets-ort-1.27.0-ortx-fe4e13f-bpe-only-v1
 
 jobs:
   apple:
@@ -85,4 +85,6 @@ jobs:
               --title "FONNX native assets: ORT $ORT_VERSION / ORTX ${ORTX_COMMIT:0:8}" \
               --notes "Reproducible dynamic iOS device/simulator assets. See provenance.txt and tool/apple/build_ios_native_assets.sh."
           fi
-          gh release upload "$RELEASE_TAG" dist/* --clobber
+          # Release assets are immutable inputs to checked-in SHA pins. A
+          # producer-recipe change must use a new RELEASE_TAG, never clobber.
+          gh release upload "$RELEASE_TAG" dist/*
