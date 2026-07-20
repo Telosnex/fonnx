@@ -59,6 +59,27 @@ jobs:
           OUTPUT_DIR: ${{ github.workspace }}/dist
         run: tool/extensions/build_selected_extensions.sh
 
+      - name: Create a BpeDecoder session with the Linux x64 artifact
+        if: matrix.os == 'linux' && matrix.arch == 'x64'
+        run: |
+          python3 -m pip install --disable-pip-version-check onnxruntime==$ORT_VERSION
+          unzip -p dist/fonnx-ortextensions-*-linux-x64.zip libortextensions.so \
+            > "$RUNNER_TEMP/libortextensions.so"
+          python3 - <<'PY'
+          import os
+          import onnxruntime as ort
+
+          options = ort.SessionOptions()
+          options.register_custom_ops_library(
+              os.path.join(os.environ['RUNNER_TEMP'], 'libortextensions.so'))
+          ort.InferenceSession(
+              'test/models/bpe_decoder.onnx',
+              options,
+              providers=['CPUExecutionProvider'],
+          )
+          print('Linux x64 BpeDecoder session created successfully.')
+          PY
+
       - uses: actions/upload-artifact@v4
         with:
           name: ortextensions-${{ matrix.os }}-${{ matrix.arch }}
