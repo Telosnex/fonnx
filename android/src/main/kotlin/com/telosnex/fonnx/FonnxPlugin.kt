@@ -71,8 +71,18 @@ class FonnxPlugin : FlutterPlugin, MethodCallHandler {
 
                 val miniLm = cachedMiniLm
                 if (miniLm != null) {
-                    val embedding = miniLm.getEmbedding(wordpieces.map { it.toLong() }.toLongArray())
-                    result.success(embedding.first())
+                    launch(Dispatchers.Default) {
+                        try {
+                            val embedding = miniLm.getEmbedding(wordpieces.map { it.toLong() }.toLongArray())
+                            launch(Dispatchers.Main) {
+                                result.success(embedding.first())
+                            }
+                        } catch (e: Throwable) {
+                            launch(Dispatchers.Main) {
+                                result.error("MiniLm", "Inference failed: ${e.message}", null)
+                            }
+                        }
+                    }
                 } else {
                     result.error("MiniLm", "Could not instantiate model", null)
                 }
