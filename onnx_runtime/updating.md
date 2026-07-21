@@ -96,10 +96,12 @@ Audit outputs:
 - no `.so`, `.dylib`, or `.dll` is tracked by Git;
 - iOS Runner and Podfile deployment targets are at least the upstream ORT
   requirement (15.1 for ORT 1.27.0);
-- after a device Release build, the app `MinimumOSVersion`, each generated
-  native-asset framework `MinimumOSVersion`, and each embedded Mach-O `minos`
-  are all equal; Flutter currently hardcodes 13.0 in native-asset wrappers, so
-  the post-`Thin Binary` correction/re-signing phase is required to avoid
-  App Store Connect `ITMS-90208`;
+- after a device Release build, the app and generated native-asset framework
+  `MinimumOSVersion` values are not lower than any embedded Mach-O `minos`;
+  Flutter 3.44.2 generates native-asset wrapper plists with its iOS 13
+  baseline rather than a higher Runner target (see flutter/flutter#148044 and
+  the open deployment-version tracking issue flutter/flutter#145104), so the
+  post-`Thin Binary` correction/re-signing phase is required for ORT 1.27 to
+  avoid App Store Connect `ITMS-90208`;
 - macOS deployment target is at least 14.0 and Release builds request arm64
   only; Intel Apple targets are intentionally unsupported.

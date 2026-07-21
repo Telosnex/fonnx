@@ -66,15 +66,28 @@ definitions:
     script: |
       cd example
       flutter build ios --verbose --no-tree-shake-icons
+      version_at_least() {
+        awk -v actual="$1" -v required="$2" 'BEGIN {
+          split(actual, a, "."); split(required, r, ".")
+          for (i = 1; i <= 4; i++) {
+            if ((a[i] + 0) > (r[i] + 0)) exit 0
+            if ((a[i] + 0) < (r[i] + 0)) exit 1
+          }
+          exit 0
+        }'
+      }
       app="build/ios/iphoneos/Runner.app"
       app_min=$(/usr/libexec/PlistBuddy -c 'Print :MinimumOSVersion' "$app/Info.plist")
-      test "$app_min" = 15.1
+      version_at_least "$app_min" 15.1
       for name in onnxruntime ortextensions; do
         framework="$app/Frameworks/$name.framework"
         plist_min=$(/usr/libexec/PlistBuddy -c 'Print :MinimumOSVersion' "$framework/Info.plist")
-        binary_min=$(xcrun vtool -show-build "$framework/$name" | awk '/^[[:space:]]*minos / { print $2; exit }')
+        binary_mins=$(xcrun vtool -show-build "$framework/$name" | awk '/^[[:space:]]*minos / { print $2 }')
         test "$plist_min" = "$app_min"
-        test "$binary_min" = "$app_min"
+        test -n "$binary_mins"
+        for binary_min in $binary_mins; do
+          version_at_least "$app_min" "$binary_min"
+        done
         codesign --verify --strict "$framework"
       done
   script_linux_packages: &script_linux_packages

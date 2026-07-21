@@ -138,16 +138,21 @@ Silicon are required; Intel support was intentionally dropped.
 ### Required iOS project setup
 
 Set both the Runner deployment target and `platform :ios` in the Podfile to
-15.1 or newer. Current Flutter stable wraps every iOS native code asset in a
-framework whose generated `Info.plist` incorrectly uses Flutter's global 13.0
-minimum instead of the consuming app's target. A dylib built for 15.1 inside
-that wrapper is rejected by App Store Connect with `ITMS-90208`.
+15.1 or newer. Flutter 3.44.2's iOS native-assets pipeline generates framework
+`Info.plist` files with Flutter's iOS 13 baseline. It does not currently derive
+that value from a consuming Runner project's higher deployment target. The
+related upstream history is [flutter/flutter#148044](https://github.com/flutter/flutter/issues/148044),
+and Flutter's source TODO points to the still-open
+[flutter/flutter#145104](https://github.com/flutter/flutter/issues/145104).
 
-Until Flutter exposes the app target to native-asset packaging, add a Run
+ORT 1.27's Apple Mach-O binaries require iOS 15.1. App Store Connect rejects a
+framework that advertises a lower minimum than its binary with `ITMS-90208`.
+Until Flutter propagates the app target into native-asset packaging, add a Run
 Script phase immediately **after** Flutter's `Thin Binary` phase. The phase
 must set `MinimumOSVersion` on `onnxruntime.framework` and
-`ortextensions.framework` to `IPHONEOS_DEPLOYMENT_TARGET`, verify each Mach-O
-minimum matches, and re-sign the modified frameworks. The complete fail-closed
+`ortextensions.framework` to `IPHONEOS_DEPLOYMENT_TARGET`, verify that this
+minimum is not lower than any embedded Mach-O minimum, and re-sign the modified
+frameworks. The complete fail-closed
 implementation is in
 [`example/ios/fix_fonnx_framework_minimum_os.sh`](example/ios/fix_fonnx_framework_minimum_os.sh),
 and the example Xcode project shows the required phase ordering.
