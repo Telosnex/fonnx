@@ -62,9 +62,21 @@ definitions:
       echo "flutter.sdk=$HOME/programs/flutter" \
         > "$CM_BUILD_DIR/example/android/local.properties"
   script_ios_build: &script_ios_build
-    name: Build IPA
+    name: Build and validate iOS app
     script: |
-      cd example && flutter build ios --verbose --no-tree-shake-icons
+      cd example
+      flutter build ios --verbose --no-tree-shake-icons
+      app="build/ios/iphoneos/Runner.app"
+      app_min=$(/usr/libexec/PlistBuddy -c 'Print :MinimumOSVersion' "$app/Info.plist")
+      test "$app_min" = 15.1
+      for name in onnxruntime ortextensions; do
+        framework="$app/Frameworks/$name.framework"
+        plist_min=$(/usr/libexec/PlistBuddy -c 'Print :MinimumOSVersion' "$framework/Info.plist")
+        binary_min=$(xcrun vtool -show-build "$framework/$name" | awk '/^[[:space:]]*minos / { print $2; exit }')
+        test "$plist_min" = "$app_min"
+        test "$binary_min" = "$app_min"
+        codesign --verify --strict "$framework"
+      done
   script_linux_packages: &script_linux_packages
     name: Linux packages
     script: |

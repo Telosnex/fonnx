@@ -94,7 +94,12 @@ Audit outputs:
 - every native target includes exactly one ORT and one Extensions code asset;
 - `grep -R MethodChannel lib/` returns nothing;
 - no `.so`, `.dylib`, or `.dll` is tracked by Git;
-- iOS deployment target is at least the upstream ORT requirement (15.1 for
-  ORT 1.27.0);
+- iOS Runner and Podfile deployment targets are at least the upstream ORT
+  requirement (15.1 for ORT 1.27.0);
+- after a device Release build, the app `MinimumOSVersion`, each generated
+  native-asset framework `MinimumOSVersion`, and each embedded Mach-O `minos`
+  are all equal; Flutter currently hardcodes 13.0 in native-asset wrappers, so
+  the post-`Thin Binary` correction/re-signing phase is required to avoid
+  App Store Connect `ITMS-90208`;
 - macOS deployment target is at least 14.0 and Release builds request arm64
   only; Intel Apple targets are intentionally unsupported.

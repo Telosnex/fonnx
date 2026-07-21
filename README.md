@@ -135,6 +135,23 @@ in its supported dynamic mode and publishes arm64 device/simulator artifacts
 for the hook. iOS 15.1 or newer is required. macOS 14 or newer and Apple
 Silicon are required; Intel support was intentionally dropped.
 
+### Required iOS project setup
+
+Set both the Runner deployment target and `platform :ios` in the Podfile to
+15.1 or newer. Current Flutter stable wraps every iOS native code asset in a
+framework whose generated `Info.plist` incorrectly uses Flutter's global 13.0
+minimum instead of the consuming app's target. A dylib built for 15.1 inside
+that wrapper is rejected by App Store Connect with `ITMS-90208`.
+
+Until Flutter exposes the app target to native-asset packaging, add a Run
+Script phase immediately **after** Flutter's `Thin Binary` phase. The phase
+must set `MinimumOSVersion` on `onnxruntime.framework` and
+`ortextensions.framework` to `IPHONEOS_DEPLOYMENT_TARGET`, verify each Mach-O
+minimum matches, and re-sign the modified frameworks. The complete fail-closed
+implementation is in
+[`example/ios/fix_fonnx_framework_minimum_os.sh`](example/ios/fix_fonnx_framework_minimum_os.sh),
+and the example Xcode project shows the required phase ordering.
+
 ONNX Runtime Extensions is also a separately bundled code asset. The build is
 selected to the one custom operator in the current model inventory:
 Whisper's `ai.onnx.contrib:BpeDecoder`.
