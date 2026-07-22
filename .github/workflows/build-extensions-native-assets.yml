@@ -1,0 +1,158 @@
+name: Build Extensions native assets
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/build-extensions-native-assets.yml'
+      - 'tool/extensions/**'
+      - 'onnx_runtime/headers/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fonnx-extensions-native-assets-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  ORT_VERSION: 1.27.0
+  ORTX_COMMIT: fe4e13f46b19fb490c90b09fe280277308bd5bb7
+
+jobs:
+  unix:
+    name: ${{ matrix.os }}-${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            os: linux
+            arch: x64
+          - runner: ubuntu-24.04
+            os: linux
+            arch: arm64
+          - runner: macos-15
+            os: macos
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: microsoft/onnxruntime-extensions
+          ref: ${{ env.ORTX_COMMIT }}
+          path: _native_deps/onnxruntime-extensions
+
+      - name: Install Linux aarch64 cross-compiler
+        if: matrix.os == 'linux' && matrix.arch == 'arm64'
+        run: sudo apt-get update && sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+
+      - name: Build selected-op library
+        env:
+          TARGET_OS: ${{ matrix.os }}
+          TARGET_ARCH: ${{ matrix.arch }}
+          ORT_EXTENSIONS_ROOT: ${{ github.workspace }}/_native_deps/onnxruntime-extensions
+          OUTPUT_DIR: ${{ github.workspace }}/dist
+        run: tool/extensions/build_selected_extensions.sh
+
+      - name: Create a BpeDecoder session with the Linux x64 artifact
+        if: matrix.os == 'linux' && matrix.arch == 'x64'
+        run: |
+          python3 -m pip install --disable-pip-version-check onnxruntime==$ORT_VERSION
+          unzip -p dist/fonnx-ortextensions-*-linux-x64.zip libortextensions.so \
+            > "$RUNNER_TEMP/libortextensions.so"
+          python3 - <<'PY'
+          import os
+          import onnxruntime as ort
+
+          options = ort.SessionOptions()
+          options.register_custom_ops_library(
+              os.path.join(os.environ['RUNNER_TEMP'], 'libortextensions.so'))
+          ort.InferenceSession(
+              'test/models/bpe_decoder.onnx',
+              options,
+              providers=['CPUExecutionProvider'],
+          )
+          print('Linux x64 BpeDecoder session created successfully.')
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ortextensions-${{ matrix.os }}-${{ matrix.arch }}
+          path: |
+            dist/*.zip
+            dist/*.sha256
+          if-no-files-found: error
+
+  android:
+    name: android-${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [arm, arm64, x64]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: microsoft/onnxruntime-extensions
+          ref: ${{ env.ORTX_COMMIT }}
+          path: _native_deps/onnxruntime-extensions
+
+      - name: Build selected-op library
+        env:
+          TARGET_OS: android
+          TARGET_ARCH: ${{ matrix.arch }}
+          ORT_EXTENSIONS_ROOT: ${{ github.workspace }}/_native_deps/onnxruntime-extensions
+          OUTPUT_DIR: ${{ github.workspace }}/dist
+        run: |
+          export ANDROID_NDK_HOME="$ANDROID_NDK_LATEST_HOME"
+          tool/extensions/build_selected_extensions.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ortextensions-android-${{ matrix.arch }}
+          path: |
+            dist/*.zip
+            dist/*.sha256
+          if-no-files-found: error
+
+  windows:
+    name: windows-${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, arm64]
+    runs-on: windows-2025
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: microsoft/onnxruntime-extensions
+          ref: ${{ env.ORTX_COMMIT }}
+          path: _native_deps/onnxruntime-extensions
+
+      - name: Build selected-op library
+        shell: bash
+        env:
+          TARGET_OS: windows
+          TARGET_ARCH: ${{ matrix.arch }}
+          ORT_EXTENSIONS_ROOT: ${{ github.workspace }}/_native_deps/onnxruntime-extensions
+          OUTPUT_DIR: ${{ github.workspace }}/dist
+        run: tool/extensions/build_selected_extensions.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ortextensions-windows-${{ matrix.arch }}
+          path: |
+            dist/*.zip
+            dist/*.sha256
+          if-no-files-found: error

@@ -210,10 +210,7 @@ void pyannoteIsolateEntryPoint(SendPort mainSendPort) {
           fonnxOrtDylibPathOverride = message.ortDylibPathOverride;
         }
 
-        ortSessionObjects ??= createOrtSession(
-          message.modelPath,
-          includeOnnxExtensionsOps: true,
-        );
+        ortSessionObjects ??= createOrtSession(message.modelPath);
 
         final result = await _processAudioInIsolate(
           ortSessionObjects!,
@@ -267,8 +264,11 @@ Future<List<Map<String, dynamic>>> _processAudioInIsolate(
       (_) => List.filled(PyannoteONNX.numSpeakers, 0.0),
     );
 
-    final windows =
-        slidingWindow(audioData, PyannoteONNX.duration, step).toList();
+    final windows = slidingWindow(
+      audioData,
+      PyannoteONNX.duration,
+      step,
+    ).toList();
 
     for (int idx = 0; idx < windows.length; idx++) {
       final (windowSize, window) = windows[idx];
@@ -330,8 +330,10 @@ Future<List<Map<String, dynamic>>> _processAudioInIsolate(
         final numCompleteFrames = outputData.length ~/ 7;
         for (int frame = 0; frame < numCompleteFrames; frame++) {
           final i = frame * 7;
-          final probs =
-              outputData.sublist(i, i + 7).map((x) => exp(x)).toList();
+          final probs = outputData
+              .sublist(i, i + 7)
+              .map((x) => exp(x))
+              .toList();
 
           final speakerProbs = List<double>.filled(3, 0.0);
           speakerProbs[0] = probs[1] + probs[4] + probs[5]; // spk1

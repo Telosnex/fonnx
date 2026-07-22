@@ -30,7 +30,7 @@ void main() {
     expect(allEmbeddings, hasLength(13));
     expect(allEmbeddings[0].text, hasLength(1510));
     expect(allEmbeddings[1].text, hasLength(1224));
-    expect(allEmbeddings[12].text, hasLength(802));
+    expect(allEmbeddings[12].text, hasLength(803));
   });
 
   test('Performance test', () async {
@@ -56,7 +56,8 @@ void main() {
     final result1 = await miniLm.getEmbeddingAsVector(tokenize('Bonjour'));
     final result2 = await miniLm.getEmbeddingAsVector(tokenize('Ni hao'));
     final result = result1.cosineSimilarity(result2);
-    expect(result, closeTo(0.166, 0.001));
+    // Re-baselined after the pinned ORT 1.16.1 -> 1.27.0 optimizer upgrade.
+    expect(result, closeTo(0.158, 0.001));
   });
 
   test('Similarity: weather', () async {
@@ -78,27 +79,27 @@ void main() {
     final sWFInBuffaloToAnswer =
         vBuffaloWeatherForecast.cosineSimilarity(vAnswer);
 
-    expect(sRandomToAnswer, closeTo(0.054, 0.001));
-    expect(sSFToAnswer, closeTo(0.313, 0.001));
-    expect(sWFInBuffaloToAnswer, closeTo(0.344, 0.001));
-    expect(sWFToAnswer, closeTo(0.493, 0.001));
-    expect(sSpainWFToAnswer, closeTo(0.778, 0.001));
-    expect(sWFInSpainToAnswer, closeTo(0.787, 0.001));
+    expect(sRandomToAnswer, closeTo(0.037, 0.001));
+    expect(sSFToAnswer, closeTo(0.315, 0.001));
+    expect(sWFInBuffaloToAnswer, closeTo(0.358, 0.001));
+    expect(sWFToAnswer, closeTo(0.516, 0.001));
+    expect(sSpainWFToAnswer, closeTo(0.781, 0.001));
+    expect(sWFInSpainToAnswer, closeTo(0.791, 0.001));
   });
 
   test('Similarity: password', () async {
     final vQuery = await vec('whats my jewelry pin');
     final vAnswer = await vec('My safe passcode is 1234');
-    expect(vQuery.cosineSimilarity(vAnswer), closeTo(0.234, 0.001));
+    expect(vQuery.cosineSimilarity(vAnswer), closeTo(0.223, 0.001));
     final vRandom = await vec('Rain in Spain falls mainly on the plain');
-    expect(vQuery.cosineSimilarity(vRandom), closeTo(0.018, 0.001));
+    expect(vQuery.cosineSimilarity(vRandom), closeTo(0.017, 0.001));
   });
 
   test('Similarity: London', () async {
     final vQuery = await vec('How big is London');
     final vAnswer =
         await vec('UK capital has 9,787,426 inhabitants at the 2011 census');
-    expect(vQuery.cosineSimilarity(vAnswer), closeTo(0.347, 0.001));
+    expect(vQuery.cosineSimilarity(vAnswer), closeTo(0.351, 0.001));
   });
 }
 

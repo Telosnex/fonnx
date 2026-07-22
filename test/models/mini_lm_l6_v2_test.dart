@@ -29,7 +29,7 @@ void main() {
     expect(allEmbeddings, hasLength(27));
     expect(allEmbeddings[0].text, hasLength(767));
     expect(allEmbeddings[1].text, hasLength(728));
-    expect(allEmbeddings[26].text, hasLength(324));
+    expect(allEmbeddings[26].text, hasLength(326));
   });
 
   test('Performance test', () async {
@@ -53,7 +53,8 @@ void main() {
     final result1 = await miniLm.getEmbeddingAsVector(tokenize('Bonjour'));
     final result2 = await miniLm.getEmbeddingAsVector(tokenize('Ni hao'));
     final result = result1.cosineSimilarity(result2);
-    expect(result, closeTo(0.261, 0.001));
+    // Re-baselined after the pinned ORT 1.16.1 -> 1.27.0 optimizer upgrade.
+    expect(result, closeTo(0.255, 0.001));
   });
 
   test('Similarity: weather', () async {
@@ -75,29 +76,29 @@ void main() {
     final sWFInBuffaloToAnswer =
         vBuffaloWeatherForecast.cosineSimilarity(vAnswer);
 
-    expect(sRandomToAnswer, closeTo(0.055, 0.001));
-    expect(sSFToAnswer, closeTo(0.189, 0.001));
-    expect(sWFInBuffaloToAnswer, closeTo(0.278, 0.001));
-    expect(sWFToAnswer, closeTo(0.470, 0.001));
-    expect(sSpainWFToAnswer, closeTo(0.730, 0.001));
-    expect(sWFInSpainToAnswer, closeTo(0.744, 0.001));
+    expect(sRandomToAnswer, closeTo(0.050, 0.001));
+    expect(sSFToAnswer, closeTo(0.209, 0.001));
+    expect(sWFInBuffaloToAnswer, closeTo(0.281, 0.001));
+    expect(sWFToAnswer, closeTo(0.471, 0.001));
+    expect(sSpainWFToAnswer, closeTo(0.734, 0.001));
+    expect(sWFInSpainToAnswer, closeTo(0.746, 0.001));
   });
 
   test('Similarity: password', () async {
     final vQuery = await vec('whats my jewelry pin');
     final vAnswer = await vec('My safe passcode is 1234');
-    expect(vQuery.cosineSimilarity(vAnswer), closeTo(0.386, 0.001));
+    expect(vQuery.cosineSimilarity(vAnswer), closeTo(0.377, 0.001));
     final vRandom = await vec('Rain in Spain falls mainly on the plain');
-    expect(vQuery.cosineSimilarity(vRandom), closeTo(0.008, 0.001));
+    expect(vQuery.cosineSimilarity(vRandom), closeTo(0.004, 0.001));
   });
 
   test('Similarity: London', () async {
     final vQuery = await vec('How big is London');
     final vAnswer =
         await vec('UK capital has 9,787,426 inhabitants at the 2011 census');
-    // For some reason this value is 0.400 on macOS arm, 0.391 on Windows.
-    // Using a lower tolerance than other tests to ensure it passes on both.
-    expect(vQuery.cosineSimilarity(vAnswer), closeTo(0.391, 0.01));
+    // Keep a cross-platform tolerance: ORT execution providers and SIMD paths
+    // can differ slightly while preserving semantic ranking.
+    expect(vQuery.cosineSimilarity(vAnswer), closeTo(0.408, 0.01));
   });
 }
 

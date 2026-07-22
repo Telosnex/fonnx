@@ -1,8 +1,10 @@
 output: "../lib/onnx/ort_ffi_bindings.dart"
 ignore-source-errors: true
 headers:
+  # FONNX uses ORT's stable C ABI. Do not glob the whole release SDK: it also
+  # contains C++-only provider headers that are not valid Dart FFI input.
   entry-points:
-    - "../onnx_runtime/headers/**.h"
+    - "../onnx_runtime/headers/onnxruntime_c_api.h"
 ffi-native:
 preamble: |
   // ignore_for_file: type=lint, unused_field, unused_element

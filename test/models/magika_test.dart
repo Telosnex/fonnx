@@ -3,7 +3,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fonnx/models/magika/magika.dart';
 import 'package:fonnx/models/magika/magika_native.dart';
@@ -152,9 +151,9 @@ void main() {
   Future<List<int>> getBytes(String path) async {
     String testFilePath = 'test/data/magika/$path';
     File file = File(testFilePath);
-    final bytes = await file.readAsBytes();
-    // Trim whitespace from the file bytes.
-    return extractFeaturesFromBytes(Uint8List.fromList(bytes)).all;
+    // Magika.getType is a raw-file-bytes API. Preprocessing belongs to the
+    // implementation and must be identical in tests and production.
+    return file.readAsBytes();
   }
 
   Future<MagikaType> getType(List<int> bytes) async {

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:fonnx/dylib_path_overrides.dart';
+import 'package:fonnx/onnx/ort_extensions.dart';
 import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free, malloc;
 import 'package:ffi/ffi.dart';
 
@@ -183,11 +184,10 @@ extension DartNativeFunctions on OrtApi {
     inputShape[0] = values.length; // Depth: Number of 2D arrays
     inputShape[1] =
         values.first.length; // Rows: Number of rows in the first 2D array
-    inputShape[2] =
-        values
-            .first
-            .first
-            .length; // Columns: Number of columns in the first row
+    inputShape[2] = values
+        .first
+        .first
+        .length; // Columns: Number of columns in the first row
 
     final ptrVoid = inputTensorNative.cast<Void>();
     final status = createTensorWithDataAsOrtValue(
@@ -517,10 +517,9 @@ extension DartNativeFunctions on OrtApi {
             Pointer<Pointer<OrtSession>>,
           )
         >();
-    final modelPathChars =
-        defaultTargetPlatform == TargetPlatform.windows || Platform.isWindows
-            ? modelPath.toNativeUtf16().cast<Char>()
-            : modelPath.toNativeUtf8().cast<Char>();
+    final modelPathChars = Platform.isWindows
+        ? modelPath.toNativeUtf16().cast<Char>()
+        : modelPath.toNativeUtf8().cast<Char>();
     try {
       final status = createSessionFn(
         env,
@@ -812,24 +811,6 @@ extension DartNativeFunctions on OrtApi {
     return status;
   }
 
-  Pointer<OrtStatus> sessionOptionsAppendExecutionProviderCoreML(
-    Pointer<OrtSessionOptions> options,
-    int coremlFlags,
-  ) {
-    final status = OrtSessionOptionsAppendExecutionProvider_CoreML(
-      options,
-      coremlFlags,
-    );
-
-    if (status.isError) {
-      final error =
-          'SessionOptionsAppendExecutionProvider_CoreML failed. Code: ${getErrorCodeMessage(status)}\n'
-          'Message: ${getErrorMessage(status)}';
-      throw Exception(error);
-    }
-    return status;
-  }
-
   Pointer<OrtStatus> setIntraOpNumThreads(
     Pointer<OrtSessionOptions> options,
     int intraOpNumThreads,
@@ -901,70 +882,6 @@ void releaseOrtSessionObjects(OrtSessionObjects? objects) {
   calloc.free(objects.envPtr);
 }
 
-String get ortDylibPath {
-  if (fonnxOrtDylibPathOverride != null) {
-    return fonnxOrtDylibPathOverride!;
-  }
-  final isTesting = !kIsWeb && Platform.environment['FLUTTER_TEST'] == 'true';
-  if (isTesting) {
-    // defaultTargetPlatform is _always_ Android when running tests, so we need
-    // to query the "actual" platform
-    if (Platform.isWindows) {
-      return 'windows/onnx_runtime/onnxruntime-x64.dll';
-    } else if (Platform.isMacOS) {
-      return 'macos/onnx_runtime/osx/libonnxruntime.1.16.1.dylib';
-    } else if (Platform.isLinux) {
-      return 'linux/onnx_runtime/libonnxruntime.so.1.16.1';
-    } else {
-      throw 'Unsure how to load ORT during testing for this platform (${Platform.operatingSystem})';
-    }
-  }
-  switch (defaultTargetPlatform) {
-    case TargetPlatform.android:
-      throw 'Android runs using a platform-specific implementation, not FFI';
-    case TargetPlatform.fuchsia:
-      throw UnimplementedError();
-    case TargetPlatform.iOS:
-      throw 'iOS runs using a platform-specific implementation, not FFI';
-    case TargetPlatform.linux:
-      return 'libonnxruntime.so.1.16.1';
-    case TargetPlatform.macOS:
-      return 'libonnxruntime.1.16.1.dylib';
-    case TargetPlatform.windows:
-      return 'onnxruntime-x64.dll';
-  }
-}
-
-String get ortExtensionsDylibPath {
-  if (fonnxOrtExtensionsDylibPathOverride != null) {
-    return fonnxOrtExtensionsDylibPathOverride!;
-  }
-  final isTesting = !kIsWeb && Platform.environment['FLUTTER_TEST'] == 'true';
-  if (isTesting) {
-    if (Platform.isMacOS) {
-      return 'macos/onnx_runtime/osx/libortextensions.0.9.0.dylib';
-    } else if (Platform.isLinux) {
-      return 'linux/onnx_runtime/libortextensions.so.0.9.0';
-    } else {
-      throw 'Unsure how to load ORT during testing for this platform (${Platform.operatingSystem})';
-    }
-  }
-  switch (defaultTargetPlatform) {
-    case TargetPlatform.android:
-      throw UnimplementedError();
-    case TargetPlatform.fuchsia:
-      throw UnimplementedError();
-    case TargetPlatform.iOS:
-      throw UnimplementedError();
-    case TargetPlatform.linux:
-      return 'libortextensions.so.0.9.0';
-    case TargetPlatform.macOS:
-      return 'libortextensions.0.9.0.dylib';
-    case TargetPlatform.windows:
-      return 'ortextensions-x64.dll';
-  }
-}
-
 /// You MUST call [calloc.free] on the returned pointer when you are done with it.
 ///
 /// It is reasonable to never free it in an app where you would like the model
@@ -973,22 +890,16 @@ OrtSessionObjects createOrtSession(
   String modelPath, {
   bool includeOnnxExtensionsOps = false,
 }) {
-  // Used to have:
-  //   DynamicLibrary.open(dylibPath);
-  //   final baseApi = OrtGetApiBase().ref;
-  // That led to an error that said:
-  //
-  // After reading [this Github issue](https://github.com/dart-lang/sdk/issues/50551)
-  //   my instinct was there may be an issue with global static functions and ffi,
-  //   and Linux may be lagging in support. Explicitly looking the function up in
-  //   the explicit library did fix it.
-  final lib = DynamicLibrary.open(ortDylibPath);
-
-  final fn = lib.lookupFunction<
-    Pointer<OrtApiBase> Function(),
-    Pointer<OrtApiBase> Function()
-  >('OrtGetApiBase');
-  final answer = fn.call();
+  // Normal builds resolve the hook's code asset through @Native. The explicit
+  // lookup exists only for diagnostic hosts that intentionally override ORT.
+  final answer = switch (fonnxOrtDylibPathOverride) {
+    final path? =>
+      DynamicLibrary.open(path).lookupFunction<
+        Pointer<OrtApiBase> Function(),
+        Pointer<OrtApiBase> Function()
+      >('OrtGetApiBase')(),
+    null => OrtGetApiBase(),
+  };
   final baseApi = answer.ref;
   final api = baseApi.GetApi.asFunction<Pointer<OrtApi> Function(int)>();
   final ortApi = api(ORT_API_VERSION).ref;
@@ -1005,18 +916,17 @@ OrtSessionObjects createOrtSession(
   ortApi.createSessionOptions(sessionOptionsPtr);
   if (includeOnnxExtensionsOps) {
     try {
-      DynamicLibrary.open(ortExtensionsDylibPath);
-      final libraryHandle = calloc<Pointer<Void>>();
-      final utf8Path = ortExtensionsDylibPath.toNativeUtf8().cast<Char>();
-      try {
-        ortApi.registerCustomOpsLibrary(
-          sessionOptionsPtr.value,
-          utf8Path,
-          libraryHandle,
+      final extensionsStatus = registerOrtExtensions(
+        options: sessionOptionsPtr.value,
+        apiBase: answer,
+        libraryPathOverride: fonnxOrtExtensionsDylibPathOverride,
+      );
+      if (extensionsStatus.isError) {
+        throw Exception(
+          'Register custom ops failed. '
+          'Code: ${ortApi.getErrorCodeMessage(extensionsStatus)}\n'
+          'Message: ${ortApi.getErrorMessage(extensionsStatus)}',
         );
-      } finally {
-        malloc.free(utf8Path);
-        calloc.free(libraryHandle);
       }
     } catch (e) {
       debugPrint('Error loading ORT Extensions: $e');

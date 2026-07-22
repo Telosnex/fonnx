@@ -1,46 +1,107 @@
-# Updating ONNX Runtime
-1. 
-For macOS/Linux/Windows:
-- Find latest release on [Github](https://github.com/microsoft/onnxruntime/releases). 
-[Official ONNX page][https://onnxruntime.ai/docs/reference/releases-servicing.html] is behind but has more info.
-For iOS:
-- Use latest pod.
-2. Download and extract ex. onnxruntime-osx-arm64-1.16.0.tgz
-3. From lib folder, take dylib and dsym put in ex. macOS/onnx_runtime/osx 
-- platform subfolder because ex. for macOS, podspec needs to be altered
-4. From include, take headers and copy to ex. onnx_runtime/headers
-5. Generate bindings: 
-a. Setup LLVM, etc. See "Using this package" at https://pub.dev/packages/ffigen 
-b. `dart run ffigen --config onnx_runtime/ffigen_config.yaml`
-c. Done!
+# Updating ONNX Runtime and Extensions
 
-## Verifying
+FONNX distributes native libraries with `hook/build.dart`. No ONNX binaries are
+tracked in Git and no CocoaPods, Gradle dependency, or Flutter plugin wrapper is
+part of the runtime path.
 
-### Test
-Launching the Example app and press Test Mini-lm-l6-v2. 
-Then, the word "match" should display below the button.
+## Pinned components
 
-### macOS
-The binary must support both Apple Silicon and Intel. See [here](https://developer.apple.com/documentation/apple-silicon/building-a-universal-macos-binary) for detailed info from Apple. 
+- ONNX Runtime: `1.27.0` (`_ortVersion` in `hook/build.dart`).
+- ONNX Runtime Extensions:
+  `fe4e13f46b19fb490c90b09fe280277308bd5bb7`.
+- Extensions selected-op inventory: `ai.onnx.contrib:BpeDecoder`, used only by
+  FONNX's end-to-end Whisper graph.
 
-TL;DR:
-1. Build on Apple Silicon in profile mode.
-2. You can then find the .app in the build/ directory. The easiest way to locate it is to right click on the running app, hover Options, then press Show in Finder. 
-3. Right click on the .app and choose Get Info. At the bottom of the General section, there is a checkbox that says Open using Rosetta. Launch the app again, and verify it works.
+## Updating ONNX Runtime
 
-### Windows
-Windows x64 is all we need to support currently.
-Flutter is not quite stable for Windows arm64 ([Github issue](https://github.com/flutter/flutter/issues/62597)).
-Neither arm nor arm64 devices are particularly numerous.
-As of October 2023, at most ~0.35% of Windows devices could plausibly be Win32. [source](https://www.pcbenchmarks.net/os-marketshare.html)
+1. Check the upstream GitHub release and Maven Central. Pin the newest version
+   available for **every** target. Maven lag is why the current common pin is
+   1.27.0 even though a 1.27.1 GitHub release exists.
+2. Update every ORT URL/digest in `hook/build.dart`. Digests for GitHub release
+   assets are available from the GitHub release API. Compute and independently
+   verify the Maven AAR's SHA-256.
+3. Extract the release SDK headers into `onnx_runtime/headers`.
+4. Regenerate the C ABI bindings:
 
-# Updating ONNX Runtime Extensions
-ONNX Runtime Extensions is a supplementary library that includes everything from audio decoding to a BPE tokenizer: this enables Olive, a more intense ONNX optimizer, to do things such as export a Whisper model that combines the encoder and decoder model, takes audio bytes as input, and provides strings as output: this is _much_ more convenient and presumably faster.
+   ```sh
+   dart run ffigen --config onnx_runtime/ffigen_config.yaml
+   dart format lib/onnx/ort_ffi_bindings.dart
+   ```
 
-It is also _significantly_ harder to land. 
+   The generator intentionally enters through `onnxruntime_c_api.h`, not a
+   glob of every SDK header. Provider headers contain C++ declarations that
+   are not valid Dart FFI input.
+5. Update `ORT_VERSION` in both producer workflows and build scripts.
+6. Run the full Apple producer when ORT changes. Its fallback path invokes
+   Microsoft's first-party `build_apple_framework.py --build_dynamic_framework`
+   for arm64 iPhone and arm64 simulator. Publish
+   that verified archive as the immutable Apple ORT base. Subsequent
+   Extensions-only recipe changes set `ORT_PREBUILT_ARCHIVE_URL` and its
+   SHA-256: the producer extracts only the unchanged ORT slices and rebuilds
+   Extensions, avoiding another long ORT compile. Microsoft publishes only
+   static iOS artifacts; FONNX's base fills that dynamic publishing gap.
+7. Publish new producer outputs under a **new immutable prerelease tag**, then
+   pin their downloaded SHA-256 values in `hook/build.dart`. Never use
+   `gh release upload --clobber` on an asset referenced by a checked-in hash:
+   old commits must remain buildable.
 
-For desktop platforms, you need to checkout [the Github repo](https://github.com/microsoft/onnxruntime-extensions) and build on the platform you're producing. For example, on Linux, I ran `./build.sh` in the checkout root, then copied `/GitHub/onnxruntime-extensions/out/Linux/RelWithDebInfo/lib/libortextensions.so.0.10.0` to `/Github/fonnx/linux/onnx_runtime/libortextensions.so.0.9.0`.
+## Updating ONNX Runtime Extensions
 
-The version naming difference is because the repo labels with the next version, but it makes more sense to couple it to the current release, so it's easier to understand if iOS/Android are on the same version.
+1. Inspect every shipped model and enumerate non-core `(domain, op_type)`
+   pairs. Do not infer dependencies from call-site flags. At the current pin,
+   Magika and Pyannote use core ORT only; Whisper contains one
+   `ai.onnx.contrib:BpeDecoder` node.
+2. Update `ORTX_COMMIT` in:
+   - `.github/workflows/build-ios-native-assets.yml`;
+   - `.github/workflows/build-extensions-native-assets.yml`;
+   - `tool/apple/build_ios_native_assets.sh`;
+   - `tool/extensions/build_selected_extensions.sh`.
+3. Update the generated `cmake/_selectedoplist.cmake` content in both scripts
+   if the model inventory changed. Upstream's GPT-2 selected feature is broader
+   than `BpeDecoder`; `tool/extensions/bpe_decoder_only.patch` narrows both the
+   compiled source list and registered factory. Update that pinned-source patch
+   as needed, and keep its `git apply --check` producer gate.
+4. Run the Extensions matrix. It produces selected-op dynamic libraries for
+   Android armv7/arm64/x64, Linux x64/aarch64, macOS arm64, and Windows
+   x64/arm64. The Apple producer creates iOS device/simulator output.
+5. Verify each sidecar digest after downloading the workflow artifacts; publish
+   under the new prerelease; copy the final URLs and digests into the hook.
 
-iOS and Android require importing a package, see [here on onnxruntime.ai](https://onnxruntime.ai/docs/extensions/).
+## Required verification
+
+```sh
+flutter analyze
+flutter test test/ort_native_asset_test.dart
+(cd example && flutter build apk --debug)
+(cd example && flutter build ios --simulator)
+```
+
+`ort_native_asset_test.dart` checks all three important contracts:
+`OrtGetApiBase`, core-model session creation, and Extensions registration by
+creating a minimal graph containing `ai.onnx.contrib:BpeDecoder`.
+
+Also run hydrated-model goldens with `flutter test --concurrency=1`. The suite
+contains process-RSS smoke tests, so parallel test-file execution contaminates
+their measurements with other concurrently loaded models. This checkout may
+contain raw Git LFS pointer files rather than model bytes; `Invalid protobuf`
+against a ~130-byte `.onnx` is an LFS checkout failure, not an ORT regression.
+Re-baseline numerical goldens only after recording and reviewing the complete
+before/after score set; ORT graph-optimizer upgrades can legitimately shift
+cosine scores while preserving model ranking.
+
+Audit outputs:
+
+- every native target includes exactly one ORT and one Extensions code asset;
+- `grep -R MethodChannel lib/` returns nothing;
+- no `.so`, `.dylib`, or `.dll` is tracked by Git;
+- iOS Runner and Podfile deployment targets are at least the upstream ORT
+  requirement (15.1 for ORT 1.27.0);
+- after a device Release build, the app and generated native-asset framework
+  `MinimumOSVersion` values are not lower than any embedded Mach-O `minos`;
+  Flutter 3.44.2 generates native-asset wrapper plists with its iOS 13
+  baseline rather than a higher Runner target (see flutter/flutter#148044 and
+  the open deployment-version tracking issue flutter/flutter#145104), so the
+  post-`Thin Binary` correction/re-signing phase is required for ORT 1.27 to
+  avoid App Store Connect `ITMS-90208`;
+- macOS deployment target is at least 14.0 and Release builds request arm64
+  only; Intel Apple targets are intentionally unsupported.

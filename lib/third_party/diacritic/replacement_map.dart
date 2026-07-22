@@ -3,6 +3,7 @@
 
 /// A very simple replacement map that handles the common characters in Western
 /// languages.
+library;
 
 bool _initialized = false;
 Map<int, int> _singleUnit = {};

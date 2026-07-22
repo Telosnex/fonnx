@@ -1,5 +1,6 @@
 # Uncomment this line to define a global platform for your project
-platform :ios, '14.0'
+# ONNX Runtime 1.27's official Apple build requires iOS 15.1.
+platform :ios, '15.1'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'

@@ -1,0 +1,43 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e3aeefa..ac2593e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -448,7 +448,8 @@ set(_HAS_TOKENIZER OFF)
+ if(OCOS_ENABLE_GPT2_TOKENIZER)
+   # GPT2
+   set(_HAS_TOKENIZER ON)
+-  file(GLOB tok_TARGET_SRC "operators/tokenizer/bpe_*.*" "operators/tokenizer/unicode*.*" "operators/tokenizer/case_*.*")
++  # FONNX patch: compile only the decoder required by its Whisper graph.
++  set(tok_TARGET_SRC "operators/tokenizer/bpe_decoder.hpp")
+   list(APPEND TARGET_SRC ${tok_TARGET_SRC})
+ endif()
+ 
+diff --git a/operators/tokenizer/tokenizers.cc b/operators/tokenizer/tokenizers.cc
+index 813b09a..9e9b807 100644
+--- a/operators/tokenizer/tokenizers.cc
++++ b/operators/tokenizer/tokenizers.cc
+@@ -4,11 +4,7 @@
+ #include "ocos.h"
+ 
+ #ifdef ENABLE_GPT2_TOKENIZER
+-#include "bpe_kernels.h"
+-#include "bpe_tokenizer_model.hpp"
+ #include "bpe_decoder.hpp"
+-#include "tokenizer_op_impl.hpp"
+-using namespace ort_extensions;
+ #endif
+ 
+ #ifdef ENABLE_SPM_TOKENIZER
+@@ -37,12 +33,7 @@ using namespace ort_extensions;
+ FxLoadCustomOpFactory LoadCustomOpClasses_Tokenizer = []() -> CustomOpArray& {
+   static OrtOpLoader op_loader(
+ #ifdef ENABLE_GPT2_TOKENIZER
+-      CustomCpuStructV2("GPT2Tokenizer", GPT2Tokenizer),
+-      CustomCpuStructV2("CLIPTokenizer", CLIPTokenizer),
+-      CustomCpuStructV2("RobertaTokenizer", RobertaTokenizer),
+       CustomCpuStructV2("BpeDecoder", KernelBpeDecoder),
+-      CustomCpuStructV2("SpmTokenizer", SpmTokenizer),
+-      CustomCpuStructV2("HfJsonTokenizer", JsonTokenizerOpKernel),
+ #endif
+ 
+ #ifdef ENABLE_SPM_TOKENIZER

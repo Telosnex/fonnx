@@ -44,6 +44,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - assets/models/bpe_decoder.onnx
     - assets/models/magika/magika.onnx
     - assets/models/miniLmL6V2/miniLmL6V2.onnx
     - assets/models/minishLab/potion8m.onnx
