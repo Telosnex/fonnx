@@ -7,6 +7,24 @@ import 'package:fonnx/onnx/ort_extensions.dart';
 import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free, malloc;
 import 'package:ffi/ffi.dart';
 
+final class _OrtSessionFinalizerContext extends Struct {
+  external Pointer<Pointer<OrtSession>> session;
+  external Pointer<Pointer<OrtEnv>> env;
+  external Pointer<NativeFunction<Void Function(Pointer<OrtSession>)>>
+  releaseSession;
+  external Pointer<NativeFunction<Void Function(Pointer<OrtEnv>)>> releaseEnv;
+}
+
+@Native<Void Function(Pointer<Void>)>(
+  symbol: 'fonnx_release_ort_session_context',
+  assetId: 'package:fonnx/onnx/ort_session_finalizer.dart',
+)
+external void _releaseOrtSessionContext(Pointer<Void> context);
+
+final _ortSessionFinalizer = NativeFinalizer(
+  Native.addressOf<NativeFinalizerFunction>(_releaseOrtSessionContext),
+);
+
 extension DartNativeFunctions on OrtApi {
   String? getErrorCodeMessage(Pointer<OrtStatus> status) {
     final getErrorCodeFn =
@@ -852,18 +870,33 @@ extension DartNativeFunctions on OrtApi {
 ///
 /// The sessionPtr is live. If you free it, you will not be able to use the
 /// model anymore. Conversely, you must free it when you are done with it.
-class OrtSessionObjects {
+class OrtSessionObjects implements Finalizable {
   final Pointer<Pointer<OrtSession>> sessionPtr;
   final Pointer<Pointer<OrtEnv>> envPtr;
   final OrtApiBase apiBase;
   final OrtApi api;
+  final Pointer<_OrtSessionFinalizerContext> _finalizerContext;
+  bool _released = false;
 
-  OrtSessionObjects({
+  OrtSessionObjects._({
     required this.sessionPtr,
     required this.envPtr,
     required this.apiBase,
     required this.api,
-  });
+    required Pointer<_OrtSessionFinalizerContext> finalizerContext,
+  }) : _finalizerContext = finalizerContext {
+    // NativeFinalizer callbacks run during isolate-group shutdown, including
+    // Flutter hot restart. This is the fallback for cases where the isolate
+    // cannot process its normal explicit `close` message.
+    _ortSessionFinalizer.attach(this, _finalizerContext.cast(), detach: this);
+  }
+
+  void release() {
+    if (_released) return;
+    _released = true;
+    _ortSessionFinalizer.detach(this);
+    _releaseOrtSessionContext(_finalizerContext.cast());
+  }
 }
 
 void releaseOrtSessionObjects(OrtSessionObjects? objects) {
@@ -871,15 +904,7 @@ void releaseOrtSessionObjects(OrtSessionObjects? objects) {
     return;
   }
 
-  if (objects.sessionPtr.value.address != 0) {
-    objects.api.releaseSession(objects.sessionPtr.value);
-  }
-  calloc.free(objects.sessionPtr);
-
-  if (objects.envPtr.value.address != 0) {
-    objects.api.releaseEnv(objects.envPtr.value);
-  }
-  calloc.free(objects.envPtr);
+  objects.release();
 }
 
 /// You MUST call [calloc.free] on the returned pointer when you are done with it.
@@ -960,11 +985,18 @@ OrtSessionObjects createOrtSession(
   ortApi.releaseSessionOptions(sessionOptionsPtr.value);
   calloc.free(sessionOptionsPtr);
   debugPrint('ORT Session created');
-  return OrtSessionObjects(
+  final finalizerContext = calloc<_OrtSessionFinalizerContext>();
+  finalizerContext.ref
+    ..session = sessionPtr
+    ..env = envPtr
+    ..releaseSession = ortApi.ReleaseSession
+    ..releaseEnv = ortApi.ReleaseEnv;
+  return OrtSessionObjects._(
     sessionPtr: sessionPtr,
     envPtr: envPtr,
     apiBase: baseApi,
     api: ortApi,
+    finalizerContext: finalizerContext,
   );
 }
 

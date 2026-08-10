@@ -15,6 +15,8 @@ void main() {
     final session = createOrtSession('test/models/identity.onnx');
     expect(session.sessionPtr.value, isNot(nullptr));
     releaseOrtSessionObjects(session);
+    // Explicit release is safe alongside the NativeFinalizer fallback.
+    releaseOrtSessionObjects(session);
   });
 
   test('bundled Extensions registers Whisper BpeDecoder', () {

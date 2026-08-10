@@ -16,11 +16,13 @@ import 'package:archive/archive.dart';
 import 'package:code_assets/code_assets.dart';
 import 'package:crypto/crypto.dart';
 import 'package:hooks/hooks.dart';
+import 'package:native_toolchain_c/native_toolchain_c.dart';
 import 'package:path/path.dart' as p;
 
 const _ortVersion = '1.27.0';
 const _ortAssetName = 'onnx/ort_ffi_bindings.dart';
 const _ortExtensionsAssetName = 'onnx/ort_extensions.dart';
+const _ortSessionFinalizerAssetName = 'onnx/ort_session_finalizer.dart';
 
 final class _Artifact {
   const _Artifact({
@@ -236,8 +238,19 @@ void main(List<String> args) async {
       );
     }
 
+    await CBuilder.library(
+      name: 'fonnx_ort_session_finalizer',
+      assetName: _ortSessionFinalizerAssetName,
+      sources: [
+        input.packageRoot.resolve('src/ort_session_finalizer.c').toFilePath(),
+      ],
+    ).run(input: input, output: output);
+
     // Make changes to the hook invalidate hooks_runner's own dependency graph.
     output.dependencies.add(input.packageRoot.resolve('hook/build.dart'));
+    output.dependencies.add(
+      input.packageRoot.resolve('src/ort_session_finalizer.c'),
+    );
   });
 }
 
