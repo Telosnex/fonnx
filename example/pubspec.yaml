@@ -3,7 +3,7 @@ description: Demonstrates how to use the fonnx plugin.
 publish_to: "none"
 
 environment:
-  sdk: ">=3.7.0 <4.0.0"
+  sdk: ">=3.9.0 <4.0.0"
 
 dependencies:
   flutter:
@@ -33,7 +33,7 @@ dependency_overrides:
     git:
       url: https://github.com/bluefireteam/audioplayers.git
       path: packages/audioplayers_web
-      ref: main
+      ref: a3d7e3f8ab1d2bdab854a9650b6d77207e4324dc
 dev_dependencies:
   integration_test:
     sdk: flutter
@@ -51,6 +51,9 @@ flutter:
     - assets/models/minishLab/potion32m.onnx
     - assets/models/msmarcoMiniLmL6V3/msmarcoMiniLmL6V3.onnx
     - assets/models/sileroVad/silero_vad_v6.2.1.onnx
+    - assets/models/keywordSpotter/encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx
+    - assets/models/keywordSpotter/decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx
+    - assets/models/keywordSpotter/joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx
     - assets/models/whisper/whisper_tiny.onnx
     - assets/models/pyannote/pyannote_seg3.onnx
     - assets/text_sample.txt
@@ -58,4 +61,5 @@ flutter:
     - assets/audio_sample.pcm
     - assets/audio_sample_16khz.wav
     - assets/audio_sample_ac1_ar16000.pcm
+    - assets/telosnex_hotword_3times_ar16000.pcm
     - assets/silence_16khz.wav
