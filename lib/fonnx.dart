@@ -6,6 +6,7 @@
 library;
 
 export 'extensions/vector.dart';
+export 'models/keyword_spotter/keyword_spotter.dart';
 export 'models/magika/magika.dart';
 export 'models/pyannote/pyannote.dart';
 export 'models/whisper/whisper.dart';

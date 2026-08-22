@@ -829,6 +829,41 @@ extension DartNativeFunctions on OrtApi {
     return status;
   }
 
+  Pointer<OrtStatus> addSessionConfigEntry(
+    Pointer<OrtSessionOptions> options, {
+    required String key,
+    required String value,
+  }) {
+    final fn =
+        AddSessionConfigEntry.asFunction<
+          Pointer<OrtStatus> Function(
+            Pointer<OrtSessionOptions>,
+            Pointer<Char>,
+            Pointer<Char>,
+          )
+        >();
+    final nativeKey = key.toNativeUtf8();
+    final nativeValue = value.toNativeUtf8();
+    try {
+      final status = fn(
+        options,
+        nativeKey.cast<Char>(),
+        nativeValue.cast<Char>(),
+      );
+      if (status.isError) {
+        final error =
+            'AddSessionConfigEntry failed for $key. '
+            'Code: ${getErrorCodeMessage(status)}\n'
+            'Message: ${getErrorMessage(status)}';
+        throw Exception(error);
+      }
+      return status;
+    } finally {
+      malloc.free(nativeValue);
+      malloc.free(nativeKey);
+    }
+  }
+
   Pointer<OrtStatus> setIntraOpNumThreads(
     Pointer<OrtSessionOptions> options,
     int intraOpNumThreads,
@@ -911,9 +946,14 @@ void releaseOrtSessionObjects(OrtSessionObjects? objects) {
 ///
 /// It is reasonable to never free it in an app where you would like the model
 /// to be loaded for the lifetime of the app.
+/// Creates an ORT session from [modelPath].
+///
+/// [sessionConfigEntries] is a narrow escape hatch for documented ORT runtime
+/// workarounds. Entries are copied into the session options before creation.
 OrtSessionObjects createOrtSession(
   String modelPath, {
   bool includeOnnxExtensionsOps = false,
+  Map<String, String> sessionConfigEntries = const {},
 }) {
   // Normal builds resolve the hook's code asset through @Native. The explicit
   // lookup exists only for diagnostic hosts that intentionally override ORT.
@@ -939,6 +979,13 @@ OrtSessionObjects createOrtSession(
 
   final sessionOptionsPtr = calloc<Pointer<OrtSessionOptions>>();
   ortApi.createSessionOptions(sessionOptionsPtr);
+  for (final entry in sessionConfigEntries.entries) {
+    ortApi.addSessionConfigEntry(
+      sessionOptionsPtr.value,
+      key: entry.key,
+      value: entry.value,
+    );
+  }
   if (includeOnnxExtensionsOps) {
     try {
       final extensionsStatus = registerOrtExtensions(

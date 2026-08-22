@@ -14,6 +14,17 @@ framework."
 
 # Changelog
 
+## 2026 Aug 9
+- Added runtime-configurable English keyword spotting on Android, iOS, Linux,
+  macOS, Windows, and Web.
+- All native targets use the same Dart FFI worker through Native Assets; no
+  Kotlin, Swift, CocoaPods, Maven, or model-specific native runner is needed.
+- Added runtime phrase replacement, pronunciation aliases, teach-by-voice
+  transcription, streaming fixtures, and Android/iOS integration tests.
+- Added the ORT 1.27.0 Apple SME Zipformer workaround. It is scoped to the
+  encoder session and can be removed after upgrading the Native Asset to fixed
+  ORT 1.27.1 or newer.
+
 ## 2026 Jul 20
 - Upgraded ONNX Runtime from 1.16.1 to 1.27.0 on every native platform.
 - Replaced vendored binaries, CocoaPods, Maven runtime dependencies, and
@@ -120,6 +131,29 @@ Avg. ms for 1 Mini LM L6 V2 embedding / 200 words.
 - Input is mix of lorem ipsum text from 8 languages.
 
 # Integrating FONNX
+
+## Open-vocabulary keyword spotting
+
+The 5 MB GigaSpeech Zipformer bundle detects English phrases selected at
+runtime. It accepts streaming mono 16 kHz PCM, supports atomic phrase changes,
+and can learn pronunciation aliases from a recording. Native targets share one
+Dart FFI implementation; Web uses an ONNX Runtime worker with the same Dart
+frontend and decoder.
+
+```dart
+final spotter = await KeywordSpotter.load(
+  bundle: KeywordSpotterBundle.gigaSpeech3m(modelDirectory),
+  keywords: const [
+    KeywordPhrase('telosnex', spokenForms: ['tell us next']),
+  ],
+);
+spotter.detections.listen((event) => print(event.phrase));
+await spotter.acceptPcm16(microphoneBytes);
+await spotter.close();
+```
+
+See the [keyword spotter documentation](lib/models/keyword_spotter/README.md)
+and the example's realtime phrase editor.
 
 ## Native platforms via Dart FFI and code assets
 

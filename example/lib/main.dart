@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fonnx_example/keyword_spotter_widget.dart';
 import 'package:fonnx_example/magika_widget.dart';
 import 'package:fonnx_example/minilml6v2_widget.dart';
 import 'package:fonnx_example/minishlab_widget.dart';
@@ -76,6 +77,8 @@ class _MyAppState extends State<MyApp> {
                     MagikaWidget(),
                     SizedBox(height: 16),
                     SileroVadWidget(),
+                    SizedBox(height: 16),
+                    KeywordSpotterWidget(),
                     SizedBox(height: 16),
                     MiniLmL6V2Widget(),
                     SizedBox(height: 16),

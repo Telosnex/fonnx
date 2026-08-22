@@ -8,17 +8,9 @@ plugins {
 android {
     namespace = "com.telosnex.fonnx.fonnx_example"
     compileSdk = flutter.compileSdkVersion
-    // 25-05-28:
-    // Your project is configured with Android NDK 26.3.11579264, but the following plugin(s) depend on a different Android NDK version:
-    // - audioplayers_android requires Android NDK 27.0.12077973
-    // - file_picker requires Android NDK 27.0.12077973
-    // - flutter_plugin_android_lifecycle requires Android NDK 27.0.12077973
-    // - fonnx requires Android NDK 27.0.12077973
-    // - path_provider_android requires Android NDK 27.0.12077973
-    // - record_android requires Android NDK 27.0.12077973
-    // Fix this issue by using the highest Android NDK version (they are backward compatible).
-    // Add the following to /Users/jpo/dev/fonnx/example/android/app/build.gradle.kts:
-    ndkVersion = "27.0.12077973"
+    // Native Assets and integration_test currently require NDK r28. Android
+    // NDKs are backward compatible, so use the highest plugin requirement.
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
