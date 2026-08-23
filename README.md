@@ -158,8 +158,9 @@ and the example's realtime phrase editor.
 ## Native platforms via Dart FFI and code assets
 
 Android, iOS, Linux, macOS, and Windows use the same Dart FFI implementation.
-`hook/build.dart` selects the target artifact, downloads it into a
-content-addressed cache, verifies its pinned SHA-256, extracts the library, and
+`hook/build.dart` reads the canonical `native_artifacts/manifest.json`, selects
+the target artifact, downloads it into a content-addressed cache, verifies its
+pinned SHA-256, extracts the library, and
 emits a bundled Flutter code asset. There are no FONNX CocoaPods/Gradle native
 dependencies and no platform channels.
 
@@ -168,6 +169,9 @@ code asset. FONNX release CI runs Microsoft's official Apple framework script
 in its supported dynamic mode and publishes arm64 device/simulator artifacts
 for the hook. iOS 15.1 or newer is required. macOS 14 or newer and Apple
 Silicon are required; Intel support was intentionally dropped.
+The current selected-op Linux artifact requires glibc 2.38 and
+`GLIBCXX_3.4.32`; Windows requires the Microsoft Visual C++ 2015–2022 runtime.
+These exact floors are verified and recorded in the production manifest.
 
 ### Required iOS project setup
 
@@ -197,6 +201,28 @@ Whisper's `ai.onnx.contrib:BpeDecoder`.
 
 ## Web
 
+FONNX ships a local ONNX Runtime Web 1.27.0 reference runtime in `lib/web`
+(mirrored into `example/web` in this repository).
+Every model Worker imports `./ort.min.mjs`; no executable CDN dependency is
+used. The same version backs native and Web inference, and the package manifest
+locks the JS module, Emscripten side module, Wasm, workers, deployed copies, and
+supported model fixtures. Copy the required init/Worker files plus the three
+`ort*` runtime files from `lib/web` into the consuming app's `web/` directory.
+
+Run the complete package gate with:
+
+```bash
+tool/test_all.sh
+```
+
+It verifies source/artifact/model hashes, rejects Git LFS pointers, executes a
+real local Web identity and Magika Worker model, runs the package-owned
+finalizer through 8,192 ASan/UBSan ownership states, checks exact native
+ORT/Extensions artifacts plus hydrated model goldens/RSS tests serially, and
+runs the deterministic frontend corpus through VM, Chrome JavaScript, and
+Chrome Wasm. Set `FONNX_FULL_RUNTIME_MATRIX=1` to include iOS Simulator,
+Android, Linux arm64/x64, and Windows/Wine artifact execution.
+
 Sending these headers with the request for the ONNX JS package gives a 10x speedup:
 
 ```
@@ -208,32 +234,10 @@ See [this GitHub issue](https://github.com/nagadomi/nunif/issues/34) for details
 
 ### Developing with Web
 
-While developing, two issues prevent it work working on the web.
-Both have workarounds
-
-#### WASM Mime Type
-
-You may see errors in console logs about the MIME type of the
-.wasm being incorrect and starting with the wrong bytes.
-
-That is due to local Flutter serving of the web app.
-
-To fix, download the WASM files from the same CDN folder that hosts ort.min.js
-(see _\_worker.js) and also in _\_minilm_worker.js, remove the // in front of ort.env.wasm.wasmPaths = "".
-
-Then, place the WASM files downloaded from the CDN next to index.html.
-
-In release mode and deployed, this is not an issue, you do not need to host the WASM files.
-
-#### Cross-Origin-Embedder-Policy
-
-To safely use SharedArrayBuffer, the server must send the Cross-Origin-Embedder-Policy header with the value require-corp.
-
-See here for how to workaround it: https://github.com/nagadomi/nunif/issues/34
-
-Note that the extension became adware, you should have Chrome set up its
-permissions such that it isn't run until you click it. Also, note that you have to do
-that each time the Flutter web app in debug mode's port changes.
+Serve `.wasm` as `application/wasm`. For multithreaded inference, serve both
+cross-origin isolation headers shown above; ORT falls back to one thread when
+`SharedArrayBuffer` is unavailable. `flutter run -d chrome` is sufficient for
+single-threaded development and requires no CDN download or browser extension.
 
 # License
 

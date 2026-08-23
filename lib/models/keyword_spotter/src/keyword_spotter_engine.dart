@@ -146,9 +146,7 @@ final class KeywordSpotterEngine {
   }
 
   void _setKeywordsWithoutReset(List<KeywordPhrase> keywords) {
-    if (keywords.isEmpty) {
-      throw ArgumentError.value(keywords, 'keywords', 'Must not be empty');
-    }
+    keywords = validatedKeywordPhraseSnapshot(keywords);
     final tokenIds = <List<int>>[];
     final graphPhrases = <KeywordPhrase>[];
     for (final keyword in keywords) {

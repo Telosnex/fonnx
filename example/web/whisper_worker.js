@@ -1,4 +1,4 @@
-import * as ort from 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.1/dist/esm/ort.min.js';
+import * as ort from './ort.min.mjs';
 
 let session = null;
 
@@ -7,7 +7,7 @@ let session = null;
 // Tested on MBA M2 with a value of 8 for navigator.hardwareConcurrency.
 const cores = navigator.hardwareConcurrency;
 ort.env.wasm.numThreads = Math.max(1, Math.min(Math.floor(cores / 2), cores));
-ort.env.wasm.wasmPaths = "";
+ort.env.wasm.wasmPaths = new URL('./', import.meta.url).href;
 
 function convertAudioBytesToFloats(audioBytes) {
     // Assuming 'audioBytes' is a Uint8Array.
@@ -38,11 +38,14 @@ function convertAudioBytesToFloats(audioBytes) {
 self.onmessage = async e => {
     const { action, modelArrayBuffer, audioBytes, messageId } = e.data;
     try {
+    if (e.data.protocolVersion !== 1) throw new Error('Unsupported FONNX Worker protocol');
         if (action === 'loadModel' && modelArrayBuffer) {
             console.log('Whisper loading model');
-            session = await ort.InferenceSession.create(modelArrayBuffer, {
-                executionProviders: ['wasm', 'cpu'],
+            const nextSession = await ort.InferenceSession.create(modelArrayBuffer, {
+                executionProviders: ['wasm'],
             });
+            if (session) await session.release();
+            session = nextSession;
             console.log('Whisper model loaded');
             self.postMessage({ messageId, action: 'modelLoaded' });
         } else if (action === 'runInference') {
@@ -67,7 +70,7 @@ self.onmessage = async e => {
             const lengthPenaltyTensor = new ort.Tensor('float32', [1.0], [1]);
             const repetitionPenaltyTensor = new ort.Tensor('float32', [1.0], [1]);
             const logitsProcessorTensor = new ort.Tensor('int32', [0], [1]);
-            const results = await session.run({
+            const inputs = {
                 audio_pcm: audioStreamTensor,
                 max_length: maxLengthTensor,
                 min_length: minLengthTensor,
@@ -76,10 +79,16 @@ self.onmessage = async e => {
                 length_penalty: lengthPenaltyTensor,
                 repetition_penalty: repetitionPenaltyTensor,
                 logits_processor: logitsProcessorTensor
-            });
-            const transcript = results.str.cpuData[0];
-            const message = { messageId, action: 'inferenceResult', transcript };
-            self.postMessage(message);
+            };
+            let results;
+            try {
+                results = await session.run(inputs);
+                const transcript = results.str.data[0];
+                self.postMessage({ messageId, action: 'inferenceResult', transcript });
+            } finally {
+                for (const tensor of Object.values(inputs)) tensor.dispose();
+                for (const tensor of Object.values(results || {})) tensor.dispose();
+            }
         }
     } catch (error) {
         console.error('[whisper_worker.js] An error occurred:', error.message);

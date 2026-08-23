@@ -11,14 +11,17 @@ MsmarcoMiniLmL6V3 getMsmarcoMiniLmL6V3(String path) =>
 external JSPromise<JSAny?> sbertJs(JSString modelPath, JSInt16Array wordpieces);
 
 class MsmarcoMiniLmL6V3Web implements MsmarcoMiniLmL6V3 {
+  @override
   final String modelPath;
 
   MsmarcoMiniLmL6V3Web(this.modelPath);
 
   @override
   Future<Vector> getEmbeddingAsVector(List<int> tokens) async {
-    final jsObject =
-        await sbertJs(modelPath.toJS, Int16List.fromList(tokens).toJS).toDart;
+    final jsObject = await sbertJs(
+      modelPath.toJS,
+      Int16List.fromList(tokens).toJS,
+    ).toDart;
 
     if (jsObject == null) {
       throw Exception('Embeddings returned from JS code are null');

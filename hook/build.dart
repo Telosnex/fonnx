@@ -10,6 +10,7 @@
 // hooks_runner's environment-sensitive cache. A cold build downloads once;
 // subsequent builds only copy the verified artifact into the hook output.
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:archive/archive.dart';
@@ -19,7 +20,6 @@ import 'package:hooks/hooks.dart';
 import 'package:native_toolchain_c/native_toolchain_c.dart';
 import 'package:path/path.dart' as p;
 
-const _ortVersion = '1.27.0';
 const _ortAssetName = 'onnx/ort_ffi_bindings.dart';
 const _ortExtensionsAssetName = 'onnx/ort_extensions.dart';
 const _ortSessionFinalizerAssetName = 'onnx/ort_session_finalizer.dart';
@@ -31,6 +31,25 @@ final class _Artifact {
     required this.libraryEntrySuffix,
   });
 
+  factory _Artifact.fromJson(Object? value, String label) {
+    if (value is! Map<String, Object?>) {
+      throw FormatException('$label must be an object');
+    }
+    final url = value['url'];
+    final digest = value['sha256'];
+    final suffix = value['libraryEntrySuffix'];
+    if (url is! String ||
+        !url.startsWith('https://') ||
+        digest is! String ||
+        !RegExp(r'^[0-9a-f]{64}$').hasMatch(digest) ||
+        suffix is! String ||
+        suffix.isEmpty ||
+        suffix.contains('..')) {
+      throw FormatException('Invalid artifact record: $label');
+    }
+    return _Artifact(url: url, sha256: digest, libraryEntrySuffix: suffix);
+  }
+
   final String url;
   final String sha256;
   final String libraryEntrySuffix;
@@ -41,160 +60,58 @@ final class _Artifact {
   }
 }
 
-const _nativeAssetsReleaseUrl =
-    'https://github.com/Telosnex/fonnx/releases/download/'
-    'native-assets-ort-1.27.0-ortx-fe4e13f-bpe-only-v2';
-const _iosNativeAssetsUrl =
-    '$_nativeAssetsReleaseUrl/'
-    'fonnx-ios-arm64-ort-1.27.0-ortx-fe4e13f4.zip';
+final class _ArtifactManifest {
+  const _ArtifactManifest({
+    required this.ort,
+    required this.extensions,
+    required this.file,
+  });
 
-const _ortArtifacts = <String, _Artifact>{
-  'android-arm': _Artifact(
-    url:
-        'https://repo.maven.apache.org/maven2/com/microsoft/onnxruntime/'
-        'onnxruntime-android/$_ortVersion/'
-        'onnxruntime-android-$_ortVersion.aar',
-    sha256: '077dec5e2d821234c7dc0aba584bec8f999854b546c754cab93a90741c56fbeb',
-    libraryEntrySuffix: 'jni/armeabi-v7a/libonnxruntime.so',
-  ),
-  'android-arm64': _Artifact(
-    url:
-        'https://repo.maven.apache.org/maven2/com/microsoft/onnxruntime/'
-        'onnxruntime-android/$_ortVersion/'
-        'onnxruntime-android-$_ortVersion.aar',
-    sha256: '077dec5e2d821234c7dc0aba584bec8f999854b546c754cab93a90741c56fbeb',
-    libraryEntrySuffix: 'jni/arm64-v8a/libonnxruntime.so',
-  ),
-  'android-x64': _Artifact(
-    url:
-        'https://repo.maven.apache.org/maven2/com/microsoft/onnxruntime/'
-        'onnxruntime-android/$_ortVersion/'
-        'onnxruntime-android-$_ortVersion.aar',
-    sha256: '077dec5e2d821234c7dc0aba584bec8f999854b546c754cab93a90741c56fbeb',
-    libraryEntrySuffix: 'jni/x86_64/libonnxruntime.so',
-  ),
-  'ios-arm64-iphoneos': _Artifact(
-    url: _iosNativeAssetsUrl,
-    sha256: '0ce93d30e305b1331a73c54b4739fde473f28270037a7d908838ff5c8b87a369',
-    libraryEntrySuffix: 'iphoneos/libonnxruntime.dylib',
-  ),
-  'ios-arm64-iphonesimulator': _Artifact(
-    url: _iosNativeAssetsUrl,
-    sha256: '0ce93d30e305b1331a73c54b4739fde473f28270037a7d908838ff5c8b87a369',
-    libraryEntrySuffix: 'iphonesimulator/libonnxruntime.dylib',
-  ),
-  'linux-arm64': _Artifact(
-    url:
-        'https://github.com/microsoft/onnxruntime/releases/download/'
-        'v$_ortVersion/onnxruntime-linux-aarch64-$_ortVersion.tgz',
-    sha256: '3e4d83ac06924a32a07b6d7f91ce6f852876153fc0bbdf931bf517a140bfbe48',
-    libraryEntrySuffix: 'lib/libonnxruntime.so.$_ortVersion',
-  ),
-  'linux-x64': _Artifact(
-    url:
-        'https://github.com/microsoft/onnxruntime/releases/download/'
-        'v$_ortVersion/onnxruntime-linux-x64-$_ortVersion.tgz',
-    sha256: '547e40a48f1fe73e3f812d7c88a948612c23f896b91e4e2ee1e232d7b468246f',
-    libraryEntrySuffix: 'lib/libonnxruntime.so.$_ortVersion',
-  ),
-  'macos-arm64': _Artifact(
-    url:
-        'https://github.com/microsoft/onnxruntime/releases/download/'
-        'v$_ortVersion/onnxruntime-osx-arm64-$_ortVersion.tgz',
-    sha256: '545e81c58152353acb0d1e8bd6ce4b62f830c0961f5b3acfedc790ffd76e477a',
-    libraryEntrySuffix: 'lib/libonnxruntime.$_ortVersion.dylib',
-  ),
-  'windows-arm64': _Artifact(
-    url:
-        'https://github.com/microsoft/onnxruntime/releases/download/'
-        'v$_ortVersion/onnxruntime-win-arm64-$_ortVersion.zip',
-    sha256: 'a32f2650575b3c20df462e337519fd1cc4105356130d11dba9771c6f374d952f',
-    libraryEntrySuffix: 'lib/onnxruntime.dll',
-  ),
-  'windows-x64': _Artifact(
-    url:
-        'https://github.com/microsoft/onnxruntime/releases/download/'
-        'v$_ortVersion/onnxruntime-win-x64-$_ortVersion.zip',
-    sha256: 'c5c81710938e68079ff1a192b04897faabe4b43830d48f39f27ecd4e16138bfc',
-    libraryEntrySuffix: 'lib/onnxruntime.dll',
-  ),
-};
+  final Map<String, _Artifact> ort;
+  final Map<String, _Artifact> extensions;
+  final File file;
+}
 
-const _ortExtensionsCommitShort = 'fe4e13f4';
-
-const _ortExtensionsArtifacts = <String, _Artifact>{
-  'android-arm': _Artifact(
-    url:
-        '$_nativeAssetsReleaseUrl/'
-        'fonnx-ortextensions-$_ortExtensionsCommitShort-android-arm.zip',
-    sha256: '23fb7f372ed77386424584e14a7718674e05bc35ee76b74436527ebd88bddcdc',
-    libraryEntrySuffix: 'libortextensions.so',
-  ),
-  'android-arm64': _Artifact(
-    url:
-        '$_nativeAssetsReleaseUrl/'
-        'fonnx-ortextensions-$_ortExtensionsCommitShort-android-arm64.zip',
-    sha256: 'ab796237516e98968d84d02772689d9d67ca1ba87ec088292332ba44671c5627',
-    libraryEntrySuffix: 'libortextensions.so',
-  ),
-  'android-x64': _Artifact(
-    url:
-        '$_nativeAssetsReleaseUrl/'
-        'fonnx-ortextensions-$_ortExtensionsCommitShort-android-x64.zip',
-    sha256: '27c1ecd5673c57631d98bb6856a9684c820ae11e4117dd24a26dd4f4be22decf',
-    libraryEntrySuffix: 'libortextensions.so',
-  ),
-  'ios-arm64-iphoneos': _Artifact(
-    url: _iosNativeAssetsUrl,
-    sha256: '0ce93d30e305b1331a73c54b4739fde473f28270037a7d908838ff5c8b87a369',
-    libraryEntrySuffix: 'iphoneos/libortextensions.dylib',
-  ),
-  'ios-arm64-iphonesimulator': _Artifact(
-    url: _iosNativeAssetsUrl,
-    sha256: '0ce93d30e305b1331a73c54b4739fde473f28270037a7d908838ff5c8b87a369',
-    libraryEntrySuffix: 'iphonesimulator/libortextensions.dylib',
-  ),
-  'linux-arm64': _Artifact(
-    url:
-        '$_nativeAssetsReleaseUrl/'
-        'fonnx-ortextensions-$_ortExtensionsCommitShort-linux-arm64.zip',
-    sha256: 'a4785c95de8a102362a9765c61a5f6cc01bedefbd1453d9667cd6345d719b0cf',
-    libraryEntrySuffix: 'libortextensions.so',
-  ),
-  'linux-x64': _Artifact(
-    url:
-        '$_nativeAssetsReleaseUrl/'
-        'fonnx-ortextensions-$_ortExtensionsCommitShort-linux-x64.zip',
-    sha256: '6a7aa5a33926e797e205a6925fbbbfe26bb0314ff333886e5ad78f4383c3993b',
-    libraryEntrySuffix: 'libortextensions.so',
-  ),
-  'macos-arm64': _Artifact(
-    url:
-        '$_nativeAssetsReleaseUrl/'
-        'fonnx-ortextensions-$_ortExtensionsCommitShort-macos-arm64.zip',
-    sha256: '92f03c220720a1a902283f6b720039d48335c4251138af78468a8e436cec2d9c',
-    libraryEntrySuffix: 'libortextensions.dylib',
-  ),
-  'windows-arm64': _Artifact(
-    url:
-        '$_nativeAssetsReleaseUrl/'
-        'fonnx-ortextensions-$_ortExtensionsCommitShort-windows-arm64.zip',
-    sha256: '8fea38110b79c6b6777ae84e970e6b115674a855c9856659499f219e05e63e87',
-    libraryEntrySuffix: 'ortextensions.dll',
-  ),
-  'windows-x64': _Artifact(
-    url:
-        '$_nativeAssetsReleaseUrl/'
-        'fonnx-ortextensions-$_ortExtensionsCommitShort-windows-x64.zip',
-    sha256: '8cd742345c48e3502b124f3b21bd06a0010ebe8a9ea33b021f2a082aa0691a5d',
-    libraryEntrySuffix: 'ortextensions.dll',
-  ),
-};
+Future<_ArtifactManifest> _loadArtifactManifest(Uri packageRoot) async {
+  final file = File.fromUri(
+    packageRoot.resolve('native_artifacts/manifest.json'),
+  );
+  final decoded = jsonDecode(await file.readAsString());
+  if (decoded is! Map<String, Object?> ||
+      decoded['schema'] != 1 ||
+      decoded['profile'] != 1 ||
+      decoded['finalizerAbi'] != 1 ||
+      decoded['webWorkerProtocolAbi'] != 1) {
+    throw const FormatException('Unsupported fonnx artifact manifest/profile');
+  }
+  final records = decoded['nativeArtifacts'];
+  if (records is! Map<String, Object?> || records.length != 10) {
+    throw const FormatException('Expected exactly 10 native target records');
+  }
+  final ort = <String, _Artifact>{};
+  final extensions = <String, _Artifact>{};
+  for (final entry in records.entries) {
+    final target = entry.value;
+    if (target is! Map<String, Object?> || target.length != 2) {
+      throw FormatException('Invalid native target record: ${entry.key}');
+    }
+    ort[entry.key] = _Artifact.fromJson(
+      target['onnxRuntime'],
+      '${entry.key}.onnxRuntime',
+    );
+    extensions[entry.key] = _Artifact.fromJson(
+      target['extensions'],
+      '${entry.key}.extensions',
+    );
+  }
+  return _ArtifactManifest(ort: ort, extensions: extensions, file: file);
+}
 
 void main(List<String> args) async {
   await build(args, (input, output) async {
     if (!input.config.buildCodeAssets) return;
 
+    final manifest = await _loadArtifactManifest(input.packageRoot);
     final os = input.config.code.targetOS;
 
     if (os == OS.fuchsia) {
@@ -210,11 +127,11 @@ void main(List<String> args) async {
           }
         : '';
     final key = '${os.name}-${architecture.name}$sdkSuffix';
-    final artifact = _ortArtifacts[key];
+    final artifact = manifest.ort[key];
     if (artifact == null) {
       throw UnsupportedError(
         'No fonnx ONNX Runtime artifact for $key. Supported targets: '
-        '${_ortArtifacts.keys.join(', ')}. Intel Apple targets are '
+        '${manifest.ort.keys.join(', ')}. Intel Apple targets are '
         'intentionally not supported.',
       );
     }
@@ -227,7 +144,7 @@ void main(List<String> args) async {
       assetName: _ortAssetName,
     );
 
-    final extensionsArtifact = _ortExtensionsArtifacts[key];
+    final extensionsArtifact = manifest.extensions[key];
     if (extensionsArtifact != null) {
       await _publishArtifact(
         input: input,
@@ -244,13 +161,18 @@ void main(List<String> args) async {
       sources: [
         input.packageRoot.resolve('src/ort_session_finalizer.c').toFilePath(),
       ],
+      includes: [input.packageRoot.resolve('src').toFilePath()],
       libraries: [if (os == OS.windows) 'ole32'],
     ).run(input: input, output: output);
 
     // Make changes to the hook invalidate hooks_runner's own dependency graph.
     output.dependencies.add(input.packageRoot.resolve('hook/build.dart'));
+    output.dependencies.add(manifest.file.uri);
     output.dependencies.add(
       input.packageRoot.resolve('src/ort_session_finalizer.c'),
+    );
+    output.dependencies.add(
+      input.packageRoot.resolve('src/ort_session_finalizer.h'),
     );
   });
 }

@@ -9,6 +9,7 @@ MinishLab getMinishLab(String path) => MinishLabNative(path);
 class MinishLabNative implements MinishLab {
   MinishLabNative(this.modelPath);
 
+  @override
   final String modelPath;
   final OnnxIsolateManager _onnxIsolateManager = OnnxIsolateManager();
 
@@ -19,7 +20,8 @@ class MinishLabNative implements MinishLab {
   }
 
   Future<Float32List> getEmbedding(List<int> tokens) async {
+    final snapshot = List<int>.unmodifiable(tokens);
     await _onnxIsolateManager.start(OnnxIsolateType.minishLab);
-    return _onnxIsolateManager.sendInference(modelPath, tokens);
+    return _onnxIsolateManager.sendInference(modelPath, snapshot);
   }
 }

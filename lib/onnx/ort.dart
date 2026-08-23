@@ -21,6 +21,21 @@ final class _OrtSessionFinalizerContext extends Struct {
 )
 external void _releaseOrtSessionContext(Pointer<Void> context);
 
+@Native<Uint32 Function()>(
+  symbol: 'fonnx_ort_session_finalizer_abi_version',
+  assetId: 'package:fonnx/onnx/ort_session_finalizer.dart',
+)
+external int fonnxOrtSessionFinalizerAbiVersion();
+
+@Native<Pointer<Utf8> Function()>(
+  symbol: 'fonnx_ort_session_finalizer_build_info',
+  assetId: 'package:fonnx/onnx/ort_session_finalizer.dart',
+)
+external Pointer<Utf8> _fonnxOrtSessionFinalizerBuildInfo();
+
+String get fonnxOrtSessionFinalizerBuildInfo =>
+    _fonnxOrtSessionFinalizerBuildInfo().toDartString();
+
 final _ortSessionFinalizer = NativeFinalizer(
   Native.addressOf<NativeFinalizerFunction>(_releaseOrtSessionContext),
 );
@@ -34,13 +49,19 @@ extension DartNativeFunctions on OrtApi {
     return messageForOrtErrorCode(errorCodeResult);
   }
 
-  String getErrorMessage(Pointer<OrtStatus> status) {
+  /// Copies the error message and releases the owned ORT status.
+  ///
+  /// Call [getErrorCodeMessage] first if both values are needed. ORT requires
+  /// every non-null status to be released exactly once.
+  String consumeErrorMessage(Pointer<OrtStatus> status) {
     final getErrorMessageFn =
         GetErrorMessage.asFunction<
           Pointer<Char> Function(Pointer<OrtStatus>)
         >();
     final message = getErrorMessageFn(status);
-    return message.toDartString();
+    final result = message.toDartString();
+    ReleaseStatus.asFunction<void Function(Pointer<OrtStatus>)>()(status);
+    return result;
   }
 
   Pointer<Float> createFloat32Tensor(
@@ -70,7 +91,7 @@ extension DartNativeFunctions on OrtApi {
     if (status.isError) {
       final error =
           'Code: ${getErrorCodeMessage(status)}\n'
-          'Message: ${getErrorMessage(status)}';
+          'Message: ${consumeErrorMessage(status)}';
       calloc.free(inputTensorNative);
       calloc.free(inputShape);
       throw Exception(error);
@@ -120,7 +141,7 @@ extension DartNativeFunctions on OrtApi {
     if (status.isError) {
       final error =
           'Code: ${getErrorCodeMessage(status)}\n'
-          'Message: ${getErrorMessage(status)}';
+          'Message: ${consumeErrorMessage(status)}';
       calloc.free(inputTensorNative);
       calloc.free(inputShape);
       throw Exception(error);
@@ -168,7 +189,7 @@ extension DartNativeFunctions on OrtApi {
     if (status.isError) {
       final error =
           'Code: ${getErrorCodeMessage(status)}\n'
-          'Message: ${getErrorMessage(status)}';
+          'Message: ${consumeErrorMessage(status)}';
       calloc.free(inputTensorNative);
       calloc.free(inputShape);
       throw Exception(error);
@@ -222,7 +243,7 @@ extension DartNativeFunctions on OrtApi {
     if (status.isError) {
       final error =
           'Code: ${getErrorCodeMessage(status)}\n'
-          'Message: ${getErrorMessage(status)}';
+          'Message: ${consumeErrorMessage(status)}';
       calloc.free(inputTensorNative);
       calloc.free(inputShape);
       throw Exception(error);
@@ -271,7 +292,7 @@ extension DartNativeFunctions on OrtApi {
     if (status.isError) {
       final error =
           'Code: ${getErrorCodeMessage(status)}\n'
-          'Message: ${getErrorMessage(status)}';
+          'Message: ${consumeErrorMessage(status)}';
       calloc.free(inputTensorNative);
       calloc.free(inputShape);
       throw Exception(error);
@@ -308,7 +329,7 @@ extension DartNativeFunctions on OrtApi {
     if (status.isError) {
       final error =
           'Code: ${getErrorCodeMessage(status)}\n'
-          'Message: ${getErrorMessage(status)}';
+          'Message: ${consumeErrorMessage(status)}';
       calloc.free(inputTensorNative);
       calloc.free(inputShape);
       throw Exception(error);
@@ -345,7 +366,7 @@ extension DartNativeFunctions on OrtApi {
     if (status.isError) {
       final error =
           'Code: ${getErrorCodeMessage(status)}\n'
-          'Message: ${getErrorMessage(status)}';
+          'Message: ${consumeErrorMessage(status)}';
       calloc.free(inputTensorNative);
       calloc.free(inputShape);
       throw Exception(error);
@@ -365,7 +386,7 @@ extension DartNativeFunctions on OrtApi {
     if (status.isError) {
       final error =
           'Code: ${getErrorCodeMessage(status)}\n'
-          'Message: ${getErrorMessage(status)}';
+          'Message: ${consumeErrorMessage(status)}';
       throw Exception(error);
     }
     return outputCount;
@@ -392,7 +413,7 @@ extension DartNativeFunctions on OrtApi {
     if (status.isError) {
       final error =
           'Code: ${getErrorCodeMessage(status)}\n'
-          'Message: ${getErrorMessage(status)}';
+          'Message: ${consumeErrorMessage(status)}';
       throw Exception(error);
     }
     return status;
@@ -410,7 +431,7 @@ extension DartNativeFunctions on OrtApi {
     if (status.isError) {
       final error =
           'Code: ${getErrorCodeMessage(status)}\n'
-          'Message: ${getErrorMessage(status)}';
+          'Message: ${consumeErrorMessage(status)}';
       throw Exception(error);
     }
     return status;
@@ -476,7 +497,7 @@ extension DartNativeFunctions on OrtApi {
     if (status.isError) {
       final error =
           'Code: ${getErrorCodeMessage(status)}\n'
-          'Message: ${getErrorMessage(status)}';
+          'Message: ${consumeErrorMessage(status)}';
       throw Exception(error);
     }
     return status;
@@ -562,7 +583,7 @@ extension DartNativeFunctions on OrtApi {
     if (status.isError) {
       final error =
           'Code: ${getErrorCodeMessage(status)}\n'
-          'Message: ${getErrorMessage(status)}';
+          'Message: ${consumeErrorMessage(status)}';
       throw Exception(error);
     }
     return status;
@@ -600,7 +621,7 @@ extension DartNativeFunctions on OrtApi {
     if (status.isError) {
       final error =
           'Get string tensor element length failed. Code: ${getErrorCodeMessage(status)}\n'
-          'Message: ${getErrorMessage(status)}';
+          'Message: ${consumeErrorMessage(status)}';
       throw Exception(error);
     }
     return status;
@@ -625,7 +646,7 @@ extension DartNativeFunctions on OrtApi {
     if (status.isError) {
       final error =
           'Get string tensor element failed. Code: ${getErrorCodeMessage(status)}\n'
-          'Message: ${getErrorMessage(status)}';
+          'Message: ${consumeErrorMessage(status)}';
       throw Exception(error);
     }
     return status;
@@ -654,7 +675,7 @@ extension DartNativeFunctions on OrtApi {
     if (status.isError) {
       final error =
           'Get tensor data failed. Code: ${getErrorCodeMessage(status)}\n'
-          'Message: ${getErrorMessage(status)}';
+          'Message: ${consumeErrorMessage(status)}';
       throw Exception(error);
     }
     return status;
@@ -676,7 +697,7 @@ extension DartNativeFunctions on OrtApi {
     if (status.isError) {
       final error =
           'Get dimensions count failed. Code: ${getErrorCodeMessage(status)}\n'
-          'Message: ${getErrorMessage(status)}';
+          'Message: ${consumeErrorMessage(status)}';
       throw Exception(error);
     }
     return status;
@@ -699,7 +720,7 @@ extension DartNativeFunctions on OrtApi {
     if (status.isError) {
       final error =
           'Get tensor type and shape failed. Code: ${getErrorCodeMessage(status)}\n'
-          'Message: ${getErrorMessage(status)}';
+          'Message: ${consumeErrorMessage(status)}';
       throw Exception(error);
     }
     return status;
@@ -728,7 +749,7 @@ extension DartNativeFunctions on OrtApi {
     if (status.isError) {
       final error =
           'Get tensor element type failed. Code: ${getErrorCodeMessage(status)}\n'
-          'Message: ${getErrorMessage(status)}';
+          'Message: ${consumeErrorMessage(status)}';
       throw Exception(error);
     }
     return status;
@@ -749,7 +770,7 @@ extension DartNativeFunctions on OrtApi {
     if (status.isError) {
       final error =
           'Get tensor shape element count failed. Code: ${getErrorCodeMessage(status)}\n'
-          'Message: ${getErrorMessage(status)}';
+          'Message: ${consumeErrorMessage(status)}';
       throw Exception(error);
     }
     return status;
@@ -776,7 +797,7 @@ extension DartNativeFunctions on OrtApi {
     if (status.isError) {
       final error =
           'Register custom ops library failed. Code: ${getErrorCodeMessage(status)}\n'
-          'Message: ${getErrorMessage(status)}';
+          'Message: ${consumeErrorMessage(status)}';
       throw Exception(error);
     }
     return status;
@@ -818,7 +839,7 @@ extension DartNativeFunctions on OrtApi {
     if (status.isError) {
       final error =
           'Run failed. Code: ${getErrorCodeMessage(status)}\n'
-          'Message: ${getErrorMessage(status)}';
+          'Message: ${consumeErrorMessage(status)}';
       // rationale: Crucial for debugging, for some reason this
       // isn't bubbling to UI.
       // TODO: figure out why
@@ -854,7 +875,7 @@ extension DartNativeFunctions on OrtApi {
         final error =
             'AddSessionConfigEntry failed for $key. '
             'Code: ${getErrorCodeMessage(status)}\n'
-            'Message: ${getErrorMessage(status)}';
+            'Message: ${consumeErrorMessage(status)}';
         throw Exception(error);
       }
       return status;
@@ -876,7 +897,7 @@ extension DartNativeFunctions on OrtApi {
     if (status.isError) {
       final error =
           'SessionOptionsSetIntraOpNumThreads failed. Code: ${getErrorCodeMessage(status)}\n'
-          'Message: ${getErrorMessage(status)}';
+          'Message: ${consumeErrorMessage(status)}';
       throw Exception(error);
     }
     return status;
@@ -894,7 +915,7 @@ extension DartNativeFunctions on OrtApi {
     if (status.isError) {
       final error =
           'SessionOptionsSetInterOpNumThreads failed. Code: ${getErrorCodeMessage(status)}\n'
-          'Message: ${getErrorMessage(status)}';
+          'Message: ${consumeErrorMessage(status)}';
       throw Exception(error);
     }
     return status;
@@ -967,84 +988,106 @@ OrtSessionObjects createOrtSession(
   };
   final baseApi = answer.ref;
   final api = baseApi.GetApi.asFunction<Pointer<OrtApi> Function(int)>();
-  final ortApi = api(ORT_API_VERSION).ref;
+  final ortApiPointer = api(ORT_API_VERSION);
+  if (ortApiPointer == nullptr) {
+    throw StateError('ONNX Runtime does not support API $ORT_API_VERSION');
+  }
+  final ortApi = ortApiPointer.ref;
   final envPtr = calloc<Pointer<OrtEnv>>();
-  final status = ortApi.createEnv(envPtr);
-  if (status.isError) {
-    final error =
-        'Code: ${ortApi.getErrorCodeMessage(status)}\n'
-        'Message: ${ortApi.getErrorMessage(status)}';
-    throw Exception(error);
-  }
-
   final sessionOptionsPtr = calloc<Pointer<OrtSessionOptions>>();
-  ortApi.createSessionOptions(sessionOptionsPtr);
-  for (final entry in sessionConfigEntries.entries) {
-    ortApi.addSessionConfigEntry(
-      sessionOptionsPtr.value,
-      key: entry.key,
-      value: entry.value,
-    );
-  }
-  if (includeOnnxExtensionsOps) {
-    try {
+  final sessionPtr = calloc<Pointer<OrtSession>>();
+  var optionsPointerFreed = false;
+  var ownershipTransferred = false;
+
+  try {
+    final status = ortApi.createEnv(envPtr);
+    if (status.isError) {
+      final error =
+          'Code: ${ortApi.getErrorCodeMessage(status)}\n'
+          'Message: ${ortApi.consumeErrorMessage(status)}';
+      throw Exception(error);
+    }
+
+    ortApi.createSessionOptions(sessionOptionsPtr);
+    for (final entry in sessionConfigEntries.entries) {
+      ortApi.addSessionConfigEntry(
+        sessionOptionsPtr.value,
+        key: entry.key,
+        value: entry.value,
+      );
+    }
+    if (includeOnnxExtensionsOps) {
       final extensionsStatus = registerOrtExtensions(
         options: sessionOptionsPtr.value,
         apiBase: answer,
         libraryPathOverride: fonnxOrtExtensionsDylibPathOverride,
       );
       if (extensionsStatus.isError) {
-        throw Exception(
-          'Register custom ops failed. '
-          'Code: ${ortApi.getErrorCodeMessage(extensionsStatus)}\n'
-          'Message: ${ortApi.getErrorMessage(extensionsStatus)}',
-        );
+        final error =
+            'Register custom ops failed. '
+            'Code: ${ortApi.getErrorCodeMessage(extensionsStatus)}\n'
+            'Message: ${ortApi.consumeErrorMessage(extensionsStatus)}';
+        throw Exception(error);
       }
-    } catch (e) {
-      debugPrint('Error loading ORT Extensions: $e');
-      rethrow;
+    }
+
+    // Avoiding explicit inter/intra-op thread counts currently performs best.
+    // CoreML was also measured around 10x slower than CPU on an M2 Max for the
+    // package's embedding graphs, so provider selection remains ORT's default.
+    final sessionStatus = ortApi.createSession(
+      env: envPtr.value,
+      modelPath: modelPath,
+      sessionOptions: sessionOptionsPtr.value,
+      session: sessionPtr,
+    );
+    if (sessionStatus.isError) {
+      final error =
+          'Code: ${ortApi.getErrorCodeMessage(sessionStatus)}\n'
+          'Message: ${ortApi.consumeErrorMessage(sessionStatus)}';
+      throw Exception(error);
+    }
+
+    ortApi.releaseSessionOptions(sessionOptionsPtr.value);
+    sessionOptionsPtr.value = nullptr;
+    calloc.free(sessionOptionsPtr);
+    optionsPointerFreed = true;
+
+    final finalizerContext = calloc<_OrtSessionFinalizerContext>();
+    finalizerContext.ref
+      ..session = sessionPtr
+      ..env = envPtr
+      ..releaseSession = ortApi.ReleaseSession
+      ..releaseEnv = ortApi.ReleaseEnv;
+    ownershipTransferred = true;
+    debugPrint('ORT Session created');
+    return OrtSessionObjects._(
+      sessionPtr: sessionPtr,
+      envPtr: envPtr,
+      apiBase: baseApi,
+      api: ortApi,
+      finalizerContext: finalizerContext,
+    );
+  } catch (_) {
+    if (sessionPtr.value != nullptr) {
+      ortApi.releaseSession(sessionPtr.value);
+      sessionPtr.value = nullptr;
+    }
+    if (!optionsPointerFreed && sessionOptionsPtr.value != nullptr) {
+      ortApi.releaseSessionOptions(sessionOptionsPtr.value);
+      sessionOptionsPtr.value = nullptr;
+    }
+    if (envPtr.value != nullptr) {
+      ortApi.releaseEnv(envPtr.value);
+      envPtr.value = nullptr;
+    }
+    rethrow;
+  } finally {
+    if (!ownershipTransferred) {
+      calloc.free(sessionPtr);
+      if (!optionsPointerFreed) calloc.free(sessionOptionsPtr);
+      calloc.free(envPtr);
     }
   }
-
-  // Avoiding setting inter/intra op num threads at all seems to get the best performance.
-  // 128 threads: ~5.00 ms/embedding
-  // 1 thread: ~0.85 ms/embedding
-  // 7 threads: ~0.65 ms/embedding
-  // Not setting inter/intra op num threads: ~0.65 ms/embedding
-
-  // Adding CoreML support slowed down inference about 10x on M2 Max.
-  // This persisted even when CPU only + only if ANE is available flags were
-  // set, either together or independently.
-  final sessionPtr = calloc<Pointer<OrtSession>>();
-  final sessionStatus = ortApi.createSession(
-    env: envPtr.value,
-    modelPath: modelPath,
-    sessionOptions: sessionOptionsPtr.value,
-    session: sessionPtr,
-  );
-  if (sessionStatus.isError) {
-    final error =
-        'Code: ${ortApi.getErrorCodeMessage(sessionStatus)}\n'
-        'Message: ${ortApi.getErrorMessage(sessionStatus)}';
-    throw Exception(error);
-  }
-
-  ortApi.releaseSessionOptions(sessionOptionsPtr.value);
-  calloc.free(sessionOptionsPtr);
-  debugPrint('ORT Session created');
-  final finalizerContext = calloc<_OrtSessionFinalizerContext>();
-  finalizerContext.ref
-    ..session = sessionPtr
-    ..env = envPtr
-    ..releaseSession = ortApi.ReleaseSession
-    ..releaseEnv = ortApi.ReleaseEnv;
-  return OrtSessionObjects._(
-    sessionPtr: sessionPtr,
-    envPtr: envPtr,
-    apiBase: baseApi,
-    api: ortApi,
-    finalizerContext: finalizerContext,
-  );
 }
 
 extension IsError on Pointer<OrtStatus> {

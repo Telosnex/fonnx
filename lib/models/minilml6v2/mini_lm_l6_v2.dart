@@ -8,8 +8,14 @@ import 'mini_lm_l6_v2_abstract.dart'
 
 abstract class MiniLmL6V2 {
   static MiniLmL6V2? _instance;
+  String get modelPath;
 
   static MiniLmL6V2 load(String path) {
+    if (path.trim().isEmpty) throw ArgumentError.value(path, 'path');
+    final current = _instance;
+    if (current != null && current.modelPath != path) {
+      throw StateError('MiniLmL6V2 is already loaded from ${current.modelPath}');
+    }
     _instance ??= getMiniLmL6V2(path);
     return _instance!;
   }

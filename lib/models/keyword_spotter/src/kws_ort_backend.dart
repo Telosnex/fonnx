@@ -300,7 +300,7 @@ final class _OrtGraph {
         onnxTensorElementDataType: type,
       );
       if (status.isError) {
-        throw Exception(_session.api.getErrorMessage(status));
+        throw Exception(_session.api.consumeErrorMessage(status));
       }
       return _OwnedOrtValue(this, value.value, backing: backing);
     } catch (_) {

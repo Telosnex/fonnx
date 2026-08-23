@@ -10,14 +10,17 @@ MinishLab getMinishLab(String path) => MinishLabWeb(path);
 external JSPromise<JSAny?> sbertJs(JSString modelPath, JSInt16Array wordpieces);
 
 class MinishLabWeb implements MinishLab {
+  @override
   final String modelPath;
 
   MinishLabWeb(this.modelPath);
 
   @override
   Future<Vector> getEmbeddingAsVector(List<int> tokens) async {
-    final jsObject =
-        await sbertJs(modelPath.toJS, Int16List.fromList(tokens).toJS).toDart;
+    final jsObject = await sbertJs(
+      modelPath.toJS,
+      Int16List.fromList(tokens).toJS,
+    ).toDart;
 
     if (jsObject == null) {
       throw Exception('Embeddings returned from JS code are null');

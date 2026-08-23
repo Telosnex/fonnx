@@ -1,19 +1,22 @@
-import * as ort from 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.1/dist/esm/ort.min.js';
+import * as ort from './ort.min.mjs';
 
 let session = null;
 
 const cores = navigator.hardwareConcurrency;
 ort.env.wasm.numThreads = Math.max(1, Math.min(Math.floor(cores / 2), cores));
-ort.env.wasm.wasmPaths = "";
+ort.env.wasm.wasmPaths = new URL('./', import.meta.url).href;
 
 self.onmessage = async e => {
     const { action, modelArrayBuffer, fileBytes, messageId } = e.data;
     try {
+    if (e.data.protocolVersion !== 1) throw new Error('Unsupported FONNX Worker protocol');
         if (action === 'loadModel' && modelArrayBuffer) {
             console.log('Magika loading model');
-            session = await ort.InferenceSession.create(modelArrayBuffer, {
-                executionProviders: ['wasm', 'cpu'],
+            const nextSession = await ort.InferenceSession.create(modelArrayBuffer, {
+                executionProviders: ['wasm'],
             });
+            if (session) await session.release();
+            session = nextSession;
             console.log('Magika model loaded');
             self.postMessage({ messageId, action: 'modelLoaded' });
         } else if (action === 'runInference') {
@@ -28,16 +31,23 @@ self.onmessage = async e => {
                 return;
             }
 
-            const float32Array = fileBytes instanceof Float32Array 
-            ? fileBytes 
+            const float32Array = fileBytes instanceof Float32Array
+            ? fileBytes
             : new Float32Array(fileBytes);
 
-            console.log('Magika running inference');
             const bytesTensor = new ort.Tensor('float32', float32Array, [1, float32Array.length]);
-            const results = await session.run({ bytes: bytesTensor });
-            const targetLabel = results['target_label'].data;
-            const message = { messageId, action: 'inferenceResult', targetLabel };
-            self.postMessage(message);
+            let results;
+            try {
+                results = await session.run({ bytes: bytesTensor });
+                const targetLabel = Float32Array.from(results.target_label.data);
+                self.postMessage(
+                    { messageId, action: 'inferenceResult', targetLabel },
+                    [targetLabel.buffer],
+                );
+            } finally {
+                bytesTensor.dispose();
+                for (const tensor of Object.values(results || {})) tensor.dispose();
+            }
         }
     } catch (error) {
         console.error('[magika_worker.js] An error occurred:', error.message);

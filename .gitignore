@@ -1,6 +1,3 @@
-# Ignore only the large model files
-example/assets/models/minishLab/potion32m.onnx
-
 # See https://www.dartlang.org/guides/libraries/private-files
 
 # Files and directories created by pub

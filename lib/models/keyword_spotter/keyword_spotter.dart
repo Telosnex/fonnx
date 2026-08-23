@@ -13,12 +13,39 @@ abstract class KeywordSpotter {
     required List<KeywordPhrase> keywords,
     int maxActivePaths = 4,
     int trailingBlankFrames = 1,
-  }) => getKeywordSpotter(
-    bundle: bundle,
-    keywords: keywords,
-    maxActivePaths: maxActivePaths,
-    trailingBlankFrames: trailingBlankFrames,
-  );
+  }) {
+    if ([
+      bundle.encoderPath,
+      bundle.decoderPath,
+      bundle.joinerPath,
+    ].any((path) => path.trim().isEmpty)) {
+      throw ArgumentError.value(
+        bundle,
+        'bundle',
+        'Model paths must not be empty',
+      );
+    }
+    if (maxActivePaths < 1 || maxActivePaths > 64) {
+      throw ArgumentError.value(
+        maxActivePaths,
+        'maxActivePaths',
+        'Must be 1..64',
+      );
+    }
+    if (trailingBlankFrames < 0 || trailingBlankFrames > 100) {
+      throw ArgumentError.value(
+        trailingBlankFrames,
+        'trailingBlankFrames',
+        'Must be 0..100',
+      );
+    }
+    return getKeywordSpotter(
+      bundle: bundle,
+      keywords: validatedKeywordPhraseSnapshot(keywords),
+      maxActivePaths: maxActivePaths,
+      trailingBlankFrames: trailingBlankFrames,
+    );
+  }
 
   Stream<KeywordDetection> get detections;
 

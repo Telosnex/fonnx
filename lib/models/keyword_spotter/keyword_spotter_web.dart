@@ -88,9 +88,10 @@ final class KeywordSpotterWeb extends KeywordSpotter {
     int sampleRate = 16000,
   }) async {
     _ensureOpen();
+    final snapshot = Float32List.fromList(samples);
     return _enqueue(() async {
       for (final detection in await _engine.accept(
-        samples,
+        snapshot,
         sampleRate: sampleRate,
       )) {
         _detections.add(detection);
@@ -114,13 +115,15 @@ final class KeywordSpotterWeb extends KeywordSpotter {
     int sampleRate = 16000,
   }) {
     _ensureOpen();
-    return _enqueue(() => _engine.transcribe(samples, sampleRate: sampleRate));
+    final snapshot = Float32List.fromList(samples);
+    return _enqueue(() => _engine.transcribe(snapshot, sampleRate: sampleRate));
   }
 
   @override
   Future<void> setKeywords(List<KeywordPhrase> keywords) {
     _ensureOpen();
-    return _enqueue(() => _engine.setKeywords(keywords));
+    final snapshot = validatedKeywordPhraseSnapshot(keywords);
+    return _enqueue(() => _engine.setKeywords(snapshot));
   }
 
   @override

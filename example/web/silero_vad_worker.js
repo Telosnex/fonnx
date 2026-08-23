@@ -1,10 +1,10 @@
-import * as ort from 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.1/dist/esm/ort.min.js';
+import * as ort from './ort.min.mjs';
 
 let session = null;
 
 const cores = navigator.hardwareConcurrency;
 ort.env.wasm.numThreads = Math.max(1, Math.min(Math.floor(cores / 2), cores));
-ort.env.wasm.wasmPaths = '';
+ort.env.wasm.wasmPaths = new URL('./', import.meta.url).href;
 
 const chunkSamples = 512;
 const contextSamples = 64;
@@ -45,14 +45,21 @@ async function runInference(audioBytes, previousStateAsJsonString) {
     const input = new Float32Array(contextSamples + chunkSamples);
     input.set(context);
     input.set(chunk, contextSamples);
-    const results = await session.run({
+    const inputs = {
       input: new ort.Tensor('float32', input, [1, input.length]),
       state: new ort.Tensor('float32', state, [2, 1, 128]),
       // The model declares a scalar but also accepts this one-value tensor.
       sr: new ort.Tensor('int64', [16000], [1]),
-    });
-    output.push(results.output.data[0]);
-    state = new Float32Array(results.stateN.data);
+    };
+    let results;
+    try {
+      results = await session.run(inputs);
+      output.push(results.output.data[0]);
+      state = new Float32Array(results.stateN.data);
+    } finally {
+      for (const tensor of Object.values(inputs)) tensor.dispose();
+      for (const tensor of Object.values(results || {})) tensor.dispose();
+    }
     context = chunk.slice(chunkSamples - contextSamples);
   }
 
@@ -72,10 +79,13 @@ self.onmessage = async (event) => {
     messageId,
   } = event.data;
   try {
+    if (event.data.protocolVersion !== 1) throw new Error('Unsupported FONNX Worker protocol');
     if (action === 'loadModel' && modelArrayBuffer) {
-      session = await ort.InferenceSession.create(modelArrayBuffer, {
-        executionProviders: ['wasm', 'cpu'],
-      });
+      const nextSession = await ort.InferenceSession.create(modelArrayBuffer, {
+                executionProviders: ['wasm'],
+            });
+            if (session) await session.release();
+            session = nextSession;
       self.postMessage({ messageId, action: 'modelLoaded' });
       return;
     }

@@ -47,3 +47,5 @@ app.*.map.json
 
 # FVM Version Cache
 .fvm/
+!.fvm/
+!.fvm/fvm_config.json

@@ -6,6 +6,10 @@ on:
     paths:
       - 'hook/**'
       - 'lib/**'
+      - 'native_artifacts/**'
+      - 'src/**'
+      - 'tool/**'
+      - 'example/web/**'
       - 'test/ort_native_asset_test.dart'
       - 'test/models/bpe_decoder.onnx'
       - 'test/models/identity.onnx'
@@ -38,11 +42,22 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
       - run: flutter pub get
       - run: flutter analyze
+      - name: Verify source, native, Web, and model manifest
+        run: dart run tool/verify_artifacts.dart
+      - name: Run pinned local ORT Web identity inference
+        run: node tool/test_web_runtime.mjs
+      - name: Sanitize package-owned finalizer boundary
+        if: runner.os != 'Windows'
+        run: tool/test_native_sanitizers.sh
+      - name: Run deterministic operation corpus
+        run: flutter test test/deterministic_operation_corpus_test.dart --reporter expanded
       - name: Resolve ORT + Extensions and create real sessions
         run: flutter test test/ort_native_asset_test.dart --reporter expanded

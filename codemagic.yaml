@@ -182,8 +182,11 @@ definitions:
     name: Apple codesign setup
     script: xcode-project use-profiles
   script_pub_get: &script_pub_get
-    name: flutter pub get
-    script: flutter pub get
+    name: Resolve and verify pinned production inputs
+    script: |
+      flutter pub get
+      dart run tool/verify_artifacts.dart
+      node tool/test_web_runtime.mjs
   flutter_test_artifacts: &flutter_test_artifacts
     - flutter_drive.log
     - test-results/flutter.json

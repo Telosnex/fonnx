@@ -8,8 +8,16 @@ import 'msmarco_mini_lm_l6_v3_abstract.dart'
 
 abstract class MsmarcoMiniLmL6V3 {
   static MsmarcoMiniLmL6V3? _instance;
+  String get modelPath;
 
   static MsmarcoMiniLmL6V3 load(String path) {
+    if (path.trim().isEmpty) throw ArgumentError.value(path, 'path');
+    final current = _instance;
+    if (current != null && current.modelPath != path) {
+      throw StateError(
+        'MsmarcoMiniLmL6V3 is already loaded from ${current.modelPath}',
+      );
+    }
     _instance ??= getMsmarcoMiniLmL6V3(path);
     return _instance!;
   }

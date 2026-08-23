@@ -1,23 +1,20 @@
-#include <stdint.h>
+#include "ort_session_finalizer.h"
 
 #if defined(_WIN32)
 #include <objbase.h>
-#define FONNX_EXPORT __declspec(dllexport)
 #define fonnx_dart_free CoTaskMemFree
 #else
 #include <stdlib.h>
-#define FONNX_EXPORT __attribute__((visibility("default")))
 #define fonnx_dart_free free
 #endif
 
-typedef void (*fonnx_release_fn)(void *);
+FONNX_EXPORT uint32_t fonnx_ort_session_finalizer_abi_version(void) {
+  return FONNX_ORT_SESSION_FINALIZER_ABI_VERSION;
+}
 
-typedef struct fonnx_ort_session_context {
-  void **session;
-  void **env;
-  fonnx_release_fn release_session;
-  fonnx_release_fn release_env;
-} fonnx_ort_session_context;
+FONNX_EXPORT const char *fonnx_ort_session_finalizer_build_info(void) {
+  return "fonnx ORT session finalizer ABI 1";
+}
 
 FONNX_EXPORT void fonnx_release_ort_session_context(void *opaque) {
   fonnx_ort_session_context *context =

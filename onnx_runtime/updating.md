@@ -6,7 +6,7 @@ part of the runtime path.
 
 ## Pinned components
 
-- ONNX Runtime: `1.27.0` (`_ortVersion` in `hook/build.dart`).
+- ONNX Runtime: `1.27.0` (`native_artifacts/manifest.json`).
 - ONNX Runtime Extensions:
   `fe4e13f46b19fb490c90b09fe280277308bd5bb7`.
 - Extensions selected-op inventory: `ai.onnx.contrib:BpeDecoder`, used only by
@@ -17,7 +17,7 @@ part of the runtime path.
 1. Check the upstream GitHub release and Maven Central. Pin the newest version
    available for **every** target. Maven lag is why the current common pin is
    1.27.0 even though a 1.27.1 GitHub release exists.
-2. Update every ORT URL/digest in `hook/build.dart`. Digests for GitHub release
+2. Update every ORT URL/digest in `native_artifacts/manifest.json`. Digests for GitHub release
    assets are available from the GitHub release API. Compute and independently
    verify the Maven AAR's SHA-256.
 3. Extract the release SDK headers into `onnx_runtime/headers`.
@@ -41,7 +41,7 @@ part of the runtime path.
    Extensions, avoiding another long ORT compile. Microsoft publishes only
    static iOS artifacts; FONNX's base fills that dynamic publishing gap.
 7. Publish new producer outputs under a **new immutable prerelease tag**, then
-   pin their downloaded SHA-256 values in `hook/build.dart`. Never use
+   pin their downloaded SHA-256 values in `native_artifacts/manifest.json`. Never use
    `gh release upload --clobber` on an asset referenced by a checked-in hash:
    old commits must remain buildable.
 
@@ -71,6 +71,7 @@ part of the runtime path.
 
 ```sh
 flutter analyze
+dart run tool/verify_artifacts.dart
 flutter test test/ort_native_asset_test.dart
 (cd example && flutter build apk --debug)
 (cd example && flutter build ios --simulator)

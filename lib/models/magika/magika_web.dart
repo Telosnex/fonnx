@@ -8,9 +8,12 @@ Magika getMagika(String path) => MagikaWeb(path);
 
 @JS('window.magikaInferenceAsyncJs')
 external JSPromise<JSFloat32Array?> magikaInferenceAsyncJs(
-    String modelPath, JSUint8Array fileBytes);
+  String modelPath,
+  JSUint8Array fileBytes,
+);
 
 class MagikaWeb implements Magika {
+  @override
   final String modelPath;
 
   MagikaWeb(this.modelPath);

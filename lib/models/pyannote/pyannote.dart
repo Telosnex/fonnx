@@ -9,25 +9,30 @@ abstract class Pyannote {
   String get modelPath;
 
   static Pyannote load(String path) {
+    if (path.trim().isEmpty) throw ArgumentError.value(path, 'path');
+    final current = _instance;
+    if (current != null && current.modelPath != path) {
+      throw StateError('Pyannote is already loaded from ${current.modelPath}');
+    }
     _instance ??= getPyannote(path);
     return _instance!;
   }
 
- /// Converts int16 PCM bytes to normalized float32 samples
+  /// Converts int16 PCM bytes to normalized float32 samples
   static Float32List int16PcmBytesToFloat32(Uint8List bytes) {
-  // Convert bytes to Int16 samples
-  final samples = Int16List.sublistView(bytes);
+    // Convert bytes to Int16 samples
+    final samples = Int16List.sublistView(bytes);
 
-  // Convert to Float32, scaling from Int16 range to [-1, 1]
-  final float32Data = Float32List(samples.length);
-  for (int i = 0; i < samples.length; i++) {
-    float32Data[i] = samples[i] / 32768.0; // 32768 = 2^15
+    // Convert to Float32, scaling from Int16 range to [-1, 1]
+    final float32Data = Float32List(samples.length);
+    for (int i = 0; i < samples.length; i++) {
+      float32Data[i] = samples[i] / 32768.0; // 32768 = 2^15
+    }
+    return float32Data;
   }
-  return float32Data;
-}
 
   /// Process audio data and return speaker segments
-  /// 
+  ///
   /// Returns a list of segments. For regular segmentation models:
   /// ```dart
   /// {

@@ -10,8 +10,17 @@ export 'magika_model.dart';
 
 abstract class Magika {
   static Magika? _instance;
+  String get modelPath;
 
   static Magika load(String path) {
+    if (path.trim().isEmpty) throw ArgumentError.value(path, 'path');
+    final current = _instance;
+    if (current != null && current.modelPath != path) {
+      throw StateError(
+        'Magika is already loaded from ${current.modelPath}; '
+        'a singleton cannot silently switch models',
+      );
+    }
     _instance ??= getMagika(path);
     return _instance!;
   }
@@ -42,8 +51,10 @@ Future<MagikaType> getTypeFromResultVector(Float32List resultVector) async {
     }
   }
   final label = labels[maxIndex];
-  assert(resultVector.length == labels.length,
-      'Result vector length does not match the number of labels');
+  assert(
+    resultVector.length == labels.length,
+    'Result vector length does not match the number of labels',
+  );
   final matchingType = MagikaType.values.firstWhere(
     (type) => type.targetLabel == label,
     orElse: () {
@@ -53,11 +64,13 @@ Future<MagikaType> getTypeFromResultVector(Float32List resultVector) async {
   return matchingType;
 }
 
-ModelFeatures extractFeaturesFromBytes(Uint8List content,
-    {int paddingToken = 256,
-    int begSize = 512,
-    int midSize = 512,
-    int endSize = 512}) {
+ModelFeatures extractFeaturesFromBytes(
+  Uint8List content, {
+  int paddingToken = 256,
+  int begSize = 512,
+  int midSize = 512,
+  int endSize = 512,
+}) {
   List<int> trimBytes(List<int> bytes) {
     int start = 0;
     int end = bytes.length - 1;
@@ -92,10 +105,7 @@ ModelFeatures extractFeaturesFromBytes(Uint8List content,
       }
     } else {
       final paddingSize = begSize - content.length;
-      beg = [
-        ...content,
-        ...List<int>.filled(paddingSize, paddingToken),
-      ];
+      beg = [...content, ...List<int>.filled(paddingSize, paddingToken)];
     }
   }
   assert(beg.length == begSize);
@@ -134,20 +144,13 @@ ModelFeatures extractFeaturesFromBytes(Uint8List content,
       }
     } else {
       final paddingSize = endSize - content.length;
-      end = [
-        ...List<int>.filled(paddingSize, paddingToken),
-        ...content,
-      ];
+      end = [...List<int>.filled(paddingSize, paddingToken), ...content];
     }
   }
   assert(end.length == endSize);
 
   // Convert lists back to Uint8List
-  return ModelFeatures(
-    beg: beg,
-    mid: mid,
-    end: end,
-  );
+  return ModelFeatures(beg: beg, mid: mid, end: end);
 }
 
 final labels = [
@@ -263,5 +266,5 @@ final labels = [
   "xz",
   "yaml",
   "zip",
-  "zlibstream"
+  "zlibstream",
 ];

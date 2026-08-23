@@ -6,7 +6,10 @@ import 'package:fonnx/models/whisper/whisper.dart';
 Whisper getWhisper(String path) => WhisperWeb(path);
 
 @JS('window.whisper')
-external JSPromise<JSString?> whisperJs(String modelPath, JSUint8Array audioBytes);
+external JSPromise<JSString?> whisperJs(
+  String modelPath,
+  JSUint8Array audioBytes,
+);
 
 class WhisperWeb implements Whisper {
   @override
@@ -16,7 +19,8 @@ class WhisperWeb implements Whisper {
 
   @override
   Future<String> doInference(Uint8List bytes) async {
-    final jsObject = await whisperJs(modelPath, bytes.toJS).toDart;
+    final snapshot = Uint8List.fromList(bytes);
+    final jsObject = await whisperJs(modelPath, snapshot.toJS).toDart;
     final text = jsObject?.toDart;
     if (text == null) {
       throw Exception('Whisper transcription returned from JS code is null');

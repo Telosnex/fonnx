@@ -28,8 +28,7 @@ final class KeywordPhrase {
     this.spokenForms = const <String>[],
     this.score = 1,
     this.threshold = 0.25,
-  }) : assert(score > 0),
-       assert(threshold > 0 && threshold <= 1);
+  });
 
   /// Text returned in [KeywordDetection.phrase].
   final String text;
@@ -65,6 +64,54 @@ final class KeywordDetection {
 
   Duration get endTime =>
       tokenTimestamps.last + const Duration(milliseconds: 40);
+}
+
+/// Validates and snapshots caller-owned phrase configuration at API entry.
+///
+/// Inference is serialized asynchronously, so retaining either the outer list
+/// or a mutable [KeywordPhrase.spokenForms] list would make results depend on
+/// mutations performed after the call returned.
+List<KeywordPhrase> validatedKeywordPhraseSnapshot(
+  Iterable<KeywordPhrase> keywords,
+) {
+  final result = <KeywordPhrase>[];
+  for (final keyword in keywords) {
+    if (keyword.text.trim().isEmpty) {
+      throw ArgumentError.value(
+        keyword.text,
+        'KeywordPhrase.text',
+        'Must not be empty',
+      );
+    }
+    if (!keyword.score.isFinite || keyword.score <= 0) {
+      throw ArgumentError.value(
+        keyword.score,
+        'KeywordPhrase.score',
+        'Must be finite and > 0',
+      );
+    }
+    if (!keyword.threshold.isFinite ||
+        keyword.threshold <= 0 ||
+        keyword.threshold > 1) {
+      throw ArgumentError.value(
+        keyword.threshold,
+        'KeywordPhrase.threshold',
+        'Must be finite and in (0, 1]',
+      );
+    }
+    result.add(
+      KeywordPhrase(
+        keyword.text,
+        spokenForms: List<String>.unmodifiable(keyword.spokenForms),
+        score: keyword.score,
+        threshold: keyword.threshold,
+      ),
+    );
+  }
+  if (result.isEmpty) {
+    throw ArgumentError.value(keywords, 'keywords', 'Must not be empty');
+  }
+  return List<KeywordPhrase>.unmodifiable(result);
 }
 
 abstract interface class KwsOnnxBackend {

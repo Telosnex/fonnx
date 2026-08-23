@@ -1,0 +1,20 @@
+# Repository/CI/deployment material, not consumer package inputs.
+.github/
+.vscode/
+.fvm/
+.ruby-lsp/
+docs/
+build/
+codemagic.yaml
+header.png
+onnx_runtime/
+test/
+tool/
+
+# `lib/web` contains the manifest-verified reference Web runtime. Exclude the
+# 280+ MiB example application and model inventory.
+example/
+
+# Local IDE/project debris.
+*.iml
+.DS_Store

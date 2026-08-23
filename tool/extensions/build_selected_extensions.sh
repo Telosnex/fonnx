@@ -158,6 +158,26 @@ for unexpected_op in \
   fi
 done
 
+linux_runtime_floor=not-applicable
+if [[ "$TARGET_OS" == linux ]]; then
+  if [[ "$TARGET_ARCH" == arm64 ]]; then
+    readelf_tool=aarch64-linux-gnu-readelf
+  else
+    readelf_tool=readelf
+  fi
+  version_info="$("$readelf_tool" --version-info "$library")"
+  max_glibc="$(grep -oE 'GLIBC_[0-9.]+' <<<"$version_info" | sort -Vu | tail -1)"
+  max_glibcxx="$(grep -oE 'GLIBCXX_[0-9.]+' <<<"$version_info" | sort -Vu | tail -1)"
+  # Profile 1 records the existing Ubuntu 24.04 producer floor explicitly.
+  # A lower-sysroot rebuild should use a new immutable release/profile; a
+  # higher accidental floor must fail here instead of surprising consumers.
+  [[ "$max_glibc" == GLIBC_2.38 && "$max_glibcxx" == GLIBCXX_3.4.32 ]] || {
+    echo "Unexpected Linux runtime floor: $max_glibc / $max_glibcxx" >&2
+    exit 1
+  }
+  linux_runtime_floor="$max_glibc,$max_glibcxx"
+fi
+
 readonly STAGING="$BUILD_ROOT/staging"
 mkdir -p "$STAGING"
 cp "$library" "$STAGING/$output_name"
@@ -165,6 +185,7 @@ printf '%s\n' \
   "ORT_VERSION=$ORT_VERSION" \
   "ORTX_COMMIT=$(git -C "$ORT_EXTENSIONS_ROOT" rev-parse HEAD)" \
   "TARGET=$TARGET_OS-$TARGET_ARCH" \
+  "LINUX_RUNTIME_FLOOR=$linux_runtime_floor" \
   "SELECTED_EXTENSION_OPS=ai.onnx.contrib:BpeDecoder" \
   > "$STAGING/provenance.txt"
 

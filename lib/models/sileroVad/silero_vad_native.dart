@@ -20,11 +20,22 @@ class SileroVadNative implements SileroVad {
     Uint8List bytes, {
     Map<String, dynamic> previousState = const {},
   }) async {
+    final bytesSnapshot = Uint8List.fromList(bytes);
+    final stateSnapshot = <String, dynamic>{
+      for (final entry in previousState.entries)
+        entry.key: switch (entry.value) {
+          Float32List value => Float32List.fromList(value),
+          Int64List value => Int64List.fromList(value),
+          Uint8List value => Uint8List.fromList(value),
+          List<dynamic> value => List<dynamic>.of(value),
+          final value => value,
+        },
+    };
     await _sileroVadIsolateManager.start();
     return _sileroVadIsolateManager.sendInference(
       modelPath,
-      bytes,
-      previousState,
+      bytesSnapshot,
+      stateSnapshot,
       ortDylibPathOverride: fonnxOrtDylibPathOverride,
     );
   }

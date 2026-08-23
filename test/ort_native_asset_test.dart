@@ -5,6 +5,14 @@ import 'package:fonnx/onnx/ort.dart';
 import 'package:fonnx/onnx/ort_ffi_bindings.dart';
 
 void main() {
+  test('package-owned finalizer ABI is explicit', () {
+    expect(fonnxOrtSessionFinalizerAbiVersion(), 1);
+    expect(
+      fonnxOrtSessionFinalizerBuildInfo,
+      'fonnx ORT session finalizer ABI 1',
+    );
+  });
+
   test('bundled ONNX Runtime exports a usable C API', () {
     final apiBase = OrtGetApiBase();
     expect(apiBase, isNot(nullptr));
@@ -16,6 +24,18 @@ void main() {
     expect(session.sessionPtr.value, isNot(nullptr));
     releaseOrtSessionObjects(session);
     // Explicit release is safe alongside the NativeFinalizer fallback.
+    releaseOrtSessionObjects(session);
+  });
+
+  test('failed sessions consume statuses and leave ORT reusable', () {
+    for (var iteration = 0; iteration < 32; iteration++) {
+      expect(
+        () => createOrtSession('test/models/does-not-exist-$iteration.onnx'),
+        throwsException,
+      );
+    }
+    final session = createOrtSession('test/models/identity.onnx');
+    expect(session.sessionPtr.value, isNot(nullptr));
     releaseOrtSessionObjects(session);
   });
 

@@ -1,8 +1,8 @@
-import * as ort from 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.1/dist/esm/ort.min.js';
+import * as ort from './ort.min.mjs';
 
 const cores = navigator.hardwareConcurrency || 1;
 ort.env.wasm.numThreads = Math.max(1, Math.floor(cores / 2));
-ort.env.wasm.wasmPaths = '';
+ort.env.wasm.wasmPaths = new URL('./', import.meta.url).href;
 
 const engines = new Map();
 const leftContexts = [64, 32, 16, 8, 16, 32];
@@ -74,18 +74,36 @@ function requireEngine(engineId) {
   return engine;
 }
 
+async function releaseEngine(engine) {
+  for (const state of engine.states || []) disposeTensor(state);
+  await engine.encoder?.release();
+  await engine.decoder?.release();
+  await engine.joiner?.release();
+}
+
+async function createEngine(data) {
+  const options = { executionProviders: ['wasm'] };
+  const engine = { encoder: null, decoder: null, joiner: null, states: [] };
+  try {
+    engine.encoder = await ort.InferenceSession.create(data.encoder, options);
+    engine.decoder = await ort.InferenceSession.create(data.decoder, options);
+    engine.joiner = await ort.InferenceSession.create(data.joiner, options);
+    reset(engine);
+    return engine;
+  } catch (error) {
+    await releaseEngine(engine);
+    throw error;
+  }
+}
+
 self.onmessage = async ({ data }) => {
   const { action, messageId, engineId } = data;
   try {
+    if (data.protocolVersion !== 1) throw new Error('Unsupported FONNX Worker protocol');
     if (action === 'load') {
-      const options = { executionProviders: ['wasm'] };
-      const engine = {
-        encoder: await ort.InferenceSession.create(data.encoder, options),
-        decoder: await ort.InferenceSession.create(data.decoder, options),
-        joiner: await ort.InferenceSession.create(data.joiner, options),
-        states: [],
-      };
-      reset(engine);
+      const engine = await createEngine(data);
+      const previous = engines.get(engineId);
+      if (previous) await releaseEngine(previous);
       engines.set(engineId, engine);
       self.postMessage({ action: 'result', messageId });
       return;
@@ -93,11 +111,17 @@ self.onmessage = async ({ data }) => {
 
     const engine = requireEngine(engineId);
     if (action === 'encoder') {
-      const feeds = { x: new ort.Tensor('float32', data.features, [1, 45, 80]) };
+      const input = new ort.Tensor('float32', data.features, [1, 45, 80]);
+      const feeds = { x: input };
       for (let i = 0; i < stateInputNames.length; i++) {
         feeds[stateInputNames[i]] = engine.states[i];
       }
-      const result = await engine.encoder.run(feeds);
+      let result;
+      try {
+        result = await engine.encoder.run(feeds);
+      } finally {
+        input.dispose();
+      }
       for (const state of engine.states) disposeTensor(state);
       engine.states = stateOutputNames.map(name => result[name]);
       const output = Float32Array.from(result.encoder_out.data);
@@ -107,18 +131,30 @@ self.onmessage = async ({ data }) => {
       const values = JSON.parse(data.contextsJson).map(BigInt);
       const contexts = new BigInt64Array(values);
       const batch = contexts.length / 2;
-      const result = await engine.decoder.run({
-        y: new ort.Tensor('int64', contexts, [batch, 2]),
-      });
+      const input = new ort.Tensor('int64', contexts, [batch, 2]);
+      let result;
+      try {
+        result = await engine.decoder.run({ y: input });
+      } finally {
+        input.dispose();
+      }
       const output = Float32Array.from(result.decoder_out.data);
       disposeTensor(result.decoder_out);
       self.postMessage({ action: 'result', messageId, result: output }, [output.buffer]);
     } else if (action === 'joiner') {
       const batch = data.encoderVectors.length / 320;
-      const result = await engine.joiner.run({
-        encoder_out: new ort.Tensor('float32', data.encoderVectors, [batch, 320]),
-        decoder_out: new ort.Tensor('float32', data.decoderVectors, [batch, 320]),
-      });
+      const encoderInput = new ort.Tensor('float32', data.encoderVectors, [batch, 320]);
+      const decoderInput = new ort.Tensor('float32', data.decoderVectors, [batch, 320]);
+      let result;
+      try {
+        result = await engine.joiner.run({
+          encoder_out: encoderInput,
+          decoder_out: decoderInput,
+        });
+      } finally {
+        encoderInput.dispose();
+        decoderInput.dispose();
+      }
       const output = Float32Array.from(result.logit.data);
       disposeTensor(result.logit);
       self.postMessage({ action: 'result', messageId, result: output }, [output.buffer]);
@@ -126,10 +162,7 @@ self.onmessage = async ({ data }) => {
       reset(engine);
       self.postMessage({ action: 'result', messageId });
     } else if (action === 'close') {
-      for (const state of engine.states) disposeTensor(state);
-      await engine.encoder.release();
-      await engine.decoder.release();
-      await engine.joiner.release();
+      await releaseEngine(engine);
       engines.delete(engineId);
       self.postMessage({ action: 'result', messageId });
     } else {

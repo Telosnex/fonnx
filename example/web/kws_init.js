@@ -1,49 +1,21 @@
-const worker = new Worker(new URL('./kws_worker.js', import.meta.url), { type: 'module' });
-const pending = new Map();
-let nextMessageId = 0;
+import { FonnxWorkerRpc, fetchModel } from './fonnx_worker_rpc.js';
 
-worker.onmessage = ({ data }) => {
-  const request = pending.get(data.messageId);
-  if (!request) return;
-  pending.delete(data.messageId);
-  if (data.action === 'error') {
-    request.reject(new Error(data.error));
-  } else {
-    request.resolve(data.result);
-  }
-};
-
-function request(action, payload = {}) {
-  return new Promise((resolve, reject) => {
-    const messageId = `kws-${nextMessageId++}`;
-    pending.set(messageId, { resolve, reject });
-    worker.postMessage({ action, messageId, ...payload });
-  });
-}
-
-async function fetchModel(path) {
-  const response = await fetch(path);
-  if (!response.ok) throw new Error(`Unable to fetch KWS model ${path}: ${response.status}`);
-  return response.arrayBuffer();
-}
+const rpc = new FonnxWorkerRpc(new URL('./kws_worker.js', import.meta.url), 'kws');
 
 window.fonnxKwsLoad = async (engineId, encoderPath, decoderPath, joinerPath) => {
   const [encoder, decoder, joiner] = await Promise.all([
-    fetchModel(encoderPath),
-    fetchModel(decoderPath),
-    fetchModel(joinerPath),
+    fetchModel(encoderPath, 'KWS encoder'),
+    fetchModel(decoderPath, 'KWS decoder'),
+    fetchModel(joinerPath, 'KWS joiner'),
   ]);
-  return request('load', { engineId, encoder, decoder, joiner });
+  await rpc.request('load', { engineId, encoder, decoder, joiner });
 };
 
-window.fonnxKwsEncoder = (engineId, features) =>
-  request('encoder', { engineId, features });
-
-window.fonnxKwsDecoder = (engineId, contextsJson) =>
-  request('decoder', { engineId, contextsJson });
-
-window.fonnxKwsJoiner = (engineId, encoderVectors, decoderVectors) =>
-  request('joiner', { engineId, encoderVectors, decoderVectors });
-
-window.fonnxKwsReset = (engineId) => request('reset', { engineId });
-window.fonnxKwsClose = (engineId) => request('close', { engineId });
+window.fonnxKwsEncoder = async (engineId, features) =>
+  (await rpc.request('encoder', { engineId, features })).result;
+window.fonnxKwsDecoder = async (engineId, contextsJson) =>
+  (await rpc.request('decoder', { engineId, contextsJson })).result;
+window.fonnxKwsJoiner = async (engineId, encoderVectors, decoderVectors) =>
+  (await rpc.request('joiner', { engineId, encoderVectors, decoderVectors })).result;
+window.fonnxKwsReset = (engineId) => rpc.request('reset', { engineId });
+window.fonnxKwsClose = (engineId) => rpc.request('close', { engineId });

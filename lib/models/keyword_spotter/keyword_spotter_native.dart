@@ -45,8 +45,9 @@ final class KeywordSpotterNative extends KeywordSpotter {
         'English keyword spotting currently requires 16 kHz mono audio',
       );
     }
+    final snapshot = Float32List.fromList(samples);
     return _enqueue(() async {
-      for (final detection in await _manager.accept(samples)) {
+      for (final detection in await _manager.accept(snapshot)) {
         _detections.add(detection);
       }
     });
@@ -75,13 +76,15 @@ final class KeywordSpotterNative extends KeywordSpotter {
         'English keyword spotting currently requires 16 kHz mono audio',
       );
     }
-    return _enqueue(() => _manager.transcribe(samples));
+    final snapshot = Float32List.fromList(samples);
+    return _enqueue(() => _manager.transcribe(snapshot));
   }
 
   @override
   Future<void> setKeywords(List<KeywordPhrase> keywords) {
     _ensureOpen();
-    return _enqueue(() => _manager.setKeywords(keywords));
+    final snapshot = validatedKeywordPhraseSnapshot(keywords);
+    return _enqueue(() => _manager.setKeywords(snapshot));
   }
 
   @override

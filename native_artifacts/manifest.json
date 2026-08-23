@@ -1,0 +1,502 @@
+{
+  "schema": 1,
+  "profile": 1,
+  "sources": {
+    "onnxRuntime": {
+      "version": "1.27.0",
+      "commit": "8f0278c77bf44b0cc83c098c6c722b92a36ac4b5"
+    },
+    "onnxRuntimeExtensions": {
+      "commit": "fe4e13f46b19fb490c90b09fe280277308bd5bb7",
+      "operators": [
+        "ai.onnx.contrib:BpeDecoder"
+      ]
+    },
+    "onnxRuntimeWeb": {
+      "version": "1.27.0",
+      "npmTarball": "https://registry.npmjs.org/onnxruntime-web/-/onnxruntime-web-1.27.0.tgz",
+      "sha256": "b59c9819434a7519f334f77e8d4bf22b69808d531a57724cabc4bb2c0704c835",
+      "integrity": "sha512-ogDLsqIozHZwifPuN37OproAo0byX6t43/bP8GzeZWBWD6MOGExswFAx3up4NS/vvWBOg2u2PXomDt3rMmdQSg=="
+    }
+  },
+  "nativeArtifacts": {
+    "android-arm": {
+      "onnxRuntime": {
+        "url": "https://repo.maven.apache.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/1.27.0/onnxruntime-android-1.27.0.aar",
+        "sha256": "077dec5e2d821234c7dc0aba584bec8f999854b546c754cab93a90741c56fbeb",
+        "libraryEntrySuffix": "jni/armeabi-v7a/libonnxruntime.so"
+      },
+      "extensions": {
+        "url": "https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.27.0-ortx-fe4e13f-bpe-only-v2/fonnx-ortextensions-fe4e13f4-android-arm.zip",
+        "sha256": "23fb7f372ed77386424584e14a7718674e05bc35ee76b74436527ebd88bddcdc",
+        "libraryEntrySuffix": "libortextensions.so"
+      }
+    },
+    "android-arm64": {
+      "onnxRuntime": {
+        "url": "https://repo.maven.apache.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/1.27.0/onnxruntime-android-1.27.0.aar",
+        "sha256": "077dec5e2d821234c7dc0aba584bec8f999854b546c754cab93a90741c56fbeb",
+        "libraryEntrySuffix": "jni/arm64-v8a/libonnxruntime.so"
+      },
+      "extensions": {
+        "url": "https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.27.0-ortx-fe4e13f-bpe-only-v2/fonnx-ortextensions-fe4e13f4-android-arm64.zip",
+        "sha256": "ab796237516e98968d84d02772689d9d67ca1ba87ec088292332ba44671c5627",
+        "libraryEntrySuffix": "libortextensions.so"
+      }
+    },
+    "android-x64": {
+      "onnxRuntime": {
+        "url": "https://repo.maven.apache.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/1.27.0/onnxruntime-android-1.27.0.aar",
+        "sha256": "077dec5e2d821234c7dc0aba584bec8f999854b546c754cab93a90741c56fbeb",
+        "libraryEntrySuffix": "jni/x86_64/libonnxruntime.so"
+      },
+      "extensions": {
+        "url": "https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.27.0-ortx-fe4e13f-bpe-only-v2/fonnx-ortextensions-fe4e13f4-android-x64.zip",
+        "sha256": "27c1ecd5673c57631d98bb6856a9684c820ae11e4117dd24a26dd4f4be22decf",
+        "libraryEntrySuffix": "libortextensions.so"
+      }
+    },
+    "ios-arm64-iphoneos": {
+      "onnxRuntime": {
+        "url": "https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.27.0-ortx-fe4e13f-bpe-only-v2/fonnx-ios-arm64-ort-1.27.0-ortx-fe4e13f4.zip",
+        "sha256": "0ce93d30e305b1331a73c54b4739fde473f28270037a7d908838ff5c8b87a369",
+        "libraryEntrySuffix": "iphoneos/libonnxruntime.dylib"
+      },
+      "extensions": {
+        "url": "https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.27.0-ortx-fe4e13f-bpe-only-v2/fonnx-ios-arm64-ort-1.27.0-ortx-fe4e13f4.zip",
+        "sha256": "0ce93d30e305b1331a73c54b4739fde473f28270037a7d908838ff5c8b87a369",
+        "libraryEntrySuffix": "iphoneos/libortextensions.dylib"
+      }
+    },
+    "ios-arm64-iphonesimulator": {
+      "onnxRuntime": {
+        "url": "https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.27.0-ortx-fe4e13f-bpe-only-v2/fonnx-ios-arm64-ort-1.27.0-ortx-fe4e13f4.zip",
+        "sha256": "0ce93d30e305b1331a73c54b4739fde473f28270037a7d908838ff5c8b87a369",
+        "libraryEntrySuffix": "iphonesimulator/libonnxruntime.dylib"
+      },
+      "extensions": {
+        "url": "https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.27.0-ortx-fe4e13f-bpe-only-v2/fonnx-ios-arm64-ort-1.27.0-ortx-fe4e13f4.zip",
+        "sha256": "0ce93d30e305b1331a73c54b4739fde473f28270037a7d908838ff5c8b87a369",
+        "libraryEntrySuffix": "iphonesimulator/libortextensions.dylib"
+      }
+    },
+    "linux-arm64": {
+      "onnxRuntime": {
+        "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.27.0/onnxruntime-linux-aarch64-1.27.0.tgz",
+        "sha256": "3e4d83ac06924a32a07b6d7f91ce6f852876153fc0bbdf931bf517a140bfbe48",
+        "libraryEntrySuffix": "lib/libonnxruntime.so.1.27.0"
+      },
+      "extensions": {
+        "url": "https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.27.0-ortx-fe4e13f-bpe-only-v2/fonnx-ortextensions-fe4e13f4-linux-arm64.zip",
+        "sha256": "a4785c95de8a102362a9765c61a5f6cc01bedefbd1453d9667cd6345d719b0cf",
+        "libraryEntrySuffix": "libortextensions.so"
+      }
+    },
+    "linux-x64": {
+      "onnxRuntime": {
+        "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.27.0/onnxruntime-linux-x64-1.27.0.tgz",
+        "sha256": "547e40a48f1fe73e3f812d7c88a948612c23f896b91e4e2ee1e232d7b468246f",
+        "libraryEntrySuffix": "lib/libonnxruntime.so.1.27.0"
+      },
+      "extensions": {
+        "url": "https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.27.0-ortx-fe4e13f-bpe-only-v2/fonnx-ortextensions-fe4e13f4-linux-x64.zip",
+        "sha256": "6a7aa5a33926e797e205a6925fbbbfe26bb0314ff333886e5ad78f4383c3993b",
+        "libraryEntrySuffix": "libortextensions.so"
+      }
+    },
+    "macos-arm64": {
+      "onnxRuntime": {
+        "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.27.0/onnxruntime-osx-arm64-1.27.0.tgz",
+        "sha256": "545e81c58152353acb0d1e8bd6ce4b62f830c0961f5b3acfedc790ffd76e477a",
+        "libraryEntrySuffix": "lib/libonnxruntime.1.27.0.dylib"
+      },
+      "extensions": {
+        "url": "https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.27.0-ortx-fe4e13f-bpe-only-v2/fonnx-ortextensions-fe4e13f4-macos-arm64.zip",
+        "sha256": "92f03c220720a1a902283f6b720039d48335c4251138af78468a8e436cec2d9c",
+        "libraryEntrySuffix": "libortextensions.dylib"
+      }
+    },
+    "windows-arm64": {
+      "onnxRuntime": {
+        "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.27.0/onnxruntime-win-arm64-1.27.0.zip",
+        "sha256": "a32f2650575b3c20df462e337519fd1cc4105356130d11dba9771c6f374d952f",
+        "libraryEntrySuffix": "lib/onnxruntime.dll"
+      },
+      "extensions": {
+        "url": "https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.27.0-ortx-fe4e13f-bpe-only-v2/fonnx-ortextensions-fe4e13f4-windows-arm64.zip",
+        "sha256": "8fea38110b79c6b6777ae84e970e6b115674a855c9856659499f219e05e63e87",
+        "libraryEntrySuffix": "ortextensions.dll"
+      }
+    },
+    "windows-x64": {
+      "onnxRuntime": {
+        "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.27.0/onnxruntime-win-x64-1.27.0.zip",
+        "sha256": "c5c81710938e68079ff1a192b04897faabe4b43830d48f39f27ecd4e16138bfc",
+        "libraryEntrySuffix": "lib/onnxruntime.dll"
+      },
+      "extensions": {
+        "url": "https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.27.0-ortx-fe4e13f-bpe-only-v2/fonnx-ortextensions-fe4e13f4-windows-x64.zip",
+        "sha256": "8cd742345c48e3502b124f3b21bd06a0010ebe8a9ea33b021f2a082aa0691a5d",
+        "libraryEntrySuffix": "ortextensions.dll"
+      }
+    }
+  },
+  "webAssets": {
+    "example/web/enable-threads.js": {
+      "path": "example/web/enable-threads.js",
+      "sha256": "d8475de9f34089ee311955d59ad013894f618330f818630a9e3626142f28552f",
+      "bytes": 3207
+    },
+    "example/web/fonnx_worker_rpc.js": {
+      "path": "example/web/fonnx_worker_rpc.js",
+      "sha256": "272db1fe4b84ba4c401c7deeac5a71d9d6d02159a86335b829c32b44f974773b",
+      "bytes": 1919
+    },
+    "example/web/kws_init.js": {
+      "path": "example/web/kws_init.js",
+      "sha256": "7f06d7dab8dad184e829c12bc4b307837d14093dacc5f61214ae111710a7266d",
+      "bytes": 1058
+    },
+    "example/web/kws_worker.js": {
+      "path": "example/web/kws_worker.js",
+      "sha256": "b802ff0fe919d8b60135cb624cb04ef1dc100d2d856e104461395f83aecdb517",
+      "bytes": 6091
+    },
+    "example/web/magika_init.js": {
+      "path": "example/web/magika_init.js",
+      "sha256": "ae052f2e90e9091881e33bfaf2daba7011c526bcd20213c19ed3f97adb3daa7b",
+      "bytes": 649
+    },
+    "example/web/magika_worker.js": {
+      "path": "example/web/magika_worker.js",
+      "sha256": "c5eea6e51b197128ea08a2ea74e7690f5d5858e3a72cdb4da0646def53c92757",
+      "bytes": 2446
+    },
+    "example/web/minilm_init.js": {
+      "path": "example/web/minilm_init.js",
+      "sha256": "970729063c775ac12a3a8378f218baca569f4b893440c571f5cded024e68067f",
+      "bytes": 638
+    },
+    "example/web/minilm_worker.js": {
+      "path": "example/web/minilm_worker.js",
+      "sha256": "8b8a3993ef7ff3911daf7b957b389b84c990617cc54c1737231bed4059cc416f",
+      "bytes": 3821
+    },
+    "example/web/minish_lab_init.js": {
+      "path": "example/web/minish_lab_init.js",
+      "sha256": "79a18ea90fcb3fe44c6d2d998c72a4e7f57954bcebcf7f286d668c1820cdcac7",
+      "bytes": 655
+    },
+    "example/web/minish_lab_worker.js": {
+      "path": "example/web/minish_lab_worker.js",
+      "sha256": "1b9b77ae40e9e06f1431e065702a445757f82e0c420060e4036ed068668b43b1",
+      "bytes": 2767
+    },
+    "example/web/ort-wasm-simd-threaded.mjs": {
+      "path": "example/web/ort-wasm-simd-threaded.mjs",
+      "sha256": "0a1e718d99c41b22c21f2520ff4f9e883a6b5533856e398d21816ee8eb8185d3",
+      "bytes": 24180
+    },
+    "example/web/ort-wasm-simd-threaded.wasm": {
+      "path": "example/web/ort-wasm-simd-threaded.wasm",
+      "sha256": "d1ab1b94b16a65b29d710d0b587b29e7bed336827577623913479b8afe8113e6",
+      "bytes": 13479978
+    },
+    "example/web/ort.min.mjs": {
+      "path": "example/web/ort.min.mjs",
+      "sha256": "9608e98a3fba9716f0cbd0bca0c94808b71dae2e9265ca3fe742ddc393a53ebc",
+      "bytes": 50069
+    },
+    "example/web/pyannote_init.js": {
+      "path": "example/web/pyannote_init.js",
+      "sha256": "46bc3c174a67aa3883d4ea2bbf42d969409e1797635e6d3ab2a46137c540284b",
+      "bytes": 641
+    },
+    "example/web/pyannote_worker.js": {
+      "path": "example/web/pyannote_worker.js",
+      "sha256": "8437ce90a6a7c761a2d617e64f8824121be4cd512cec4a76d11eea67ae546c15",
+      "bytes": 8945
+    },
+    "example/web/silero_vad_init.js": {
+      "path": "example/web/silero_vad_init.js",
+      "sha256": "168795668bc5cf2797ed211074f22258d75cd0870c0f3b2ed2f4a9f93901375b",
+      "bytes": 746
+    },
+    "example/web/silero_vad_worker.js": {
+      "path": "example/web/silero_vad_worker.js",
+      "sha256": "87b38a2e4c8b8eaba1034d01e792d824ddc94f5d9f007a7cfa1c044bcd6ce01f",
+      "bytes": 3615
+    },
+    "example/web/whisper_init.js": {
+      "path": "example/web/whisper_init.js",
+      "sha256": "fa11870fd79f6caf6c26e03905db935c8b29183e4d291588eaad34a58828ed83",
+      "bytes": 638
+    },
+    "example/web/whisper_worker.js": {
+      "path": "example/web/whisper_worker.js",
+      "sha256": "50cddee833bbb3b79efd455938832f9b340b89ba6f01ca94978e698e09019001",
+      "bytes": 4635
+    }
+  },
+  "models": {
+    "example/assets/models/bpe_decoder.onnx": {
+      "path": "example/assets/models/bpe_decoder.onnx",
+      "sha256": "80525e3754c09e2f33c144388520b0050a7a2f414fb951c3d0bf7425aeb108ab",
+      "bytes": 375
+    },
+    "example/assets/models/keywordSpotter/decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx": {
+      "path": "example/assets/models/keywordSpotter/decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+      "sha256": "e40ff43297abe815e8898494c17e71bba2152d9d40fa3eb803f75d0f7533329a",
+      "bytes": 277985
+    },
+    "example/assets/models/keywordSpotter/encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx": {
+      "path": "example/assets/models/keywordSpotter/encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+      "sha256": "1e721676515bcd42a186979733981213c66c80db680e1cc582dfedf3be76e678",
+      "bytes": 4807159
+    },
+    "example/assets/models/keywordSpotter/joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx": {
+      "path": "example/assets/models/keywordSpotter/joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+      "sha256": "eae9da0c7e1e6c6a3f4cc42d167899c388f6c6701b94cb96320e4f55df79624c",
+      "bytes": 163380
+    },
+    "example/assets/models/magika/magika.onnx": {
+      "path": "example/assets/models/magika/magika.onnx",
+      "sha256": "71892ac28ffe028b9512561584970417f8cee1f2fbb7624634f4032cb92a0a5a",
+      "bytes": 1055295
+    },
+    "example/assets/models/miniLmL6V2/miniLmL6V2.onnx": {
+      "path": "example/assets/models/miniLmL6V2/miniLmL6V2.onnx",
+      "sha256": "3a4ae4f8f00d87c93b04aca370ed1c5e94f80a32912f2cf5516291703353bf84",
+      "bytes": 22887725
+    },
+    "example/assets/models/minishLab/potion32m.onnx": {
+      "path": "example/assets/models/minishLab/potion32m.onnx",
+      "sha256": "e82f46335878dd5d72f9544a2a7c61061659c6273ceb8815e10ff952c2e07457",
+      "bytes": 129214550
+    },
+    "example/assets/models/minishLab/potion8m.onnx": {
+      "path": "example/assets/models/minishLab/potion8m.onnx",
+      "sha256": "da4c828fe012ec97f053278f363645b52c3815ec9a1d13d695ac901398c10f2e",
+      "bytes": 30240854
+    },
+    "example/assets/models/msmarcoMiniLmL6V3/msmarcoMiniLmL6V3.onnx": {
+      "path": "example/assets/models/msmarcoMiniLmL6V3/msmarcoMiniLmL6V3.onnx",
+      "sha256": "e80318c560513a6dcf32e4404d12ef6676af9f85ffee63e1e8ce249651e4f794",
+      "bytes": 22913492
+    },
+    "example/assets/models/pyannote/pyannote_seg3.onnx": {
+      "path": "example/assets/models/pyannote/pyannote_seg3.onnx",
+      "sha256": "057ee564753071c0b09b5b611648b50ac188d50846bff5f01e9f7bbf1591ea25",
+      "bytes": 5986908
+    },
+    "example/assets/models/sileroVad/silero_vad_v6.2.1.onnx": {
+      "path": "example/assets/models/sileroVad/silero_vad_v6.2.1.onnx",
+      "sha256": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3",
+      "bytes": 2327524
+    },
+    "example/assets/models/whisper/whisper_tiny.onnx": {
+      "path": "example/assets/models/whisper/whisper_tiny.onnx",
+      "sha256": "f3b7c806032cf080f185330ad4c593e8d1ed97f61ce354f844453c7173933d14",
+      "bytes": 74823452
+    },
+    "test/models/bpe_decoder.onnx": {
+      "path": "test/models/bpe_decoder.onnx",
+      "sha256": "80525e3754c09e2f33c144388520b0050a7a2f414fb951c3d0bf7425aeb108ab",
+      "bytes": 375
+    },
+    "test/models/identity.onnx": {
+      "path": "test/models/identity.onnx",
+      "sha256": "9fca192f29834ef3db4a60b1561d616dabb4350ce9ef63ef9d69481ac2bb2236",
+      "bytes": 84
+    }
+  },
+  "finalizerAbi": 1,
+  "webWorkerProtocolAbi": 1,
+  "deployedWebAssets": {
+    "docs/enable-threads.js": {
+      "path": "docs/enable-threads.js",
+      "sha256": "57346dc5fd1ea5cb86a73fab891407eadaae3b8f80eac07acacbc5ffaf876a23",
+      "bytes": 3248
+    },
+    "docs/flutter_service_worker.js": {
+      "path": "docs/flutter_service_worker.js",
+      "sha256": "0b248dc38a8e25e15d40bd2e6b1062941102ffb234e42305ca8481643db9f802",
+      "bytes": 9946
+    },
+    "docs/fonnx_kws_init.js": {
+      "path": "docs/fonnx_kws_init.js",
+      "sha256": "7f06d7dab8dad184e829c12bc4b307837d14093dacc5f61214ae111710a7266d",
+      "bytes": 1058
+    },
+    "docs/fonnx_kws_worker.js": {
+      "path": "docs/fonnx_kws_worker.js",
+      "sha256": "b802ff0fe919d8b60135cb624cb04ef1dc100d2d856e104461395f83aecdb517",
+      "bytes": 6091
+    },
+    "docs/fonnx_magika_init.js": {
+      "path": "docs/fonnx_magika_init.js",
+      "sha256": "ae052f2e90e9091881e33bfaf2daba7011c526bcd20213c19ed3f97adb3daa7b",
+      "bytes": 649
+    },
+    "docs/fonnx_magika_worker.js": {
+      "path": "docs/fonnx_magika_worker.js",
+      "sha256": "c5eea6e51b197128ea08a2ea74e7690f5d5858e3a72cdb4da0646def53c92757",
+      "bytes": 2446
+    },
+    "docs/fonnx_minilm_init.js": {
+      "path": "docs/fonnx_minilm_init.js",
+      "sha256": "970729063c775ac12a3a8378f218baca569f4b893440c571f5cded024e68067f",
+      "bytes": 638
+    },
+    "docs/fonnx_minilm_worker.js": {
+      "path": "docs/fonnx_minilm_worker.js",
+      "sha256": "8b8a3993ef7ff3911daf7b957b389b84c990617cc54c1737231bed4059cc416f",
+      "bytes": 3821
+    },
+    "docs/fonnx_silero_vad_init.js": {
+      "path": "docs/fonnx_silero_vad_init.js",
+      "sha256": "168795668bc5cf2797ed211074f22258d75cd0870c0f3b2ed2f4a9f93901375b",
+      "bytes": 746
+    },
+    "docs/fonnx_silero_vad_worker.js": {
+      "path": "docs/fonnx_silero_vad_worker.js",
+      "sha256": "87b38a2e4c8b8eaba1034d01e792d824ddc94f5d9f007a7cfa1c044bcd6ce01f",
+      "bytes": 3615
+    },
+    "docs/fonnx_whisper_init.js": {
+      "path": "docs/fonnx_whisper_init.js",
+      "sha256": "fa11870fd79f6caf6c26e03905db935c8b29183e4d291588eaad34a58828ed83",
+      "bytes": 638
+    },
+    "docs/fonnx_whisper_worker.js": {
+      "path": "docs/fonnx_whisper_worker.js",
+      "sha256": "50cddee833bbb3b79efd455938832f9b340b89ba6f01ca94978e698e09019001",
+      "bytes": 4635
+    },
+    "docs/fonnx_worker_rpc.js": {
+      "path": "docs/fonnx_worker_rpc.js",
+      "sha256": "272db1fe4b84ba4c401c7deeac5a71d9d6d02159a86335b829c32b44f974773b",
+      "bytes": 1919
+    },
+    "docs/ort-wasm-simd-threaded.mjs": {
+      "path": "docs/ort-wasm-simd-threaded.mjs",
+      "sha256": "0a1e718d99c41b22c21f2520ff4f9e883a6b5533856e398d21816ee8eb8185d3",
+      "bytes": 24180
+    },
+    "docs/ort-wasm-simd-threaded.wasm": {
+      "path": "docs/ort-wasm-simd-threaded.wasm",
+      "sha256": "d1ab1b94b16a65b29d710d0b587b29e7bed336827577623913479b8afe8113e6",
+      "bytes": 13479978
+    },
+    "docs/ort.min.mjs": {
+      "path": "docs/ort.min.mjs",
+      "sha256": "9608e98a3fba9716f0cbd0bca0c94808b71dae2e9265ca3fe742ddc393a53ebc",
+      "bytes": 50069
+    }
+  },
+  "runtimeConstraints": {
+    "android": "API 24",
+    "ios": "15.1",
+    "macos": "14.0, Apple Silicon",
+    "linux": "glibc 2.38 and GLIBCXX_3.4.32 (current Extensions producer)",
+    "windows": "Windows 10 plus Microsoft Visual C++ 2015-2022 runtime",
+    "web": "WebAssembly SIMD; threads require cross-origin isolation"
+  },
+  "publishedWebAssets": {
+    "lib/web/enable-threads.js": {
+      "path": "lib/web/enable-threads.js",
+      "sha256": "d8475de9f34089ee311955d59ad013894f618330f818630a9e3626142f28552f",
+      "bytes": 3207
+    },
+    "lib/web/fonnx_worker_rpc.js": {
+      "path": "lib/web/fonnx_worker_rpc.js",
+      "sha256": "272db1fe4b84ba4c401c7deeac5a71d9d6d02159a86335b829c32b44f974773b",
+      "bytes": 1919
+    },
+    "lib/web/kws_init.js": {
+      "path": "lib/web/kws_init.js",
+      "sha256": "7f06d7dab8dad184e829c12bc4b307837d14093dacc5f61214ae111710a7266d",
+      "bytes": 1058
+    },
+    "lib/web/kws_worker.js": {
+      "path": "lib/web/kws_worker.js",
+      "sha256": "b802ff0fe919d8b60135cb624cb04ef1dc100d2d856e104461395f83aecdb517",
+      "bytes": 6091
+    },
+    "lib/web/magika_init.js": {
+      "path": "lib/web/magika_init.js",
+      "sha256": "ae052f2e90e9091881e33bfaf2daba7011c526bcd20213c19ed3f97adb3daa7b",
+      "bytes": 649
+    },
+    "lib/web/magika_worker.js": {
+      "path": "lib/web/magika_worker.js",
+      "sha256": "c5eea6e51b197128ea08a2ea74e7690f5d5858e3a72cdb4da0646def53c92757",
+      "bytes": 2446
+    },
+    "lib/web/minilm_init.js": {
+      "path": "lib/web/minilm_init.js",
+      "sha256": "970729063c775ac12a3a8378f218baca569f4b893440c571f5cded024e68067f",
+      "bytes": 638
+    },
+    "lib/web/minilm_worker.js": {
+      "path": "lib/web/minilm_worker.js",
+      "sha256": "8b8a3993ef7ff3911daf7b957b389b84c990617cc54c1737231bed4059cc416f",
+      "bytes": 3821
+    },
+    "lib/web/minish_lab_init.js": {
+      "path": "lib/web/minish_lab_init.js",
+      "sha256": "79a18ea90fcb3fe44c6d2d998c72a4e7f57954bcebcf7f286d668c1820cdcac7",
+      "bytes": 655
+    },
+    "lib/web/minish_lab_worker.js": {
+      "path": "lib/web/minish_lab_worker.js",
+      "sha256": "1b9b77ae40e9e06f1431e065702a445757f82e0c420060e4036ed068668b43b1",
+      "bytes": 2767
+    },
+    "lib/web/ort-wasm-simd-threaded.mjs": {
+      "path": "lib/web/ort-wasm-simd-threaded.mjs",
+      "sha256": "0a1e718d99c41b22c21f2520ff4f9e883a6b5533856e398d21816ee8eb8185d3",
+      "bytes": 24180
+    },
+    "lib/web/ort-wasm-simd-threaded.wasm": {
+      "path": "lib/web/ort-wasm-simd-threaded.wasm",
+      "sha256": "d1ab1b94b16a65b29d710d0b587b29e7bed336827577623913479b8afe8113e6",
+      "bytes": 13479978
+    },
+    "lib/web/ort.min.mjs": {
+      "path": "lib/web/ort.min.mjs",
+      "sha256": "9608e98a3fba9716f0cbd0bca0c94808b71dae2e9265ca3fe742ddc393a53ebc",
+      "bytes": 50069
+    },
+    "lib/web/pyannote_init.js": {
+      "path": "lib/web/pyannote_init.js",
+      "sha256": "46bc3c174a67aa3883d4ea2bbf42d969409e1797635e6d3ab2a46137c540284b",
+      "bytes": 641
+    },
+    "lib/web/pyannote_worker.js": {
+      "path": "lib/web/pyannote_worker.js",
+      "sha256": "8437ce90a6a7c761a2d617e64f8824121be4cd512cec4a76d11eea67ae546c15",
+      "bytes": 8945
+    },
+    "lib/web/silero_vad_init.js": {
+      "path": "lib/web/silero_vad_init.js",
+      "sha256": "168795668bc5cf2797ed211074f22258d75cd0870c0f3b2ed2f4a9f93901375b",
+      "bytes": 746
+    },
+    "lib/web/silero_vad_worker.js": {
+      "path": "lib/web/silero_vad_worker.js",
+      "sha256": "87b38a2e4c8b8eaba1034d01e792d824ddc94f5d9f007a7cfa1c044bcd6ce01f",
+      "bytes": 3615
+    },
+    "lib/web/whisper_init.js": {
+      "path": "lib/web/whisper_init.js",
+      "sha256": "fa11870fd79f6caf6c26e03905db935c8b29183e4d291588eaad34a58828ed83",
+      "bytes": 638
+    },
+    "lib/web/whisper_worker.js": {
+      "path": "lib/web/whisper_worker.js",
+      "sha256": "50cddee833bbb3b79efd455938832f9b340b89ba6f01ca94978e698e09019001",
+      "bytes": 4635
+    }
+  }
+}

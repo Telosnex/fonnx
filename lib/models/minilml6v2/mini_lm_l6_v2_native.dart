@@ -9,6 +9,7 @@ MiniLmL6V2 getMiniLmL6V2(String path) => MiniLmL6V2Native(path);
 class MiniLmL6V2Native implements MiniLmL6V2 {
   MiniLmL6V2Native(this.modelPath);
 
+  @override
   final String modelPath;
   final OnnxIsolateManager _onnxIsolateManager = OnnxIsolateManager();
 
@@ -19,7 +20,8 @@ class MiniLmL6V2Native implements MiniLmL6V2 {
   }
 
   Future<Float32List> getEmbedding(List<int> tokens) async {
+    final snapshot = List<int>.unmodifiable(tokens);
     await _onnxIsolateManager.start(OnnxIsolateType.miniLm);
-    return _onnxIsolateManager.sendInference(modelPath, tokens);
+    return _onnxIsolateManager.sendInference(modelPath, snapshot);
   }
 }

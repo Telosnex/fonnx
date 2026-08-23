@@ -9,6 +9,11 @@ abstract class SileroVad {
   String get modelPath;
 
   static SileroVad load(String path) {
+    if (path.trim().isEmpty) throw ArgumentError.value(path, 'path');
+    final current = _instance;
+    if (current != null && current.modelPath != path) {
+      throw StateError('SileroVad is already loaded from ${current.modelPath}');
+    }
     _instance ??= getSileroVad(path);
     return _instance!;
   }

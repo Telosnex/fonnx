@@ -11,6 +11,7 @@ MsmarcoMiniLmL6V3 getMsmarcoMiniLmL6V3(String path) =>
 class MsmarcoMiniLmL6V3Native implements MsmarcoMiniLmL6V3 {
   MsmarcoMiniLmL6V3Native(this.modelPath);
 
+  @override
   final String modelPath;
   final OnnxIsolateManager _onnxIsolateManager = OnnxIsolateManager();
 
@@ -21,10 +22,11 @@ class MsmarcoMiniLmL6V3Native implements MsmarcoMiniLmL6V3 {
   }
 
   Future<Float32List> getEmbedding(List<int> tokens) async {
+    final snapshot = List<int>.unmodifiable(tokens);
     await _onnxIsolateManager.start(OnnxIsolateType.miniLm);
     return _onnxIsolateManager.sendInference(
       modelPath,
-      tokens,
+      snapshot,
       ortDylibPathOverride: fonnxOrtDylibPathOverride,
     );
   }

@@ -7,8 +7,11 @@ import 'package:fonnx/models/sileroVad/silero_vad.dart';
 SileroVad getSileroVad(String path) => SileroVadWeb(path);
 
 @JS('window.sileroVad')
-external JSPromise<JSString?> sileroVadJs(String modelPath,
-    JSUint8Array audioBytes, String previousStateAsJsonString);
+external JSPromise<JSString?> sileroVadJs(
+  String modelPath,
+  JSUint8Array audioBytes,
+  String previousStateAsJsonString,
+);
 
 class SileroVadWeb implements SileroVad {
   @override
@@ -17,12 +20,17 @@ class SileroVadWeb implements SileroVad {
   SileroVadWeb(this.modelPath);
 
   @override
-  Future<Map<String, dynamic>> doInference(Uint8List bytes,
-      {Map<String, dynamic> previousState = const {}}) async {
+  Future<Map<String, dynamic>> doInference(
+    Uint8List bytes, {
+    Map<String, dynamic> previousState = const {},
+  }) async {
     final previousStateAsJsonString = json.encode(previousState);
-    final jsObject =
-        await sileroVadJs(modelPath, bytes.toJS, previousStateAsJsonString)
-            .toDart;
+    final snapshot = Uint8List.fromList(bytes);
+    final jsObject = await sileroVadJs(
+      modelPath,
+      snapshot.toJS,
+      previousStateAsJsonString,
+    ).toDart;
 
     if (jsObject == null) {
       throw Exception('Silero VAD result returned from JS code is null');
@@ -30,7 +38,8 @@ class SileroVadWeb implements SileroVad {
     final dartObject = json.decode(jsObject.toDart);
     if (dartObject is! Map<String, dynamic>) {
       throw Exception(
-          'Silero VAD result returned from JS code is not a Map<String, dynamic>, it is a ${jsObject.runtimeType}');
+        'Silero VAD result returned from JS code is not a Map<String, dynamic>, it is a ${jsObject.runtimeType}',
+      );
     }
 
     final recasted = <String, dynamic>{};
@@ -52,8 +61,9 @@ class SileroVadWeb implements SileroVad {
       //   that are both int and double. This seems to happen on louder input,
       //   my guess is 1.0 is being converted to 1 in JS.
       // - Without this recasting, Dart code crashes in WASM.
-      final List<double> doubleArray =
-          array.map((e) => e is int ? e.toDouble() : (e as double)).toList();
+      final List<double> doubleArray = array
+          .map((e) => e is int ? e.toDouble() : (e as double))
+          .toList();
       recasted[key] = Float32List.fromList(doubleArray);
     }
     return recasted;

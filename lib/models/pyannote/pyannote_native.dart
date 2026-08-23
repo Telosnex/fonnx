@@ -20,10 +20,11 @@ class PyannoteNative implements Pyannote {
     Float32List audioData, {
     double? step,
   }) async {
+    final snapshot = Float32List.fromList(audioData);
     await _pyannoteIsolateManager.start();
     return _pyannoteIsolateManager.sendInference(
       modelPath,
-      audioData,
+      snapshot,
       ortDylibPathOverride: fonnxOrtDylibPathOverride,
     );
   }

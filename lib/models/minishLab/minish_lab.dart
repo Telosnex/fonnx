@@ -9,24 +9,30 @@ import 'minish_lab_abstract.dart'
 
 abstract class MinishLab {
   static MinishLab? _instance;
+  String get modelPath;
 
   static MinishLab load(String path) {
+    if (path.trim().isEmpty) throw ArgumentError.value(path, 'path');
+    final current = _instance;
+    if (current != null && current.modelPath != path) {
+      throw StateError('MinishLab is already loaded from ${current.modelPath}');
+    }
     _instance ??= getMinishLab(path);
     return _instance!;
   }
 
-// See [minishLabEncoder] and [minishLabDecoder] in minish_lab_vocab.dart
-// for the vocabulary used in this tokenizer.
-//
-// Derived special tokens using:
-// When encoding text for BERT models:
-// 1.  [CLS] is added at the beginning of the sequence
-// 2.  [SEP] is added at the end of the sequence
-// 3.  For sentence pair tasks, [SEP] is also used between the two sentences
-//  Other special tokens in the configuration:
-// •  [PAD] (token ID: 0): Used for padding sequences to a fixed length
-// •  [UNK] (token ID: 1): Used for unknown tokens not in the vocabulary
-// •  [MASK] (token ID: 4): Used for masked language modeling tasks
+  // See [minishLabEncoder] and [minishLabDecoder] in minish_lab_vocab.dart
+  // for the vocabulary used in this tokenizer.
+  //
+  // Derived special tokens using:
+  // When encoding text for BERT models:
+  // 1.  [CLS] is added at the beginning of the sequence
+  // 2.  [SEP] is added at the end of the sequence
+  // 3.  For sentence pair tasks, [SEP] is also used between the two sentences
+  //  Other special tokens in the configuration:
+  // •  [PAD] (token ID: 0): Used for padding sequences to a fixed length
+  // •  [UNK] (token ID: 1): Used for unknown tokens not in the vocabulary
+  // •  [MASK] (token ID: 4): Used for masked language modeling tasks
   static final potion32mTokenizer = WordpieceTokenizer(
     encoder: potion32mEncoder,
     decoder: minishLabDecoder,
