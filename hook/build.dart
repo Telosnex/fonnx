@@ -244,6 +244,7 @@ void main(List<String> args) async {
       sources: [
         input.packageRoot.resolve('src/ort_session_finalizer.c').toFilePath(),
       ],
+      libraries: [if (os == OS.windows) 'ole32'],
     ).run(input: input, output: output);
 
     // Make changes to the hook invalidate hooks_runner's own dependency graph.

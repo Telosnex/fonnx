@@ -1,10 +1,13 @@
 #include <stdint.h>
-#include <stdlib.h>
 
 #if defined(_WIN32)
+#include <objbase.h>
 #define FONNX_EXPORT __declspec(dllexport)
+#define fonnx_dart_free CoTaskMemFree
 #else
+#include <stdlib.h>
 #define FONNX_EXPORT __attribute__((visibility("default")))
+#define fonnx_dart_free free
 #endif
 
 typedef void (*fonnx_release_fn)(void *);
@@ -26,7 +29,7 @@ FONNX_EXPORT void fonnx_release_ort_session_context(void *opaque) {
       context->release_session(*context->session);
       *context->session = NULL;
     }
-    free(context->session);
+    fonnx_dart_free(context->session);
     context->session = NULL;
   }
 
@@ -35,9 +38,9 @@ FONNX_EXPORT void fonnx_release_ort_session_context(void *opaque) {
       context->release_env(*context->env);
       *context->env = NULL;
     }
-    free(context->env);
+    fonnx_dart_free(context->env);
     context->env = NULL;
   }
 
-  free(context);
+  fonnx_dart_free(context);
 }
