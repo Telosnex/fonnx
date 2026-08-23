@@ -5,6 +5,8 @@ import 'package:fonnx/models/minilml6v2/mini_lm_l6_v2.dart';
 import 'package:fonnx/models/minilml6v2/mini_lm_l6_v2_native.dart';
 import 'package:ml_linalg/linalg.dart';
 
+import 'embedding_golden.dart';
+
 void main() {
   const modelPath = 'example/assets/models/miniLmL6V2/miniLmL6V2.onnx';
   final miniLm = MiniLmL6V2Native(modelPath);
@@ -19,9 +21,25 @@ void main() {
     return miniLm.getEmbeddingAsVector(tokens);
   }
 
-  test('Embedding works', () async {
+  test('returns a normalized embedding', () async {
     final answer = await vec('');
     expect(answer, hasLength(384));
+    expect(answer.every((component) => component.isFinite), isTrue);
+    expect(answer.norm(), closeTo(1, 1e-5));
+  });
+
+  test('matches the empty-string embedding golden', () async {
+    await expectEmbeddingMatchesGolden(
+      vec,
+      'test/data/goldens/mini_lm_l6_v2_empty.json',
+    );
+  });
+
+  test('matches a non-empty embedding golden', () async {
+    await expectEmbeddingMatchesGolden(
+      vec,
+      'test/data/goldens/mini_lm_l6_v2_rain_in_spain.json',
+    );
   });
 
   test('Divided long text into chunks', () async {
@@ -33,8 +51,10 @@ void main() {
   });
 
   test('Performance test', () async {
-    final List<List<int>> tokens =
-        MiniLmL6V2.tokenizer.tokenize(data).map((e) => e.tokens).toList();
+    final List<List<int>> tokens = MiniLmL6V2.tokenizer
+        .tokenize(data)
+        .map((e) => e.tokens)
+        .toList();
     const count = 100;
     List<Future> futures = [];
     final sw = Stopwatch()..start();
@@ -46,7 +66,8 @@ void main() {
     sw.stop();
     final elapsed = sw.elapsedMilliseconds;
     debugPrint(
-        'Elapsed: $elapsed ms for $count embeddings (${elapsed / count} ms per embedding)');
+      'Elapsed: $elapsed ms for $count embeddings (${elapsed / count} ms per embedding)',
+    );
   });
 
   test('Similarity', () async {
@@ -59,10 +80,12 @@ void main() {
 
   test('Similarity: weather', () async {
     final vRandom = await vec(
-        'jabberwocky awaits: lets not be late lest the lillies bloom in the garden of eden');
+      'jabberwocky awaits: lets not be late lest the lillies bloom in the garden of eden',
+    );
     final vSF = await vec('shipping forecast');
-    final vAnswer =
-        await vec('WeatherChannel Spain the weather is sunny and warm');
+    final vAnswer = await vec(
+      'WeatherChannel Spain the weather is sunny and warm',
+    );
     final vWF = await vec('weather forecast');
     final vSpainWF = await vec('spain weather forecast');
     final vWFInSpain = await vec('weather forecast in Spain');
@@ -73,8 +96,9 @@ void main() {
     final sWFToAnswer = vWF.cosineSimilarity(vAnswer);
     final sSpainWFToAnswer = vSpainWF.cosineSimilarity(vAnswer);
     final sWFInSpainToAnswer = vWFInSpain.cosineSimilarity(vAnswer);
-    final sWFInBuffaloToAnswer =
-        vBuffaloWeatherForecast.cosineSimilarity(vAnswer);
+    final sWFInBuffaloToAnswer = vBuffaloWeatherForecast.cosineSimilarity(
+      vAnswer,
+    );
 
     expect(sRandomToAnswer, closeTo(0.050, 0.001));
     expect(sSFToAnswer, closeTo(0.209, 0.001));
@@ -94,8 +118,9 @@ void main() {
 
   test('Similarity: London', () async {
     final vQuery = await vec('How big is London');
-    final vAnswer =
-        await vec('UK capital has 9,787,426 inhabitants at the 2011 census');
+    final vAnswer = await vec(
+      'UK capital has 9,787,426 inhabitants at the 2011 census',
+    );
     // Keep a cross-platform tolerance: ORT execution providers and SIMD paths
     // can differ slightly while preserving semantic ranking.
     expect(vQuery.cosineSimilarity(vAnswer), closeTo(0.408, 0.01));

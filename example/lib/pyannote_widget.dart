@@ -17,7 +17,6 @@ class PyannoteWidget extends StatefulWidget {
 }
 
 class _PyannoteWidgetState extends State<PyannoteWidget> {
-  bool? _verifyPassed;
   String? _speedTestResult;
 
   @override
@@ -37,27 +36,6 @@ class _PyannoteWidgetState extends State<PyannoteWidget> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             ElevatedButton(
-              onPressed: _runVerificationTest,
-              child: const Text('Test Correctness'),
-            ),
-            widthPadding,
-            if (_verifyPassed == true)
-              const Icon(
-                Icons.check,
-                color: Colors.green,
-              ),
-            if (_verifyPassed == false)
-              const Icon(
-                Icons.close,
-                color: Colors.red,
-              ),
-          ],
-        ),
-        heightPadding,
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            ElevatedButton(
               onPressed: _runPerformanceTest,
               child: const Text('Test Speed'),
             ),
@@ -71,69 +49,6 @@ class _PyannoteWidgetState extends State<PyannoteWidget> {
         ),
       ],
     );
-  }
-
-  void _runVerificationTest() async {
-    final modelPath = await getModelPath('pyannote_seg3.onnx');
-    final pyannote = Pyannote.load(modelPath);
-
-    // Get test audio file as Float32List
-    final wavFile =
-        await rootBundle.load('assets/audio_sample_ac1_ar16000.pcm');
-    final processed =
-        Pyannote.int16PcmBytesToFloat32(wavFile.buffer.asUint8List());
-    final result = await pyannote.process(processed);
-    setState(() {
-      // Verify the basic structure and content of the result
-      final isValidStructure = result.every((segment) =>
-          segment.containsKey('speaker') &&
-          segment.containsKey('start') &&
-          segment.containsKey('stop'));
-
-      // Verify the expected number of speakers and timing range
-      final speakers = result.map((s) => s['speaker'] as int).toSet();
-      final hasValidSpeakers =
-          speakers.length <= 3 && speakers.every((s) => s >= 0 && s < 3);
-
-      // Verify timing sequence
-      var isValidTiming = true;
-      double lastStop = 0;
-      for (final segment in result) {
-        final start = segment['start'] as double;
-        final stop = segment['stop'] as double;
-        if (start > stop || start < lastStop) {
-          isValidTiming = false;
-          break;
-        }
-        lastStop = stop;
-      }
-      
-      final golden = kIsWeb || Platform.isAndroid
-          ? [
-              {"speaker": 1, "start": 0.8044375, "stop": 4.4494375}
-            ]
-          : [
-              {'start': 0.8381875, 'speaker': 1, 'stop': 4.4831875}
-            ];
-      final matchesGolden = result.length == 1 &&
-          result[0]['speaker'] == golden[0]['speaker'] &&
-          result[0]['start'] == golden[0]['start'] &&
-          result[0]['stop'] == golden[0]['stop'];
-      _verifyPassed = isValidStructure &&
-          hasValidSpeakers &&
-          isValidTiming &&
-          matchesGolden;
-
-      if (_verifyPassed != true) {
-        if (kDebugMode) {
-          print('Verification of Pyannote output failed:');
-          print('Structure valid: $isValidStructure');
-          print('Speakers valid: $hasValidSpeakers');
-          print('Timing valid: $isValidTiming');
-          print('Result: $result');
-        }
-      }
-    });
   }
 
   void _runPerformanceTest() async {

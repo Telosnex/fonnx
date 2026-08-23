@@ -17,7 +17,6 @@ class WhisperWidget extends StatefulWidget {
 }
 
 class _WhisperWidgetState extends State<WhisperWidget> {
-  bool? _verifyPassed;
   String? _speedTestResult;
 
   @override
@@ -37,27 +36,6 @@ class _WhisperWidgetState extends State<WhisperWidget> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             ElevatedButton(
-              onPressed: _runVerificationTest,
-              child: const Text('Test Correctness'),
-            ),
-            widthPadding,
-            if (_verifyPassed == true)
-              const Icon(
-                Icons.check,
-                color: Colors.green,
-              ),
-            if (_verifyPassed == false)
-              const Icon(
-                Icons.close,
-                color: Colors.red,
-              ),
-          ],
-        ),
-        heightPadding,
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            ElevatedButton(
               onPressed: _runPerformanceTest,
               child: const Text('Test Speed'),
             ),
@@ -71,19 +49,6 @@ class _WhisperWidgetState extends State<WhisperWidget> {
         )
       ],
     );
-  }
-
-  void _runVerificationTest() async {
-    final modelPath =
-        await getWhisperModelPath('whisper_tiny.onnx');
-    final whisper = Whisper.load(modelPath);
-    final pcmFile =
-        await rootBundle.load('assets/audio_sample_ac1_ar16000.pcm');
-    final result = await whisper.doInference(pcmFile.buffer.asUint8List());
-    setState(() {
-      _verifyPassed =
-          result.trim() == 'The rain and Spain falls mainly on the plane.';
-    });
   }
 
   void _runPerformanceTest() async {

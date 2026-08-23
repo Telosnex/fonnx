@@ -33,10 +33,11 @@ void main() {
         }
         await spotter.finish();
 
-        expect(
-          detections.map((detection) => detection.phrase),
-          containsAllInOrder(['rain in Spain', 'mainly on the plain']),
-        );
+        // Public-output golden: no missing, reordered, or extra detections.
+        expect(detections.map((detection) => detection.phrase), [
+          'rain in Spain',
+          'mainly on the plain',
+        ]);
         expect(
           detections.where((detection) => detection.phrase == 'hey telosnex'),
           isEmpty,
@@ -56,11 +57,45 @@ void main() {
           'rain in Spain',
         ]);
 
-        // Transcription mode: report what the model heard, so users can
-        // discover spokenForms for hard-to-spell names.
+        // Spoken forms must emit the canonical spelling. The exact number of
+        // detections is decoder-dependent, so this is deliberately not a
+        // golden-output comparison.
+        await spotter.setKeywords(const [
+          KeywordPhrase(
+            'telosnex',
+            spokenForms: [
+              'tell us next',
+              'tell us nucks',
+              'tell low snacks',
+              'tell us necks',
+            ],
+          ),
+        ]);
         final telosnexPcm = File(
           'example/assets/telosnex_hotword_3times_ar16000.pcm',
         ).readAsBytesSync();
+        final detectionCountBeforeAliases = detections.length;
+        for (var offset = 0;
+            offset < telosnexPcm.length;
+            offset += chunkBytes) {
+          final end = offset + chunkBytes < telosnexPcm.length
+              ? offset + chunkBytes
+              : telosnexPcm.length;
+          await spotter.acceptPcm16(telosnexPcm.sublist(offset, end));
+        }
+        await spotter.finish();
+        final aliasDetections =
+            detections.sublist(detectionCountBeforeAliases);
+        expect(aliasDetections, isNotEmpty);
+        expect(
+          aliasDetections.every(
+            (detection) => detection.phrase == 'telosnex',
+          ),
+          isTrue,
+        );
+
+        // Transcription mode: report what the model heard, so users can
+        // discover spokenForms for hard-to-spell names.
         final heard = await spotter.transcribePcm16(telosnexPcm);
         // Greedy transcription of three "telosnex" utterances; exact words
         // vary with decoding mode, but the acoustic gist is stable.
@@ -68,6 +103,7 @@ void main() {
         expect(heard, contains('snacks'));
 
         // Detection still works after a transcription pass.
+        await spotter.setKeywords(const [KeywordPhrase('rain in Spain')]);
         final detectionCountBeforeReuse = detections.length;
         for (var offset = 0; offset < pcm.length; offset += chunkBytes) {
           final end = offset + chunkBytes < pcm.length

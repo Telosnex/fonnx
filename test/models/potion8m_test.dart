@@ -5,6 +5,8 @@ import 'package:fonnx/models/minishLab/minish_lab.dart';
 import 'package:fonnx/models/minishLab/minish_lab_native.dart';
 import 'package:ml_linalg/linalg.dart';
 
+import 'embedding_golden.dart';
+
 void main() {
   const modelPath = 'example/assets/models/minishLab/potion8m.onnx';
   final minishLab = MinishLabNative(modelPath);
@@ -19,19 +21,25 @@ void main() {
     return minishLab.getEmbeddingAsVector(tokens);
   }
 
-  test('Embedding works', () async {
-    final answer = await vec('quickly say this?');
-    final dartArrayString = StringBuffer();
-    dartArrayString.write('[');
-    for (var i = 0; i < answer.length; i++) {
-      dartArrayString.write(answer[i]);
-      if (i != answer.length - 1) {
-        dartArrayString.write(', ');
-      }
-    }
-    dartArrayString.write(']');
-    debugPrint(dartArrayString.toString());
+  test('returns a normalized embedding', () async {
+    final answer = await vec('');
     expect(answer, hasLength(256));
+    expect(answer.every((component) => component.isFinite), isTrue);
+    expect(answer.norm(), closeTo(1, 1e-5));
+  });
+
+  test('matches the empty-string embedding golden', () async {
+    await expectEmbeddingMatchesGolden(
+      vec,
+      'test/data/goldens/potion8m_empty.json',
+    );
+  });
+
+  test('matches a non-empty embedding golden', () async {
+    await expectEmbeddingMatchesGolden(
+      vec,
+      'test/data/goldens/potion8m_rain_in_spain.json',
+    );
   });
 
   test('Divided long text into chunks', () async {

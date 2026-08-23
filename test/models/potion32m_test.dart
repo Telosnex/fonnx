@@ -5,6 +5,8 @@ import 'package:fonnx/models/minishLab/minish_lab.dart';
 import 'package:fonnx/models/minishLab/minish_lab_native.dart';
 import 'package:ml_linalg/linalg.dart';
 
+import 'embedding_golden.dart';
+
 void main() {
   const modelPath = 'example/assets/models/minishLab/potion32m.onnx';
   final minishLab = MinishLabNative(modelPath);
@@ -19,9 +21,25 @@ void main() {
     return minishLab.getEmbeddingAsVector(tokens);
   }
 
-  test('Embedding works', () async {
+  test('returns a normalized embedding', () async {
     final answer = await vec('');
     expect(answer, hasLength(512));
+    expect(answer.every((component) => component.isFinite), isTrue);
+    expect(answer.norm(), closeTo(1, 1e-5));
+  });
+
+  test('matches the empty-string embedding golden', () async {
+    await expectEmbeddingMatchesGolden(
+      vec,
+      'test/data/goldens/potion32m_empty.json',
+    );
+  });
+
+  test('matches a non-empty embedding golden', () async {
+    await expectEmbeddingMatchesGolden(
+      vec,
+      'test/data/goldens/potion32m_rain_in_spain.json',
+    );
   });
 
   test('Divided long text into chunks', () async {
@@ -48,7 +66,8 @@ void main() {
     sw.stop();
     final elapsed = sw.elapsedMilliseconds;
     debugPrint(
-        'Elapsed: $elapsed ms for $count embeddings (${elapsed / count} ms per embedding)');
+      'Elapsed: $elapsed ms for $count embeddings (${elapsed / count} ms per embedding)',
+    );
   });
 
   test('Similarity', () async {
@@ -60,10 +79,12 @@ void main() {
 
   test('Similarity: weather', () async {
     final vRandom = await vec(
-        'jabberwocky awaits: lets not be late lest the lillies bloom in the garden of eden');
+      'jabberwocky awaits: lets not be late lest the lillies bloom in the garden of eden',
+    );
     final vSF = await vec('shipping forecast');
-    final vAnswer =
-        await vec('WeatherChannel Spain the weather is sunny and warm');
+    final vAnswer = await vec(
+      'WeatherChannel Spain the weather is sunny and warm',
+    );
     final vWF = await vec('weather forecast');
     final vSpainWF = await vec('spain weather forecast');
     final vWFInSpain = await vec('weather forecast in Spain');
@@ -74,8 +95,9 @@ void main() {
     final sWFToAnswer = vWF.cosineSimilarity(vAnswer);
     final sSpainWFToAnswer = vSpainWF.cosineSimilarity(vAnswer);
     final sWFInSpainToAnswer = vWFInSpain.cosineSimilarity(vAnswer);
-    final sWFInBuffaloToAnswer =
-        vBuffaloWeatherForecast.cosineSimilarity(vAnswer);
+    final sWFInBuffaloToAnswer = vBuffaloWeatherForecast.cosineSimilarity(
+      vAnswer,
+    );
 
     expect(sRandomToAnswer, closeTo(0.047, 0.001));
     expect(sSFToAnswer, closeTo(0.057, 0.001));
@@ -95,8 +117,9 @@ void main() {
 
   test('Similarity: London', () async {
     final vQuery = await vec('How big is London');
-    final vAnswer =
-        await vec('UK capital has 9,787,426 inhabitants at the 2011 census');
+    final vAnswer = await vec(
+      'UK capital has 9,787,426 inhabitants at the 2011 census',
+    );
     expect(vQuery.cosineSimilarity(vAnswer), closeTo(0.063, 0.001));
   });
 }

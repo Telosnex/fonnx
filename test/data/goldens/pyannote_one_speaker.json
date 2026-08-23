@@ -1,0 +1,10 @@
+{
+  "input": "test/data/audio_sample_ac1_ar16000.pcm",
+  "segments": [
+    {
+      "speaker": 0,
+      "start": 0.8044375,
+      "stop": 4.4494375
+    }
+  ]
+}

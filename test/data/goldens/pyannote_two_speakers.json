@@ -1,0 +1,20 @@
+{
+  "input": "test/data/talkovergpt.pcm",
+  "segments": [
+    {
+      "speaker": 0,
+      "start": 0.8719375,
+      "stop": 1.5469375
+    },
+    {
+      "speaker": 1,
+      "start": 3.2681875,
+      "stop": 6.2044375
+    },
+    {
+      "speaker": 0,
+      "start": 3.9769375,
+      "stop": 6.2719375
+    }
+  ]
+}

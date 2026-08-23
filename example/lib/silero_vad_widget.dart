@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +17,6 @@ class SileroVadWidget extends StatefulWidget {
 }
 
 class _SileroVadWidgetState extends State<SileroVadWidget> {
-  bool? _verifyPassed;
   String? _speedTestResult;
   @override
   Widget build(BuildContext context) {
@@ -37,27 +35,6 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             ElevatedButton(
-              onPressed: _runVerificationTest,
-              child: const Text('Test Correctness'),
-            ),
-            widthPadding,
-            if (_verifyPassed == true)
-              const Icon(
-                Icons.check,
-                color: Colors.green,
-              ),
-            if (_verifyPassed == false)
-              const Icon(
-                Icons.close,
-                color: Colors.red,
-              ),
-          ],
-        ),
-        heightPadding,
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            ElevatedButton(
               onPressed: _runPerformanceTest,
               child: const Text('Test Speed'),
             ),
@@ -71,24 +48,6 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
         ),
       ],
     );
-  }
-
-  void _runVerificationTest() async {
-    final modelPath = await getModelPath('silero_vad_v6.2.1.onnx');
-    final silero = SileroVad.load(modelPath);
-    final pcm = await rootBundle.load('assets/audio_sample_ac1_ar16000.pcm');
-    final result = await silero.doInference(pcm.buffer.asUint8List());
-    final probabilities = result['output'] as Float32List;
-    setState(() {
-      _verifyPassed =
-          result.length == 3 &&
-          probabilities.length == 155 &&
-          probabilities.first < 0.1 &&
-          probabilities.reduce(math.max) > 0.99;
-      if (_verifyPassed != true && kDebugMode) {
-        debugPrint('verification of Silero v6 output failed, got $result');
-      }
-    });
   }
 
   void _runPerformanceTest() async {

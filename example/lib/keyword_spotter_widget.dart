@@ -40,7 +40,6 @@ class _KeywordSpotterWidgetState extends State<KeywordSpotterWidget> {
   final _detectionLog = <String>[];
   var _hasDefaultTelosnexAliases = true;
 
-  bool? _verifyPassed;
   String? _error;
   String _activeKeyword = '';
   bool _listening = false;
@@ -73,21 +72,6 @@ class _KeywordSpotterWidgetState extends State<KeywordSpotterWidget> {
         const Text(
           '5 MB model detects custom English wake phrases, changeable at '
           'runtime without training. By k2-fsa/sherpa-onnx.',
-        ),
-        heightPadding,
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            ElevatedButton(
-              onPressed: _busy ? null : _runVerificationTest,
-              child: const Text('Test Correctness'),
-            ),
-            widthPadding,
-            if (_verifyPassed == true)
-              const Icon(Icons.check, color: Colors.green),
-            if (_verifyPassed == false)
-              const Icon(Icons.close, color: Colors.red),
-          ],
         ),
         heightPadding,
         Row(
@@ -171,94 +155,6 @@ class _KeywordSpotterWidgetState extends State<KeywordSpotterWidget> {
         ],
       ],
     );
-  }
-
-  Future<void> _runVerificationTest() async {
-    setState(() {
-      _busy = true;
-      _error = null;
-      _verifyPassed = null;
-    });
-    KeywordSpotter? spotter;
-    try {
-      spotter = await KeywordSpotter.load(
-        bundle: await _getBundle(),
-        maxActivePaths: 16,
-        keywords: const [
-          KeywordPhrase('rain in Spain'),
-          KeywordPhrase('mainly on the plain'),
-          KeywordPhrase('hey telosnex'),
-        ],
-      );
-      final detected = <String>[];
-      final subscription = spotter.detections.listen(
-        (event) => detected.add(event.phrase),
-      );
-      final pcm = (await rootBundle.load(
-        'assets/audio_sample_ac1_ar16000.pcm',
-      )).buffer.asUint8List();
-      const chunkBytes = 3200; // 100 ms of mono 16-bit 16 kHz PCM.
-      for (var offset = 0; offset < pcm.length; offset += chunkBytes) {
-        final end = offset + chunkBytes < pcm.length
-            ? offset + chunkBytes
-            : pcm.length;
-        await spotter.acceptPcm16(pcm.sublist(offset, end));
-      }
-      await spotter.finish();
-      final passedFirstPass =
-          detected.contains('rain in Spain') &&
-          detected.contains('mainly on the plain') &&
-          !detected.contains('hey telosnex');
-
-      // Change the keywords at runtime and replay: only the new one may fire.
-      detected.clear();
-      await spotter.setKeywords(const [KeywordPhrase('rain in Spain')]);
-      for (var offset = 0; offset < pcm.length; offset += chunkBytes) {
-        final end = offset + chunkBytes < pcm.length
-            ? offset + chunkBytes
-            : pcm.length;
-        await spotter.acceptPcm16(pcm.sublist(offset, end));
-      }
-      await spotter.finish();
-      final passedRuntimeChange =
-          detected.contains('rain in Spain') &&
-          !detected.contains('mainly on the plain');
-
-      // Regression fixture recorded saying the brand three times. The
-      // acoustic model transcribes those attempts as these three forms, but
-      // every event must retain the canonical brand spelling.
-      detected.clear();
-      await spotter.setKeywords(const [
-        KeywordPhrase('telosnex', spokenForms: _defaultTelosnexSpokenForms),
-      ]);
-      final telosnexPcm = (await rootBundle.load(
-        'assets/telosnex_hotword_3times_ar16000.pcm',
-      )).buffer.asUint8List();
-      for (var offset = 0; offset < telosnexPcm.length; offset += chunkBytes) {
-        final end = offset + chunkBytes < telosnexPcm.length
-            ? offset + chunkBytes
-            : telosnexPcm.length;
-        await spotter.acceptPcm16(telosnexPcm.sublist(offset, end));
-      }
-      await spotter.finish();
-      await subscription.cancel();
-      final passed =
-          passedFirstPass &&
-          passedRuntimeChange &&
-          detected.where((phrase) => phrase == 'telosnex').length == 3;
-      setState(() => _verifyPassed = passed);
-      if (!passed) {
-        debugPrint('KWS verification failed, detections: $detected');
-      }
-    } catch (e) {
-      setState(() {
-        _verifyPassed = false;
-        _error = '$e';
-      });
-    } finally {
-      await spotter?.close();
-      setState(() => _busy = false);
-    }
   }
 
   Future<void> _startListening() async {

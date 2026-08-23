@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -7,16 +8,32 @@ import 'package:fonnx/models/sileroVad/silero_vad.dart';
 void main() {
   test('Silero VAD v6.2.1 matches official streaming frame contract', () async {
     const modelPath = 'example/assets/models/sileroVad/silero_vad_v6.2.1.onnx';
-    final pcm =
-        File('test/data/audio_sample_ac1_ar16000.pcm').readAsBytesSync();
+    final golden =
+        jsonDecode(
+              File(
+                'test/data/goldens/silero_vad_rain_in_spain.json',
+              ).readAsStringSync(),
+            )
+            as Map<String, dynamic>;
+    final pcm = File(golden['input'] as String).readAsBytesSync();
+    final expectedOutput = (golden['output'] as List)
+        .cast<num>()
+        .map((value) => value.toDouble())
+        .toList();
     final vad = SileroVad.load(modelPath);
 
     final whole = await vad.doInference(pcm);
     final wholeOutput = whole['output'] as Float32List;
 
     expect(whole.keys, containsAll(<String>['output', 'state', 'context']));
-    expect(wholeOutput, hasLength(155));
-    expect(wholeOutput.first, closeTo(0.0271902382, 1e-5));
+    expect(wholeOutput, hasLength(expectedOutput.length));
+    for (var index = 0; index < expectedOutput.length; index++) {
+      expect(
+        wholeOutput[index],
+        closeTo(expectedOutput[index], 1e-4),
+        reason: 'VAD confidence at frame $index changed',
+      );
+    }
     expect(wholeOutput.reduce((a, b) => a > b ? a : b), greaterThan(0.999));
     expect(whole['state'], isA<Float32List>());
     expect(whole['state'], hasLength(256));
