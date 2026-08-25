@@ -42,12 +42,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          lfs: true
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
+      - name: Hydrate Git LFS model fixtures
+        run: dart tool/hydrate_lfs_models.dart
       - run: flutter pub get
       - run: flutter analyze
       - name: Verify source, native, Web, and model manifest

@@ -184,8 +184,7 @@ definitions:
   script_pub_get: &script_pub_get
     name: Resolve and verify pinned production inputs
     script: |
-      git lfs install --local
-      git lfs pull
+      dart tool/hydrate_lfs_models.dart
       flutter pub get
       dart run tool/verify_artifacts.dart
       node tool/test_web_runtime.mjs
