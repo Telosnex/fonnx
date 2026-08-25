@@ -195,11 +195,6 @@ Future<void> _verifyLocalRecords(
     final file = File('${root.path}/$relativePath');
     if (!await file.exists()) throw StateError('Missing $label: $relativePath');
     final actualBytes = await file.length();
-    if (actualBytes != expectedBytes) {
-      throw StateError(
-        'Size mismatch for $relativePath: expected $expectedBytes, got $actualBytes',
-      );
-    }
     if (rejectLfsPointers) {
       final prefix = await file
           .openRead(0, actualBytes.clamp(0, 200))
@@ -209,6 +204,11 @@ Future<void> _verifyLocalRecords(
           .startsWith('version https://git-lfs.github.com/spec/v1')) {
         throw StateError('$relativePath is an unhydrated Git LFS pointer');
       }
+    }
+    if (actualBytes != expectedBytes) {
+      throw StateError(
+        'Size mismatch for $relativePath: expected $expectedBytes, got $actualBytes',
+      );
     }
     final actualHash = await sha256.bind(file.openRead()).first;
     if (actualHash.toString() != expectedHash) {
@@ -220,6 +220,15 @@ Future<void> _verifyLocalRecords(
 }
 
 Future<void> _verifyWebRuntime(Directory root) async {
+  final webPackage = _object(
+    jsonDecode(
+      await File('${root.path}/example/web/package.json').readAsString(),
+    ),
+    'example/web/package.json',
+  );
+  if (webPackage['type'] != 'module') {
+    throw const FormatException('example/web must declare ES module semantics');
+  }
   final initFiles = <File>[
     ...Directory('${root.path}/example/web').listSync().whereType<File>().where(
       (file) => file.path.endsWith('_init.js'),
@@ -270,10 +279,10 @@ Future<void> _verifyWebRuntime(Directory root) async {
       throw StateError('Deployed $name differs from the canonical asset');
     }
   }
-  for (final canonical in Directory('${root.path}/example/web')
-      .listSync()
-      .whereType<File>()
-      .where(
+  for (final canonical
+      in Directory(
+        '${root.path}/example/web',
+      ).listSync().whereType<File>().where(
         (file) =>
             file.path.endsWith('.js') ||
             file.path.endsWith('.mjs') ||
