@@ -38,6 +38,7 @@ class _KeywordSpotterWidgetState extends State<KeywordSpotterWidget> {
     text: _defaultTelosnexSpokenForms.join(', '),
   );
   final _detectionLog = <String>[];
+  final _spokenTokenSequences = <KeywordTokenSequence>[];
   var _hasDefaultTelosnexAliases = true;
 
   String? _error;
@@ -89,6 +90,7 @@ class _KeywordSpotterWidgetState extends State<KeywordSpotterWidget> {
                   if (_hasDefaultTelosnexAliases) {
                     _hasDefaultTelosnexAliases = false;
                     _spokenFormsController.clear();
+                    _spokenTokenSequences.clear();
                   }
                 },
                 onSubmitted: (_) => _applyKeyword(),
@@ -126,7 +128,10 @@ class _KeywordSpotterWidgetState extends State<KeywordSpotterWidget> {
                   labelText: 'Sounds like (optional, comma-separated)',
                   helperText: 'Names may need phonetic aliases.',
                 ),
-                onChanged: (_) => _hasDefaultTelosnexAliases = false,
+                onChanged: (_) {
+                  _hasDefaultTelosnexAliases = false;
+                  _spokenTokenSequences.clear();
+                },
                 onSubmitted: (_) => _applyKeyword(),
               ),
             ),
@@ -288,7 +293,8 @@ class _KeywordSpotterWidgetState extends State<KeywordSpotterWidget> {
           ));
       var pcm = buffer.takeBytes();
       if (pcm.length.isOdd) pcm = pcm.sublist(0, pcm.length - 1);
-      final heard = await spotter.transcribePcm16(pcm);
+      final transcription = await spotter.transcribePcm16WithTokens(pcm);
+      final heard = transcription.text;
       if (heard.isEmpty) {
         setState(() => _detectionLog.add('👂 heard nothing; try again'));
         return;
@@ -296,6 +302,7 @@ class _KeywordSpotterWidgetState extends State<KeywordSpotterWidget> {
       setState(() {
         _detectionLog.add('👂 heard "$heard"');
         _hasDefaultTelosnexAliases = false;
+        _spokenTokenSequences.add(transcription.tokenSequence);
         final existing = _spokenFormsController.text.trim();
         _spokenFormsController.text = existing.isEmpty
             ? heard
@@ -322,7 +329,11 @@ class _KeywordSpotterWidgetState extends State<KeywordSpotterWidget> {
         .map((form) => form.trim())
         .where((form) => form.isNotEmpty)
         .toList(growable: false);
-    return KeywordPhrase(phrase, spokenForms: spokenForms);
+    return KeywordPhrase(
+      phrase,
+      spokenForms: spokenForms,
+      spokenTokenSequences: _spokenTokenSequences,
+    );
   }
 
   Future<void> _stopListening() async {

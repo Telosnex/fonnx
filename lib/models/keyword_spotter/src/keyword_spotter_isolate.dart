@@ -65,9 +65,12 @@ final class KeywordSpotterIsolateManager {
   Future<List<KeywordDetection>> finish() =>
       _request<List<KeywordDetection>>(const _FinishMessage());
 
-  Future<String> transcribe(Float32List samples) => _request<String>(
-    _TranscribeMessage(TransferableTypedData.fromList(<TypedData>[samples])),
-  );
+  Future<KeywordTranscription> transcribe(Float32List samples) =>
+      _request<KeywordTranscription>(
+        _TranscribeMessage(
+          TransferableTypedData.fromList(<TypedData>[samples]),
+        ),
+      );
 
   Future<void> setKeywords(List<KeywordPhrase> keywords) =>
       _request<void>(_SetKeywordsMessage(keywords));

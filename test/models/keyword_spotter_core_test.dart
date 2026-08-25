@@ -1,16 +1,28 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fonnx/models/keyword_spotter/keyword_spotter.dart';
 import 'package:fonnx/models/keyword_spotter/src/context_graph.dart';
 import 'package:fonnx/models/keyword_spotter/src/english_tokenizer.dart';
+import 'package:fonnx/models/keyword_spotter/src/english_vocabulary.dart';
 import 'package:fonnx/models/keyword_spotter/src/streaming_fbank.dart';
 
 void main() {
   group('EnglishKwsTokenizer', () {
     final tokenizer = EnglishKwsTokenizer();
+
+    test('published tokenizer identity matches the vocabulary', () {
+      final digest = sha256.convert(
+        utf8.encode(englishKwsPieces.join('\u0000')),
+      );
+
+      expect(englishKwsPieces, hasLength(keywordSpotterVocabularySize));
+      expect(KeywordSpotter.tokenizerId, endsWith('$digest'));
+    });
 
     test('matches SentencePiece unigram reference', () {
       expect(tokenizer.encode('rain in Spain'), [215, 46, 16, 219, 354]);
@@ -48,6 +60,22 @@ void main() {
         3,
       ]);
       expect(tokenizer.encode('tell us necks'), [410, 142, 304, 122, 3]);
+    });
+
+    test('decodes exact model token IDs without re-tokenizing', () {
+      // This valid character-piece sequence has the same text as the unigram
+      // encoder's [410, 142, 446], but it is not the same decoder path.
+      const tokenIds = [20, 4, 10, 33, 33, 20, 28, 3, 20, 9, 10, 193, 4];
+
+      expect(tokenizer.decode(tokenIds), 'tell us next');
+      expect(KeywordSpotter.decodeTokenIds(tokenIds), 'tell us next');
+      expect(tokenizer.encode('tell us next'), isNot(tokenIds));
+    });
+
+    test('rejects control and out-of-vocabulary token IDs', () {
+      expect(() => tokenizer.decode([0]), throwsArgumentError);
+      expect(() => tokenizer.decode([2]), throwsArgumentError);
+      expect(() => tokenizer.decode([999]), throwsArgumentError);
     });
 
     test('normalizes English whitespace and case', () {

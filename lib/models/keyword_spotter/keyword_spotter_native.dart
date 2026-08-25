@@ -64,7 +64,7 @@ final class KeywordSpotterNative extends KeywordSpotter {
   }
 
   @override
-  Future<String> transcribeSamples(
+  Future<KeywordTranscription> transcribeSamplesWithTokens(
     Float32List samples, {
     int sampleRate = 16000,
   }) {

@@ -14,6 +14,10 @@ framework."
 
 # Changelog
 
+## 2026 Aug 24
+- Pronunciation transcription can preserve exact decoder token IDs, identify
+  their vocabulary, decode them without re-tokenization, and feed compatible
+  token sequences directly back into keyword matching.
 ## 2026 Aug 9
 - Added runtime-configurable English keyword spotting on Android, iOS, Linux,
   macOS, Windows, and Web.

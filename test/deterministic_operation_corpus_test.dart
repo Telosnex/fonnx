@@ -113,19 +113,48 @@ void main() {
 
   test('keyword configuration is validated and deeply snapshotted', () {
     final spokenForms = <String>['tell us next'];
+    final tokenIds = <int>[410, 142, 446];
     final input = <KeywordPhrase>[
-      KeywordPhrase('telosnex', spokenForms: spokenForms),
+      KeywordPhrase(
+        'telosnex',
+        spokenForms: spokenForms,
+        spokenTokenSequences: [
+          KeywordTokenSequence(
+            tokenizerId: KeywordSpotter.tokenizerId,
+            tokenIds: tokenIds,
+          ),
+        ],
+      ),
     ];
     final snapshot = validatedKeywordPhraseSnapshot(input);
     input.clear();
     spokenForms[0] = 'mutated';
+    tokenIds[0] = 999;
     expect(snapshot.single.text, 'telosnex');
     expect(snapshot.single.spokenForms, const ['tell us next']);
+    expect(snapshot.single.spokenTokenSequences.single.tokenIds, [
+      410,
+      142,
+      446,
+    ]);
     expect(
       () => snapshot.add(const KeywordPhrase('x')),
       throwsUnsupportedError,
     );
     expect(() => snapshot.single.spokenForms.add('x'), throwsUnsupportedError);
+    expect(
+      () => snapshot.single.spokenTokenSequences.add(
+        const KeywordTokenSequence(
+          tokenizerId: KeywordSpotter.tokenizerId,
+          tokenIds: [3],
+        ),
+      ),
+      throwsUnsupportedError,
+    );
+    expect(
+      () => snapshot.single.spokenTokenSequences.single.tokenIds.add(3),
+      throwsUnsupportedError,
+    );
   });
 
   test('keyword configuration rejects hostile numeric values', () {
@@ -145,6 +174,34 @@ void main() {
       );
     }
     expect(() => validatedKeywordPhraseSnapshot(const []), throwsArgumentError);
+    expect(
+      () => validatedKeywordPhraseSnapshot(const [
+        KeywordPhrase(
+          'x',
+          spokenTokenSequences: [
+            KeywordTokenSequence(
+              tokenizerId: 'different-vocabulary',
+              tokenIds: [3],
+            ),
+          ],
+        ),
+      ]),
+      throwsArgumentError,
+    );
+    expect(
+      () => validatedKeywordPhraseSnapshot(const [
+        KeywordPhrase(
+          'x',
+          spokenTokenSequences: [
+            KeywordTokenSequence(
+              tokenizerId: KeywordSpotter.tokenizerId,
+              tokenIds: [],
+            ),
+          ],
+        ),
+      ]),
+      throwsArgumentError,
+    );
   });
 }
 

@@ -69,7 +69,7 @@ final class KeywordSpotterEngine {
   /// This reports the closest English text to what the acoustic model heard,
   /// which is the recommended way to discover [KeywordPhrase.spokenForms] for
   /// names and brands. Resets all streaming state.
-  Future<String> transcribe(
+  Future<KeywordTranscription> transcribe(
     Float32List samples, {
     int sampleRate = 16000,
   }) async {
@@ -117,8 +117,12 @@ final class KeywordSpotterEngine {
       }
     }
     await reset();
-    final pieces = tokens.skip(2).map(_tokenizer.piece).join();
-    return pieces.replaceAll('▁', ' ').trim().toLowerCase();
+    final tokenIds = tokens.skip(2).toList(growable: false);
+    return KeywordTranscription(
+      text: _tokenizer.decode(tokenIds),
+      tokenizerId: keywordSpotterTokenizerId,
+      tokenIds: tokenIds,
+    );
   }
 
   Future<void> setKeywords(List<KeywordPhrase> keywords) async {
@@ -153,6 +157,10 @@ final class KeywordSpotterEngine {
       for (final spokenForm in <String>[keyword.text, ...keyword.spokenForms]) {
         tokenIds.add(_tokenizer.encode(spokenForm));
         // Every pronunciation reports the user's canonical display text.
+        graphPhrases.add(keyword);
+      }
+      for (final sequence in keyword.spokenTokenSequences) {
+        tokenIds.add(sequence.tokenIds);
         graphPhrases.add(keyword);
       }
     }

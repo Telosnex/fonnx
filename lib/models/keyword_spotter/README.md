@@ -30,7 +30,27 @@ Call `finish` at the end of a finite recording so the final partial feature
 frames and trailing-blank confirmation are processed. `setKeywords` atomically
 replaces all phrases and resets decoder context. `transcribePcm16` and
 `transcribeSamples` can be used to discover useful `spokenForms` for names and
-brands.
+brands. Their `WithTokens` variants also return the exact greedy decoder token
+IDs:
+
+```dart
+final learned = await spotter.transcribePcm16WithTokens(recording);
+print(learned.text);
+print(KeywordSpotter.decodeTokenIds(learned.tokenIds));
+
+await spotter.setKeywords([
+  KeywordPhrase(
+    'telosnex',
+    spokenForms: [learned.text], // Portable fallback across vocabularies.
+    spokenTokenSequences: [learned.tokenSequence], // Exact current tokens.
+  ),
+]);
+```
+
+Token IDs only have meaning with their vocabulary. Persist `tokenizerId` beside
+them, and supply an exact sequence only while it equals
+`KeywordSpotter.tokenizerId`; decoded text remains the fallback after a model
+change.
 
 ## Public contract
 
@@ -39,8 +59,9 @@ brands.
 - Model: `sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01`, using its
   three int8 ONNX graphs.
 - Runtime phrase changes require no training or network access.
-- Names and brands can provide `spokenForms`; detections still return the
-  canonical `KeywordPhrase.text`.
+- Names and brands can provide portable `spokenForms` and exact
+  `spokenTokenSequences`; detections still return the canonical
+  `KeywordPhrase.text`.
 - Android, iOS, Linux, macOS, and Windows: the same ONNX Runtime Dart FFI
   implementation in a long-lived isolate, with libraries supplied by Native
   Assets. There are no model-specific Kotlin or Swift runners. ORT 1.27.0's

@@ -1,5 +1,16 @@
 import 'dart:typed_data';
 
+/// Identity of the exact token-ID-to-piece mapping used by the English model.
+///
+/// Persist this beside token IDs. A sequence may only be reused when its
+/// identity matches [keywordSpotterTokenizerId]. The suffix is a SHA-256 of
+/// the 500 vocabulary pieces joined by a NUL byte, in token-ID order.
+const keywordSpotterTokenizerId =
+    'gigaspeech3m-en-bpe500:'
+    'b38b12916722c11272652064fbff4e67b931cbdcd989fc20ea6a3c734415bcba';
+
+const keywordSpotterVocabularySize = 500;
+
 final class KeywordSpotterBundle {
   const KeywordSpotterBundle({
     required this.encoderPath,
@@ -22,10 +33,38 @@ final class KeywordSpotterBundle {
   final String joinerPath;
 }
 
+/// An exact decoder token sequence and the vocabulary that gives it meaning.
+final class KeywordTokenSequence {
+  const KeywordTokenSequence({
+    required this.tokenizerId,
+    required this.tokenIds,
+  });
+
+  final String tokenizerId;
+  final List<int> tokenIds;
+}
+
+/// Text and exact decoder output from pronunciation discovery.
+final class KeywordTranscription {
+  KeywordTranscription({
+    required this.text,
+    required this.tokenizerId,
+    required Iterable<int> tokenIds,
+  }) : tokenIds = List<int>.unmodifiable(tokenIds);
+
+  final String text;
+  final String tokenizerId;
+  final List<int> tokenIds;
+
+  KeywordTokenSequence get tokenSequence =>
+      KeywordTokenSequence(tokenizerId: tokenizerId, tokenIds: tokenIds);
+}
+
 final class KeywordPhrase {
   const KeywordPhrase(
     this.text, {
     this.spokenForms = const <String>[],
+    this.spokenTokenSequences = const <KeywordTokenSequence>[],
     this.score = 1,
     this.threshold = 0.25,
   });
@@ -42,6 +81,14 @@ final class KeywordPhrase {
   /// KeywordPhrase('telosnex', spokenForms: ['tell us next'])
   /// ```
   final List<String> spokenForms;
+
+  /// Exact acoustic tokenizations that match the same phrase.
+  ///
+  /// These avoid the potentially lossy decode-to-text/re-encode round trip.
+  /// Persist [KeywordTranscription.tokenizerId] with the IDs and only supply a
+  /// sequence when it matches [keywordSpotterTokenizerId]. Keep the decoded
+  /// [spokenForms] as a portable fallback when the vocabulary changes.
+  final List<KeywordTokenSequence> spokenTokenSequences;
 
   final double score;
   final double threshold;
@@ -69,7 +116,7 @@ final class KeywordDetection {
 /// Validates and snapshots caller-owned phrase configuration at API entry.
 ///
 /// Inference is serialized asynchronously, so retaining either the outer list
-/// or a mutable [KeywordPhrase.spokenForms] list would make results depend on
+/// or mutable pronunciation/token lists would make results depend on
 /// mutations performed after the call returned.
 List<KeywordPhrase> validatedKeywordPhraseSnapshot(
   Iterable<KeywordPhrase> keywords,
@@ -99,10 +146,39 @@ List<KeywordPhrase> validatedKeywordPhraseSnapshot(
         'Must be finite and in (0, 1]',
       );
     }
+    final tokenSequences = <KeywordTokenSequence>[];
+    for (final sequence in keyword.spokenTokenSequences) {
+      if (sequence.tokenizerId != keywordSpotterTokenizerId) {
+        throw ArgumentError.value(
+          sequence.tokenizerId,
+          'KeywordTokenSequence.tokenizerId',
+          'Does not match the active keyword-spotter vocabulary',
+        );
+      }
+      if (sequence.tokenIds.isEmpty ||
+          sequence.tokenIds.any(
+            (id) => id < 3 || id >= keywordSpotterVocabularySize,
+          )) {
+        throw ArgumentError.value(
+          sequence.tokenIds,
+          'KeywordTokenSequence.tokenIds',
+          'Must contain only normal vocabulary token IDs',
+        );
+      }
+      tokenSequences.add(
+        KeywordTokenSequence(
+          tokenizerId: sequence.tokenizerId,
+          tokenIds: List<int>.unmodifiable(sequence.tokenIds),
+        ),
+      );
+    }
     result.add(
       KeywordPhrase(
         keyword.text,
         spokenForms: List<String>.unmodifiable(keyword.spokenForms),
+        spokenTokenSequences: List<KeywordTokenSequence>.unmodifiable(
+          tokenSequences,
+        ),
         score: keyword.score,
         threshold: keyword.threshold,
       ),

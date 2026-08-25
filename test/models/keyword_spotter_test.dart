@@ -6,6 +6,24 @@ import 'package:fonnx/models/keyword_spotter/keyword_spotter.dart';
 
 void main() {
   const modelDirectory = 'example/assets/models/keywordSpotter';
+  const telosnexTokenSequences = [
+    KeywordTokenSequence(
+      tokenizerId: KeywordSpotter.tokenizerId,
+      tokenIds: [410, 142, 446],
+    ),
+    KeywordTokenSequence(
+      tokenizerId: KeywordSpotter.tokenizerId,
+      tokenIds: [410, 142, 20, 9, 28, 122, 3],
+    ),
+    KeywordTokenSequence(
+      tokenizerId: KeywordSpotter.tokenizerId,
+      tokenIds: [410, 218, 56, 31, 9, 25, 122, 3],
+    ),
+    KeywordTokenSequence(
+      tokenizerId: KeywordSpotter.tokenizerId,
+      tokenIds: [410, 142, 304, 122, 3],
+    ),
+  ];
 
   test(
     'detects runtime English phrases in streaming PCM',
@@ -94,13 +112,28 @@ void main() {
           isTrue,
         );
 
-        // Transcription mode: report what the model heard, so users can
-        // discover spokenForms for hard-to-spell names.
-        final heard = await spotter.transcribePcm16(telosnexPcm);
+        // Transcription mode preserves exactly what the decoder emitted.
+        final transcription = await spotter.transcribePcm16WithTokens(
+          telosnexPcm,
+        );
         // Greedy transcription of three "telosnex" utterances; exact words
         // vary with decoding mode, but the acoustic gist is stable.
+        expect(transcription.text, contains('tell'));
+        expect(transcription.text, contains('snacks'));
+        expect(transcription.tokenIds, isNotEmpty);
+        expect(transcription.tokenizerId, KeywordSpotter.tokenizerId);
+        expect(
+          KeywordSpotter.decodeTokenIds(transcription.tokenIds),
+          transcription.text,
+        );
+        expect(
+          () => transcription.tokenIds.add(3),
+          throwsUnsupportedError,
+        );
+
+        // The original text-only API remains source-compatible.
+        final heard = await spotter.transcribePcm16(telosnexPcm);
         expect(heard, contains('tell'));
-        expect(heard, contains('snacks'));
 
         // Detection still works after a transcription pass.
         await spotter.setKeywords(const [KeywordPhrase('rain in Spain')]);
@@ -125,6 +158,46 @@ void main() {
     },
     timeout: const Timeout(Duration(minutes: 2)),
   );
+  test(
+    'detects exact learned token sequences without re-tokenizing text',
+    () async {
+      final spotter = await KeywordSpotter.load(
+        bundle: KeywordSpotterBundle.gigaSpeech3m(modelDirectory),
+        keywords: const [
+          KeywordPhrase(
+            'telosnex',
+            spokenTokenSequences: telosnexTokenSequences,
+          ),
+        ],
+      );
+      final detections = <KeywordDetection>[];
+      final subscription = spotter.detections.listen(detections.add);
+      try {
+        final pcm = File(
+          'example/assets/telosnex_hotword_3times_ar16000.pcm',
+        ).readAsBytesSync();
+        const chunkBytes = 3200;
+        for (var offset = 0; offset < pcm.length; offset += chunkBytes) {
+          final end = offset + chunkBytes < pcm.length
+              ? offset + chunkBytes
+              : pcm.length;
+          await spotter.acceptPcm16(pcm.sublist(offset, end));
+        }
+        await spotter.finish();
+
+        expect(detections, isNotEmpty);
+        expect(
+          detections.every((detection) => detection.phrase == 'telosnex'),
+          isTrue,
+        );
+      } finally {
+        await subscription.cancel();
+        await spotter.close();
+      }
+    },
+    timeout: const Timeout(Duration(minutes: 2)),
+  );
+
   test(
     'serializes chunks and recreates Native Asset sessions',
     () async {

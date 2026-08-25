@@ -4,10 +4,20 @@ import 'keyword_spotter_none.dart'
     if (dart.library.io) 'keyword_spotter_native.dart'
     if (dart.library.js_interop) 'keyword_spotter_web.dart';
 import 'keyword_spotter_types.dart';
+import 'src/english_tokenizer.dart';
 
 export 'keyword_spotter_types.dart';
 
 abstract class KeywordSpotter {
+  static final EnglishKwsTokenizer _tokenizer = EnglishKwsTokenizer();
+
+  /// Vocabulary identity for token IDs accepted and returned by this API.
+  static const tokenizerId = keywordSpotterTokenizerId;
+
+  /// Decodes exact token IDs without running the unigram encoder again.
+  static String decodeTokenIds(Iterable<int> tokenIds) =>
+      _tokenizer.decode(tokenIds);
+
   static Future<KeywordSpotter> load({
     required KeywordSpotterBundle bundle,
     required List<KeywordPhrase> keywords,
@@ -63,10 +73,29 @@ abstract class KeywordSpotter {
   Future<String> transcribeSamples(
     Float32List samples, {
     int sampleRate = 16000,
+  }) async =>
+      (await transcribeSamplesWithTokens(samples, sampleRate: sampleRate)).text;
+
+  /// Transcribes audio and preserves the model's exact decoder token IDs.
+  ///
+  /// [KeywordTranscription.text] is [decodeTokenIds] applied to those IDs.
+  /// Keep the text as a portable fallback and use the IDs only while
+  /// [KeywordTranscription.tokenizerId] equals [tokenizerId].
+  Future<KeywordTranscription> transcribeSamplesWithTokens(
+    Float32List samples, {
+    int sampleRate = 16000,
   });
 
   Future<String> transcribePcm16(Uint8List bytes, {int sampleRate = 16000}) =>
       transcribeSamples(_pcm16ToSamples(bytes), sampleRate: sampleRate);
+
+  Future<KeywordTranscription> transcribePcm16WithTokens(
+    Uint8List bytes, {
+    int sampleRate = 16000,
+  }) => transcribeSamplesWithTokens(
+    _pcm16ToSamples(bytes),
+    sampleRate: sampleRate,
+  );
 
   static Float32List _pcm16ToSamples(Uint8List bytes) {
     if (bytes.length.isOdd) {

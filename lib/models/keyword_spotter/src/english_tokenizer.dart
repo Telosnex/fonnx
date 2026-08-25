@@ -67,6 +67,21 @@ final class EnglishKwsTokenizer {
     return reversed.reversed.toList(growable: false);
   }
 
+  String decode(Iterable<int> tokenIds) {
+    final pieces = StringBuffer();
+    for (final tokenId in tokenIds) {
+      if (tokenId < 3 || tokenId >= englishKwsPieces.length) {
+        throw ArgumentError.value(
+          tokenId,
+          'tokenIds',
+          'Must contain only normal English KWS vocabulary token IDs',
+        );
+      }
+      pieces.write(englishKwsPieces[tokenId]);
+    }
+    return pieces.toString().replaceAll('▁', ' ').trim().toLowerCase();
+  }
+
   String normalize(String phrase) {
     final trimmed = phrase.trim();
     if (trimmed.isEmpty) {
