@@ -108,9 +108,12 @@ Future<_ArtifactManifest> _loadArtifactManifest(Uri packageRoot) async {
 }
 
 void main(List<String> args) async {
+  final hookLog = _HookLogBuffer('fonnx');
   await build(args, (input, output) async {
     if (!input.config.buildCodeAssets) return;
 
+    final hookStopwatch = Stopwatch()..start();
+    final artifactStopwatch = Stopwatch()..start();
     final manifest = await _loadArtifactManifest(input.packageRoot);
     final os = input.config.code.targetOS;
 
@@ -142,6 +145,7 @@ void main(List<String> args) async {
       artifact: artifact,
       outputFileName: os.dylibFileName('onnxruntime'),
       assetName: _ortAssetName,
+      log: hookLog,
     );
 
     final extensionsArtifact = manifest.extensions[key];
@@ -152,9 +156,12 @@ void main(List<String> args) async {
         artifact: extensionsArtifact,
         outputFileName: os.dylibFileName('ortextensions'),
         assetName: _ortExtensionsAssetName,
+        log: hookLog,
       );
     }
+    final artifactDuration = artifactStopwatch.elapsed;
 
+    final finalizerStopwatch = Stopwatch()..start();
     await CBuilder.library(
       name: 'fonnx_ort_session_finalizer',
       assetName: _ortSessionFinalizerAssetName,
@@ -164,6 +171,7 @@ void main(List<String> args) async {
       includes: [input.packageRoot.resolve('src').toFilePath()],
       libraries: [if (os == OS.windows) 'ole32'],
     ).run(input: input, output: output);
+    final finalizerDuration = finalizerStopwatch.elapsed;
 
     // Make changes to the hook invalidate hooks_runner's own dependency graph.
     output.dependencies.add(input.packageRoot.resolve('hook/build.dart'));
@@ -174,7 +182,13 @@ void main(List<String> args) async {
     output.dependencies.add(
       input.packageRoot.resolve('src/ort_session_finalizer.h'),
     );
-  });
+
+    hookLog.add(
+      'Hook completed in ${_formatDuration(hookStopwatch.elapsed)} '
+      '(artifacts ${_formatDuration(artifactDuration)}, '
+      'finalizer ${_formatDuration(finalizerDuration)})',
+    );
+  }).whenComplete(hookLog.flush);
 }
 
 Future<void> _publishArtifact({
@@ -183,10 +197,13 @@ Future<void> _publishArtifact({
   required _Artifact artifact,
   required String outputFileName,
   required String assetName,
+  required _HookLogBuffer log,
 }) async {
+  final publishStopwatch = Stopwatch()..start();
   final cachedLibrary = await _ensureCachedLibrary(
     artifact: artifact,
     outputFileName: outputFileName,
+    log: log,
   );
   final outputDirectory = Directory.fromUri(input.outputDirectory);
   await outputDirectory.create(recursive: true);
@@ -200,11 +217,16 @@ Future<void> _publishArtifact({
       file: publishedLibrary.uri,
     ),
   );
+  log.add(
+    'Published $outputFileName in '
+    '${_formatDuration(publishStopwatch.elapsed)}',
+  );
 }
 
 Future<File> _ensureCachedLibrary({
   required _Artifact artifact,
   required String outputFileName,
+  required _HookLogBuffer log,
 }) async {
   // One archive (notably an Android AAR) can contain several ABI-specific
   // libraries with the same output filename. Include the selected entry in
@@ -240,9 +262,9 @@ Future<File> _ensureCachedLibrary({
     );
     await _withExclusiveLock(
       File(p.join(artifactDirectory.path, '.download.lock')),
-      () => _ensureVerifiedDownload(artifact, archiveFile),
+      () => _ensureVerifiedDownload(artifact, archiveFile, log),
     );
-    await _extractLibrary(artifact, archiveFile, library);
+    await _extractLibrary(artifact, archiveFile, library, log);
     return library;
   });
 }
@@ -250,6 +272,7 @@ Future<File> _ensureCachedLibrary({
 Future<void> _ensureVerifiedDownload(
   _Artifact artifact,
   File archiveFile,
+  _HookLogBuffer log,
 ) async {
   if (await archiveFile.exists()) {
     final digest = await _sha256Of(archiveFile);
@@ -260,7 +283,8 @@ Future<void> _ensureVerifiedDownload(
   final partial = File('${archiveFile.path}.partial');
   if (await partial.exists()) await partial.delete();
 
-  stderr.writeln('fonnx: downloading ${artifact.url}');
+  final downloadStopwatch = Stopwatch()..start();
+  log.add('Downloading ${artifact.url}');
   final client = HttpClient();
   try {
     final request = await client.getUrl(Uri.parse(artifact.url));
@@ -286,14 +310,19 @@ Future<void> _ensureVerifiedDownload(
     );
   }
   await partial.rename(archiveFile.path);
+  log.add(
+    'Download completed in ${_formatDuration(downloadStopwatch.elapsed)}',
+  );
 }
 
 Future<void> _extractLibrary(
   _Artifact artifact,
   File archiveFile,
   File outputFile,
+  _HookLogBuffer log,
 ) async {
-  stderr.writeln('fonnx: extracting ${p.basename(outputFile.path)}');
+  final extractionStopwatch = Stopwatch()..start();
+  log.add('Extracting ${p.basename(outputFile.path)}');
   final encoded = await archiveFile.readAsBytes();
   final archive = artifact.isZip
       ? ZipDecoder().decodeBytes(encoded, verify: true)
@@ -322,6 +351,45 @@ Future<void> _extractLibrary(
   final partial = File('${outputFile.path}.partial');
   await partial.writeAsBytes(bytes, flush: true);
   await partial.rename(outputFile.path);
+  log.add(
+    'Extraction completed in ${_formatDuration(extractionStopwatch.elapsed)}',
+  );
+}
+
+/// Collects hook messages so hooks_runner does not insert a blank line after
+/// every separately streamed stderr chunk.
+final class _HookLogBuffer {
+  _HookLogBuffer(this.tag);
+
+  final String tag;
+  final List<String> _lines = [];
+
+  void add(String message) {
+    final normalized = message.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
+    for (final line in normalized.split('\n')) {
+      if (line.trim().isEmpty) continue;
+      _lines.add('[$tag] $line');
+    }
+  }
+
+  void flush() {
+    if (_lines.isEmpty) return;
+    // hooks_runner adds the terminating newline while capturing this chunk.
+    stderr.write(_lines.join('\n'));
+  }
+}
+
+String _formatDuration(Duration duration) {
+  final millis = duration.inMilliseconds;
+  if (millis < 1000) return '${millis}ms';
+  final seconds = duration.inSeconds;
+  final remainderMillis = millis - seconds * 1000;
+  if (seconds < 60) {
+    return '$seconds.${(remainderMillis ~/ 100).toString()}s';
+  }
+  final minutes = seconds ~/ 60;
+  final remainderSeconds = seconds % 60;
+  return '${minutes}m ${remainderSeconds}s';
 }
 
 Future<String> _sha256Of(File file) async =>
