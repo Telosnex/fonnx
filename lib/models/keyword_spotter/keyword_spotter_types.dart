@@ -103,7 +103,12 @@ final class KeywordDetection {
   });
 
   final String phrase;
+
+  /// Audio position of the confirmation frame, not callback arrival time.
+  /// Timestamp origin is the most recent public reset or setKeywords call.
   final Duration detectedAt;
+
+  /// Audio positions in that same timeline. Internal silence resets preserve it.
   final List<Duration> tokenTimestamps;
   final double meanTokenProbability;
 

@@ -65,14 +65,16 @@ final class TransducerKeywordDecoder {
     reset();
   }
 
-  void reset() {
+  /// Clears hypotheses without losing the input clock on an internal silence reset.
+  /// Public reset/setKeywords starts a new timeline.
+  void reset({bool preserveTimeline = false}) {
     final hypothesis = KwsHypothesis(
       tokens: <int>[-1, blankId],
       logProbability: 0,
       contextState: _graph.root,
     );
     _hypotheses = <String, KwsHypothesis>{hypothesis.key: hypothesis};
-    _frameOffset = 0;
+    if (!preserveTimeline) _frameOffset = 0;
   }
 
   Future<List<KeywordDetection>> decode(KwsEncoderOutput encoder) async {
@@ -173,7 +175,7 @@ final class TransducerKeywordDecoder {
           detections.add(
             KeywordDetection(
               phrase: matched.phrase,
-              detectedAt: Duration(milliseconds: timestamps.last * 40),
+              detectedAt: Duration(milliseconds: (frame + _frameOffset) * 40),
               tokenTimestamps: timestamps
                   .map((frame) => Duration(milliseconds: frame * 40))
                   .toList(growable: false),

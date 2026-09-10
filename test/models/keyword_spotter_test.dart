@@ -159,6 +159,45 @@ void main() {
     timeout: const Timeout(Duration(minutes: 2)),
   );
   test(
+    'public timestamps locate a wake phrase after long silence and reset',
+    () async {
+      final spotter = await KeywordSpotter.load(
+        bundle: KeywordSpotterBundle.gigaSpeech3m(modelDirectory),
+        keywords: const [KeywordPhrase('rain in Spain')],
+      );
+      final detections = <KeywordDetection>[];
+      final subscription = spotter.detections.listen(detections.add);
+      final pcm = await File(
+        'test/data/audio_sample_ac1_ar16000.pcm',
+      ).readAsBytes();
+      try {
+        // Several internal blank resets occur before the first spoken token.
+        await spotter.acceptPcm16(Uint8List(16000 * 2 * 8));
+        await spotter.acceptPcm16(pcm);
+        await spotter.finish();
+        final delayed = detections.single;
+        expect(
+          delayed.startTime,
+          greaterThanOrEqualTo(const Duration(seconds: 8)),
+        );
+        expect(delayed.detectedAt, greaterThan(delayed.endTime));
+
+        await spotter.reset();
+        detections.clear();
+        await spotter.acceptPcm16(pcm);
+        await spotter.finish();
+        final fresh = detections.single;
+        expect(fresh.startTime, lessThan(const Duration(seconds: 3)));
+        expect(fresh.detectedAt, greaterThan(fresh.endTime));
+      } finally {
+        await subscription.cancel();
+        await spotter.close();
+      }
+    },
+    timeout: const Timeout(Duration(minutes: 2)),
+  );
+
+  test(
     'detects exact learned token sequences without re-tokenizing text',
     () async {
       final spotter = await KeywordSpotter.load(

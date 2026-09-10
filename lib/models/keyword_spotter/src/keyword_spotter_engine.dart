@@ -177,7 +177,9 @@ final class KeywordSpotterEngine {
     final detections = <KeywordDetection>[];
     while (_processedFrames + _encoderChunkFrames < _fbank.numFramesReady) {
       if (_decoder.trailingBlanks * 0.04 > 1.5) {
-        _decoder.reset();
+        // The frontend continues at _processedFrames. Reset acoustic context,
+        // not the timestamps used to locate speech in the caller's recording.
+        _decoder.reset(preserveTimeline: true);
         await _backend.resetEncoderState();
       }
       final features = _fbank.getFrames(_processedFrames, _encoderChunkFrames);
