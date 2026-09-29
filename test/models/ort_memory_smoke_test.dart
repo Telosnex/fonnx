@@ -16,6 +16,7 @@ import 'package:fonnx/models/pyannote/pyannote.dart';
 import 'package:fonnx/models/pyannote/pyannote_native.dart';
 import 'package:fonnx/models/sileroVad/silero_vad_native.dart';
 import 'package:fonnx/models/whisper/whisper_native.dart';
+import 'package:fonnx/tokenizers/potion_32m_tokenizer.dart';
 
 void main() {
   test(
@@ -111,7 +112,7 @@ void main() {
       const modelPath = 'example/assets/models/minishLab/potion32m.onnx';
       final minishLab = MinishLabNative(modelPath);
       final tokens =
-          MinishLab.potion32mTokenizer
+          potion32mTokenizer
               .tokenize('This is a memory smoke test for native ORT cleanup.')
               .first
               .tokens;

@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fonnx/extensions/vector.dart';
-import 'package:fonnx/models/minishLab/minish_lab.dart';
 import 'package:fonnx/models/minishLab/minish_lab_native.dart';
+import 'package:fonnx/tokenizers/potion_32m_tokenizer.dart';
 import 'package:ml_linalg/linalg.dart';
 
 import 'embedding_golden.dart';
@@ -10,7 +10,7 @@ import 'embedding_golden.dart';
 void main() {
   const modelPath = 'example/assets/models/minishLab/potion32m.onnx';
   final minishLab = MinishLabNative(modelPath);
-  final tokenizer = MinishLab.potion32mTokenizer;
+  final tokenizer = potion32mTokenizer;
 
   List<int> tokenize(String text) {
     return tokenizer.tokenize(text).first.tokens;
@@ -51,7 +51,7 @@ void main() {
   });
 
   test('Performance test', () async {
-    final List<List<int>> tokens = MinishLab.potion32mTokenizer
+    final List<List<int>> tokens = potion32mTokenizer
         .tokenize(data)
         .map((e) => e.tokens)
         .toList();

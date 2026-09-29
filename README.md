@@ -14,6 +14,13 @@ framework."
 
 # Changelog
 
+## 2026 Sep 29
+- Moved the Potion 32M tokenizer into an opt-in library so 8M-only apps no
+  longer load the 32M vocabulary in debug builds. Replace
+  `MinishLab.potion32mTokenizer` with `potion32mTokenizer` and import
+  `package:fonnx/tokenizers/potion_32m_tokenizer.dart`.
+  `MinishLab.potion8mTokenizer` is unchanged.
+
 ## 2026 Aug 24
 - Pronunciation transcription can preserve exact decoder token IDs, identify
   their vocabulary, decode them without re-tokenization, and feed compatible

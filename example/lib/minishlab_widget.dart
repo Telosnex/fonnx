@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fonnx/models/minishLab/minish_lab.dart';
+import 'package:fonnx/tokenizers/potion_32m_tokenizer.dart';
 import 'package:fonnx_example/padding.dart';
 import 'dart:async';
 import 'package:path_provider/path_provider.dart' as path_provider;
@@ -49,7 +50,7 @@ class _MinishLabWidgetState extends State<MinishLabWidget> {
 
   void _runMinishPotion32MSpeedTest() async {
     final string = await rootBundle.loadString('assets/text_sample.txt');
-    final textAndTokens = MinishLab.potion32mTokenizer.tokenize(string);
+    final textAndTokens = potion32mTokenizer.tokenize(string);
     final path = await getModelPath('potion32m.onnx');
     final model = MinishLab.load(path);
     debugPrint('Loaded model');
