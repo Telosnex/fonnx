@@ -1,0 +1,39 @@
+{
+  "schema": 2,
+  "fixture": {
+    "path": "replay.json.gz",
+    "sha256": "48b9e143b7194c52d0fa7ee65e9facca7bdf47d017a83c706099154b633d3972",
+    "bytes": 1633127
+  },
+  "dataset": {
+    "url": "https://huggingface.co/datasets/futo-org/swipe.futo.org/resolve/d71bf5fd7f45b3e7c2ed2d76a21b0dbd3b4ba566/test.jsonl",
+    "selection": "First 1000 rows in file order. Public trace points (relative milliseconds, x, y), alphabetic target, and derived encoder features only. User identifiers, session IDs, and prompt sentences are excluded.",
+    "license": "LICENSE-MIT.txt"
+  },
+  "preprocessing": "points: raw trace as [relativeMilliseconds, x, y]. features: original NumPy two-stage linear interpolation (trace to approximately 60 Hz, then 64 points; x then y) as exact float32. lib/models/futo_swipe/src/trace_resampler.dart must reproduce features from points bit-for-bit. Fixed alphabetic QWERTY geometry and 26-key mask.",
+  "reference": {
+    "runtime": "ExecuTorch 1.2.0 / torch 2.11.0 Python binding on Apple M4 Max",
+    "sourceModelRevision": "18328c3042b066952c0936b3771d492fe2ec289a",
+    "refinedLogitsSha256": "7e4f6a2e8014c01f3e2070e105a12985bfe8d5bf7e3815f5301b32383d73743c",
+    "shape": [
+      1000,
+      1,
+      32,
+      27
+    ],
+    "format": "Little-endian float32",
+    "scope": "Top-three candidates frozen from the original one-off ExecuTorch logits with the independent Dart CTC recurrence. This replay does not regenerate the ExecuTorch numerical comparison."
+  },
+  "lexicons": {
+    "esdb": {
+      "url": "https://raw.githubusercontent.com/en-wl/wordlist-diff/7f2f4078354752045ee16a041605686561122185/en_US.txt",
+      "sha256": "45a4dd29b86234fbabce26f33272466bb5572db6fdca1470c4f218e6b666a56d",
+      "bytes": 1024440
+    },
+    "aosp": {
+      "url": "https://raw.githubusercontent.com/LineageOS/android_packages_inputmethods_LatinIME/017c5587d7f8728bf7d67143e990d160efe4a08f/dictionaries/en_US_wordlist.combined.gz",
+      "sha256": "0f78dd455b532be169a23f233227b811fabced4b5bd7fc9c40cc05839793bcbd",
+      "bytes": 883015
+    }
+  }
+}

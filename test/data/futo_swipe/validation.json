@@ -1,0 +1,91 @@
+{
+  "host": "Apple M4 Max",
+  "reference": "ExecuTorch 1.2.0 with torch 2.11.0 Python binding; backend default threading (torch threads=1 does not install NoThreadPoolGuard).",
+  "target": "ONNX Runtime 1.27.0 CPU one thread",
+  "swipes": 1000,
+  "contexts": 200,
+  "embeddingTables": "bit-exact across all four complete tensors",
+  "numeric": {
+    "encoder:0": {
+      "maxAbsoluteError": 0.40546512603759766,
+      "maxScaledError": 0.024518784135580063,
+      "cases": 1000
+    },
+    "encoder:1": {
+      "maxAbsoluteError": 0.0050106048583984375,
+      "maxScaledError": 0.00041935109766200185,
+      "cases": 1000
+    },
+    "encoder:2": {
+      "maxAbsoluteError": 0.00016540288925170898,
+      "maxScaledError": 0.00012698046339210123,
+      "cases": 1000
+    },
+    "decoder:0": {
+      "maxAbsoluteError": 2.6702880859375e-05,
+      "maxScaledError": 3.448655206739204e-06,
+      "cases": 1000
+    },
+    "pipeline:decoder": {
+      "maxAbsoluteError": 0.3516864776611328,
+      "maxScaledError": 0.020371468737721443,
+      "cases": 1000
+    },
+    "context:0": {
+      "maxAbsoluteError": 4.5299530029296875e-05,
+      "maxScaledError": 2.5714234652696177e-05,
+      "cases": 200
+    }
+  },
+  "dataset": {
+    "source": "https://huggingface.co/datasets/futo-org/swipe.futo.org/resolve/d71bf5fd7f45b3e7c2ed2d76a21b0dbd3b4ba566/test.jsonl",
+    "selection": "First 1000 rows; same resampling and fixed alphabetic QWERTY geometry",
+    "license": "MIT; test/data/futo_swipe/LICENSE-MIT.txt"
+  },
+  "candidateReplay": {
+    "count": 1000,
+    "context": false,
+    "beam": 300,
+    "sameFirst": 1000,
+    "sameTopThreeOrdered": 1000,
+    "etTop1": 886,
+    "ortTop1": 886,
+    "etTop3": 914,
+    "ortTop3": 914,
+    "differences": [],
+    "method": "Public FutoSwipe.decode from raw trace points: Dart NumPy-compatible resampling, native ONNX Runtime, and lib/models/futo_swipe CTC prefix search. Lexicon: model vocabulary + revision- and hash-pinned ESDB US spelling list + AOSP combined frequencies in replay_manifest.json, letters-only entries in source order. No ContextLM reranking.",
+    "reproduceCommand": "flutter test tool/futo/replay.dart --concurrency=1 --reporter expanded",
+    "reference": "Frozen original ExecuTorch ordered top-three in replay.json.gz. Current ONNX pipeline is rerun live; this does not regenerate the historical numerical error statistics.",
+    "nativeReplayVerification": {
+      "runtime": "fonnx bundled macOS arm64 ONNX Runtime 1.27.0, default CPU threading, Apple M4 Max",
+      "api": "FutoSwipe.decode from raw trace points",
+      "result": "1000/1000 identical ordered top-three; top1 886/1000 and top3 914/1000; context disabled",
+      "swipeableLexicon": 253219,
+      "decodeMilliseconds": {
+        "p50": 15.872,
+        "p95": 22.857
+      },
+      "command": "flutter test tool/futo/replay.dart --concurrency=1 --reporter expanded"
+    },
+    "resampling": "lib/models/futo_swipe/src/trace_resampler.dart reproduces the NumPy features of all 1000 traces bit-for-bit, including 32 zero-duration and 6 duplicate-timestamp traces."
+  },
+  "limits": [
+    "Not bit-exact floating point inference. Encoder log-score drift reaches 0.405 near sigmoid saturation; output clamps preserved exactly.",
+    "All ordered top-three candidates match on this replay; no claim of population accuracy.",
+    "No Pi, Android, iOS, or in-browser inference test. Web Worker and compiled Dart Web API were exercised under Node with ONNX Runtime Web 1.27.0.",
+    "Context-enabled swipe ranking has no frozen ExecuTorch reference in this package.",
+    "Nine compact native goldens use three real swipes, padding, all-hashed IDs, and an exact-vocabulary sentence."
+  ],
+  "nativeRegression": {
+    "runtime": "fonnx bundled macOS arm64 ONNX Runtime 1.27.0 native code asset",
+    "scope": "Nine ExecuTorch numerical goldens through the shipped native backend; four complete embedding hashes; all distributed files and source pins; seven tamper checks; replay fixture integrity; converter wire/bounds tests; public FutoSwipe API tests; and pure-Dart engine, hash, resampler, and brute-force CTC tests.",
+    "tolerances": "Encoder coefficients: 5e-4*(1+abs(reference)); saturated encoder blank log score below -11: 0.42 absolute; other outputs: 1e-4*(1+abs(reference)). Bounds taken from the independent 1000-swipe replay, not fitted weights."
+  },
+  "evidenceStatus": "Historical one-off live ExecuTorch-versus-ONNX numerical comparison. The original transient scripts are not a supported regeneration tool. Native numerical goldens, complete embedding hashes, raw public traces, and a 1000-swipe public-API candidate replay are checked in.",
+  "webVerification": {
+    "runtime": "ONNX Runtime Web 1.27.0 WebAssembly under Node 22.16.0, real futo_swipe_worker.js and futo_swipe_init.js",
+    "worker": "Nine goldens within the native tolerances; four embedding tables byte-identical",
+    "dartApi": "dart compile js of the public API matched native lexicon size, top-three for 20 swipes, next-word ranking, and word scores within 5e-6",
+    "limit": "Not run in a browser"
+  }
+}

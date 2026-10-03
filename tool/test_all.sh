@@ -7,6 +7,10 @@ cd "$root"
 
 tests=(
   test/deterministic_operation_corpus_test.dart
+  test/models/futo_swipe_api_test.dart
+  test/models/futo_swipe_converter_test.dart
+  test/models/futo_swipe_core_test.dart
+  test/models/futo_swipe_test.dart
   test/models/keyword_spotter_core_test.dart
   test/models/keyword_spotter_test.dart
   test/models/magika_test.dart

@@ -1,0 +1,10 @@
+These models are derived from FUTO Swipe and are subject to the FUTO Model
+Weights License 1.0. See LICENSE-FUTO.txt for the complete, unchanged terms.
+
+This is an unofficial ONNX format conversion. It does not imply sponsorship,
+affiliation, or endorsement by FUTO. No training or intentional weight changes
+were performed. Source revisions, tensor contracts, and checksums are recorded
+in manifest.json.
+
+Products using these models must display a visible notice to end users stating
+that the product is powered by "FUTO Swipe" technology, as required by the license.

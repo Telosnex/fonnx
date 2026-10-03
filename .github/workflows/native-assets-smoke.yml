@@ -10,6 +10,13 @@ on:
       - 'src/**'
       - 'tool/**'
       - 'example/web/**'
+      - 'example/assets/models/futoSwipe/**'
+      - 'test/models/futo_swipe*.dart'
+      - 'lib/models/futo_swipe/**'
+      - 'lib/web/futo_swipe_*.js'
+      - 'example/web/futo_swipe_*.js'
+      - 'test/data/futo_swipe/**'
+      - '.gitattributes'
       - 'test/ort_native_asset_test.dart'
       - 'test/models/bpe_decoder.onnx'
       - 'test/models/identity.onnx'
@@ -61,3 +68,5 @@ jobs:
         run: flutter test test/deterministic_operation_corpus_test.dart --reporter expanded
       - name: Resolve ORT + Extensions and create real sessions
         run: flutter test test/ort_native_asset_test.dart --reporter expanded
+      - name: Run FUTO Swipe conversion and native inference regressions
+        run: flutter test test/models/futo_swipe_core_test.dart test/models/futo_swipe_converter_test.dart test/models/futo_swipe_test.dart test/models/futo_swipe_api_test.dart --concurrency=1 --reporter expanded

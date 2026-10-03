@@ -102,6 +102,49 @@ Another tool that automates conversion to ONNX is [HFOnnx](https://neuml.github.
 - Brief intro to how ONNX model format & runtime work [huggingface.com](https://huggingface.co/docs/optimum/onnxruntime/concept_guides/onnx)
 - [Netron](https://netron.app/) allows you to view ONNX models, inspect their runtime graph, and export them to other formats
 
+### FUTO keyboard models
+
+`FutoSwipe` provides offline English QWERTY swipe decoding, next-word
+prediction, and ContextLM word scoring from the FUTO Swipe models:
+
+```dart
+final swipe = await FutoSwipe.load(
+  bundle: FutoSwipeBundle.fromDirectory(modelDirectory),
+  lexicon: const [FutoSwipeWord('hello', frequency: 200)],
+);
+final candidates = await swipe.decode(points, previousWords: const ['say']);
+```
+
+`lib/models/futo_swipe/README.md` documents the API contract, pipeline, and
+validation. The Web requires `futo_swipe_init.js` and `futo_swipe_worker.js`.
+
+The converted bundle is in `example/assets/models/futoSwipe/`. It has the swipe
+encoder, the English QWERTY decoder, ContextLM, and `get_embeddings.onnx`. All
+graphs use core ONNX opset 17 and need no custom operators. `manifest.json`
+records the tensor contracts, source revisions, and hashes. The vocabulary,
+scoring configuration, metadata, license, and `NOTICE.txt` are distributed with
+the models. The artifact gate verifies every file.
+
+The bundle is derived from FUTO Swipe and is subject to the FUTO Model Weights
+License 1.0 in `LICENSE-FUTO.txt`. Products must display visible **FUTO Swipe**
+attribution. Neither the conversion nor the runtime uses the GPL swipe library.
+
+To reproduce the bundle, use FlatBuffers `flatc` 25.2.10 and an empty output
+directory:
+
+```bash
+dart run tool/futo/convert.dart /tmp/futo-swipe-onnx /path/to/flatc
+```
+
+The Dart converter translates the pinned `.pte` graphs and copies their FP32
+weights. It needs no Python, training checkpoint, or ExecuTorch runtime.
+Inference is not bit-exact with ExecuTorch, especially near sigmoid saturation.
+`test/data/futo_swipe/validation.json` records the one-off numerical
+comparison. The network-enabled replay in `tool/futo/replay.dart` sends 1,000
+raw public swipes through `FutoSwipe.decode`. It checks the results against
+frozen ExecuTorch top-three candidates. All FUTO-specific tools are in
+`tool/futo/`.
+
 ### Text Embeddings
 
 These models generate embeddings for text.

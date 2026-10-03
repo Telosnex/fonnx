@@ -1,2 +1,5 @@
 # Manifest hashes are byte-exact and must not vary with checkout platform.
 * text=auto eol=lf
+
+# Protobuf model bytes must not undergo line-ending conversion.
+/example/assets/models/futoSwipe/**/*.onnx -text

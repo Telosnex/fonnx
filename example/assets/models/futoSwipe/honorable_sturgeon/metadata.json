@@ -1,0 +1,94 @@
+{
+  "kind": "encoder",
+  "codename": "honorable_sturgeon",
+  "layout": "en_qwerty",
+  "input_shape": [
+    1,
+    2,
+    64
+  ],
+  "input_shapes": {
+    "features": [
+      1,
+      2,
+      64
+    ],
+    "layout_keys": [
+      1,
+      64,
+      2
+    ],
+    "layout_mask": [
+      1,
+      64
+    ]
+  },
+  "max_keys": 64,
+  "scoring": {
+    "gamma": 0.1017,
+    "lambda": 0.0373,
+    "beta": 2.1745
+  },
+  "tuned_params": {
+    "gamma": 0.1017,
+    "lambda": 0.0373,
+    "beta": 2.1745,
+    "beam_width": 100
+  },
+  "model_config": {
+    "input_channels": 2,
+    "hidden_channels": 128,
+    "kernel_size": 7,
+    "dilations": [
+      1,
+      2,
+      3,
+      5,
+      8
+    ],
+    "expansion": 4,
+    "dropout": 0.1,
+    "se_ratio": 4,
+    "adapter_channels": 256,
+    "freq_x": 8,
+    "freq_y": 8,
+    "lambda_init": 0.0,
+    "coeff_norm": "batch"
+  },
+  "parameter_counts": {
+    "backbone": 552224,
+    "spatial_head": 16833,
+    "savgol": 35,
+    "total": 635140,
+    "total_mb": 2.4228668212890625,
+    "adapter": 66048
+  },
+  "training_metrics": {
+    "epochs_completed": 54,
+    "total_steps": 848760,
+    "wall_time_seconds": 12523.8,
+    "val_loss_best": 0.48613289892673495,
+    "val_loss_final": 0.48808453381061556,
+    "train_loss_final": 0.594605802225625,
+    "top1_acc": 0.85576,
+    "top3_acc": 0.92363,
+    "mrr": 0.89199,
+    "cer": 0.06237
+  },
+  "run_dir": "/home/lee/Documents/FUTO/universal-swipe/runs/encoder/20260412_135243",
+  "checkpoint": "best_acc.pt",
+  "git_commit": "86b375fbc0ad76fd6cc421b09f28a110c4e98367",
+  "export_timestamp": "2026-04-20T22:38:25+00:00",
+  "file_hashes": {
+    "model_fp32.pte": "725242bab5d14345e96ff214e8de2bfbc1f962c232d320df9c24cb82ffd1fbaf",
+    "model_fp16.pte": "08f5587f4cf2a9fac0d8ef056ca60d2fabf19fdf27a7e9891ac0e522cb9800f6",
+    "ops.txt": "7719616549a61141a1a55afe55c3aef3afa4bf9d434d668e5ecc45790e4b0cf1",
+    "model_mixed.pte": "ce961c7a314e49545d5b9baf2fc51245bd23b6bf6ecec482f67d1ccb6885811e"
+  },
+  "file_sizes": {
+    "model_fp32.pte": 2649856,
+    "model_fp16.pte": 2530432,
+    "ops.txt": 377,
+    "model_mixed.pte": 2566144
+  }
+}

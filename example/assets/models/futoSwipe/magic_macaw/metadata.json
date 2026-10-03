@@ -1,0 +1,61 @@
+{
+  "kind": "decoder",
+  "codename": "magic_macaw",
+  "layout": "en_qwerty",
+  "input_shape": [
+    1,
+    32,
+    92
+  ],
+  "scoring": {
+    "gamma": 0.10805559316114142,
+    "lambda": 0.03353661356880642,
+    "beta": 2.1994436323306066
+  },
+  "model_config": {
+    "hidden_size": 256,
+    "num_layers": 8,
+    "proj_dim": 64,
+    "context": 7,
+    "num_chars": 26,
+    "dropout": 0.05,
+    "input_dim": 92
+  },
+  "parameter_counts": {
+    "total": 304155,
+    "total_mb": 1.1602592468261719
+  },
+  "training_metrics": {
+    "epochs_completed": 55,
+    "total_steps": 48900,
+    "wall_time_seconds": 5830.3,
+    "val_loss_best": 0.19973850001891455,
+    "val_rank_acc_best": 94.63788773501663,
+    "learned_score_best": 191.64666666666668
+  },
+  "paired_encoder": {
+    "codename": "honorable_sturgeon",
+    "checkpoint": "runs/encoder/20260412_135243/checkpoints/best_acc.pt",
+    "hash": "7cd582b2afb1"
+  },
+  "run_dir": "/home/lee/Documents/FUTO/universal-swipe/runs/decoder/20260417_214601",
+  "checkpoint": "best_learned_ema.pt",
+  "git_commit": "86b375fbc0ad76fd6cc421b09f28a110c4e98367",
+  "export_timestamp": "2026-04-20T21:45:58+00:00",
+  "file_hashes": {
+    "model_fp32.pte": "01eaf16ac4bc0f1ed0698c240807f0e95e6d427bcf6de04983ffc50736744d85",
+    "model_fp16.pte": "cda2f78695c117d75bee53f37ff2f3ab37fd4310b5760c1d62fdcc18a03a590f",
+    "ops.txt": "f76de861b093aa86dca1d3b25e4e6c17f4692433509c47099ab14622125b0502"
+  },
+  "file_sizes": {
+    "model_fp32.pte": 1247468,
+    "model_fp16.pte": 654518,
+    "ops.txt": 51
+  },
+  "tuned_params": {
+    "gamma": 0.10805559316114142,
+    "lambda": 0.03353661356880642,
+    "beta": 2.1994436323306066,
+    "beam_width": 100
+  }
+}

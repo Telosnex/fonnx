@@ -1,0 +1,42 @@
+{
+    "fallback": {
+        "gamma": 0.4056,
+        "lambda": 0.0176,
+        "beta": 0.9866,
+        "alpha": 1.0,
+        "gamma_prune": 0.4234,
+        "beta_prune": 1.0382
+    },
+    "encoder:honorable_sturgeon": {
+        "gamma": 0.4056,
+        "lambda": 0.0176,
+        "beta": 0.9866,
+        "alpha": 0.0,
+        "gamma_prune": 0.4234,
+        "beta_prune": 1.0382
+    },
+    "encoder:honorable_sturgeon decoder:magic_macaw": {
+        "gamma": 0.5949,
+        "lambda": 0.0134,
+        "beta": 0.7271,
+        "alpha": 0.0,
+        "gamma_prune": 0.1902,
+        "beta_prune": 1.2727
+    },
+    "encoder:honorable_sturgeon contextlm:hungry_jellyfish": {
+        "gamma": 0.0159,
+        "lambda": 0.0219,
+        "beta": 3.0665,
+        "alpha": 0.6459,
+        "gamma_prune": 0.2566,
+        "beta_prune": 1.0054
+    },
+    "encoder:honorable_sturgeon decoder:magic_macaw contextlm:hungry_jellyfish": {
+        "gamma": 0.1126,
+        "lambda": 0.0060,
+        "beta": 2.2138,
+        "alpha": 0.6387,
+        "gamma_prune": 0.1902,
+        "beta_prune": 1.2727
+    }
+}

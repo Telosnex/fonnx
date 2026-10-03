@@ -152,6 +152,16 @@
       "sha256": "272db1fe4b84ba4c401c7deeac5a71d9d6d02159a86335b829c32b44f974773b",
       "bytes": 1919
     },
+    "example/web/futo_swipe_init.js": {
+      "path": "example/web/futo_swipe_init.js",
+      "sha256": "b4608d909762399c8671d7b1755acd2b7d08b1dba3b60db5ede6574ab50f20a8",
+      "bytes": 1715
+    },
+    "example/web/futo_swipe_worker.js": {
+      "path": "example/web/futo_swipe_worker.js",
+      "sha256": "650b011a8022539ff5ddd896ef2ee7001b036a17549edfd2042990490d11b8c6",
+      "bytes": 4564
+    },
     "example/web/kws_init.js": {
       "path": "example/web/kws_init.js",
       "sha256": "7f06d7dab8dad184e829c12bc4b307837d14093dacc5f61214ae111710a7266d",
@@ -243,6 +253,26 @@
       "path": "example/assets/models/bpe_decoder.onnx",
       "sha256": "80525e3754c09e2f33c144388520b0050a7a2f414fb951c3d0bf7425aeb108ab",
       "bytes": 375
+    },
+    "example/assets/models/futoSwipe/honorable_sturgeon/model_fp32.onnx": {
+      "path": "example/assets/models/futoSwipe/honorable_sturgeon/model_fp32.onnx",
+      "sha256": "e60b80b77c28e7bd426fa400435584991614d44ce4ba61eba408d8eb81f5f63b",
+      "bytes": 2591063
+    },
+    "example/assets/models/futoSwipe/hungry_jellyfish/context_lm.onnx": {
+      "path": "example/assets/models/futoSwipe/hungry_jellyfish/context_lm.onnx",
+      "sha256": "95722c67e2efde6cd925ddf57a0d44bf879824e53b7db45f32572bff97276979",
+      "bytes": 5955586
+    },
+    "example/assets/models/futoSwipe/hungry_jellyfish/get_embeddings.onnx": {
+      "path": "example/assets/models/futoSwipe/hungry_jellyfish/get_embeddings.onnx",
+      "sha256": "d64902693fec59fb99a1ba986e9fd0668147d5e1e3b3b23cb91e100e2a5d71a1",
+      "bytes": 4456995
+    },
+    "example/assets/models/futoSwipe/magic_macaw/model_fp32.onnx": {
+      "path": "example/assets/models/futoSwipe/magic_macaw/model_fp32.onnx",
+      "sha256": "16e478c542406f4c8a43a16a0a68b83a8f73b516975d66e691a1e1b46bd6dadf",
+      "bytes": 1228537
     },
     "example/assets/models/keywordSpotter/decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx": {
       "path": "example/assets/models/keywordSpotter/decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
@@ -412,6 +442,16 @@
       "path": "lib/web/fonnx_worker_rpc.js",
       "sha256": "272db1fe4b84ba4c401c7deeac5a71d9d6d02159a86335b829c32b44f974773b",
       "bytes": 1919
+    },
+    "lib/web/futo_swipe_init.js": {
+      "path": "lib/web/futo_swipe_init.js",
+      "sha256": "b4608d909762399c8671d7b1755acd2b7d08b1dba3b60db5ede6574ab50f20a8",
+      "bytes": 1715
+    },
+    "lib/web/futo_swipe_worker.js": {
+      "path": "lib/web/futo_swipe_worker.js",
+      "sha256": "650b011a8022539ff5ddd896ef2ee7001b036a17549edfd2042990490d11b8c6",
+      "bytes": 4564
     },
     "lib/web/kws_init.js": {
       "path": "lib/web/kws_init.js",

@@ -1,0 +1,245 @@
+{
+  "modelRevision": "18328c3042b066952c0936b3771d492fe2ec289a",
+  "executorchSchemaRevision": "0b0e2c5cdd67c8b4396a46ea1d1aa72ffb0128d7",
+  "converterVersion": 2,
+  "opset": 17,
+  "irVersion": 8,
+  "sources": {
+    "LICENSE.md": {
+      "url": "https://huggingface.co/futo-org/futo-swipe/resolve/18328c3042b066952c0936b3771d492fe2ec289a/LICENSE.md",
+      "sha256": "ef6b4f6437efa0a2929de351b10c16a8c870b32e1c23054ac76af61531f5db21",
+      "bytes": 5826
+    },
+    "scoring.json": {
+      "url": "https://huggingface.co/futo-org/futo-swipe/resolve/18328c3042b066952c0936b3771d492fe2ec289a/scoring.json",
+      "sha256": "8377ba6932882667da1e87717609f4ccd6bb78709b6b6ea898d3d4325c9c37f6",
+      "bytes": 1085
+    },
+    "honorable_sturgeon/model_fp32.pte": {
+      "url": "https://huggingface.co/futo-org/futo-swipe/resolve/18328c3042b066952c0936b3771d492fe2ec289a/honorable_sturgeon/model_fp32.pte",
+      "sha256": "725242bab5d14345e96ff214e8de2bfbc1f962c232d320df9c24cb82ffd1fbaf",
+      "bytes": 2649856
+    },
+    "honorable_sturgeon/metadata.json": {
+      "url": "https://huggingface.co/futo-org/futo-swipe/resolve/18328c3042b066952c0936b3771d492fe2ec289a/honorable_sturgeon/metadata.json",
+      "sha256": "d2c5aecd89d97e21125046eb1f311b5aed1bdb5805e97316bba70b13f1c7be2c",
+      "bytes": 2110
+    },
+    "magic_macaw/model_fp32.pte": {
+      "url": "https://huggingface.co/futo-org/futo-swipe/resolve/18328c3042b066952c0936b3771d492fe2ec289a/magic_macaw/model_fp32.pte",
+      "sha256": "01eaf16ac4bc0f1ed0698c240807f0e95e6d427bcf6de04983ffc50736744d85",
+      "bytes": 1247468
+    },
+    "magic_macaw/metadata.json": {
+      "url": "https://huggingface.co/futo-org/futo-swipe/resolve/18328c3042b066952c0936b3771d492fe2ec289a/magic_macaw/metadata.json",
+      "sha256": "65ffc8890de41782eb3322aa96f31df24463ea434a200d3ce84aad4fe7c28a11",
+      "bytes": 1683
+    },
+    "hungry_jellyfish/context_lm.pte": {
+      "url": "https://huggingface.co/futo-org/futo-swipe/resolve/18328c3042b066952c0936b3771d492fe2ec289a/hungry_jellyfish/context_lm.pte",
+      "sha256": "74d29f56a513c0c60abcd43df3b16a6b68925cdf4e97e51b094a5275ec2810d7",
+      "bytes": 6247616
+    },
+    "hungry_jellyfish/metadata.json": {
+      "url": "https://huggingface.co/futo-org/futo-swipe/resolve/18328c3042b066952c0936b3771d492fe2ec289a/hungry_jellyfish/metadata.json",
+      "sha256": "3daee38ea94796b676e7f60c3e1cf22525d5ae4dbdfa2787979a99e4573d9495",
+      "bytes": 59
+    },
+    "hungry_jellyfish/vocab.txt": {
+      "url": "https://huggingface.co/futo-org/futo-swipe/resolve/18328c3042b066952c0936b3771d492fe2ec289a/hungry_jellyfish/vocab.txt",
+      "sha256": "a7db66376783b5a23ee3d4a2aaa8f2499fd9b35f975e92bcb248664c2cf6ebd1",
+      "bytes": 284965
+    }
+  },
+  "outputs": {
+    "honorable_sturgeon/model_fp32.onnx": {
+      "sha256": "e60b80b77c28e7bd426fa400435584991614d44ce4ba61eba408d8eb81f5f63b",
+      "bytes": 2591063,
+      "inputs": [
+        {
+          "name": "features",
+          "shape": [
+            1,
+            2,
+            64
+          ],
+          "onnxType": 1
+        },
+        {
+          "name": "layout_keys",
+          "shape": [
+            1,
+            64,
+            2
+          ],
+          "onnxType": 1
+        },
+        {
+          "name": "layout_mask",
+          "shape": [
+            1,
+            64
+          ],
+          "onnxType": 9
+        }
+      ],
+      "outputs": [
+        {
+          "name": "log_emissions",
+          "shape": [
+            1,
+            32,
+            65
+          ],
+          "onnxType": 1
+        },
+        {
+          "name": "coefficients",
+          "shape": [
+            1,
+            32,
+            64
+          ],
+          "onnxType": 1
+        },
+        {
+          "name": "intention",
+          "shape": [
+            1,
+            32,
+            1
+          ],
+          "onnxType": 1
+        }
+      ]
+    },
+    "magic_macaw/model_fp32.onnx": {
+      "sha256": "16e478c542406f4c8a43a16a0a68b83a8f73b516975d66e691a1e1b46bd6dadf",
+      "bytes": 1228537,
+      "inputs": [
+        {
+          "name": "features",
+          "shape": [
+            1,
+            32,
+            92
+          ],
+          "onnxType": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "log_emissions",
+          "shape": [
+            1,
+            32,
+            27
+          ],
+          "onnxType": 1
+        }
+      ]
+    },
+    "hungry_jellyfish/context_lm.onnx": {
+      "sha256": "95722c67e2efde6cd925ddf57a0d44bf879824e53b7db45f32572bff97276979",
+      "bytes": 5955586,
+      "inputs": [
+        {
+          "name": "token_ids",
+          "shape": [
+            1,
+            16
+          ],
+          "onnxType": 7
+        },
+        {
+          "name": "hash_buckets",
+          "shape": [
+            1,
+            16,
+            2
+          ],
+          "onnxType": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "context_states",
+          "shape": [
+            1,
+            16,
+            16
+          ],
+          "onnxType": 1
+        }
+      ]
+    },
+    "hungry_jellyfish/get_embeddings.onnx": {
+      "sha256": "d64902693fec59fb99a1ba986e9fd0668147d5e1e3b3b23cb91e100e2a5d71a1",
+      "bytes": 4456995,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "exact_embeddings",
+          "shape": [
+            32768,
+            16
+          ],
+          "onnxType": 1
+        },
+        {
+          "name": "exact_biases",
+          "shape": [
+            32768
+          ],
+          "onnxType": 1
+        },
+        {
+          "name": "hashed_embeddings",
+          "shape": [
+            32768,
+            16
+          ],
+          "onnxType": 1
+        },
+        {
+          "name": "hashed_biases",
+          "shape": [
+            32768
+          ],
+          "onnxType": 1
+        }
+      ]
+    }
+  },
+  "files": {
+    "LICENSE-FUTO.txt": {
+      "sha256": "ef6b4f6437efa0a2929de351b10c16a8c870b32e1c23054ac76af61531f5db21",
+      "bytes": 5826
+    },
+    "scoring.json": {
+      "sha256": "8377ba6932882667da1e87717609f4ccd6bb78709b6b6ea898d3d4325c9c37f6",
+      "bytes": 1085
+    },
+    "honorable_sturgeon/metadata.json": {
+      "sha256": "d2c5aecd89d97e21125046eb1f311b5aed1bdb5805e97316bba70b13f1c7be2c",
+      "bytes": 2110
+    },
+    "magic_macaw/metadata.json": {
+      "sha256": "65ffc8890de41782eb3322aa96f31df24463ea434a200d3ce84aad4fe7c28a11",
+      "bytes": 1683
+    },
+    "hungry_jellyfish/metadata.json": {
+      "sha256": "3daee38ea94796b676e7f60c3e1cf22525d5ae4dbdfa2787979a99e4573d9495",
+      "bytes": 59
+    },
+    "hungry_jellyfish/vocab.txt": {
+      "sha256": "a7db66376783b5a23ee3d4a2aaa8f2499fd9b35f975e92bcb248664c2cf6ebd1",
+      "bytes": 284965
+    },
+    "NOTICE.txt": {
+      "sha256": "ee9000a961bd702869220f29700d6df03358246233489fa4339e053702d0a44b",
+      "bytes": 570
+    }
+  },
+  "notice": "Derived from FUTO Swipe. Subject to FUTO Model Weights License 1.0 (LICENSE-FUTO.txt). Format conversion only; no training or intentional weight changes. Products must display visible FUTO Swipe attribution."
+}

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
+import 'futo/bundle.dart';
 
 const _nativeTargets = {
   'android-arm',
@@ -108,13 +109,13 @@ Future<void> main(List<String> arguments) async {
   await _verifyLocalRecords(
     root,
     _object(manifest['webAssets'], 'webAssets'),
-    expectedCount: 19,
+    expectedCount: 21,
     label: 'canonical Web asset',
   );
   await _verifyLocalRecords(
     root,
     _object(manifest['publishedWebAssets'], 'publishedWebAssets'),
-    expectedCount: 19,
+    expectedCount: 21,
     label: 'published Web asset',
   );
   await _verifyLocalRecords(
@@ -126,11 +127,14 @@ Future<void> main(List<String> arguments) async {
   await _verifyLocalRecords(
     root,
     _object(manifest['models'], 'models'),
-    expectedCount: 14,
+    expectedCount: 18,
     label: 'model',
     rejectLfsPointers: true,
   );
 
+  await verifyFutoSwipeBundle(
+    Directory('${root.path}/example/assets/models/futoSwipe'),
+  );
   await _verifyWebRuntime(root);
   if (arguments.contains('--downloads')) {
     for (final artifact in downloads.values) {
@@ -138,7 +142,7 @@ Future<void> main(List<String> arguments) async {
     }
   }
   stdout.writeln(
-    'PASS: ${native.length} native targets, 35 Web assets, 14 model fixtures, '
+    'PASS: ${native.length} native targets, 35 Web assets, 18 model fixtures, '
     'and exact source/profile pins',
   );
 }
