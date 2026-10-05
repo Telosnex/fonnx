@@ -1,12 +1,21 @@
 # Pinned production inputs
 
-`manifest.json` is the canonical supply-chain record used directly by
-`hook/build.dart`. FONNX does not commit native ORT libraries: the hook selects
-one immutable archive record for the target tuple, downloads it into a
-content-addressed cache, verifies SHA-256, extracts exactly one named library,
-and bundles it as a code asset.
+`prebuilt.json` is the native and runtime-download manifest. The hook uses
+`package:native_prebuilt` to select the release, check the source key and file
+hashes, and publish three bundled libraries. The session finalizer is prebuilt
+alongside Extensions, so consumer builds need no C compiler.
 
-## Source profile 1
+`upstream_ort.json` pins the upstream ORT URLs, archive hashes, exact archive
+entries, and extracted library hashes. Source builds use these same inputs.
+`tool/release_native.dart` preserves those URLs and uploads only Extensions and
+the finalizer. The release workflow runs the hook for all ten supported targets.
+
+`manifest.json` keeps the source pins, Web assets, model publication inputs, and
+runtime constraints. Runtime models have their own immutable release and the
+`runtimeFiles` section in `prebuilt.json`. The generated Dart catalog is in
+`lib/src/native_prebuilt.g.dart`.
+
+## Source profile 2
 
 - ONNX Runtime 1.27.0:
   `8f0278c77bf44b0cc83c098c6c722b92a36ac4b5`
@@ -24,12 +33,16 @@ target has both an ORT and selected-op Extensions record. Unsupported tuples
 fail during the build hook rather than falling back to an unpinned system
 runtime.
 
-The current Linux Extensions producer is Ubuntu 24.04 and the binary floor is
-therefore glibc 2.38 plus `GLIBCXX_3.4.32`. Exact-artifact tests intentionally
-proved that it does not run on glibc 2.31. The producer and manifest now lock
-that fact rather than advertising accidental compatibility. Lowering the floor
-requires rebuilding/publishing a new immutable Extensions profile with an
-older sysroot. Windows requires the Microsoft Visual C++ 2015–2022 runtime.
+The Linux Extensions producer uses Ubuntu 22.04. Its runtime baseline is glibc
+2.35 and the Ubuntu 22.04 libstdc++. Profile 2 replaces the old Ubuntu 24.04
+producer, whose Extensions files needed glibc 2.38 and `GLIBCXX_3.4.32`.
+Windows requires the Microsoft Visual C++ 2015–2022 runtime.
+
+Apple requirements stay at iOS 15.1 and macOS 14. The manifest stores the iOS
+major version 15 because the shared schema uses integer versions. Flutter's
+hook request is fixed at 13. `hook/apple_compatibility.dart` uses FONNX's declared
+floor only for release selection, not for the source-build input. The README
+contains the required iOS deployment target and framework packaging fix.
 
 ## Web runtime
 
@@ -43,7 +56,7 @@ that each model Worker imports `./ort.min.mjs`.
 
 ## Model inventory
 
-The manifest records SHA-256 and byte length for 14 supported/example and
+The manifest records SHA-256 and byte length for 18 example and
 conformance ONNX files. Verification rejects Git LFS pointer text explicitly,
 which turns an otherwise confusing ORT `Invalid protobuf` error into a
 supply-chain failure before tests run.
@@ -63,5 +76,7 @@ tool/test_linux_artifact_docker.sh linux-x64
 tool/test_windows_artifact_wine.sh
 ```
 
-The normal build hook independently verifies the selected downloaded archive.
+The normal build hook checks both the archive hash and each extracted file
+hash. `dart run native_prebuilt:check` checks the native and model release URLs.
+Use `--download` to independently download and hash every file.
 Licenses for bundled Microsoft runtime code are under `licenses/`.

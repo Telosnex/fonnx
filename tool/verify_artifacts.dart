@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
+import 'package:native_prebuilt/native_prebuilt.dart';
+import 'package:native_prebuilt/src/release_tool.dart';
+import '../hook/upstream_ort.dart';
 import 'futo/bundle.dart';
 
 const _nativeTargets = {
@@ -30,7 +33,7 @@ const _expectedRuntimeConstraints = {
   'android': 'API 24',
   'ios': '15.1',
   'macos': '14.0, Apple Silicon',
-  'linux': 'glibc 2.38 and GLIBCXX_3.4.32 (current Extensions producer)',
+  'linux': 'glibc 2.35 and Ubuntu 22.04 libstdc++',
   'windows': 'Windows 10 plus Microsoft Visual C++ 2015-2022 runtime',
   'web': 'WebAssembly SIMD; threads require cross-origin isolation',
 };
@@ -48,7 +51,7 @@ Future<void> main(List<String> arguments) async {
     'manifest',
   );
   if (manifest['schema'] != 1 ||
-      manifest['profile'] != 1 ||
+      manifest['profile'] != 2 ||
       manifest['finalizerAbi'] != 1 ||
       manifest['webWorkerProtocolAbi'] != 1) {
     throw const FormatException('Unsupported manifest/profile/finalizer ABI');
@@ -69,40 +72,21 @@ Future<void> main(List<String> arguments) async {
     }
   }
 
-  final native = _object(manifest['nativeArtifacts'], 'nativeArtifacts');
-  _expectKeys(native.keys.toSet(), _nativeTargets, 'native target');
-  final downloads = <String, ({Uri url, String sha256})>{};
-  for (final target in native.entries) {
-    final record = _object(target.value, target.key);
-    _expectKeys(record.keys.toSet(), const {
-      'onnxRuntime',
-      'extensions',
+  final native = (await PrebuiltManifest.load(root.uri))!;
+  _expectKeys(native.targets.keys.toSet(), _nativeTargets, 'native target');
+  final upstream = await loadUpstreamOrt(root.uri);
+  for (final target in native.targets.entries) {
+    _expectKeys(target.value.files.map((f) => f.asset!).toSet(), const {
+      ortAsset,
+      extensionsAsset,
+      finalizerAsset,
     }, target.key);
-    for (final component in record.entries) {
-      final artifact = _object(
-        component.value,
-        '${target.key}.${component.key}',
+    final ort = target.value.files.singleWhere((f) => f.asset == ortAsset);
+    if (jsonEncode(ort.toJson()) !=
+        jsonEncode(upstream[target.key]!.toJson())) {
+      throw FormatException(
+        '${target.key} no longer uses its pinned upstream ORT file',
       );
-      final url = artifact['url'];
-      final digest = artifact['sha256'];
-      final suffix = artifact['libraryEntrySuffix'];
-      if (url is! String ||
-          !url.startsWith('https://') ||
-          url.contains('/latest/') ||
-          digest is! String ||
-          !_isDigest(digest) ||
-          suffix is! String ||
-          suffix.isEmpty ||
-          suffix.contains('..')) {
-        throw FormatException(
-          'Invalid artifact: ${target.key}.${component.key}',
-        );
-      }
-      final previous = downloads[digest];
-      if (previous != null && previous.url.toString() != url) {
-        throw FormatException('Digest $digest is assigned to multiple URLs');
-      }
-      downloads[digest] = (url: Uri.parse(url), sha256: digest);
     }
   }
 
@@ -136,13 +120,14 @@ Future<void> main(List<String> arguments) async {
     Directory('${root.path}/example/assets/models/futoSwipe'),
   );
   await _verifyWebRuntime(root);
-  if (arguments.contains('--downloads')) {
-    for (final artifact in downloads.values) {
-      await _verifyDownload(artifact.url, artifact.sha256);
-    }
-  }
+  final problems = await checkPackage(
+    packageRoot: root.uri,
+    download: arguments.contains('--downloads'),
+    log: stdout.writeln,
+  );
+  if (problems.isNotEmpty) throw StateError(problems.join('\n'));
   stdout.writeln(
-    'PASS: ${native.length} native targets, 35 Web assets, 18 model fixtures, '
+    'PASS: ${native.targets.length} native targets, 35 Web assets, 18 model fixtures, '
     'and exact source/profile pins',
   );
 }
@@ -313,30 +298,6 @@ Future<void> _verifyWebRuntime(Directory root) async {
     if (serviceWorker.contains('"$obsolete"')) {
       throw StateError('Service Worker still caches obsolete $obsolete');
     }
-  }
-}
-
-Future<void> _verifyDownload(Uri url, String expectedHash) async {
-  stdout.writeln('downloading $url');
-  final client = HttpClient();
-  try {
-    final request = await client.getUrl(url);
-    request.headers.set(
-      HttpHeaders.userAgentHeader,
-      'fonnx-artifact-verifier/1',
-    );
-    final response = await request.close();
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw HttpException('HTTP ${response.statusCode}', uri: url);
-    }
-    final actual = await sha256.bind(response).first;
-    if (actual.toString() != expectedHash) {
-      throw StateError(
-        'Hash mismatch for $url: expected $expectedHash, got $actual',
-      );
-    }
-  } finally {
-    client.close(force: true);
   }
 }
 

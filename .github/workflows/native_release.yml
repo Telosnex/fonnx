@@ -1,0 +1,243 @@
+# Builds every supported native target and publishes the package-owned files
+# as an immutable GitHub release (fllama ADR 005 D5, D6, D8). Start it with
+#   git push -f origin HEAD:native-release       (release)
+#   git push -f origin HEAD:native-release-dry   (build only, no upload)
+# or with workflow_dispatch. On success it pushes the branch
+# native-manifest/<tag> with native_artifacts/prebuilt.json. Merge that
+# branch to use the release.
+#
+# Microsoft's pinned ORT libraries are upstream inputs. tool/release_native.dart
+# preserves the Microsoft and Maven URLs, but rehosts the two unchanged iOS
+# ORT files because their old fonnx release was mutable. It also uploads the
+# package-owned Extensions and finalizer libraries (22 assets in total).
+name: native release
+run-name: Native release / ${{ (github.ref_name == 'native-release-dry' || inputs.dry_run) && 'build only' || 'publish' }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Build only, upload nothing.
+        type: boolean
+        default: false
+  push:
+    branches: [native-release, native-release-dry]
+
+concurrency:
+  group: native-release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  FLUTTER_VERSION: 3.47.0
+  PYTHON_VERSION: 3.12.10
+  CMAKE_VERSION: 3.31.6
+  NDK_VERSION: 28.2.13676358
+  IOS_VERSION: 15
+  MACOS_VERSION: 14
+  ANDROID_API: 24
+
+jobs:
+  build:
+    name: ${{ matrix.target }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { target: windows-x64, runner: windows-2022 }
+          - { target: windows-arm64, runner: windows-11-arm }
+          - { target: linux-x64, runner: ubuntu-22.04 }
+          - { target: linux-arm64, runner: ubuntu-22.04-arm }
+          - { target: macos-arm64, runner: macos-15 }
+          - { target: ios-arm64-iphoneos, runner: macos-15 }
+          - { target: ios-arm64-iphonesimulator, runner: macos-15 }
+          - { target: android-arm, runner: ubuntu-22.04 }
+          - { target: android-arm64, runner: ubuntu-22.04 }
+          - { target: android-x64, runner: ubuntu-22.04 }
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          fetch-depth: 1
+
+      # Flutter publishes no SDK archive for every ARM64 host. A shallow tag
+      # clone gives every matrix entry the same pinned Dart and Flutter SDK.
+      - &flutter
+        name: Install Flutter
+        run: |
+          git clone -q --depth 1 --branch "$FLUTTER_VERSION" \
+            https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/flutter/bin/flutter" config --no-analytics > /dev/null
+          "$RUNNER_TEMP/flutter/bin/flutter" --version
+
+      # Extensions needs Python while configuring and CMake while building.
+      # Pin both so runner image updates do not silently change release files.
+      - name: Install Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install CMake and Ninja
+        uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # v4.2.1
+        with:
+          cmakeVersion: ${{ env.CMAKE_VERSION }}
+          ninjaVersion: 1.12.1
+
+      - name: Install the Android NDK
+        if: startsWith(matrix.target, 'android-')
+        run: |
+          { yes || true; } | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
+            "ndk;$NDK_VERSION" > /dev/null
+          ndk="$ANDROID_HOME/ndk/$NDK_VERSION"
+          test -d "$ndk"
+          echo "ANDROID_NDK_HOME=$ndk" >> "$GITHUB_ENV"
+
+      - name: Describe the toolchain
+        id: toolchain
+        run: |
+          case "${{ matrix.target }}" in
+            android-*)
+              t="Android NDK $NDK_VERSION, $(cmake --version | sed -n 1p)" ;;
+            windows-*)
+              vs="$("/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe" \
+                -latest -products '*' -property catalog_productDisplayVersion || true)"
+              t="Visual Studio ${vs:-unknown}, MSVC, $(cmake --version | sed -n 1p)" ;;
+            macos-*|ios-*)
+              t="$(xcodebuild -version | sed -n 1p), $(xcrun clang --version | sed -n 1p), $(cmake --version | sed -n 1p)" ;;
+            linux-*)
+              t="$(gcc --version | sed -n 1p), $(cmake --version | sed -n 1p)" ;;
+          esac
+          echo "Toolchain: $t"
+          echo "value=$t" >> "$GITHUB_OUTPUT"
+
+      # flutter pub get also downloads sky_engine, which dart pub get needs.
+      - run: flutter pub get --no-example
+
+      # Build outputs and downloaded sources stay out of the checkout because
+      # untracked files in the checkout are part of the source key.
+      - name: Set paths
+        run: echo "OUT=$RUNNER_TEMP/native" >> "$GITHUB_ENV"
+
+      - &clean
+        name: Check that the work tree is clean
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git status --porcelain
+            echo "::error::Untracked or changed files would change the source key."
+            exit 1
+          fi
+
+      - name: Source key
+        run: |
+          mkdir -p "$OUT/key"
+          dart run native_prebuilt:key --list > "$OUT/key/${{ matrix.target }}.txt"
+          tail -1 "$OUT/key/${{ matrix.target }}.txt"
+
+      - name: Build
+        env:
+          TOOLCHAIN: ${{ steps.toolchain.outputs.value }}
+        run: |
+          defines=()
+          case "${{ matrix.target }}" in
+            android-*) defines+=(--define "android_ndk_home=$ANDROID_NDK_HOME") ;;
+          esac
+          dart run native_prebuilt:build \
+            --target "${{ matrix.target }}" \
+            --out "$OUT/out/${{ matrix.target }}" \
+            --repo "$GITHUB_REPOSITORY" \
+            --runner "${{ matrix.runner }}" \
+            --toolchain "$TOOLCHAIN" \
+            --ios-version "$IOS_VERSION" \
+            --macos-version "$MACOS_VERSION" \
+            --android-api "$ANDROID_API" \
+            "${defines[@]}"
+          cat "$OUT/out/${{ matrix.target }}/target.json"
+
+      - *clean
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: native-${{ matrix.target }}
+          path: ${{ runner.temp }}/native/
+          if-no-files-found: error
+          retention-days: 90
+
+  release:
+    needs: build
+    # Only the owner publishes, from this repository.
+    if: >-
+      github.repository == 'Telosnex/fonnx' &&
+      github.actor == 'jpohhhh' && github.triggering_actor == 'jpohhhh'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    env:
+      DRY_RUN: ${{ github.ref_name == 'native-release-dry' || inputs.dry_run == true }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - *flutter
+      - run: flutter pub get --no-example
+      - run: echo "ARTIFACTS=$RUNNER_TEMP/artifacts" >> "$GITHUB_ENV"
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: native-*
+          path: ${{ runner.temp }}/artifacts
+          merge-multiple: true
+
+      - name: Compare the source keys of all runners (I2)
+        run: |
+          dart run native_prebuilt:key --list > "$RUNNER_TEMP/local-key.txt"
+          status=0
+          for f in "$ARTIFACTS"/key/*.txt; do
+            if ! diff -u "$RUNNER_TEMP/local-key.txt" "$f"; then
+              echo "::error::The source key on $(basename "$f" .txt) differs."
+              status=1
+            fi
+          done
+          exit $status
+
+      - name: Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          args=(--staging "$RUNNER_TEMP/staging")
+          if [[ "$DRY_RUN" == true ]]; then args+=(--dry-run); fi
+          dart run tool/release_native.dart "${args[@]}" "$ARTIFACTS/out"
+          cat native_artifacts/prebuilt.json
+
+      - name: Push the manifest branch
+        if: env.DRY_RUN != 'true'
+        run: |
+          tag="native-$(dart run native_prebuilt:key | tail -1 | cut -c1-16)"
+          branch="native-manifest/$tag"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git add native_artifacts/prebuilt.json
+          git commit -m "native: prebuilt files of release $tag"
+          git push origin "$branch"
+          {
+            echo "Release: https://github.com/$GITHUB_REPOSITORY/releases/tag/$tag"
+            echo
+            echo "Merge branch \`$branch\` to use it."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: prebuilt-manifest
+          path: native_artifacts/prebuilt.json

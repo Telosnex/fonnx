@@ -212,20 +212,42 @@ and the example's realtime phrase editor.
 ## Native platforms via Dart FFI and code assets
 
 Android, iOS, Linux, macOS, and Windows use the same Dart FFI implementation.
-`hook/build.dart` reads the canonical `native_artifacts/manifest.json`, selects
-the target artifact, downloads it into a content-addressed cache, verifies its
-pinned SHA-256, extracts the library, and
-emits a bundled Flutter code asset. There are no FONNX CocoaPods/Gradle native
-dependencies and no platform channels.
+`hook/build.dart` uses `package:native_prebuilt` and
+`native_artifacts/prebuilt.json`. If the package sources match the release,
+it downloads and checks three bundled code assets: ONNX Runtime, selected-op
+Extensions, and the session finalizer. No C compiler is needed for a released
+package. Microsoft supplies the pinned ORT archives except on iOS, where FONNX
+supplies its existing dynamic ORT base. FONNX release CI builds Extensions and
+the finalizer through the same hook that runs local source builds.
+
+The `native_build` user define selects `auto` (default), `download`, or
+`source`. In auto mode, a source change makes the hook compile Extensions and
+the finalizer. ORT remains a pinned upstream input in both modes. Source builds
+need git, CMake, Python, and a target compiler. Apple targets build on macOS,
+Linux on Linux, Windows on Windows, and Android with the pinned NDK.
+
+```yaml
+hooks:
+  user_defines:
+    fonnx:
+      native_build: source
+```
+
+There are no FONNX CocoaPods/Gradle native dependencies and no platform channels.
 
 Microsoft's published iOS artifact is static and cannot be loaded as a Dart
 code asset. FONNX release CI runs Microsoft's official Apple framework script
 in its supported dynamic mode and publishes arm64 device/simulator artifacts
 for the hook. iOS 15.1 or newer is required. macOS 14 or newer and Apple
 Silicon are required; Intel support was intentionally dropped.
-The current selected-op Linux artifact requires glibc 2.38 and
-`GLIBCXX_3.4.32`; Windows requires the Microsoft Visual C++ 2015–2022 runtime.
-These exact floors are verified and recorded in the production manifest.
+Linux releases build on Ubuntu 22.04 and run with glibc 2.35 and its
+libstdc++. Windows requires the Microsoft Visual C++ 2015–2022 runtime.
+The package profile records these requirements.
+
+Flutter reports iOS 13 and macOS 13 to hooks regardless of the app's target.
+FONNX uses its declared iOS 15.1/macOS 14 floors for prebuilt selection. The
+manifest keeps the real minima. Compiling from source cannot lower the minimum
+of the pinned ORT input.
 
 ### Required iOS project setup
 
@@ -252,6 +274,39 @@ and the example Xcode project shows the required phase ordering.
 ONNX Runtime Extensions is also a separately bundled code asset. The build is
 selected to the one custom operator in the current model inventory:
 Whisper's `ai.onnx.contrib:BpeDecoder`.
+
+## Runtime model downloads
+
+The 16 example models are also immutable release files. The generated
+`nativePrebuiltRuntimeFiles` catalog pins their sizes, URLs, and SHA-256 values.
+Apps can download a model after install instead of including it as an asset:
+
+```dart
+import 'package:fonnx/runtime_models.dart';
+
+final model = await ensureFonnxRuntimeModel(
+  'pyannote/pyannote_seg3.onnx',
+  modelDirectory,
+);
+```
+
+The helper checks an existing file before reuse. It checks each download before
+it puts the file at its final path. FUTO model names are distinct in the release
+and map back to their source paths through `runtimeModelNamesByPath`.
+The model files remain in the example and conformance fixtures. Applications
+choose when to replace their bundled assets. Tokenizers, FUTO metadata, and
+license notices are separate from the ONNX model files.
+
+To publish a complete model set, run:
+
+```bash
+dart run tool/publish_models.dart --repo Telosnex/fonnx
+```
+
+To publish the native libraries, push to `native-release` and merge the
+`native-manifest/<tag>` branch from `.github/workflows/native_release.yml`.
+Push to `native-release-dry` for a build-only run. `tool/release_native.dart`
+preserves the upstream ORT URLs when it writes the manifest.
 
 ## Web
 

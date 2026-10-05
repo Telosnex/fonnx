@@ -1,5 +1,12 @@
 ## 0.0.1
 
+* Use `native_prebuilt` for the native hook, shared verified cache, source-key
+  selection, and build modes. Release CI builds selected-op Extensions and the
+  session finalizer through the hook for all ten targets. Consumer builds no
+  longer compile the finalizer. Upstream ONNX Runtime URLs stay unchanged.
+* Publish the 16 example ONNX models as verified runtime downloads. The
+  `runtime_models.dart` API exposes their pinned catalog and download helper.
+* Build Linux Extensions on Ubuntu 22.04 (glibc 2.35) instead of Ubuntu 24.04.
 * Make `native_artifacts/manifest.json` the canonical source for all ten native
   target pairs, ORT/Extensions/Web source pins, Web assets, and model fixtures.
 * Align native and Web on ONNX Runtime 1.27.0, remove mixed 1.17/1.19 workers,

@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "version": "1.27.0",
+  "targets": {
+    "android-arm": {
+      "url": "https://repo.maven.apache.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/1.27.0/onnxruntime-android-1.27.0.aar",
+      "downloadSha256": "077dec5e2d821234c7dc0aba584bec8f999854b546c754cab93a90741c56fbeb",
+      "archiveEntry": "jni/armeabi-v7a/libonnxruntime.so",
+      "sha256": "18b443c4066fe01598e768162d7876729b35c40af3df2f317ca45f87656e0431"
+    },
+    "android-arm64": {
+      "url": "https://repo.maven.apache.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/1.27.0/onnxruntime-android-1.27.0.aar",
+      "downloadSha256": "077dec5e2d821234c7dc0aba584bec8f999854b546c754cab93a90741c56fbeb",
+      "archiveEntry": "jni/arm64-v8a/libonnxruntime.so",
+      "sha256": "12c870ee77349d0e80e0d85eb293849ebe8f56717a81eec62b53ecb1446e7de8"
+    },
+    "android-x64": {
+      "url": "https://repo.maven.apache.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/1.27.0/onnxruntime-android-1.27.0.aar",
+      "downloadSha256": "077dec5e2d821234c7dc0aba584bec8f999854b546c754cab93a90741c56fbeb",
+      "archiveEntry": "jni/x86_64/libonnxruntime.so",
+      "sha256": "a1f59077f0cd6a9105ca13489c3fce9932679d3eb58340e053cdeecb905c847f"
+    },
+    "ios-arm64-iphoneos": {
+      "url": "https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.27.0-ortx-fe4e13f-bpe-only-v2/fonnx-ios-arm64-ort-1.27.0-ortx-fe4e13f4.zip",
+      "downloadSha256": "0ce93d30e305b1331a73c54b4739fde473f28270037a7d908838ff5c8b87a369",
+      "archiveEntry": "iphoneos/libonnxruntime.dylib",
+      "sha256": "1f5179684a2b68770db9e0bddc8fe18cf25ffe5fdf1a7b917c6a9a7b3ed1f9e6"
+    },
+    "ios-arm64-iphonesimulator": {
+      "url": "https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.27.0-ortx-fe4e13f-bpe-only-v2/fonnx-ios-arm64-ort-1.27.0-ortx-fe4e13f4.zip",
+      "downloadSha256": "0ce93d30e305b1331a73c54b4739fde473f28270037a7d908838ff5c8b87a369",
+      "archiveEntry": "iphonesimulator/libonnxruntime.dylib",
+      "sha256": "281f12c21165a9ace10ce3897907eee1b186b5acd910aac228052f2cd9e6b7b1"
+    },
+    "linux-arm64": {
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.27.0/onnxruntime-linux-aarch64-1.27.0.tgz",
+      "downloadSha256": "3e4d83ac06924a32a07b6d7f91ce6f852876153fc0bbdf931bf517a140bfbe48",
+      "archiveEntry": "onnxruntime-linux-aarch64-1.27.0/lib/libonnxruntime.so.1.27.0",
+      "sha256": "c36bc200e7e6c093b8abb0b34590fbdd8c52fd3fb5e33795b9523ffdde2fce0f"
+    },
+    "linux-x64": {
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.27.0/onnxruntime-linux-x64-1.27.0.tgz",
+      "downloadSha256": "547e40a48f1fe73e3f812d7c88a948612c23f896b91e4e2ee1e232d7b468246f",
+      "archiveEntry": "onnxruntime-linux-x64-1.27.0/lib/libonnxruntime.so.1.27.0",
+      "sha256": "4061866361d9a8d2872f5f419c5515ce35a830a0c5c77ce1723320ac0dbabfc7"
+    },
+    "macos-arm64": {
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.27.0/onnxruntime-osx-arm64-1.27.0.tgz",
+      "downloadSha256": "545e81c58152353acb0d1e8bd6ce4b62f830c0961f5b3acfedc790ffd76e477a",
+      "archiveEntry": "./onnxruntime-osx-arm64-1.27.0/lib/libonnxruntime.1.27.0.dylib",
+      "sha256": "299e5a2c6ea00531ecd6bf3217e23798c1fcba1698bb386d313c8e16d7317d60"
+    },
+    "windows-arm64": {
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.27.0/onnxruntime-win-arm64-1.27.0.zip",
+      "downloadSha256": "a32f2650575b3c20df462e337519fd1cc4105356130d11dba9771c6f374d952f",
+      "archiveEntry": "onnxruntime-win-arm64-1.27.0/lib/onnxruntime.dll",
+      "sha256": "1df26c7820f2c46f9922a36bce184bf67c6200cb19995c87bdd8ab6eea111667"
+    },
+    "windows-x64": {
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.27.0/onnxruntime-win-x64-1.27.0.zip",
+      "downloadSha256": "c5c81710938e68079ff1a192b04897faabe4b43830d48f39f27ecd4e16138bfc",
+      "archiveEntry": "onnxruntime-win-x64-1.27.0/lib/onnxruntime.dll",
+      "sha256": "fd6dd0a8b1f5562d642abdcbd36bc54251482d2ebaa3f4f88669bfdad92e7525"
+    }
+  }
+}

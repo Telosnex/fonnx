@@ -3,3 +3,8 @@
 
 # Protobuf model bytes must not undergo line-ending conversion.
 /example/assets/models/futoSwipe/**/*.onnx -text
+
+# Runtime models and Web modules are byte-exact on every checkout host.
+*.onnx -text
+*.wasm -text
+*.gz -text
