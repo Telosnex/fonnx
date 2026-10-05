@@ -7,8 +7,9 @@ alongside Extensions, so consumer builds need no C compiler.
 
 `upstream_ort.json` pins the upstream ORT URLs, archive hashes, exact archive
 entries, and extracted library hashes. Source builds use these same inputs.
-`tool/release_native.dart` preserves those URLs and uploads only Extensions and
-the finalizer. The release workflow runs the hook for all ten supported targets.
+`tool/release_native.dart` preserves the Microsoft/Maven URLs. It uploads
+Extensions, the finalizer, and unchanged copies of the two dynamic iOS ORT
+files. The source build uses the existing pinned iOS base. The release workflow runs the hook for all ten supported targets.
 
 `manifest.json` keeps the source pins, Web assets, model publication inputs, and
 runtime constraints. Runtime models have their own immutable release and the

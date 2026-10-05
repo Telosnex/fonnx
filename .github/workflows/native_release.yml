@@ -36,8 +36,6 @@ defaults:
 
 env:
   FLUTTER_VERSION: 3.47.0
-  PYTHON_VERSION: 3.12.10
-  CMAKE_VERSION: 3.31.6
   NDK_VERSION: 28.2.13676358
   IOS_VERSION: 15
   MACOS_VERSION: 14
@@ -81,19 +79,6 @@ jobs:
           "$RUNNER_TEMP/flutter/bin/flutter" config --no-analytics > /dev/null
           "$RUNNER_TEMP/flutter/bin/flutter" --version
 
-      # Extensions needs Python while configuring and CMake while building.
-      # Pin both so runner image updates do not silently change release files.
-      - name: Install Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install CMake and Ninja
-        uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # v4.2.1
-        with:
-          cmakeVersion: ${{ env.CMAKE_VERSION }}
-          ninjaVersion: 1.12.1
-
       - name: Install the Android NDK
         if: startsWith(matrix.target, 'android-')
         run: |
@@ -106,17 +91,22 @@ jobs:
       - name: Describe the toolchain
         id: toolchain
         run: |
+          if command -v python3 >/dev/null; then
+            python_version="$(python3 --version 2>&1)"
+          else
+            python_version="$(python --version 2>&1)"
+          fi
           case "${{ matrix.target }}" in
             android-*)
-              t="Android NDK $NDK_VERSION, $(cmake --version | sed -n 1p)" ;;
+              t="Android NDK $NDK_VERSION, $(cmake --version | sed -n 1p), $python_version" ;;
             windows-*)
               vs="$("/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe" \
                 -latest -products '*' -property catalog_productDisplayVersion || true)"
-              t="Visual Studio ${vs:-unknown}, MSVC, $(cmake --version | sed -n 1p)" ;;
+              t="Visual Studio ${vs:-unknown}, MSVC, $(cmake --version | sed -n 1p), $python_version" ;;
             macos-*|ios-*)
-              t="$(xcodebuild -version | sed -n 1p), $(xcrun clang --version | sed -n 1p), $(cmake --version | sed -n 1p)" ;;
+              t="$(xcodebuild -version | sed -n 1p), $(xcrun clang --version | sed -n 1p), $(cmake --version | sed -n 1p), $python_version" ;;
             linux-*)
-              t="$(gcc --version | sed -n 1p), $(cmake --version | sed -n 1p)" ;;
+              t="$(gcc --version | sed -n 1p), $(cmake --version | sed -n 1p), $python_version" ;;
           esac
           echo "Toolchain: $t"
           echo "value=$t" >> "$GITHUB_OUTPUT"

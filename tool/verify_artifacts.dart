@@ -82,8 +82,10 @@ Future<void> main(List<String> arguments) async {
       finalizerAsset,
     }, target.key);
     final ort = target.value.files.singleWhere((f) => f.asset == ortAsset);
-    if (jsonEncode(ort.toJson()) !=
-        jsonEncode(upstream[target.key]!.toJson())) {
+    final pinned = upstream[target.key]!;
+    if (ort.sha256 != pinned.sha256 ||
+        (!target.key.startsWith('ios-') &&
+            jsonEncode(ort.toJson()) != jsonEncode(pinned.toJson()))) {
       throw FormatException(
         '${target.key} no longer uses its pinned upstream ORT file',
       );

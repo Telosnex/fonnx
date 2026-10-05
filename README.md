@@ -306,7 +306,8 @@ dart run tool/publish_models.dart --repo Telosnex/fonnx
 To publish the native libraries, push to `native-release` and merge the
 `native-manifest/<tag>` branch from `.github/workflows/native_release.yml`.
 Push to `native-release-dry` for a build-only run. `tool/release_native.dart`
-preserves the upstream ORT URLs when it writes the manifest.
+preserves the upstream ORT URLs when it writes the manifest. The two iOS ORT
+files are copied unchanged into the new immutable release.
 
 ## Web
 
