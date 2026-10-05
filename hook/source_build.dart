@@ -213,6 +213,12 @@ Future<void> buildFromSource(
 if(NOT TARGET fonnx_ort_session_finalizer)
   add_library(fonnx_ort_session_finalizer SHARED "${cmakePath(input.packageRoot.resolve('src/ort_session_finalizer.c'))}")
   target_include_directories(fonnx_ort_session_finalizer PRIVATE "${cmakePath(input.packageRoot.resolve('src/'))}")
+  if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+    # This C-only shim needs no ORT APIs. Keep its old iOS 13 minimum so
+    # Flutter's framework plist is correct without another packaging fix.
+    set_target_properties(fonnx_ort_session_finalizer PROPERTIES
+      XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "13.0")
+  endif()
   if(WIN32)
     target_link_libraries(fonnx_ort_session_finalizer PRIVATE ole32)
   endif()
