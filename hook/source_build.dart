@@ -308,7 +308,7 @@ bool _isLibrary(String name, OS os) => switch (os) {
   OS.windows => name.toLowerCase() == 'ortextensions.dll',
   OS.macOS ||
   OS.iOS => RegExp(r'^libortextensions\.[0-9.]+dylib$').hasMatch(name),
-  _ => name == 'libortextensions.so',
+  _ => RegExp(r'^libortextensions\.so(?:\.[0-9]+)*$').hasMatch(name),
 };
 
 List<String> _targetArguments(BuildInput input, TargetName target) {
