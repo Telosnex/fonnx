@@ -1,0 +1,35 @@
+name: Check prebuilt files
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - native_artifacts/prebuilt.json
+      - lib/src/native_prebuilt.g.dart
+      - .github/workflows/prebuilt_check.yml
+  schedule:
+    - cron: '27 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Flutter
+        shell: bash
+        run: |
+          git clone -q --depth 1 --branch 3.47.0 \
+            https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/flutter/bin/flutter" config --no-analytics > /dev/null
+          "$RUNNER_TEMP/flutter/bin/flutter" --version
+      - run: flutter pub get --no-example
+      - name: Check the source key and every native and model URL
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: dart run native_prebuilt:check

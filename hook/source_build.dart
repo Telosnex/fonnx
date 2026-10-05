@@ -87,7 +87,11 @@ Future<void> buildFromSource(
         .where((a) => a.startsWith('-DCMAKE_CXX_COMPILER='))
         .firstOrNull;
     identity.add(
-      await _run(compiler?.split('=').last ?? 'g++', ['--version'], log),
+      await _run(
+        compiler?.split('=').last ?? Platform.environment['CXX'] ?? 'g++',
+        ['--version'],
+        log,
+      ),
     );
   } else if (Platform.isWindows) {
     final vswhere = p.join(
@@ -112,7 +116,8 @@ Future<void> buildFromSource(
       .substring(0, 16);
   final work = Directory.fromUri(
     input.outputDirectoryShared.resolve(
-      'source/${source.sourceKey.key}/${target.name}/$toolchainKey/',
+      // Leave room for git pack names and CMake object paths on Windows.
+      's/${source.sourceKey.short}/${target.name}/$toolchainKey/',
     ),
   );
   await withFileLock(File(p.join(work.path, 'build.lock')), () async {
@@ -121,6 +126,13 @@ Future<void> buildFromSource(
     if (!await Directory(p.join(checkout.path, '.git')).exists()) {
       await checkout.create(recursive: true);
       await _run('git', ['init', checkout.path], log);
+      await _run('git', [
+        '-C',
+        checkout.path,
+        'config',
+        'core.longpaths',
+        'true',
+      ], log);
       await _run('git', [
         '-C',
         checkout.path,
@@ -289,6 +301,15 @@ endif()
           file: finalizer.uri,
         ),
       );
+      if (source.release != null && target.os == OS.linux) {
+        for (final file in [
+          File(p.join(out.path, upstream.name)),
+          published,
+          finalizer,
+        ]) {
+          await _checkLinuxBaseline(file, log);
+        }
+      }
     } finally {
       if (await selected.exists()) await selected.delete();
       await _run('git', ['-C', checkout.path, 'apply', '-R', patch], log);
@@ -400,4 +421,43 @@ Future<String> _run(
     );
   }
   return '${result.stdout}';
+}
+
+/// A release must work with Ubuntu 22.04's glibc and libstdc++, even if the
+/// runner installs a newer compiler. Local source builds use their own host.
+Future<void> _checkLinuxBaseline(
+  File library,
+  void Function(String) log,
+) async {
+  final versions = await _run('readelf', ['--version-info', library.path], log);
+  for (final (prefix, ceiling) in [('GLIBC', '2.35'), ('GLIBCXX', '3.4.30')]) {
+    final required =
+        RegExp(
+            '${prefix}_([0-9]+(?:\\.[0-9]+)*)',
+          ).allMatches(versions).map((m) => m.group(1)!).toSet().toList()
+          ..sort(_compareVersions);
+    if (required.isEmpty) continue;
+    final maximum = required.last;
+    if (_compareVersions(maximum, ceiling) > 0) {
+      throw StateError(
+        '${library.path} needs ${prefix}_$maximum. '
+        'Release files must need no more than ${prefix}_$ceiling. Use the Ubuntu 22.04 release runner.',
+      );
+    }
+    log(
+      '${p.basename(library.path)} needs ${prefix}_$maximum (baseline $ceiling)',
+    );
+  }
+}
+
+int _compareVersions(String a, String b) {
+  final left = a.split('.').map(int.parse).toList();
+  final right = b.split('.').map(int.parse).toList();
+  for (var i = 0; i < left.length || i < right.length; i++) {
+    final order = (i < left.length ? left[i] : 0).compareTo(
+      i < right.length ? right[i] : 0,
+    );
+    if (order != 0) return order;
+  }
+  return 0;
 }

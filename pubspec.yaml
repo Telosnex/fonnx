@@ -4,8 +4,8 @@ version: 0.0.1
 homepage: https://github.com/Telosnex/fonnx
 
 environment:
-  # Native-assets hooks require Dart 3.9 or newer.
-  sdk: '>=3.9.0 <4.0.0'
+  # native_prebuilt requires Dart 3.10 or newer.
+  sdk: '>=3.10.0 <4.0.0'
 
 dependencies:
   args: ^2.7.0
