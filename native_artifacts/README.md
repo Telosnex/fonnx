@@ -80,4 +80,5 @@ tool/test_windows_artifact_wine.sh
 The normal build hook checks both the archive hash and each extracted file
 hash. `dart run native_prebuilt:check` checks the native and model release URLs.
 Use `--download` to independently download and hash every file.
-Licenses for bundled Microsoft runtime code are under `licenses/`.
+Licenses for bundled Microsoft runtime code are in the package `LICENSE`,
+in the Flutter multi-license format.
