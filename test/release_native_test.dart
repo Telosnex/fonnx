@@ -17,6 +17,7 @@ final class RecordingPublisher implements Publisher {
     required String tag,
     required List<File> assets,
     required String notes,
+    required bool latest,
   }) async => uploaded = assets;
   @override
   Future<Map<String, String>?> publishedAssetDigests({

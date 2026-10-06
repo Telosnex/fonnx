@@ -109,9 +109,11 @@ final class _OwnedFilesPublisher implements Publisher {
     required String tag,
     required List<File> assets,
     required String notes,
+    required bool latest,
   }) => publisher.publish(
     repository: repository,
     tag: tag,
+    latest: latest,
     assets: assets.where((f) => !skipped.contains(p.basename(f.path))).toList(),
     notes: '$notes ORT uses the pinned upstream URLs in prebuilt.json.',
   );
