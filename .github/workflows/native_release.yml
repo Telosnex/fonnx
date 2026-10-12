@@ -1,5 +1,6 @@
 # Builds every supported native target and publishes the package-owned files
-# as an immutable GitHub release (fllama ADR 005 D5, D6, D8). Start it with
+# as an immutable GitHub release (native_prebuilt ADR 001 D5, D6, D8). Start
+# it with
 #   git push -f origin HEAD:native-release       (release)
 #   git push -f origin HEAD:native-release-dry   (build only, no upload)
 # or with workflow_dispatch. On success it pushes the branch

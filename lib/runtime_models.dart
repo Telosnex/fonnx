@@ -90,7 +90,7 @@ RuntimeFile runtimeModelFile(
 ///
 /// An already downloaded file is reused only after it passes the same check.
 /// The atomic download and verification are provided by
-/// `native_prebuilt/runtime.dart` (ADR 005 D13).
+/// `native_prebuilt/runtime.dart` (native_prebuilt ADR 001 D13).
 Future<File> ensureFonnxRuntimeModel(
   String modelPath,
   Directory directory, {

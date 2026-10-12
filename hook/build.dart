@@ -1,4 +1,4 @@
-// Native-assets hook for fonnx (fllama ADR 005).
+// Native-assets hook for fonnx (native_prebuilt ADR 001).
 // Release builds and local source builds run the same callback. Consumer
 // builds download all three libraries, including the session finalizer.
 
