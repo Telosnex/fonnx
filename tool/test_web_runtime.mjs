@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import { Worker as NodeWorker } from 'node:worker_threads';
-import * as ort from '../example/web/ort.min.mjs';
+import * as ort from '../lib/web/ort.min.mjs';
 
 class FakeWorker {
   static latest;
@@ -15,7 +15,7 @@ class FakeWorker {
   }
 }
 globalThis.Worker = FakeWorker;
-const { FonnxWorkerRpc } = await import('../example/web/fonnx_worker_rpc.js');
+const { FonnxWorkerRpc } = await import('../lib/web/fonnx_worker_rpc.js');
 const rpc = new FonnxWorkerRpc(new URL('file:///fake-worker.js'), 'test');
 const completed = rpc.request('identity', { value: 7 });
 FakeWorker.latest.onmessage({
@@ -62,7 +62,7 @@ class BrowserWorkerAdapter {
 
 globalThis.Worker = BrowserWorkerAdapter;
 const magikaRpc = new FonnxWorkerRpc(
-  new URL('../example/web/magika_worker.js', import.meta.url),
+  new URL('../lib/web/magika_worker.js', import.meta.url),
   'magika-smoke',
 );
 const magikaModel = fs.readFileSync(
@@ -87,7 +87,7 @@ if (ort.env.versions.web !== '1.27.0' || ort.env.versions.common !== '1.27.0') {
   throw new Error(`Unexpected ORT Web versions: ${JSON.stringify(ort.env.versions)}`);
 }
 ort.env.wasm.numThreads = 1;
-ort.env.wasm.wasmPaths = new URL('../example/web/', import.meta.url).href;
+ort.env.wasm.wasmPaths = new URL('../lib/web/', import.meta.url).href;
 
 const model = fs.readFileSync(new URL('../test/models/identity.onnx', import.meta.url));
 const session = await ort.InferenceSession.create(model, {

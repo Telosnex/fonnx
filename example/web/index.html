@@ -37,39 +37,7 @@
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
-  <!-- FONNX implementations start here -->
-  <!-- REQUIRED FOR: Magika -->
-  <script type="module">
-    import './magika_init.js';
-  </script>
-  <!-- REQUIRED FOR: MiniLML6V2 / MSMARCOMiniLML6V3 -->
-  <script type="module">
-    import './minilm_init.js';
-  </script>
-  <!-- REQUIRED FOR: Minish Lab models like Potion Base 8M -->
-  <script type="module">
-    import './minish_lab_init.js';
-  </script>
-  <!-- REQUIRED FOR: Whisper models. -->
-  <script type="module">
-    import './whisper_init.js';
-  </script>
-  <!-- REQUIRED FOR: Silero VAD model. -->
-  <script type="module">
-    import './silero_vad_init.js';
-  </script>
-  <!-- REQUIRED FOR: Open-vocabulary keyword spotting. -->
-  <script type="module">
-    import './kws_init.js';
-  </script>
-  <!-- REQUIRED FOR: FUTO Swipe keyboard models. -->
-  <script type="module">
-    import './futo_swipe_init.js';
-  </script>
-  <!-- REQUIRED FOR: Pyannote -->
-  <script type="module">
-      import './pyannote_init.js';
-  </script>
+  <!-- FONNX loads its web runtime files from native_prebuilt/fonnx/. -->
   <!-- FONNX implementations end here -->
 </body>
 
