@@ -14,6 +14,16 @@ dart tool/generate_whisper_vocabulary.dart tokenizer.json \
   onnx-community/whisper-tiny@ff4177021cc41f7db950912b73ea4fdf7d01d8e7
 ```
 
+Whisper base and small are not in this repo. `WhisperBundle.base` and
+`WhisperBundle.small` load the same two files of
+[onnx-community/whisper-base](https://huggingface.co/onnx-community/whisper-base)
+at `1846881b6b3a3024392c1eea3ad983695bc23925` and
+[onnx-community/whisper-small](https://huggingface.co/onnx-community/whisper-small)
+at `36050c46d777d46dc4b5f43f6d90574fc38f8732`, renamed to
+`whisper_<size>_encoder.onnx` and `whisper_<size>_decoder.onnx`. They have
+the same `tokenizer.json` as tiny. Their `generation_config.json` differs
+only in `alignment_heads`, which fonnx does not use.
+
 ## Runtime
 Both graphs use only standard ONNX and ORT operators. They run on the stock
 ORT native libraries and on stock ORT Web, without ORT Extensions. fonnx

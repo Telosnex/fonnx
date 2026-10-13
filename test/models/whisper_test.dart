@@ -20,12 +20,7 @@ void main() {
       'test/data/audio_sample_ac1_ar16000.pcm',
     ).readAsBytes();
     final transcript = await whisper.doInference(bytes);
-    // whisper_tiny:
     expect(transcript, 'The rain in Spain falls mainly on the plane.');
-    // whisper_base:
-    //  expect(transcript, 'The rain in Spain falls, mainly on the plain.');
-    // whisper_small:
-    //  expect(transcript, 'The rain in Spain falls mainly on the plain.');
   });
 
   test('Whisper keeps the first sentence when speech starts at 0 s', () async {
@@ -58,6 +53,30 @@ void main() {
       'The rain in Spain falls mainly on the plane.',
     );
   });
+
+  // Whisper base and small are not in Git. Set FONNX_WHISPER_DIR to a
+  // directory with whisper_<size>_encoder.onnx and whisper_<size>_decoder.onnx.
+  final largerDirectory = Platform.environment['FONNX_WHISPER_DIR'];
+  for (final (name, bundle, expected) in [
+    (
+      'base',
+      WhisperBundle.base,
+      'The rain in Spain falls mainly on the plane.',
+    ),
+    (
+      'small',
+      WhisperBundle.small,
+      'The rain in Spain falls mainly on the plane.',
+    ),
+  ]) {
+    test('Whisper $name works', () async {
+      final model = WhisperNative(bundle(largerDirectory!));
+      final bytes = await File(
+        'test/data/audio_sample_ac1_ar16000.pcm',
+      ).readAsBytes();
+      expect(await model.doInference(bytes), expected);
+    }, skip: largerDirectory == null ? 'FONNX_WHISPER_DIR is not set' : false);
+  }
 
   test('Whisper performance', () async {
     final bytes = await File(

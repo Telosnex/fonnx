@@ -17,13 +17,32 @@ final class WhisperBundle {
 
   /// Whisper tiny (multilingual): `whisper_tiny_encoder.onnx` and
   /// `whisper_tiny_decoder.onnx` in [directory]. On web, [directory] is a URL.
-  factory WhisperBundle.tiny(String directory) {
+  factory WhisperBundle.tiny(String directory) =>
+      WhisperBundle._named(directory, 'tiny', decoderLayers: 4, heads: 6);
+
+  /// Whisper base (multilingual): `whisper_base_encoder.onnx` and
+  /// `whisper_base_decoder.onnx` in [directory]. On web, [directory] is a URL.
+  factory WhisperBundle.base(String directory) =>
+      WhisperBundle._named(directory, 'base', decoderLayers: 6, heads: 8);
+
+  /// Whisper small (multilingual): `whisper_small_encoder.onnx` and
+  /// `whisper_small_decoder.onnx` in [directory]. On web, [directory] is a
+  /// URL.
+  factory WhisperBundle.small(String directory) =>
+      WhisperBundle._named(directory, 'small', decoderLayers: 12, heads: 12);
+
+  factory WhisperBundle._named(
+    String directory,
+    String size, {
+    required int decoderLayers,
+    required int heads,
+  }) {
     final separator = directory.endsWith('/') ? '' : '/';
     return WhisperBundle(
-      encoderPath: '$directory${separator}whisper_tiny_encoder.onnx',
-      decoderPath: '$directory${separator}whisper_tiny_decoder.onnx',
-      decoderLayers: 4,
-      attentionHeads: 6,
+      encoderPath: '$directory${separator}whisper_${size}_encoder.onnx',
+      decoderPath: '$directory${separator}whisper_${size}_decoder.onnx',
+      decoderLayers: decoderLayers,
+      attentionHeads: heads,
     );
   }
 
