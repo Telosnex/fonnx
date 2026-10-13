@@ -10,7 +10,7 @@ Magika getMagika(String path) => MagikaWeb(path);
 @JS('window.magikaInferenceAsyncJs')
 external JSPromise<JSFloat32Array?> magikaInferenceAsyncJs(
   String modelPath,
-  JSUint8Array fileBytes,
+  JSFloat32Array features,
 );
 
 class MagikaWeb implements Magika {
@@ -22,7 +22,10 @@ class MagikaWeb implements Magika {
   @override
   Future<MagikaType> getType(List<int> fileBytes) async {
     final features = extractFeaturesFromBytes(Uint8List.fromList(fileBytes));
-    final jsFeatures = Uint8List.fromList(features.all).toJS;
+    // The padding value is 256, so the features do not fit in bytes.
+    final jsFeatures = Float32List.fromList([
+      for (final value in features.all) value.toDouble(),
+    ]).toJS;
     await loadFonnxWebModule('magika_init.js');
     final jsPromise = magikaInferenceAsyncJs(modelPath, jsFeatures);
     final jsResult = await jsPromise.toDart;
