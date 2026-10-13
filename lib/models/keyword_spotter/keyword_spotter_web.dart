@@ -183,7 +183,7 @@ final class WebKwsOnnxBackend implements KwsOnnxBackend {
   }
 
   @override
-  Future<Float32List> runDecoder(Int64List tokenContexts) async {
+  Future<Float32List> runDecoder(Int32List tokenContexts) async {
     final json = jsonEncode(tokenContexts.toList(growable: false));
     final values = (await _decoderJs(_engineId.toJS, json.toJS).toDart).toDart;
     return Float32List.fromList(values);

@@ -92,7 +92,7 @@ class _ScriptedBackend implements KwsOnnxBackend {
       _encoder(8);
 
   @override
-  Future<Float32List> runDecoder(Int64List tokenContexts) async =>
+  Future<Float32List> runDecoder(Int32List tokenContexts) async =>
       Float32List(TransducerKeywordDecoder.joinerDimension);
 
   @override

@@ -85,7 +85,7 @@ final class TransducerKeywordDecoder {
 
     for (var frame = 0; frame < encoder.frameCount; frame++) {
       final previous = _hypotheses.values.toList(growable: false);
-      final contexts = Int64List(previous.length * contextSize);
+      final contexts = Int32List(previous.length * contextSize);
       for (var i = 0; i < previous.length; i++) {
         final tokens = previous[i].tokens;
         contexts[i * 2] = tokens[tokens.length - 2];

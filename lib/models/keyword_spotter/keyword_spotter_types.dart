@@ -198,7 +198,7 @@ List<KeywordPhrase> validatedKeywordPhraseSnapshot(
 abstract interface class KwsOnnxBackend {
   Future<KwsEncoderOutput> runEncoder(Float32List features);
 
-  Future<Float32List> runDecoder(Int64List tokenContexts);
+  Future<Float32List> runDecoder(Int32List tokenContexts);
 
   Future<Float32List> runJoiner(
     Float32List encoderVectors,

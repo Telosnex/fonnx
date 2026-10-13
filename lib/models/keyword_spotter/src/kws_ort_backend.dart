@@ -74,13 +74,16 @@ final class NativeKwsOnnxBackend implements KwsOnnxBackend {
   }
 
   @override
-  Future<Float32List> runDecoder(Int64List tokenContexts) async {
+  Future<Float32List> runDecoder(Int32List tokenContexts) async {
     _ensureOpen();
     if (tokenContexts.length.isOdd) {
       throw ArgumentError.value(tokenContexts.length, 'tokenContexts.length');
     }
     final batch = tokenContexts.length ~/ 2;
-    final input = _decoder.int64Tensor(tokenContexts, <int>[batch, 2]);
+    final input = _decoder.int64Tensor(Int64List.fromList(tokenContexts), <int>[
+      batch,
+      2,
+    ]);
     final outputs = _decoder.run(
       inputNames: const ['y'],
       inputValues: [input.value],

@@ -99,7 +99,7 @@ final class KeywordSpotterEngine {
       const dimension = TransducerKeywordDecoder.joinerDimension;
       for (var frame = 0; frame < encoder.frameCount; frame++) {
         decoderVectors ??= await _backend.runDecoder(
-          Int64List.fromList([tokens[tokens.length - 2], tokens.last]),
+          Int32List.fromList([tokens[tokens.length - 2], tokens.last]),
         );
         final logits = await _backend.runJoiner(
           encoder.values.sublist(frame * dimension, (frame + 1) * dimension),
