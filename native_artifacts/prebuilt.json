@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "sourceKey": "4366e2b2a423c0e55276b5d33bf877428090ac14275fc7af00ab36878c7db1cb",
-  "release": "https://github.com/Telosnex/fonnx/releases/tag/native-4366e2b2a423c0e5",
+  "sourceKey": "a72173eb4dadd7cb2d789a0e7b9e37e94747c602f4404bfd50524259109d202b",
+  "release": "https://github.com/Telosnex/fonnx/releases/tag/native-a72173eb4dadd7cb",
   "targets": {
     "android-arm": {
       "runner": "ubuntu-22.04",
@@ -19,17 +19,17 @@
         },
         {
           "name": "libortextensions.so",
-          "sha256": "fba92e471ad4d1821e183e28d7de47aa32f41327d6a0441d8ea3dede10073c98",
-          "url": "https://github.com/Telosnex/fonnx/releases/download/native-4366e2b2a423c0e5/android-arm-libortextensions.so.gz",
-          "downloadSha256": "20b00d9104a68e772bfb872cb5beb2950b83adc4e42768170f38518711bf0aa6",
+          "sha256": "c9165b397b97227171cce6db8b582d4c3457d08ad0129c26b07cbc84f8984c7a",
+          "url": "https://github.com/Telosnex/fonnx/releases/download/native-a72173eb4dadd7cb/android-arm-libortextensions.so.gz",
+          "downloadSha256": "2f5f34da4c2237b7c917cce1053492b1eef47dd59904681c7714af6b6988489a",
           "delivery": "bundle",
           "asset": "onnx/ort_extensions.dart"
         },
         {
           "name": "libfonnx_ort_session_finalizer.so",
-          "sha256": "07a5f121a4563b1a2ef708ed69e1a6dd6db65e323d1ec7313668c9f2a7ef5c48",
-          "url": "https://github.com/Telosnex/fonnx/releases/download/native-4366e2b2a423c0e5/android-arm-libfonnx_ort_session_finalizer.so.gz",
-          "downloadSha256": "c08ee578450a8426e25acdfe059d1a03bc237132a14e9b3c262445a17fb58cfa",
+          "sha256": "fff67b20e0bcd2625ed85693601da0f7e9676eabdd66f5ff6a0db497eb6346fe",
+          "url": "https://github.com/Telosnex/fonnx/releases/download/native-a72173eb4dadd7cb/android-arm-libfonnx_ort_session_finalizer.so.gz",
+          "downloadSha256": "f056545031e2b9a47b870181f2ebb2ac47bf0b3a038aa5c1803daae1636dd197",
           "delivery": "bundle",
           "asset": "onnx/ort_session_finalizer.dart"
         }
@@ -51,17 +51,17 @@
         },
         {
           "name": "libortextensions.so",
-          "sha256": "a5f5f93fe1fdb7953d4bf3a251097b73f275fe0b3ec1faa5d4a14b379fb31b92",
-          "url": "https://github.com/Telosnex/fonnx/releases/download/native-4366e2b2a423c0e5/android-arm64-libortextensions.so.gz",
-          "downloadSha256": "1aa14793202a04c4d16b372f62815c7f34afca26bcfba3b3f4c34c00ab9de562",
+          "sha256": "f60eac7e747f605dc8dbef661968e223274d5685d8d1b1bf21a133fd4df18426",
+          "url": "https://github.com/Telosnex/fonnx/releases/download/native-a72173eb4dadd7cb/android-arm64-libortextensions.so.gz",
+          "downloadSha256": "12130f5e8f33b3127e8572cbd9d67c9e5342c06b5d519819acaf8fe30632e3ba",
           "delivery": "bundle",
           "asset": "onnx/ort_extensions.dart"
         },
         {
           "name": "libfonnx_ort_session_finalizer.so",
-          "sha256": "783f3828bc80f777adf56dd91deab984bceb86e42ddb740a483c8a1a4f2a31fe",
-          "url": "https://github.com/Telosnex/fonnx/releases/download/native-4366e2b2a423c0e5/android-arm64-libfonnx_ort_session_finalizer.so.gz",
-          "downloadSha256": "9ef379c34c4eedcb3a6e5fe70985c7747cd57abc89abc4594ae9602ad86e9113",
+          "sha256": "30fee513b19e36ea4a16a91e0dbf6bb2b5d4bf04ea5f64f0797c154265ae969a",
+          "url": "https://github.com/Telosnex/fonnx/releases/download/native-a72173eb4dadd7cb/android-arm64-libfonnx_ort_session_finalizer.so.gz",
+          "downloadSha256": "66ba7eced00194c3bb29fe3a57f7ec4e90d753cd1afc695d87fcc1623104a39a",
           "delivery": "bundle",
           "asset": "onnx/ort_session_finalizer.dart"
         }
@@ -83,17 +83,17 @@
         },
         {
           "name": "libortextensions.so",
-          "sha256": "72eebd91d096686c0f5613eb1467e06b97e8f0dbf78d749865786f87137b1d75",
-          "url": "https://github.com/Telosnex/fonnx/releases/download/native-4366e2b2a423c0e5/android-x64-libortextensions.so.gz",
-          "downloadSha256": "86cb904dbd9424c19aefa2adf0b8560a1b00ff75d079f69089d163bc6c59f9d0",
+          "sha256": "effc41ca860630d3c2483c0c2c8f82fbe3cd80aa82d843bb876cb395e6ce3968",
+          "url": "https://github.com/Telosnex/fonnx/releases/download/native-a72173eb4dadd7cb/android-x64-libortextensions.so.gz",
+          "downloadSha256": "0c3756c15efd31c0bbc95b47f9fdffbdad4383c25424f6af305779b54d17763b",
           "delivery": "bundle",
           "asset": "onnx/ort_extensions.dart"
         },
         {
           "name": "libfonnx_ort_session_finalizer.so",
-          "sha256": "0ba190c406dc5875b8de0afbb4a9bfd280a5e263b3bd1fbabf3e8bcb74646cd4",
-          "url": "https://github.com/Telosnex/fonnx/releases/download/native-4366e2b2a423c0e5/android-x64-libfonnx_ort_session_finalizer.so.gz",
-          "downloadSha256": "8e085a210cc2752a232cc5f0919c28e2487a1b4b6ad932a002a32f11d0a18d86",
+          "sha256": "86d8b1cadb6500f19ee11bdbae73ae596406c7eb5262e76afb62b373a69b55a5",
+          "url": "https://github.com/Telosnex/fonnx/releases/download/native-a72173eb4dadd7cb/android-x64-libfonnx_ort_session_finalizer.so.gz",
+          "downloadSha256": "1aa4e905852132114d02dd347581727e5af3845e7c053dfea9bc88241eb08683",
           "delivery": "bundle",
           "asset": "onnx/ort_session_finalizer.dart"
         }
@@ -107,7 +107,7 @@
         {
           "name": "libonnxruntime.dylib",
           "sha256": "1f5179684a2b68770db9e0bddc8fe18cf25ffe5fdf1a7b917c6a9a7b3ed1f9e6",
-          "url": "https://github.com/Telosnex/fonnx/releases/download/native-4366e2b2a423c0e5/ios-arm64-iphoneos-libonnxruntime.dylib.gz",
+          "url": "https://github.com/Telosnex/fonnx/releases/download/native-a72173eb4dadd7cb/ios-arm64-iphoneos-libonnxruntime.dylib.gz",
           "downloadSha256": "3d2cc403003551df6c5f70bbbdf85f95d6cfa3854e440f2003ab37a44cca2354",
           "delivery": "bundle",
           "asset": "onnx/ort_ffi_bindings.dart"
@@ -115,7 +115,7 @@
         {
           "name": "libortextensions.dylib",
           "sha256": "62100df8de61640a9c73e486b5341829172e5359265933ef0ba20a22db60d909",
-          "url": "https://github.com/Telosnex/fonnx/releases/download/native-4366e2b2a423c0e5/ios-arm64-iphoneos-libortextensions.dylib.gz",
+          "url": "https://github.com/Telosnex/fonnx/releases/download/native-a72173eb4dadd7cb/ios-arm64-iphoneos-libortextensions.dylib.gz",
           "downloadSha256": "eacdcc769ad1e499aa6dd79e67089626acd9b88347e1cd4507cc37c29274aba4",
           "delivery": "bundle",
           "asset": "onnx/ort_extensions.dart"
@@ -123,7 +123,7 @@
         {
           "name": "libfonnx_ort_session_finalizer.dylib",
           "sha256": "d3114a958abcf0d3dc15115b237435d8af37c2ff221499faabe6d020ac00b629",
-          "url": "https://github.com/Telosnex/fonnx/releases/download/native-4366e2b2a423c0e5/ios-arm64-iphoneos-libfonnx_ort_session_finalizer.dylib.gz",
+          "url": "https://github.com/Telosnex/fonnx/releases/download/native-a72173eb4dadd7cb/ios-arm64-iphoneos-libfonnx_ort_session_finalizer.dylib.gz",
           "downloadSha256": "f0eae6f31448538bca93fe385e9126fcdfa66d8e9682e842bfb0e52c76ad82cc",
           "delivery": "bundle",
           "asset": "onnx/ort_session_finalizer.dart"
@@ -138,7 +138,7 @@
         {
           "name": "libonnxruntime.dylib",
           "sha256": "281f12c21165a9ace10ce3897907eee1b186b5acd910aac228052f2cd9e6b7b1",
-          "url": "https://github.com/Telosnex/fonnx/releases/download/native-4366e2b2a423c0e5/ios-arm64-iphonesimulator-libonnxruntime.dylib.gz",
+          "url": "https://github.com/Telosnex/fonnx/releases/download/native-a72173eb4dadd7cb/ios-arm64-iphonesimulator-libonnxruntime.dylib.gz",
           "downloadSha256": "8bd6c747241af1b5f4d3634f7c794f28b65fb98b399c4bbf173a358063d41f9c",
           "delivery": "bundle",
           "asset": "onnx/ort_ffi_bindings.dart"
@@ -146,7 +146,7 @@
         {
           "name": "libortextensions.dylib",
           "sha256": "fadd0e81f6bca88a081c2a66314b58d0b913b3d175c4c3644b0a5fde80ef73d7",
-          "url": "https://github.com/Telosnex/fonnx/releases/download/native-4366e2b2a423c0e5/ios-arm64-iphonesimulator-libortextensions.dylib.gz",
+          "url": "https://github.com/Telosnex/fonnx/releases/download/native-a72173eb4dadd7cb/ios-arm64-iphonesimulator-libortextensions.dylib.gz",
           "downloadSha256": "c6d823e9781156916211d89b540a3f2f6c895bd4fe170ff609e6d7f9532caf00",
           "delivery": "bundle",
           "asset": "onnx/ort_extensions.dart"
@@ -154,7 +154,7 @@
         {
           "name": "libfonnx_ort_session_finalizer.dylib",
           "sha256": "7754ed78f0fcfbe83c22fbc7d051888d8fd432e3262a964bf3c7b85ed7216b59",
-          "url": "https://github.com/Telosnex/fonnx/releases/download/native-4366e2b2a423c0e5/ios-arm64-iphonesimulator-libfonnx_ort_session_finalizer.dylib.gz",
+          "url": "https://github.com/Telosnex/fonnx/releases/download/native-a72173eb4dadd7cb/ios-arm64-iphonesimulator-libfonnx_ort_session_finalizer.dylib.gz",
           "downloadSha256": "3f51f6857283adb77498ac6ae179fab3ba4fe1451165ace4967e788216748975",
           "delivery": "bundle",
           "asset": "onnx/ort_session_finalizer.dart"
@@ -177,7 +177,7 @@
         {
           "name": "libortextensions.so",
           "sha256": "f686634da0fc59866950ac88b759ae958e6e46edf93e02d4bf196e5873e89943",
-          "url": "https://github.com/Telosnex/fonnx/releases/download/native-4366e2b2a423c0e5/linux-arm64-libortextensions.so.gz",
+          "url": "https://github.com/Telosnex/fonnx/releases/download/native-a72173eb4dadd7cb/linux-arm64-libortextensions.so.gz",
           "downloadSha256": "d2f3581ae00f7b1524bd84dbe8b3c423c49fa89533a02454adf132b3057aa8fe",
           "delivery": "bundle",
           "asset": "onnx/ort_extensions.dart"
@@ -185,7 +185,7 @@
         {
           "name": "libfonnx_ort_session_finalizer.so",
           "sha256": "d3d28ab4285c390e51eb85ecc11c6fd78d50798723991b831fed70f0443105c5",
-          "url": "https://github.com/Telosnex/fonnx/releases/download/native-4366e2b2a423c0e5/linux-arm64-libfonnx_ort_session_finalizer.so.gz",
+          "url": "https://github.com/Telosnex/fonnx/releases/download/native-a72173eb4dadd7cb/linux-arm64-libfonnx_ort_session_finalizer.so.gz",
           "downloadSha256": "49c04d2f13cbe40debd50119a55c59fc806684fa07d540e148f590ee6891a1b9",
           "delivery": "bundle",
           "asset": "onnx/ort_session_finalizer.dart"
@@ -208,7 +208,7 @@
         {
           "name": "libortextensions.so",
           "sha256": "85b03b72018d83d31d6e4eba156ffc5fa2b1b5d2dd2890536ef74897b149acf0",
-          "url": "https://github.com/Telosnex/fonnx/releases/download/native-4366e2b2a423c0e5/linux-x64-libortextensions.so.gz",
+          "url": "https://github.com/Telosnex/fonnx/releases/download/native-a72173eb4dadd7cb/linux-x64-libortextensions.so.gz",
           "downloadSha256": "1d46177772a8de4c900ed5894bf4e7b492fc8a98a9682d224a120740ab2f55a3",
           "delivery": "bundle",
           "asset": "onnx/ort_extensions.dart"
@@ -216,7 +216,7 @@
         {
           "name": "libfonnx_ort_session_finalizer.so",
           "sha256": "139e1911bc9a77142ebb7d0cfc0059a99376aa56a6c4a4f97315ae5e55cf9838",
-          "url": "https://github.com/Telosnex/fonnx/releases/download/native-4366e2b2a423c0e5/linux-x64-libfonnx_ort_session_finalizer.so.gz",
+          "url": "https://github.com/Telosnex/fonnx/releases/download/native-a72173eb4dadd7cb/linux-x64-libfonnx_ort_session_finalizer.so.gz",
           "downloadSha256": "4a98126e79aba30ee1dff1bc65491ed7c3b3d2c5dcaa3fcac176e97b5d7d6d15",
           "delivery": "bundle",
           "asset": "onnx/ort_session_finalizer.dart"
@@ -240,7 +240,7 @@
         {
           "name": "libortextensions.dylib",
           "sha256": "c39f54affcbea8cba6c1766f4c400962418ee42bafc8f52bd6f8ff6483952036",
-          "url": "https://github.com/Telosnex/fonnx/releases/download/native-4366e2b2a423c0e5/macos-arm64-libortextensions.dylib.gz",
+          "url": "https://github.com/Telosnex/fonnx/releases/download/native-a72173eb4dadd7cb/macos-arm64-libortextensions.dylib.gz",
           "downloadSha256": "baf2d8bca30b436da95dfca1fea3f3fa838e8b027a54e5759afb4307f5ec0d02",
           "delivery": "bundle",
           "asset": "onnx/ort_extensions.dart"
@@ -248,7 +248,7 @@
         {
           "name": "libfonnx_ort_session_finalizer.dylib",
           "sha256": "49bda0b4191c8f6f1a21ac1fc9359b1c049d29672343454ca7f54ebd6cb42e53",
-          "url": "https://github.com/Telosnex/fonnx/releases/download/native-4366e2b2a423c0e5/macos-arm64-libfonnx_ort_session_finalizer.dylib.gz",
+          "url": "https://github.com/Telosnex/fonnx/releases/download/native-a72173eb4dadd7cb/macos-arm64-libfonnx_ort_session_finalizer.dylib.gz",
           "downloadSha256": "44c20992b90c547c3bcd631c410667b63039030e93d3758de546834aef1e1fd5",
           "delivery": "bundle",
           "asset": "onnx/ort_session_finalizer.dart"
@@ -270,17 +270,17 @@
         },
         {
           "name": "ortextensions.dll",
-          "sha256": "b698c23bae54ffaea0caad76b61f31dbb3ec6b28bbbe0cf32133d77f618d26f9",
-          "url": "https://github.com/Telosnex/fonnx/releases/download/native-4366e2b2a423c0e5/windows-arm64-ortextensions.dll.gz",
-          "downloadSha256": "ac1b2a240dee9e9c867cb284da8fcb17cf15ec36f2690ae26331908211698cf1",
+          "sha256": "ad4668af9a6681af7ba956decee4c37cdef4ccfd7020a94a22bf1269b153dfb7",
+          "url": "https://github.com/Telosnex/fonnx/releases/download/native-a72173eb4dadd7cb/windows-arm64-ortextensions.dll.gz",
+          "downloadSha256": "f70fb1f5c7f8ec29ca5a487c8a2bc34d82605be1c51ffddbd2840b5f21fe6c1c",
           "delivery": "bundle",
           "asset": "onnx/ort_extensions.dart"
         },
         {
           "name": "fonnx_ort_session_finalizer.dll",
-          "sha256": "3bb90b2aa73a000dd65b75029c094882b02de62eefcda76ff1f52c086e2e8700",
-          "url": "https://github.com/Telosnex/fonnx/releases/download/native-4366e2b2a423c0e5/windows-arm64-fonnx_ort_session_finalizer.dll.gz",
-          "downloadSha256": "42183eabc52041c6dd4cd21d3634b9419ad681b4821ff667d078c4ca601b6024",
+          "sha256": "5c2ef0c45987f5722b8f7fcf36c9ed4634adc2163518593a2d64c6a8b92a448a",
+          "url": "https://github.com/Telosnex/fonnx/releases/download/native-a72173eb4dadd7cb/windows-arm64-fonnx_ort_session_finalizer.dll.gz",
+          "downloadSha256": "7ab9044a8f9567ed61762373f25c89a2d5d356d19452207edc0584d2413f33e2",
           "delivery": "bundle",
           "asset": "onnx/ort_session_finalizer.dart"
         }
@@ -301,17 +301,17 @@
         },
         {
           "name": "ortextensions.dll",
-          "sha256": "4269f1ea46bda2b69c3dfdf2e63706d4acaf4b21c8184de042817dbe679711ce",
-          "url": "https://github.com/Telosnex/fonnx/releases/download/native-4366e2b2a423c0e5/windows-x64-ortextensions.dll.gz",
-          "downloadSha256": "5a55a18879a76f93e2eacea7c7a8650dbebf3fea3c394e92fe9ffeec182778b4",
+          "sha256": "c97b875d6173eb5b0b0670253b6a4f0b43d4db79d569275c8f912cab7f5233f2",
+          "url": "https://github.com/Telosnex/fonnx/releases/download/native-a72173eb4dadd7cb/windows-x64-ortextensions.dll.gz",
+          "downloadSha256": "d26eb5e6b484638bfe1f4ede13e6c389a3d04f15aa0e0f37609b2a775619740a",
           "delivery": "bundle",
           "asset": "onnx/ort_extensions.dart"
         },
         {
           "name": "fonnx_ort_session_finalizer.dll",
-          "sha256": "62b1201b6848cd2b1c6365052bcb20fa86129dd453ace5f02de0fad349351ccb",
-          "url": "https://github.com/Telosnex/fonnx/releases/download/native-4366e2b2a423c0e5/windows-x64-fonnx_ort_session_finalizer.dll.gz",
-          "downloadSha256": "df9e79fdfa78fe5d133deeda870668870a09b773050558c58125b55bb20cb18e",
+          "sha256": "5cd2bbe79c450f9bfdcb6ffbb0ac69e4d853f263cca379c44f8a8b965f9ea6a7",
+          "url": "https://github.com/Telosnex/fonnx/releases/download/native-a72173eb4dadd7cb/windows-x64-fonnx_ort_session_finalizer.dll.gz",
+          "downloadSha256": "ee7517efc80b6bc0a6b43ee5be4e0bbd2caddef22998e3156169e08e0500f295",
           "delivery": "bundle",
           "asset": "onnx/ort_session_finalizer.dart"
         }
