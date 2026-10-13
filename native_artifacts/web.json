@@ -1,6 +1,10 @@
 {
   "schema": 1,
-  "webVersion": "0d43ccb3f0aff1c0",
+  "sourceKey": "4366e2b2a423c0e55276b5d33bf877428090ac14275fc7af00ab36878c7db1cb",
+  "release": "https://github.com/Telosnex/fonnx/releases/tag/native-4366e2b2a423c0e5",
+  "runner": "ubuntu-22.04",
+  "toolchain": "onnxruntime-web 1.27.0 (npm)",
+  "webVersion": "66db1ba901961b21",
   "files": [
     {
       "name": "fonnx_worker_rpc.js",
@@ -67,6 +71,30 @@
       "sha256": "d3ccd7c7ebc19e721f7c7c2369995d34fb0fb857efe8ba65a97c02c4509274ca",
       "bytes": 3867,
       "source": "lib/web/minish_lab_worker.js"
+    },
+    {
+      "name": "ort-wasm-simd-threaded.mjs",
+      "sha256": "0a1e718d99c41b22c21f2520ff4f9e883a6b5533856e398d21816ee8eb8185d3",
+      "bytes": 24180,
+      "source": "release",
+      "url": "https://github.com/Telosnex/fonnx/releases/download/native-4366e2b2a423c0e5/web-ort-wasm-simd-threaded.mjs.gz",
+      "downloadSha256": "b7f417a38d3b04d61088a6e776f6ecbf72a0075a2403b726bce4c6988b90c837"
+    },
+    {
+      "name": "ort-wasm-simd-threaded.wasm",
+      "sha256": "d1ab1b94b16a65b29d710d0b587b29e7bed336827577623913479b8afe8113e6",
+      "bytes": 13479978,
+      "source": "release",
+      "url": "https://github.com/Telosnex/fonnx/releases/download/native-4366e2b2a423c0e5/web-ort-wasm-simd-threaded.wasm.gz",
+      "downloadSha256": "c50e8615bc14e995065d350da954c4e7a43e5a80b6a763f82c63bce485e1e262"
+    },
+    {
+      "name": "ort.min.mjs",
+      "sha256": "9608e98a3fba9716f0cbd0bca0c94808b71dae2e9265ca3fe742ddc393a53ebc",
+      "bytes": 50069,
+      "source": "release",
+      "url": "https://github.com/Telosnex/fonnx/releases/download/native-4366e2b2a423c0e5/web-ort.min.mjs.gz",
+      "downloadSha256": "2c880998b47afac519a6812ef8aa27c98eebd27f1e157922d63a3da7c01b3e0f"
     },
     {
       "name": "pyannote_init.js",
