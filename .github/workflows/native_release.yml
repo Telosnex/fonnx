@@ -223,6 +223,13 @@ jobs:
         run: node tool/test_web_runtime.mjs
       - name: Chrome browser tests
         run: flutter test --platform chrome test/web_runtime_test.dart test/deterministic_operation_corpus_test.dart
+      # CanvasKit, not skwasm: see the dart2wasm note in tool/test_all.sh.
+      - name: Chrome dart2wasm browser tests
+        run: >-
+          flutter test --platform chrome --wasm --no-cross-origin-isolation
+          --dart-define=FLUTTER_WEB_USE_SKIA=true
+          --dart-define=FLUTTER_WEB_USE_SKWASM=false
+          test/web_runtime_test.dart test/deterministic_operation_corpus_test.dart
 
   release:
     needs: [build, web, web-test]

@@ -44,10 +44,15 @@ flutter test test/models/ort_memory_smoke_test.dart \
   --concurrency=1 -r compact
 flutter test test/deterministic_operation_corpus_test.dart \
   test/web_runtime_test.dart --platform chrome -r compact
-# dart2wasm: the model Workers crash there (ADR 002 worklog), so only the
-# corpus runs.
+# dart2wasm. With the default skwasm renderer, the test server sends COOP and
+# COEP on the .html page only. The page is then cross-origin isolated, and
+# Chrome refuses each model Worker script, because it has no COEP header. The
+# CanvasKit renderer keeps the page not isolated, as in the dart2js run.
 flutter test test/deterministic_operation_corpus_test.dart \
-  --platform chrome --wasm -r compact
+  test/web_runtime_test.dart --platform chrome --wasm \
+  --no-cross-origin-isolation \
+  --dart-define=FLUTTER_WEB_USE_SKIA=true \
+  --dart-define=FLUTTER_WEB_USE_SKWASM=false -r compact
 
 if [[ "${FONNX_FULL_RUNTIME_MATRIX:-0}" == 1 ]]; then
   tool/test_linux_artifact_docker.sh linux-arm64
