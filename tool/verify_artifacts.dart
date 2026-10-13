@@ -92,18 +92,14 @@ Future<void> main(List<String> arguments) async {
     }
   }
 
-  await _verifyLocalRecords(
-    root,
-    _object(manifest['webAssets'], 'webAssets'),
-    expectedCount: 21,
-    label: 'canonical Web asset',
-  );
-  await _verifyLocalRecords(
-    root,
-    _object(manifest['publishedWebAssets'], 'publishedWebAssets'),
-    expectedCount: 21,
-    label: 'published Web asset',
-  );
+  for (final key in const ['webAssets', 'publishedWebAssets']) {
+    if (manifest.containsKey(key)) {
+      throw FormatException(
+        '$key: the package web files belong in native_artifacts/web.json '
+        '(native_prebuilt ADR 002). native_prebuilt:check verifies them.',
+      );
+    }
+  }
   await _verifyLocalRecords(
     root,
     _object(manifest['deployedWebAssets'], 'deployedWebAssets'),
@@ -113,7 +109,7 @@ Future<void> main(List<String> arguments) async {
   await _verifyLocalRecords(
     root,
     _object(manifest['models'], 'models'),
-    expectedCount: 18,
+    expectedCount: 19,
     label: 'model',
     rejectLfsPointers: true,
   );
@@ -129,7 +125,8 @@ Future<void> main(List<String> arguments) async {
   );
   if (problems.isNotEmpty) throw StateError(problems.join('\n'));
   stdout.writeln(
-    'PASS: ${native.targets.length} native targets, 35 Web assets, 18 model fixtures, '
+    'PASS: ${native.targets.length} native targets, 16 deployed Web assets, '
+    '19 model fixtures, web.json, '
     'and exact source/profile pins',
   );
 }
@@ -211,42 +208,49 @@ Future<void> _verifyLocalRecords(
 }
 
 Future<void> _verifyWebRuntime(Directory root) async {
-  final webPackage = _object(
-    jsonDecode(
-      await File('${root.path}/example/web/package.json').readAsString(),
-    ),
-    'example/web/package.json',
-  );
-  if (webPackage['type'] != 'module') {
-    throw const FormatException('example/web must declare ES module semantics');
-  }
-  final initFiles = <File>[
-    ...Directory('${root.path}/example/web').listSync().whereType<File>().where(
-      (file) => file.path.endsWith('_init.js'),
-    ),
-    ...Directory('${root.path}/docs').listSync().whereType<File>().where(
-      (file) =>
-          file.uri.pathSegments.last.startsWith('fonnx_') &&
-          file.path.endsWith('_init.js'),
-    ),
+  List<File> files(String directory, bool Function(String name) test) => [
+    for (final file in Directory(
+      '${root.path}/$directory',
+    ).listSync().whereType<File>())
+      if (test(file.uri.pathSegments.last)) file,
   ];
-  for (final file in initFiles) {
+
+  // The package files: the hook installs them (ADR 002). Each Worker loads
+  // ORT with the version query of its own URL.
+  for (final file in files('lib/web', (n) => n.endsWith('_init.js'))) {
     final source = await file.readAsString();
     if (!source.contains('FonnxWorkerRpc') || source.contains('Math.random')) {
       throw StateError('${file.path} bypasses the fatal-safe Worker RPC');
     }
   }
-  final workerFiles = <File>[
-    ...Directory('${root.path}/example/web').listSync().whereType<File>().where(
-      (file) => file.path.endsWith('_worker.js'),
-    ),
-    ...Directory('${root.path}/docs').listSync().whereType<File>().where(
-      (file) =>
-          file.uri.pathSegments.last.startsWith('fonnx_') &&
-          file.path.endsWith('_worker.js'),
-    ),
-  ];
-  for (final file in workerFiles) {
+  for (final file in files('lib/web', (n) => n.endsWith('_worker.js'))) {
+    final source = await file.readAsString();
+    if (source.contains('cdn.jsdelivr.net') ||
+        source.contains('onnxruntime-web@') ||
+        !source.contains(r'import(`./ort.min.mjs${query}`)') ||
+        !source.contains('earlyMessages') ||
+        !source.contains('protocolVersion') ||
+        !source.contains('!== 1')) {
+      throw StateError(
+        '${file.path} does not use the pinned local ORT runtime',
+      );
+    }
+  }
+
+  // The deployed demo in docs/ keeps its own copies.
+  for (final file in files(
+    'docs',
+    (n) => n.startsWith('fonnx_') && n.endsWith('_init.js'),
+  )) {
+    final source = await file.readAsString();
+    if (!source.contains('FonnxWorkerRpc') || source.contains('Math.random')) {
+      throw StateError('${file.path} bypasses the fatal-safe Worker RPC');
+    }
+  }
+  for (final file in files(
+    'docs',
+    (n) => n.startsWith('fonnx_') && n.endsWith('_worker.js'),
+  )) {
     final source = await file.readAsString();
     if (source.contains('cdn.jsdelivr.net') ||
         source.contains('onnxruntime-web@') ||
@@ -258,34 +262,19 @@ Future<void> _verifyWebRuntime(Directory root) async {
       );
     }
   }
-  for (final name in const [
-    'ort.min.mjs',
-    'ort-wasm-simd-threaded.mjs',
-    'ort-wasm-simd-threaded.wasm',
-  ]) {
-    final canonical = File('${root.path}/example/web/$name');
-    final deployed = File('${root.path}/docs/$name');
-    if (await sha256.bind(canonical.openRead()).first !=
-        await sha256.bind(deployed.openRead()).first) {
-      throw StateError('Deployed $name differs from the canonical asset');
-    }
-  }
-  for (final canonical
-      in Directory(
-        '${root.path}/example/web',
-      ).listSync().whereType<File>().where(
-        (file) =>
-            file.path.endsWith('.js') ||
-            file.path.endsWith('.mjs') ||
-            file.path.endsWith('.wasm'),
-      )) {
-    final published = File(
-      '${root.path}/lib/web/${canonical.uri.pathSegments.last}',
-    );
-    if (!await published.exists() ||
-        await sha256.bind(canonical.openRead()).first !=
-            await sha256.bind(published.openRead()).first) {
-      throw StateError('${canonical.path} differs from its published copy');
+  final pin = _object(
+    jsonDecode(
+      await File('${root.path}/web_build/onnxruntime_web.json').readAsString(),
+    ),
+    'web_build/onnxruntime_web.json',
+  );
+  for (final raw in pin['files']! as List<Object?>) {
+    final entry = _object(raw, 'onnxruntime_web.json file');
+    final deployed = File('${root.path}/docs/${entry['name']}');
+    if ('${await sha256.bind(deployed.openRead()).first}' != entry['sha256']) {
+      throw StateError(
+        'Deployed ${entry['name']} differs from the pinned ORT Web file',
+      );
     }
   }
   final serviceWorker = await File(
