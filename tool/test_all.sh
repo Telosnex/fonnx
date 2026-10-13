@@ -28,6 +28,9 @@ tests=(
 
 flutter analyze
 dart run tool/verify_artifacts.dart
+# The browser tests load the web files from lib/web/ (native_prebuilt ADR 002
+# D13). Pass a tool/build_web.dart output in FONNX_WEB_FROM to use it.
+dart run native_prebuilt:web install-dev ${FONNX_WEB_FROM:+--from "$FONNX_WEB_FROM"}
 node tool/test_web_runtime.mjs
 tool/test_native_sanitizers.sh
 if [[ "$(uname -s)-$(uname -m)" == Darwin-arm64 ]]; then
@@ -40,7 +43,9 @@ flutter test --concurrency=1 -r compact "${tests[@]}"
 flutter test test/models/ort_memory_smoke_test.dart \
   --concurrency=1 -r compact
 flutter test test/deterministic_operation_corpus_test.dart \
-  --platform chrome -r compact
+  test/web_runtime_test.dart --platform chrome -r compact
+# dart2wasm: the model Workers crash there (ADR 002 worklog), so only the
+# corpus runs.
 flutter test test/deterministic_operation_corpus_test.dart \
   --platform chrome --wasm -r compact
 

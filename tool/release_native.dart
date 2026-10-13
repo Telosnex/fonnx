@@ -19,8 +19,12 @@ Future<void> main(List<String> arguments) => runCommand(
     ..addOption('package', defaultsTo: '.')
     ..addOption('repo')
     ..addOption('staging')
+    ..addOption('web', help: 'Output directory of tool/build_web.dart.')
+    ..addOption('web-runner')
+    ..addOption('web-toolchain')
     ..addFlag('dry-run'),
-  'dart run tool/release_native.dart [--dry-run] [--repo owner/name] <build dirs...>',
+  'dart run tool/release_native.dart [--dry-run] [--repo owner/name] '
+  '[--web <dir> --web-runner <s> --web-toolchain <s>] <build dirs...>',
   (args) async {
     if (args.rest.isEmpty) {
       throw StateError('Pass the build output directories');
@@ -30,6 +34,12 @@ Future<void> main(List<String> arguments) => runCommand(
       directories: args.rest.map(Directory.new).toList(),
       repository: repositoryOf(args),
       staging: await stagingOf(args, 'fonnx_native_release_'),
+      webDirectory: switch (args.option('web')) {
+        final String path => Directory(path),
+        null => null,
+      },
+      webRunner: args.option('web-runner') ?? '',
+      webToolchain: args.option('web-toolchain') ?? '',
       publisher: args.flag('dry-run') ? null : GhPublisher(log: log),
     );
     return 0;
@@ -41,6 +51,9 @@ Future<PrebuiltManifest> releaseNative({
   required List<Directory> directories,
   required String repository,
   required Directory staging,
+  Directory? webDirectory,
+  String webRunner = '',
+  String webToolchain = '',
   Publisher? publisher,
 }) async {
   final upstream = await loadUpstreamOrt(packageRoot);
@@ -70,6 +83,9 @@ Future<PrebuiltManifest> releaseNative({
     targetDirectories: directories,
     repository: repository,
     staging: staging,
+    webDirectory: webDirectory,
+    webRunner: webRunner,
+    webToolchain: webToolchain,
     publisher: publisher == null
         ? null
         : _OwnedFilesPublisher(publisher, skippedAssets),
