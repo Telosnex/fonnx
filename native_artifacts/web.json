@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "webVersion": "bd1ba413297d4ebd",
+  "webVersion": "0d43ccb3f0aff1c0",
   "files": [
     {
       "name": "fonnx_worker_rpc.js",
@@ -16,8 +16,8 @@
     },
     {
       "name": "futo_swipe_worker.js",
-      "sha256": "8dbc417254453c2feb96b68dacb5200167643a8c2dc63227a1e1b9af7dbfec00",
-      "bytes": 5345,
+      "sha256": "e8a49aa614eff711f53e00a30f797620d34a40013c179869fce29dd32db9d611",
+      "bytes": 5664,
       "source": "lib/web/futo_swipe_worker.js"
     },
     {
@@ -28,8 +28,8 @@
     },
     {
       "name": "kws_worker.js",
-      "sha256": "6ab938231faf8580ce1d9265e3684535d78a448e7989f20e78a1fc3aa849c3d2",
-      "bytes": 6872,
+      "sha256": "7f3092493b2a7d4ce9af56838bbedaf10d3a1f11ccf561e51392094e041e7a81",
+      "bytes": 7191,
       "source": "lib/web/kws_worker.js"
     },
     {
@@ -40,8 +40,8 @@
     },
     {
       "name": "magika_worker.js",
-      "sha256": "9226761242fea661a42f5efcc4051c0160e32398464779a36d9657595ee8c23e",
-      "bytes": 3227,
+      "sha256": "6acc958dc9191a61e74411170c6879cf1492cf936ec6aff6e7f34ee623665c63",
+      "bytes": 3546,
       "source": "lib/web/magika_worker.js"
     },
     {
@@ -52,8 +52,8 @@
     },
     {
       "name": "minilm_worker.js",
-      "sha256": "33ea13583182d4aa1f5ee785f44cb64c2cccd5879c211ea1a681ac0929f01d29",
-      "bytes": 4602,
+      "sha256": "afb5e111d730e42c5ee9a8505b6f2a00846143fca44066b5bf019d569b518d59",
+      "bytes": 4921,
       "source": "lib/web/minilm_worker.js"
     },
     {
@@ -64,8 +64,8 @@
     },
     {
       "name": "minish_lab_worker.js",
-      "sha256": "5ea525e65a78c54c236924ac5046665d849c161c6966963042835c4ae5468164",
-      "bytes": 3548,
+      "sha256": "d3ccd7c7ebc19e721f7c7c2369995d34fb0fb857efe8ba65a97c02c4509274ca",
+      "bytes": 3867,
       "source": "lib/web/minish_lab_worker.js"
     },
     {
@@ -76,8 +76,8 @@
     },
     {
       "name": "pyannote_worker.js",
-      "sha256": "ee5f7d834fcdf378a5f02e7526835e5db78da44a0620c3784f2c3010cf8fc9e9",
-      "bytes": 9726,
+      "sha256": "7afe421a01bf35618a094b19893eb5e61bd202409ce866466ea801c5a0c345b4",
+      "bytes": 10045,
       "source": "lib/web/pyannote_worker.js"
     },
     {
@@ -88,20 +88,20 @@
     },
     {
       "name": "silero_vad_worker.js",
-      "sha256": "0f09dee82a67bd32021aa3ef4aa4b191fc714311cd63e313f48fe397fdf5524a",
-      "bytes": 4396,
+      "sha256": "5a59f8390dbf860268a7130d495bdc53879a75623a056cf5fe98b3d97d785005",
+      "bytes": 4715,
       "source": "lib/web/silero_vad_worker.js"
     },
     {
       "name": "whisper_init.js",
-      "sha256": "747021aef50945e2cdc8b84181bc4be7619a50f79fc67442038863181be3c6ad",
-      "bytes": 848,
+      "sha256": "b07902470b39b07854c32b7043cc3e8222a89fe701bf9fbf869f3267e4f9b2b9",
+      "bytes": 1056,
       "source": "lib/web/whisper_init.js"
     },
     {
       "name": "whisper_worker.js",
-      "sha256": "2058deef2bd958a2b62f125610faa3f58807f1853a933517415bcc6b342bfe09",
-      "bytes": 5416,
+      "sha256": "20be4c60633bdaff462bcee764977e2a3dc2082557c6767575e985f1b86ed102",
+      "bytes": 8479,
       "source": "lib/web/whisper_worker.js"
     }
   ]
