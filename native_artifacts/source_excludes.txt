@@ -1,0 +1,3 @@
+# Files that the native build does not read (native_prebuilt ADR 001 D3).
+# The local test script. The release workflow runs its own test steps.
+tool/test_all.sh

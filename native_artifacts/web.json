@@ -4,12 +4,12 @@
   "release": "https://github.com/Telosnex/fonnx/releases/tag/native-4366e2b2a423c0e5",
   "runner": "ubuntu-22.04",
   "toolchain": "onnxruntime-web 1.27.0 (npm)",
-  "webVersion": "66db1ba901961b21",
+  "webVersion": "9767fcf50cded8f3",
   "files": [
     {
       "name": "fonnx_worker_rpc.js",
-      "sha256": "272db1fe4b84ba4c401c7deeac5a71d9d6d02159a86335b829c32b44f974773b",
-      "bytes": 1919,
+      "sha256": "ef579fdabadf419387cec592944bf5e0b1727033c2e12c2fc744ba32346dfa24",
+      "bytes": 2299,
       "source": "lib/web/fonnx_worker_rpc.js"
     },
     {

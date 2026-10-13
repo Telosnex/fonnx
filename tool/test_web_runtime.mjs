@@ -40,6 +40,22 @@ await rpc.request('after-crash').then(
 );
 if (!FakeWorker.latest.terminated) throw new Error('Fatal Worker was not terminated');
 
+const expectLoadError = async (isolated, expected) => {
+  globalThis.crossOriginIsolated = isolated;
+  const loadRpc = new FonnxWorkerRpc(new URL('file:///fake-worker.js'), 'load');
+  const pending = loadRpc.request('load');
+  FakeWorker.latest.onerror({ preventDefault() {} });
+  await pending.then(
+    () => { throw new Error('Worker load error unexpectedly resolved'); },
+    (error) => {
+      if (!error.message.includes(expected)) throw error;
+    },
+  );
+};
+await expectLoadError(false, 'the Worker script did not load');
+await expectLoadError(true, 'Cross-Origin-Embedder-Policy: require-corp');
+delete globalThis.crossOriginIsolated;
+
 class BrowserWorkerAdapter {
   constructor(workerUrl) {
     this.worker = new NodeWorker(
@@ -106,4 +122,5 @@ try {
 }
 console.log('PASS: pinned local ONNX Runtime Web 1.27.0 identity inference');
 console.log('PASS: Worker RPC resolves by ID and rejects every fatal pending call');
+console.log('PASS: a Worker that does not load names the COEP header if the page is isolated');
 console.log('PASS: real Magika model executes through the pinned Worker protocol');
