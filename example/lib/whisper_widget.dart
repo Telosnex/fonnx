@@ -52,9 +52,7 @@ class _WhisperWidgetState extends State<WhisperWidget> {
   }
 
   void _runPerformanceTest() async {
-    final modelPath =
-        await getWhisperModelPath('whisper_tiny.onnx');
-    final whisper = Whisper.load(modelPath);
+    final whisper = Whisper.load(await getWhisperBundle());
     final result = await testPerformance(whisper);
     setState(() {
       _speedTestResult = result;
@@ -81,13 +79,22 @@ class _WhisperWidgetState extends State<WhisperWidget> {
     const fileDurationMs = 5000;
     final speedMultilper = fileDurationMs.toDouble() / average;
     debugPrint('  Speed multiplier: ${speedMultilper.toStringAsFixed(2)}x');
-    debugPrint('  Model path: ${whisper.modelPath}');
+    debugPrint('  Model: ${whisper.bundle}');
     return speedMultilper.toStringAsFixed(2);
   }
 
 }
 
 
+
+/// Whisper tiny from the example's assets. Native platforms need files, so
+/// the models are copied to the application support directory.
+Future<WhisperBundle> getWhisperBundle() async {
+  if (kIsWeb) return WhisperBundle.tiny('assets/models/whisper');
+  final encoderPath = await getWhisperModelPath('whisper_tiny_encoder.onnx');
+  await getWhisperModelPath('whisper_tiny_decoder.onnx');
+  return WhisperBundle.tiny(path.dirname(encoderPath));
+}
 
   Future<String> getWhisperModelPath(String modelFilenameWithExtension) async {
     if (kIsWeb) {

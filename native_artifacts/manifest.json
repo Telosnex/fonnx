@@ -117,13 +117,13 @@
     },
     "example/web/whisper_init.js": {
       "path": "example/web/whisper_init.js",
-      "sha256": "fa11870fd79f6caf6c26e03905db935c8b29183e4d291588eaad34a58828ed83",
-      "bytes": 638
+      "sha256": "b07902470b39b07854c32b7043cc3e8222a89fe701bf9fbf869f3267e4f9b2b9",
+      "bytes": 1056
     },
     "example/web/whisper_worker.js": {
       "path": "example/web/whisper_worker.js",
-      "sha256": "50cddee833bbb3b79efd455938832f9b340b89ba6f01ca94978e698e09019001",
-      "bytes": 4635
+      "sha256": "95f3bf9e4fb1a44227fecf0138b8b6f5a44430ffda0b77c10e7cc4a44bd731c6",
+      "bytes": 8160
     }
   },
   "models": {
@@ -202,10 +202,15 @@
       "sha256": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3",
       "bytes": 2327524
     },
-    "example/assets/models/whisper/whisper_tiny.onnx": {
-      "path": "example/assets/models/whisper/whisper_tiny.onnx",
-      "sha256": "f3b7c806032cf080f185330ad4c593e8d1ed97f61ce354f844453c7173933d14",
-      "bytes": 74823452
+    "example/assets/models/whisper/whisper_tiny_decoder.onnx": {
+      "path": "example/assets/models/whisper/whisper_tiny_decoder.onnx",
+      "sha256": "8d20f4157407006e871d63ca0a3c54dddd7db33dfc4ee076960f1f8b2763ce3e",
+      "bytes": 118553827
+    },
+    "example/assets/models/whisper/whisper_tiny_encoder.onnx": {
+      "path": "example/assets/models/whisper/whisper_tiny_encoder.onnx",
+      "sha256": "6642befb640f950d4a8cbbd17834d59e7e75f575b81ccf213e06b050623ab1dd",
+      "bytes": 32904992
     },
     "test/models/bpe_decoder.onnx": {
       "path": "test/models/bpe_decoder.onnx",
@@ -408,13 +413,13 @@
     },
     "lib/web/whisper_init.js": {
       "path": "lib/web/whisper_init.js",
-      "sha256": "fa11870fd79f6caf6c26e03905db935c8b29183e4d291588eaad34a58828ed83",
-      "bytes": 638
+      "sha256": "b07902470b39b07854c32b7043cc3e8222a89fe701bf9fbf869f3267e4f9b2b9",
+      "bytes": 1056
     },
     "lib/web/whisper_worker.js": {
       "path": "lib/web/whisper_worker.js",
-      "sha256": "50cddee833bbb3b79efd455938832f9b340b89ba6f01ca94978e698e09019001",
-      "bytes": 4635
+      "sha256": "95f3bf9e4fb1a44227fecf0138b8b6f5a44430ffda0b77c10e7cc4a44bd731c6",
+      "bytes": 8160
     }
   }
 }

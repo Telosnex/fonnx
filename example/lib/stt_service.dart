@@ -64,9 +64,7 @@ class SttService {
   static const int kSampleRate = 16000;
 
   // Rationale for 1 channel:
-  // - Whisper needs ORT Extensions in order to decode anything other than
-  // signed 16-bit PCM audio in 1 channel at 16kHz.
-  // - ORT Extensions are not supported on web.
+  // - Whisper takes signed 16-bit PCM audio in 1 channel at 16kHz.
   // - Generally, 1 channel is sufficient for speech recognition, it is
   //   both best practice and supported universally.
   /// Number of audio channels
@@ -90,7 +88,7 @@ class SttService {
   /// then the recording will stop.
   final Duration maxSilenceDuration;
   final String vadModelPath;
-  final String whisperModelPath;
+  final WhisperBundle whisperBundle;
 
   /// Values >= this are considered speech.
   ///
@@ -108,7 +106,7 @@ class SttService {
 
   SttService({
     required this.vadModelPath,
-    required this.whisperModelPath,
+    required this.whisperBundle,
     this.maxDuration = const Duration(seconds: 10),
     this.maxSilenceDuration = const Duration(milliseconds: 1000),
     this.voiceThreshold = kVadPIsVoiceThreshold,
@@ -160,7 +158,7 @@ class SttService {
     });
     _vadInferenceLoop(vad, frames, streamController);
     _whisperInferenceLoop(
-      Whisper.load(whisperModelPath),
+      Whisper.load(whisperBundle),
       frames,
       streamController,
     );

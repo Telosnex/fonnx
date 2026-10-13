@@ -1,15 +1,31 @@
-## Original model  
-https://huggingface.co/collections/openai/whisper-release-6501bba2cf999715fd953013
+## Source
+`whisper_tiny_encoder.onnx` and `whisper_tiny_decoder.onnx` are
+`onnx/encoder_model.onnx` and `onnx/decoder_model_merged.onnx` of
+[onnx-community/whisper-tiny](https://huggingface.co/onnx-community/whisper-tiny)
+at revision `ff4177021cc41f7db950912b73ea4fdf7d01d8e7`, unchanged (fp32).
+The original model is [openai/whisper-tiny](https://huggingface.co/openai/whisper-tiny).
 
-## Creating ONNX Model
-Created optimized models using Olive, following [these instructions](https://github.com/microsoft/Olive/tree/main/examples/whisper#whisper-optimization-using-ort-toolchain). Models larger than whisper-small, i.e. whisper-medium, whisper-large, whisper-large-v2, all fail with an error about invalid protobuf (as of 2023 10 15).
+`lib/models/whisper/src/whisper_vocabulary.dart` comes from `tokenizer.json`
+and `generation_config.json` at the same revision:
 
-## Platforms
-Only macOS ARM is currently supported.
-To deliver cross-platform support, the [ONNX runtime extensions](https://github.com/microsoft/onnxruntime-extensions) library needs to be compiled into binaries for macOS Intel, Linux, and Windows. Additionally, iOS and Android will need to take a dependency on the corresponding CocoaPod/Android package.
+```sh
+dart tool/generate_whisper_vocabulary.dart tokenizer.json \
+  generation_config.json \
+  onnx-community/whisper-tiny@ff4177021cc41f7db950912b73ea4fdf7d01d8e7
+```
 
-## Quality and downloading models
+## Runtime
+Both graphs use only standard ONNX and ORT operators. They run on the stock
+ORT native libraries and on stock ORT Web, without ORT Extensions. fonnx
+computes the log-mel features, runs the beam search, and decodes the tokens
+in Dart (`lib/models/whisper/src/`).
+
+Quantized versions of these files exist in the same repository. On CPU they
+were slower than fp32 and changed the transcripts (October 2026), so fonnx
+uses fp32.
+
+## Quality
 whisper-tiny is included in this repo to enable automated testing.
-Larger models are available [in a repo on Telosnex's HuggingFace profile](https://huggingface.co/telosnex/fonnx/tree/main).
-Testing shows that whisper-tiny and whisper-base would have a bad user experience,
-they clearly have issues with every test transcription. whisper-small does not.
+Testing shows that whisper-tiny and whisper-base would have a bad user
+experience: they clearly have issues with every test transcription.
+whisper-small does not.

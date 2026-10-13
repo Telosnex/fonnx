@@ -1,4 +1,4 @@
 import 'package:fonnx/models/whisper/whisper.dart';
 
-Whisper getWhisper(String path) =>
+Whisper getWhisper(WhisperBundle bundle) =>
     throw UnsupportedError('Cannot create a Whisper');

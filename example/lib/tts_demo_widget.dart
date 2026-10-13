@@ -288,10 +288,10 @@ class _TtsDemoWidgetState extends State<TtsDemoWidget> {
       return;
     }
     final vadModelPath = await getModelPath('silero_vad_v6.2.1.onnx');
-    final whisperModelPath = await getWhisperModelPath('whisper_tiny.onnx');
+    final whisperBundle = await getWhisperBundle();
     final service = SttService(
       vadModelPath: vadModelPath,
-      whisperModelPath: whisperModelPath,
+      whisperBundle: whisperBundle,
       voiceThreshold: _sttIsVoiceThreshold,
       maxDuration: const Duration(seconds: 10),
     );

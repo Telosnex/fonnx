@@ -39,7 +39,8 @@ const runtimeModelNamesByPath = <String, String>{
   'msmarcoMiniLmL6V3/msmarcoMiniLmL6V3.onnx': 'msmarcoMiniLmL6V3.onnx',
   'pyannote/pyannote_seg3.onnx': 'pyannote_seg3.onnx',
   'sileroVad/silero_vad_v6.2.1.onnx': 'silero_vad_v6.2.1.onnx',
-  'whisper/whisper_tiny.onnx': 'whisper_tiny.onnx',
+  'whisper/whisper_tiny_decoder.onnx': 'whisper_tiny_decoder.onnx',
+  'whisper/whisper_tiny_encoder.onnx': 'whisper_tiny_encoder.onnx',
 };
 
 /// Maps a runtime-release file name back to its model source path.

@@ -10,7 +10,7 @@ Stable `v1/` cases isolate package-owned behavior:
   chunk lengths, compared byte-for-byte with one-shot frontend output;
 - eight Magika 512-byte boundary sizes compared with an independent extractor;
 - signed PCM16 extrema;
-- Whisper timestamp cleanup;
+- Whisper token decoding;
 - deep call-time snapshots of keyword/spoken-form lists;
 - NaN, infinity, empty, and out-of-range keyword configuration.
 

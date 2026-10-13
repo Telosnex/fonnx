@@ -6,7 +6,7 @@ import 'package:fonnx/models/keyword_spotter/keyword_spotter.dart';
 import 'package:fonnx/models/keyword_spotter/src/streaming_fbank.dart';
 import 'package:fonnx/models/magika/magika.dart';
 import 'package:fonnx/models/pyannote/pyannote.dart';
-import 'package:fonnx/models/whisper/whisper.dart';
+import 'package:fonnx/models/whisper/src/whisper_engine.dart';
 
 const deterministicOperationCorpusVersion = 1;
 const deterministicOperationIds = <String>[
@@ -27,8 +27,8 @@ const deterministicOperationIds = <String>[
   'v1/magika-size-1536',
   'v1/magika-size-1537',
   'v1/pcm16-extremes',
-  'v1/whisper-timestamps-leading',
-  'v1/whisper-timestamps-multiple',
+  'v1/whisper-tokens-ascii-and-special',
+  'v1/whisper-tokens-utf8',
   'v1/keyword-config-snapshot',
   'v1/keyword-config-hostile-values',
 ];
@@ -103,12 +103,14 @@ void main() {
     );
   });
 
-  test('Whisper timestamp cleanup handles leading and repeated markers', () {
-    expect(Whisper.removeTimestamps('<|0.00|> rain in Spain'), 'rain in Spain');
+  test('Whisper token decoding skips special tokens and joins UTF-8', () {
+    // IDs from the Hugging Face tokenizer of onnx-community/whisper-tiny.
     expect(
-      Whisper.removeTimestamps('<|0.00|>rain<|1.00|> in <|2.00|>Spain'),
-      'rain in Spain',
+      decodeWhisperText(const [1012, 366, 50363, 291, 884, 30, 50257]),
+      'How are you doing?',
     );
+    // "é" and "日本" span token boundaries as raw UTF-8 bytes.
+    expect(decodeWhisperText(const [25118, 220, 27311]), 'café 日本');
   });
 
   test('keyword configuration is validated and deeply snapshotted', () {

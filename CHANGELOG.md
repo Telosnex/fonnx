@@ -1,5 +1,12 @@
 ## 0.0.1
 
+* Whisper runs the split fp32 export of `onnx-community/whisper-tiny`
+  (encoder, and merged decoder with a key/value cache) on stock ORT, native
+  and web. Log-mel features, a 2-beam search with Whisper's token
+  suppression, and token decoding are in shared Dart. ORT Extensions are no
+  longer needed for Whisper. `Whisper.load` takes a `WhisperBundle`;
+  `Whisper.removeTimestamps` is removed because timestamp tokens are
+  suppressed.
 * Use `native_prebuilt` for the native hook, shared verified cache, source-key
   selection, and build modes. Release CI builds selected-op Extensions and the
   session finalizer through the hook for all ten targets. Consumer builds no

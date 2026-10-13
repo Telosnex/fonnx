@@ -9,7 +9,8 @@ const _lfsPaths = [
   'example/assets/models/minishLab/potion32m.onnx',
   'example/assets/models/msmarcoMiniLmL6V3/msmarcoMiniLmL6V3.onnx',
   'example/assets/models/pyannote/pyannote_seg3.onnx',
-  'example/assets/models/whisper/whisper_tiny.onnx',
+  'example/assets/models/whisper/whisper_tiny_decoder.onnx',
+  'example/assets/models/whisper/whisper_tiny_encoder.onnx',
 ];
 
 const _startMarker = '# fonnx CI LFS attributes: start';

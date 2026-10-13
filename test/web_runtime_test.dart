@@ -44,10 +44,26 @@ void main() {
   });
 
   test('Whisper', () async {
-    final transcript = await Whisper.load(
-      'web_models/whisper/whisper_tiny.onnx',
-    ).doInference(await _bytes('data/audio_sample_ac1_ar16000.pcm'));
-    expect(transcript.trim(), 'The rain and Spain falls mainly on the plane.');
+    final whisper = Whisper.load(WhisperBundle.tiny('web_models/whisper'));
+    final rain = await _bytes('data/audio_sample_ac1_ar16000.pcm');
+    expect(
+      await whisper.doInference(rain),
+      'The rain in Spain falls mainly on the plane.',
+    );
+    // Speech at 0 s, and a cache reorder on most steps: the beam search must
+    // match native.
+    final talk = await _bytes('data/talkovergpt.pcm');
+    final clip = BytesBuilder(copy: false);
+    for (var i = 0; i < 3; i++) {
+      clip
+        ..add(rain)
+        ..add(talk);
+    }
+    final transcript = await whisper.doInference(
+      Uint8List.sublistView(clip.takeBytes(), 0, 28 * 32000),
+    );
+    expect(transcript, startsWith('The rain in Spain falls mainly'));
+    expect(transcript, contains('How are you doing?'));
   });
 
   test('Silero VAD', () async {
