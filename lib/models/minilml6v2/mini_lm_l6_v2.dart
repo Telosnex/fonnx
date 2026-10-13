@@ -14,7 +14,9 @@ abstract class MiniLmL6V2 {
     if (path.trim().isEmpty) throw ArgumentError.value(path, 'path');
     final current = _instance;
     if (current != null && current.modelPath != path) {
-      throw StateError('MiniLmL6V2 is already loaded from ${current.modelPath}');
+      throw StateError(
+        'MiniLmL6V2 is already loaded from ${current.modelPath}',
+      );
     }
     _instance ??= getMiniLmL6V2(path);
     return _instance!;

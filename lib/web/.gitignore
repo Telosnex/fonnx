@@ -1,0 +1,6 @@
+# native_prebuilt web install-dev: generated, do not edit.
+/.native_prebuilt_web_version
+/ort-wasm-simd-threaded.mjs
+/ort-wasm-simd-threaded.wasm
+/ort.min.mjs
+# End of native_prebuilt web install-dev.

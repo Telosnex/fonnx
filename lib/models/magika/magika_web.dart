@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'dart:js_interop';
 
 import 'package:fonnx/models/magika/magika.dart';
+import 'package:fonnx/src/web_loader.dart';
 
 Magika getMagika(String path) => MagikaWeb(path);
 
@@ -22,6 +23,7 @@ class MagikaWeb implements Magika {
   Future<MagikaType> getType(List<int> fileBytes) async {
     final features = extractFeaturesFromBytes(Uint8List.fromList(fileBytes));
     final jsFeatures = Uint8List.fromList(features.all).toJS;
+    await loadFonnxWebModule('magika_init.js');
     final jsPromise = magikaInferenceAsyncJs(modelPath, jsFeatures);
     final jsResult = await jsPromise.toDart;
 

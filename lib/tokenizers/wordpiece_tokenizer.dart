@@ -84,8 +84,9 @@ class WordpieceTokenizer {
       // Try wordpiece matches
       while (start < end) {
         final piece = word.substring(start, end);
-        final token =
-            start == 0 ? _prefixTokens[piece] : _wordpieceTokens[piece];
+        final token = start == 0
+            ? _prefixTokens[piece]
+            : _wordpieceTokens[piece];
 
         if (token != null) {
           tokens.add(token);
@@ -119,7 +120,7 @@ class WordpieceTokenizer {
     text = text.trim();
     if (text.isEmpty) {
       return [
-        TextAndTokens(text: '', tokens: [startToken, endToken])
+        TextAndTokens(text: '', tokens: [startToken, endToken]),
       ];
     }
 
@@ -134,8 +135,9 @@ class WordpieceTokenizer {
       if (word.length > maxInputCharsPerWord) continue;
 
       // Get or compute normalized word
-      final normalizedWord =
-          _normalizedCache[word] ??= removeDiacritics(word.toLowerCase());
+      final normalizedWord = _normalizedCache[word] ??= removeDiacritics(
+        word.toLowerCase(),
+      );
       final wordTokens = _tokenizeWord(normalizedWord);
 
       if (currentTokens.length + wordTokens.length >= max - 1) {
@@ -160,10 +162,8 @@ class WordpieceTokenizer {
 
     return List<TextAndTokens>.generate(
       allOutputStrings.length,
-      (i) => TextAndTokens(
-        text: allOutputStrings[i],
-        tokens: allOutputTokens[i],
-      ),
+      (i) =>
+          TextAndTokens(text: allOutputStrings[i], tokens: allOutputTokens[i]),
     );
   }
 

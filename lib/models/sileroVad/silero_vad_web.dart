@@ -3,6 +3,7 @@ import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:fonnx/models/sileroVad/silero_vad.dart';
+import 'package:fonnx/src/web_loader.dart';
 
 SileroVad getSileroVad(String path) => SileroVadWeb(path);
 
@@ -26,6 +27,7 @@ class SileroVadWeb implements SileroVad {
   }) async {
     final previousStateAsJsonString = json.encode(previousState);
     final snapshot = Uint8List.fromList(bytes);
+    await loadFonnxWebModule('silero_vad_init.js');
     final jsObject = await sileroVadJs(
       modelPath,
       snapshot.toJS,

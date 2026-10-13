@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'futo_swipe.dart';
 import 'src/futo_swipe_engine.dart';
+import 'package:fonnx/src/web_loader.dart';
 
 extension type _LoadResult._(JSObject _) implements JSObject {
   external JSString get vocabulary;
@@ -192,6 +193,7 @@ final class WebFutoSwipeOnnxBackend implements FutoSwipeOnnxBackend {
   Future<({String vocabulary, String scoring})> load(
     FutoSwipeBundle bundle,
   ) async {
+    await loadFonnxWebModule('futo_swipe_init.js');
     final result = await _loadJs(
       _engineId.toJS,
       bundle.encoderPath.toJS,

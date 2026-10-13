@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:fonnx/models/minilml6v2/mini_lm_l6_v2.dart';
 import 'package:ml_linalg/linalg.dart';
+import 'package:fonnx/src/web_loader.dart';
 
 MiniLmL6V2 getMiniLmL6V2(String path) => MiniLmL6V2Web(path);
 
@@ -17,6 +18,7 @@ class MiniLmL6V2Web implements MiniLmL6V2 {
 
   @override
   Future<Vector> getEmbeddingAsVector(List<int> tokens) async {
+    await loadFonnxWebModule('minilm_init.js');
     final jsObject = await sbertJs(
       modelPath.toJS,
       Int16List.fromList(tokens).toJS,

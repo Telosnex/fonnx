@@ -43,10 +43,9 @@ Future<Map<String, dynamic>> runSileroVadV6Ffi(
     offset += sileroVadV6ChunkSamples
   ) {
     final remaining = audio.length - offset;
-    final count =
-        remaining < sileroVadV6ChunkSamples
-            ? remaining
-            : sileroVadV6ChunkSamples;
+    final count = remaining < sileroVadV6ChunkSamples
+        ? remaining
+        : sileroVadV6ChunkSamples;
     final chunk = Float32List(sileroVadV6ChunkSamples);
     chunk.setRange(0, count, audio, offset);
     final input =

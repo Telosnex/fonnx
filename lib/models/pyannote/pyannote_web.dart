@@ -3,6 +3,7 @@ import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'pyannote.dart';
+import 'package:fonnx/src/web_loader.dart';
 
 Pyannote getPyannote(String path) => PyannoteWeb(path);
 
@@ -21,6 +22,7 @@ class PyannoteWeb implements Pyannote {
   @override
   Future<List<Map<String, dynamic>>> process(Float32List audioData) async {
     final snapshot = Float32List.fromList(audioData);
+    await loadFonnxWebModule('pyannote_init.js');
     final jsObject = await pyannoteFn(modelPath, snapshot.toJS).toDart;
 
     if (jsObject == null) {

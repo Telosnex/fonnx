@@ -1,0 +1,23 @@
+{
+  "version": "1.27.0",
+  "npmTarball": "https://registry.npmjs.org/onnxruntime-web/-/onnxruntime-web-1.27.0.tgz",
+  "sha256": "b59c9819434a7519f334f77e8d4bf22b69808d531a57724cabc4bb2c0704c835",
+  "integrity": "sha512-ogDLsqIozHZwifPuN37OproAo0byX6t43/bP8GzeZWBWD6MOGExswFAx3up4NS/vvWBOg2u2PXomDt3rMmdQSg==",
+  "files": [
+    {
+      "entry": "package/dist/ort.wasm.min.mjs",
+      "name": "ort.min.mjs",
+      "sha256": "9608e98a3fba9716f0cbd0bca0c94808b71dae2e9265ca3fe742ddc393a53ebc"
+    },
+    {
+      "entry": "package/dist/ort-wasm-simd-threaded.mjs",
+      "name": "ort-wasm-simd-threaded.mjs",
+      "sha256": "0a1e718d99c41b22c21f2520ff4f9e883a6b5533856e398d21816ee8eb8185d3"
+    },
+    {
+      "entry": "package/dist/ort-wasm-simd-threaded.wasm",
+      "name": "ort-wasm-simd-threaded.wasm",
+      "sha256": "d1ab1b94b16a65b29d710d0b587b29e7bed336827577623913479b8afe8113e6"
+    }
+  ]
+}

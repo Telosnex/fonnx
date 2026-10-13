@@ -29529,7 +29529,6 @@ const Map<String, int> potionBase8mEncoder = {
   r"""##～""": 29527,
 };
 
-
 const List<String> potionBase8mDecoder = [
   r"""[PAD]""",
   r"""[UNK]""",

@@ -2,6 +2,7 @@ import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:fonnx/models/whisper/whisper.dart';
+import 'package:fonnx/src/web_loader.dart';
 
 Whisper getWhisper(String path) => WhisperWeb(path);
 
@@ -20,6 +21,7 @@ class WhisperWeb implements Whisper {
   @override
   Future<String> doInference(Uint8List bytes) async {
     final snapshot = Uint8List.fromList(bytes);
+    await loadFonnxWebModule('whisper_init.js');
     final jsObject = await whisperJs(modelPath, snapshot.toJS).toDart;
     final text = jsObject?.toDart;
     if (text == null) {

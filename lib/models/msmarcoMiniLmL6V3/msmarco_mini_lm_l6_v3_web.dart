@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:fonnx/models/msmarcoMiniLmL6V3/msmarco_mini_lm_l6_v3.dart';
 import 'package:ml_linalg/linalg.dart';
+import 'package:fonnx/src/web_loader.dart';
 
 MsmarcoMiniLmL6V3 getMsmarcoMiniLmL6V3(String path) =>
     MsmarcoMiniLmL6V3Web(path);
@@ -18,6 +19,7 @@ class MsmarcoMiniLmL6V3Web implements MsmarcoMiniLmL6V3 {
 
   @override
   Future<Vector> getEmbeddingAsVector(List<int> tokens) async {
+    await loadFonnxWebModule('minilm_init.js');
     final jsObject = await sbertJs(
       modelPath.toJS,
       Int16List.fromList(tokens).toJS,

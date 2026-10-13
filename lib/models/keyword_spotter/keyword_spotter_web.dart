@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'keyword_spotter.dart';
 import 'src/keyword_spotter_engine.dart';
+import 'package:fonnx/src/web_loader.dart';
 
 @JS('window.fonnxKwsLoad')
 external JSPromise<JSAny?> _loadJs(
@@ -160,6 +161,7 @@ final class WebKwsOnnxBackend implements KwsOnnxBackend {
   final String _engineId;
 
   Future<void> load(KeywordSpotterBundle bundle) async {
+    await loadFonnxWebModule('kws_init.js');
     await _loadJs(
       _engineId.toJS,
       bundle.encoderPath.toJS,
