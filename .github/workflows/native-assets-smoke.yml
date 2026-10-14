@@ -74,6 +74,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: dart run tool/verify_artifacts.dart
+      - name: Install the pinned web files into lib/web
+        run: dart run native_prebuilt:web install-dev
       - name: Run pinned local ORT Web identity inference
         run: node tool/test_web_runtime.mjs
       - name: Sanitize package-owned finalizer boundary
