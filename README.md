@@ -277,9 +277,11 @@ Whisper's `ai.onnx.contrib:BpeDecoder`.
 
 ## Runtime model downloads
 
-The 16 example models are also immutable release files. The generated
-`nativePrebuiltRuntimeFiles` catalog pins their sizes, URLs, and SHA-256 values.
-Apps can download a model after install instead of including it as an asset:
+The model files are on Hugging Face in
+[`telosnex/fonnx`](https://huggingface.co/telosnex/fonnx), not in Git. The
+generated `nativePrebuiltRuntimeFiles` catalog pins the 21 models: each URL
+names a Hugging Face commit, and the catalog has each file's size and SHA-256.
+Apps download a model after install:
 
 ```dart
 import 'package:fonnx/runtime_models.dart';
@@ -291,17 +293,26 @@ final model = await ensureFonnxRuntimeModel(
 ```
 
 The helper checks an existing file before reuse. It checks each download before
-it puts the file at its final path. FUTO model names are distinct in the release
-and map back to their source paths through `runtimeModelNamesByPath`.
-The model files remain in the example and conformance fixtures. Applications
-choose when to replace their bundled assets. Tokenizers, FUTO metadata, and
-license notices are separate from the ONNX model files.
+it puts the file at its final path. The FUTO model names are distinct on
+Hugging Face and map back to their source paths through
+`runtimeModelNamesByPath`. Tokenizers, FUTO metadata, and license notices are
+separate from the ONNX model files.
 
-To publish a complete model set, run:
+The tests and the example app read the models in `example/assets/models`.
+To download them there, run:
 
 ```bash
-dart run tool/publish_models.dart --repo Telosnex/fonnx
+dart run tool/fetch_hf_models.dart            # all models, 1.3 GB
+dart run tool/fetch_hf_models.dart whisper    # one directory
 ```
+
+To add or change a model, put the file in `example/assets/models`, add its
+entry without a `commit` to the `models` section of
+`native_artifacts/manifest.json` and to `runtimeModelNamesByPath`, then run
+`dart run tool/publish_models.dart`. It uploads the new files in one Hugging
+Face commit with `hf upload`, records the commit, and writes the catalog. A
+published file never changes. `doc/ADR_001_MODELS_ON_HUGGING_FACE.md` has the
+design.
 
 To publish the native libraries, push to `native-release` and merge the
 `native-manifest/<tag>` branch from `.github/workflows/native_release.yml`.
@@ -325,10 +336,10 @@ Run the complete package gate with:
 tool/test_all.sh
 ```
 
-It verifies source/artifact/model hashes, rejects Git LFS pointers, executes a
+It downloads the models, verifies source/artifact/model hashes, executes a
 real local Web identity and Magika Worker model, runs the package-owned
 finalizer through 8,192 ASan/UBSan ownership states, checks exact native
-ORT/Extensions artifacts plus hydrated model goldens/RSS tests serially, and
+ORT/Extensions artifacts plus model goldens/RSS tests serially, and
 runs the deterministic frontend corpus through VM, Chrome JavaScript, and
 Chrome Wasm. Set `FONNX_FULL_RUNTIME_MATRIX=1` to include iOS Simulator,
 Android, Linux arm64/x64, and Windows/Wine artifact execution.

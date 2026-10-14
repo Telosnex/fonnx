@@ -1,37 +1,50 @@
-// Downloads the model files that are on Hugging Face and not in Git into
-// example/assets/models, pinned to a Hugging Face commit and checked by
-// SHA-256. A file that is already there with that SHA-256 is kept.
+// Downloads the model files from Hugging Face into example/assets/models
+// (ADR 001 D5). Each download is pinned to the Hugging Face commit of its
+// entry in native_artifacts/manifest.json and checked by SHA-256. A file that
+// is already there with that SHA-256 is kept.
 //
-// Usage: dart run tool/fetch_hf_models.dart
+// Usage: dart run tool/fetch_hf_models.dart [<path> ...]
+//
+// Each <path> is below example/assets/models: a file, or a directory such as
+// `futoSwipe`. With no <path>, the tool downloads every model (1.3 GB).
 import 'dart:io';
 
 import 'package:native_prebuilt/runtime.dart';
 
-/// The commit of huggingface.co/telosnex/fonnx that has these files.
-const _commit = 'bbecfb3bf170f508901dba5ae70afb482a3d65ca';
+import 'hf/models.dart';
 
-/// Directory under example/assets/models, and the file in it.
-const _models = [
-  (
-    'nemoAsr',
-    'fastconformer_ctc_multilingual_int8.onnx',
-    'e3ea888bcc90cafdeeedeea26f6e8ca2186d8af7939236e0eb246206f5098c00',
-    132445134,
-  ),
-];
-
-Future<void> main() async {
+Future<void> main(List<String> arguments) async {
   final root = File.fromUri(Platform.script).parent.parent;
-  for (final (directory, name, sha256, bytes) in _models) {
-    final file = await ensureRuntimeFile(
+  final prefixes = [
+    for (final argument in arguments)
+      argument.replaceAll(r'\', '/').replaceFirst(RegExp(r'/$'), ''),
+  ];
+  bool selected(HfModel model) =>
+      prefixes.isEmpty ||
+      prefixes.any(
+        (prefix) =>
+            model.modelPath == prefix || model.modelPath.startsWith('$prefix/'),
+      );
+
+  final models = hfModels(await readManifest(root)).where(selected).toList();
+  if (models.isEmpty) throw ArgumentError('No model matches $arguments');
+  for (final model in models) {
+    if (model.commit == null) {
+      throw StateError(
+        '${model.path} is not on Hugging Face yet. '
+        'Run dart run tool/publish_models.dart.',
+      );
+    }
+    final file = model.file(root);
+    final path = await ensureRuntimeFile(
       RuntimeFile(
-        name: name,
-        sha256: sha256,
-        bytes: bytes,
-        url: 'https://huggingface.co/telosnex/fonnx/resolve/$_commit/$name',
+        name: file.uri.pathSegments.last,
+        sha256: model.sha256,
+        bytes: model.bytes,
+        url: model.url,
       ),
-      Directory('${root.path}/example/assets/models/$directory'),
+      file.parent,
     );
-    stdout.writeln('OK: ${file.path}');
+    stdout.writeln('OK: ${path.path}');
   }
 }

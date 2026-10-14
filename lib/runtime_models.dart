@@ -2,7 +2,7 @@
 ///
 /// The keys in [runtimeModelNamesByPath] are paths below
 /// `example/assets/models`. The values are the plain file names used in the
-/// runtime release. Models are runtime downloads; they are not app assets.
+/// runtime catalog. Models are runtime downloads; they are not app assets.
 library;
 
 import 'dart:io';
@@ -37,6 +37,14 @@ const runtimeModelNamesByPath = <String, String>{
   'minishLab/potion32m.onnx': 'potion32m.onnx',
   'minishLab/potion8m.onnx': 'potion8m.onnx',
   'msmarcoMiniLmL6V3/msmarcoMiniLmL6V3.onnx': 'msmarcoMiniLmL6V3.onnx',
+  'nemoAsr/fastconformer_ctc_multilingual_int8.onnx':
+      'fastconformer_ctc_multilingual_int8.onnx',
+  'nemoAsr/parakeet_tdt_v3_decoder_int8.onnx':
+      'parakeet_tdt_v3_decoder_int8.onnx',
+  'nemoAsr/parakeet_tdt_v3_encoder_int8.onnx':
+      'parakeet_tdt_v3_encoder_int8.onnx',
+  'nemoAsr/parakeet_tdt_v3_joiner_int8.onnx':
+      'parakeet_tdt_v3_joiner_int8.onnx',
   'pyannote/pyannote_seg3.onnx': 'pyannote_seg3.onnx',
   'sileroVad/silero_vad_v6.2.1.onnx': 'silero_vad_v6.2.1.onnx',
   'whisper/whisper_tiny_decoder.onnx': 'whisper_tiny_decoder.onnx',

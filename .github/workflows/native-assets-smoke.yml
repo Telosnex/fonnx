@@ -52,9 +52,15 @@ jobs:
         with:
           flutter-version: 3.47.0
           cache: true
-      - name: Hydrate Git LFS model fixtures
-        run: dart tool/hydrate_lfs_models.dart
       - run: flutter pub get
+      - name: Cache Hugging Face models
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: example/assets/models/**/*.onnx
+          key: hf-models-smoke-${{ runner.os }}-${{ hashFiles('native_artifacts/manifest.json') }}
+          restore-keys: hf-models-smoke-${{ runner.os }}-
+      - name: Fetch Hugging Face models
+        run: dart run tool/fetch_hf_models.dart futoSwipe magika
       - run: flutter analyze
       - name: Verify source, native, Web, and model manifest
         env:

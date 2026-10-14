@@ -6,6 +6,7 @@ import 'package:native_prebuilt/native_prebuilt.dart';
 import 'package:native_prebuilt/src/release_tool.dart';
 import '../hook/upstream_ort.dart';
 import 'futo/bundle.dart';
+import 'hf/models.dart';
 
 const _nativeTargets = {
   'android-arm',
@@ -28,6 +29,9 @@ const _expectedSources = {
   'webTarballSha256':
       'b59c9819434a7519f334f77e8d4bf22b69808d531a57724cabc4bb2c0704c835',
 };
+
+/// The number of entries of the models section on Hugging Face.
+const _expectedHfModels = 21;
 
 const _expectedRuntimeConstraints = {
   'android': 'API 24',
@@ -106,12 +110,11 @@ Future<void> main(List<String> arguments) async {
     expectedCount: 16,
     label: 'deployed Web asset',
   );
-  await _verifyLocalRecords(
+  final models = await _verifyModels(
     root,
-    _object(manifest['models'], 'models'),
-    expectedCount: 19,
-    label: 'model',
-    rejectLfsPointers: true,
+    manifest,
+    native,
+    downloads: arguments.contains('--downloads'),
   );
 
   await verifyFutoSwipeBundle(
@@ -126,7 +129,7 @@ Future<void> main(List<String> arguments) async {
   if (problems.isNotEmpty) throw StateError(problems.join('\n'));
   stdout.writeln(
     'PASS: ${native.targets.length} native targets, 16 deployed Web assets, '
-    '19 model fixtures, web.json, '
+    '${models.length} models on Hugging Face, web.json, '
     'and exact source/profile pins',
   );
 }
@@ -155,12 +158,92 @@ void _verifySources(Map<String, Object?> sources) {
   }
 }
 
+/// The checks of ADR 001: the pins of the models on Hugging Face (I1, I3),
+/// the catalog made from them, the local copies that exist, and, with
+/// [downloads], the files on Hugging Face (I2). The other entries of the
+/// models section are test fixtures in Git.
+Future<List<HfModel>> _verifyModels(
+  Directory root,
+  Map<String, Object?> manifest,
+  PrebuiltManifest native, {
+  required bool downloads,
+}) async {
+  final models = hfModels(manifest);
+  if (models.length != _expectedHfModels) {
+    throw FormatException(
+      'Expected $_expectedHfModels models on Hugging Face, got ${models.length}',
+    );
+  }
+  checkRuntimeNames(models);
+  final records = _object(manifest['models'], 'models');
+  await _verifyLocalRecords(
+    root,
+    {
+      for (final entry in records.entries)
+        if (!entry.key.startsWith('$modelRoot/')) entry.key: entry.value,
+    },
+    expectedCount: 2,
+    label: 'test fixture',
+  );
+
+  final set = catalog(models);
+  final actual = native.runtimeFiles;
+  if (actual == null ||
+      jsonEncode(actual.toJson()) != jsonEncode(set.toJson()) ||
+      await File('${root.path}/$catalogDartPath').readAsString() !=
+          catalogDart(set)) {
+    throw StateError(
+      'The runtime catalog differs from the models of $fonnxManifestPath. '
+      'Run dart run tool/publish_models.dart.',
+    );
+  }
+  for (final file in set.files) {
+    if (!isPinnedHfUrl(file.url)) {
+      throw StateError('${file.name}: ${file.url} is not pinned to a commit');
+    }
+  }
+
+  final tracked = await Process.run('git', [
+    'ls-files',
+    '--',
+    modelRoot,
+  ], workingDirectory: root.path);
+  if (tracked.exitCode != 0) throw StateError('git ls-files failed');
+  final trackedModels = '${tracked.stdout}'
+      .split('\n')
+      .where((path) => path.toLowerCase().endsWith('.onnx'))
+      .toList();
+  if (trackedModels.isNotEmpty) {
+    throw StateError(
+      'Git tracks model files (ADR 001 I3): ${trackedModels.join(', ')}',
+    );
+  }
+
+  // Local copies are optional: tool/fetch_hf_models.dart downloads them.
+  for (final model in models) {
+    final file = model.file(root);
+    if (!await file.exists()) continue;
+    if (await file.length() != model.bytes ||
+        '${await sha256.bind(file.openRead()).first}' != model.sha256) {
+      throw StateError(
+        '${model.path} differs from its pin. '
+        'Run dart run tool/fetch_hf_models.dart.',
+      );
+    }
+  }
+
+  if (downloads) {
+    final problems = await hfProblems(models);
+    if (problems.isNotEmpty) throw StateError(problems.join('\n'));
+  }
+  return models;
+}
+
 Future<void> _verifyLocalRecords(
   Directory root,
   Map<String, Object?> records, {
   required int expectedCount,
   required String label,
-  bool rejectLfsPointers = false,
 }) async {
   if (records.length != expectedCount) {
     throw FormatException(
@@ -183,16 +266,6 @@ Future<void> _verifyLocalRecords(
     final file = File('${root.path}/$relativePath');
     if (!await file.exists()) throw StateError('Missing $label: $relativePath');
     final actualBytes = await file.length();
-    if (rejectLfsPointers) {
-      final prefix = await file
-          .openRead(0, actualBytes.clamp(0, 200))
-          .fold<List<int>>(<int>[], (bytes, chunk) => bytes..addAll(chunk));
-      if (utf8
-          .decode(prefix, allowMalformed: true)
-          .startsWith('version https://git-lfs.github.com/spec/v1')) {
-        throw StateError('$relativePath is an unhydrated Git LFS pointer');
-      }
-    }
     if (actualBytes != expectedBytes) {
       throw StateError(
         'Size mismatch for $relativePath: expected $expectedBytes, got $actualBytes',

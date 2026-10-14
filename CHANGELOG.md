@@ -1,5 +1,10 @@
 ## 0.0.1
 
+* The model files moved from Git and the GitHub runtime release to Hugging
+  Face `telosnex/fonnx`. `nativePrebuiltRuntimeFiles` pins each file by
+  Hugging Face commit and SHA-256, and now also has the four NemoAsr files.
+  `tool/fetch_hf_models.dart` downloads the models for the tests and the
+  example app. The old GitHub release stays for earlier fonnx commits.
 * Add `NemoAsr`: speech-to-text with NVIDIA's multilingual FastConformer CTC
   (10 languages, 132 MB) or Parakeet TDT 0.6B v3 (25 European languages,
   670 MB). Both are the int8 exports of sherpa-onnx, downloaded from Hugging

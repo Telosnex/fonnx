@@ -22,7 +22,7 @@ import 'package:fonnx/src/web_runtime.g.dart';
 /// generated files first: `dart run native_prebuilt:web install-dev`.
 ///
 /// The test server serves test/ at the root, so the models come from the
-/// test/web_models link to example/assets/models (hydrate Git LFS and run
+/// test/web_models link to example/assets/models (run
 /// tool/fetch_hf_models.dart first).
 void main() {
   setUpAll(() => FonnxWeb.runtimeUri = Uri.parse('packages/fonnx/web/'));

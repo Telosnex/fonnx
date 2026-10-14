@@ -43,6 +43,12 @@ void main() {
       final file = runtimeModelFile(path);
       expect(file.sha256, record['sha256']);
       expect(file.bytes, record['bytes']);
+      expect(file.name, record['name']);
+      expect(
+        file.url,
+        'https://huggingface.co/telosnex/fonnx/resolve/'
+        '${record['commit']}/${record['name']}',
+      );
     }
   });
 

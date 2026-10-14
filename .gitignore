@@ -15,7 +15,7 @@ doc/api/
 .env*
 
 # Model files from Hugging Face: dart run tool/fetch_hf_models.dart
-example/assets/models/nemoAsr/*.onnx
+example/assets/models/**/*.onnx
 
 # dsstore
 .DS_Store

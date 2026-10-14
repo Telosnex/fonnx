@@ -125,11 +125,10 @@ void main() {
     );
   });
 
-  // Parakeet TDT v3 (670 MB) is not in Git. Set FONNX_NEMO_ASR_DIR to a
-  // directory with the three files that NemoAsrBundle.parakeetTdtV3 names.
-  final v3Directory = Platform.environment['FONNX_NEMO_ASR_DIR'];
   test('Parakeet TDT v3 works', () async {
-    final v3 = NemoAsrNative(NemoAsrBundle.parakeetTdtV3(v3Directory!));
+    final v3 = NemoAsrNative(
+      NemoAsrBundle.parakeetTdtV3('example/assets/models/nemoAsr'),
+    );
     expect(
       await v3.doInference(await File(_rain).readAsBytes()),
       'The rain in Spain falls mainly on the plane.',
@@ -142,7 +141,7 @@ void main() {
       ),
       'Estoy bien, gracias.',
     );
-  }, skip: v3Directory == null ? 'FONNX_NEMO_ASR_DIR is not set' : false);
+  });
 
   test('FastConformer CTC performance', () async {
     final bytes = await File(_rain).readAsBytes();

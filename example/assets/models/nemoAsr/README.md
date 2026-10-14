@@ -1,6 +1,8 @@
 ## Source
-The models are not in Git. `dart run tool/fetch_hf_models.dart` downloads
-the CTC model here for the tests.
+The models are on Hugging Face in
+[`telosnex/fonnx`](https://huggingface.co/telosnex/fonnx), not in Git.
+`dart run tool/fetch_hf_models.dart nemoAsr` downloads them here, and
+`ensureFonnxRuntimeModel` downloads them in an app.
 
 `fastconformer_ctc_multilingual_int8.onnx` is `model.int8.onnx` of the
 sherpa-onnx archive
@@ -17,11 +19,6 @@ Italian, Polish, Russian, Spanish and Ukrainian.
 renamed to `parakeet_tdt_v3_<part>_int8.onnx`. The original model is
 [nvidia/parakeet-tdt-0.6b-v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3)
 (CC-BY-4.0): English and 24 other European languages.
-
-All four files, under these names, are also on Hugging Face in
-[`telosnex/fonnx`](https://huggingface.co/telosnex/fonnx), commit
-`bbecfb3bf170f508901dba5ae70afb482a3d65ca`. To download a file pinned to that commit:
-`https://huggingface.co/telosnex/fonnx/resolve/bbecfb3bf170f508901dba5ae70afb482a3d65ca/<file>`.
 
 | File | SHA-256 | Bytes |
 |---|---|---|

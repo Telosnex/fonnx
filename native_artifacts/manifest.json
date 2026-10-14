@@ -22,88 +22,150 @@
   "models": {
     "example/assets/models/bpe_decoder.onnx": {
       "path": "example/assets/models/bpe_decoder.onnx",
+      "name": "bpe_decoder.onnx",
       "sha256": "80525e3754c09e2f33c144388520b0050a7a2f414fb951c3d0bf7425aeb108ab",
-      "bytes": 375
+      "bytes": 375,
+      "commit": "4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979"
     },
     "example/assets/models/futoSwipe/honorable_sturgeon/model_fp32.onnx": {
       "path": "example/assets/models/futoSwipe/honorable_sturgeon/model_fp32.onnx",
+      "name": "futo_swipe_encoder_honorable_sturgeon.onnx",
       "sha256": "e60b80b77c28e7bd426fa400435584991614d44ce4ba61eba408d8eb81f5f63b",
-      "bytes": 2591063
+      "bytes": 2591063,
+      "commit": "4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979"
     },
     "example/assets/models/futoSwipe/hungry_jellyfish/context_lm.onnx": {
       "path": "example/assets/models/futoSwipe/hungry_jellyfish/context_lm.onnx",
+      "name": "futo_swipe_context_lm_hungry_jellyfish.onnx",
       "sha256": "95722c67e2efde6cd925ddf57a0d44bf879824e53b7db45f32572bff97276979",
-      "bytes": 5955586
+      "bytes": 5955586,
+      "commit": "4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979"
     },
     "example/assets/models/futoSwipe/hungry_jellyfish/get_embeddings.onnx": {
       "path": "example/assets/models/futoSwipe/hungry_jellyfish/get_embeddings.onnx",
+      "name": "futo_swipe_embeddings_hungry_jellyfish.onnx",
       "sha256": "d64902693fec59fb99a1ba986e9fd0668147d5e1e3b3b23cb91e100e2a5d71a1",
-      "bytes": 4456995
+      "bytes": 4456995,
+      "commit": "4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979"
     },
     "example/assets/models/futoSwipe/magic_macaw/model_fp32.onnx": {
       "path": "example/assets/models/futoSwipe/magic_macaw/model_fp32.onnx",
+      "name": "futo_swipe_decoder_magic_macaw.onnx",
       "sha256": "16e478c542406f4c8a43a16a0a68b83a8f73b516975d66e691a1e1b46bd6dadf",
-      "bytes": 1228537
+      "bytes": 1228537,
+      "commit": "4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979"
     },
     "example/assets/models/keywordSpotter/decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx": {
       "path": "example/assets/models/keywordSpotter/decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+      "name": "decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
       "sha256": "e40ff43297abe815e8898494c17e71bba2152d9d40fa3eb803f75d0f7533329a",
-      "bytes": 277985
+      "bytes": 277985,
+      "commit": "4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979"
     },
     "example/assets/models/keywordSpotter/encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx": {
       "path": "example/assets/models/keywordSpotter/encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+      "name": "encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
       "sha256": "1e721676515bcd42a186979733981213c66c80db680e1cc582dfedf3be76e678",
-      "bytes": 4807159
+      "bytes": 4807159,
+      "commit": "4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979"
     },
     "example/assets/models/keywordSpotter/joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx": {
       "path": "example/assets/models/keywordSpotter/joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+      "name": "joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
       "sha256": "eae9da0c7e1e6c6a3f4cc42d167899c388f6c6701b94cb96320e4f55df79624c",
-      "bytes": 163380
+      "bytes": 163380,
+      "commit": "4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979"
     },
     "example/assets/models/magika/magika.onnx": {
       "path": "example/assets/models/magika/magika.onnx",
+      "name": "magika.onnx",
       "sha256": "71892ac28ffe028b9512561584970417f8cee1f2fbb7624634f4032cb92a0a5a",
-      "bytes": 1055295
+      "bytes": 1055295,
+      "commit": "4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979"
     },
     "example/assets/models/miniLmL6V2/miniLmL6V2.onnx": {
       "path": "example/assets/models/miniLmL6V2/miniLmL6V2.onnx",
+      "name": "miniLmL6V2.onnx",
       "sha256": "3a4ae4f8f00d87c93b04aca370ed1c5e94f80a32912f2cf5516291703353bf84",
-      "bytes": 22887725
+      "bytes": 22887725,
+      "commit": "4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979"
     },
     "example/assets/models/minishLab/potion32m.onnx": {
       "path": "example/assets/models/minishLab/potion32m.onnx",
+      "name": "potion32m.onnx",
       "sha256": "e82f46335878dd5d72f9544a2a7c61061659c6273ceb8815e10ff952c2e07457",
-      "bytes": 129214550
+      "bytes": 129214550,
+      "commit": "4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979"
     },
     "example/assets/models/minishLab/potion8m.onnx": {
       "path": "example/assets/models/minishLab/potion8m.onnx",
+      "name": "potion8m.onnx",
       "sha256": "da4c828fe012ec97f053278f363645b52c3815ec9a1d13d695ac901398c10f2e",
-      "bytes": 30240854
+      "bytes": 30240854,
+      "commit": "4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979"
     },
     "example/assets/models/msmarcoMiniLmL6V3/msmarcoMiniLmL6V3.onnx": {
       "path": "example/assets/models/msmarcoMiniLmL6V3/msmarcoMiniLmL6V3.onnx",
+      "name": "msmarcoMiniLmL6V3.onnx",
       "sha256": "e80318c560513a6dcf32e4404d12ef6676af9f85ffee63e1e8ce249651e4f794",
-      "bytes": 22913492
+      "bytes": 22913492,
+      "commit": "4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979"
+    },
+    "example/assets/models/nemoAsr/fastconformer_ctc_multilingual_int8.onnx": {
+      "path": "example/assets/models/nemoAsr/fastconformer_ctc_multilingual_int8.onnx",
+      "name": "fastconformer_ctc_multilingual_int8.onnx",
+      "sha256": "e3ea888bcc90cafdeeedeea26f6e8ca2186d8af7939236e0eb246206f5098c00",
+      "bytes": 132445134,
+      "commit": "bbecfb3bf170f508901dba5ae70afb482a3d65ca"
+    },
+    "example/assets/models/nemoAsr/parakeet_tdt_v3_decoder_int8.onnx": {
+      "path": "example/assets/models/nemoAsr/parakeet_tdt_v3_decoder_int8.onnx",
+      "name": "parakeet_tdt_v3_decoder_int8.onnx",
+      "sha256": "179e50c43d1a9de79c8a24149a2f9bac6eb5981823f2a2ed88d655b24248db4e",
+      "bytes": 11845275,
+      "commit": "bbecfb3bf170f508901dba5ae70afb482a3d65ca"
+    },
+    "example/assets/models/nemoAsr/parakeet_tdt_v3_encoder_int8.onnx": {
+      "path": "example/assets/models/nemoAsr/parakeet_tdt_v3_encoder_int8.onnx",
+      "name": "parakeet_tdt_v3_encoder_int8.onnx",
+      "sha256": "acfc2b4456377e15d04f0243af540b7fe7c992f8d898d751cf134c3a55fd2247",
+      "bytes": 652184281,
+      "commit": "bbecfb3bf170f508901dba5ae70afb482a3d65ca"
+    },
+    "example/assets/models/nemoAsr/parakeet_tdt_v3_joiner_int8.onnx": {
+      "path": "example/assets/models/nemoAsr/parakeet_tdt_v3_joiner_int8.onnx",
+      "name": "parakeet_tdt_v3_joiner_int8.onnx",
+      "sha256": "3164c13fc2821009440d20fcb5fdc78bff28b4db2f8d0f0b329101719c0948b3",
+      "bytes": 6355277,
+      "commit": "bbecfb3bf170f508901dba5ae70afb482a3d65ca"
     },
     "example/assets/models/pyannote/pyannote_seg3.onnx": {
       "path": "example/assets/models/pyannote/pyannote_seg3.onnx",
+      "name": "pyannote_seg3.onnx",
       "sha256": "057ee564753071c0b09b5b611648b50ac188d50846bff5f01e9f7bbf1591ea25",
-      "bytes": 5986908
+      "bytes": 5986908,
+      "commit": "4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979"
     },
     "example/assets/models/sileroVad/silero_vad_v6.2.1.onnx": {
       "path": "example/assets/models/sileroVad/silero_vad_v6.2.1.onnx",
+      "name": "silero_vad_v6.2.1.onnx",
       "sha256": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3",
-      "bytes": 2327524
+      "bytes": 2327524,
+      "commit": "4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979"
     },
     "example/assets/models/whisper/whisper_tiny_decoder.onnx": {
       "path": "example/assets/models/whisper/whisper_tiny_decoder.onnx",
+      "name": "whisper_tiny_decoder.onnx",
       "sha256": "8d20f4157407006e871d63ca0a3c54dddd7db33dfc4ee076960f1f8b2763ce3e",
-      "bytes": 118553827
+      "bytes": 118553827,
+      "commit": "4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979"
     },
     "example/assets/models/whisper/whisper_tiny_encoder.onnx": {
       "path": "example/assets/models/whisper/whisper_tiny_encoder.onnx",
+      "name": "whisper_tiny_encoder.onnx",
       "sha256": "6642befb640f950d4a8cbbd17834d59e7e75f575b81ccf213e06b050623ab1dd",
-      "bytes": 32904992
+      "bytes": 32904992,
+      "commit": "4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979"
     },
     "test/models/bpe_decoder.onnx": {
       "path": "test/models/bpe_decoder.onnx",
