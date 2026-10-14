@@ -1,5 +1,12 @@
 ## 0.0.1
 
+* Add `SenseVoice`: speech-to-text with Alibaba's SenseVoice Small (239 MB,
+  int8 sherpa-onnx export): Mandarin, Cantonese, English, Japanese and
+  Korean, with the language detected or set. Native and web. Kaldi filter
+  bank features, greedy CTC and token decoding are in shared Dart. On FLEURS:
+  5.5% CER Mandarin, 6.4% Japanese, 7.7% Korean, 7.0% WER English (Whisper
+  Small: 9.8, 12.3, 8.9, 6.2). The NeMo log-mel features and SenseVoice share
+  `lib/src/power_spectrum.dart`.
 * The model files moved from Git and the GitHub runtime release to Hugging
   Face `telosnex/fonnx`. `nativePrebuiltRuntimeFiles` pins each file by
   Hugging Face commit and SHA-256, and now also has the four NemoAsr files.

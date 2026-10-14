@@ -82,6 +82,18 @@ void main() {
     expect(transcript, contains('como'));
   });
 
+  test('SenseVoice', () async {
+    final senseVoice = SenseVoice.load(
+      SenseVoiceBundle.inDirectory('web_models/senseVoice'),
+    );
+    expect(
+      await senseVoice.doInference(
+        await _bytes('data/audio_sample_ac1_ar16000.pcm'),
+      ),
+      'The rain in Spain falls mainly on the plain.',
+    );
+  });
+
   test('Silero VAD', () async {
     final golden =
         jsonDecode(

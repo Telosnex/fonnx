@@ -30,6 +30,7 @@ Each file has the license of its source model.
 | `parakeet_tdt_v3_decoder_int8.onnx`, `…_encoder_…`, `…_joiner_…` | [nvidia/parakeet-tdt-0.6b-v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3), int8 export of [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx/releases/tag/asr-models) | CC-BY-4.0 |
 | `potion8m.onnx`, `potion32m.onnx` | [Minish Lab](https://huggingface.co/minishlab) potion-base-8M and potion-base-32M | MIT |
 | `pyannote_seg3.onnx` | [pyannote/segmentation-3.0](https://huggingface.co/pyannote/segmentation-3.0) | MIT |
+| `sense_voice_small_int8.onnx`, `sense_voice_small_tokens.txt` | [FunAudioLLM/SenseVoiceSmall](https://huggingface.co/FunAudioLLM/SenseVoiceSmall) (Alibaba), int8 export of [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx/releases/tag/asr-models) (2024-07-17) | [FunASR Model License](https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE) |
 | `silero_vad_v6.2.1.onnx` | [Silero VAD v6.2.1](https://github.com/snakers4/silero-vad/releases/tag/v6.2.1) | MIT |
 | `whisper_tiny_decoder.onnx`, `whisper_tiny_encoder.onnx` | [onnx-community/whisper-tiny](https://huggingface.co/onnx-community/whisper-tiny), from [openai/whisper-tiny](https://huggingface.co/openai/whisper-tiny) | MIT |
 
@@ -46,6 +47,9 @@ and [onnx-community/whisper-small](https://huggingface.co/onnx-community/whisper
 The NeMo ASR files are exports of NVIDIA models, used under
 [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/). fonnx did not
 change the files of the sherpa-onnx exports.
+
+The SenseVoice files are the sherpa-onnx export of SenseVoice Small by
+Tongyi Lab, Alibaba, unchanged, used under the FunASR Model License.
 
 The `futo_swipe_*.onnx` files are derived from FUTO Swipe and are subject to
 the FUTO Model Weights License 1.0. `LICENSE-FUTO.txt` in this repository has

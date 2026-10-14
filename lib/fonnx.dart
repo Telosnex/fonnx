@@ -12,5 +12,6 @@ export 'models/keyword_spotter/keyword_spotter.dart';
 export 'models/magika/magika.dart';
 export 'models/nemoAsr/nemo_asr.dart';
 export 'models/pyannote/pyannote.dart';
+export 'models/senseVoice/sense_voice.dart';
 export 'models/whisper/whisper.dart';
 export 'src/web_config.dart';

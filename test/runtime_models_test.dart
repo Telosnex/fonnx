@@ -7,16 +7,12 @@ import 'package:fonnx/runtime_models.dart';
 import 'package:native_prebuilt/runtime.dart';
 
 void main() {
-  test('runtime model map covers each example ONNX model', () async {
+  test('runtime model map covers each model file on Hugging Face', () async {
     final manifest =
         jsonDecode(await File('native_artifacts/manifest.json').readAsString())
             as Map<String, dynamic>;
     final models = (manifest['models'] as Map<String, dynamic>).keys
-        .where(
-          (path) =>
-              path.startsWith('example/assets/models/') &&
-              path.endsWith('.onnx'),
-        )
+        .where((path) => path.startsWith('example/assets/models/'))
         .map((path) => path.substring('example/assets/models/'.length))
         .toSet();
 

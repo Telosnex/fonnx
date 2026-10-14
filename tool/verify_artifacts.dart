@@ -31,7 +31,7 @@ const _expectedSources = {
 };
 
 /// The number of entries of the models section on Hugging Face.
-const _expectedHfModels = 21;
+const _expectedHfModels = 23;
 
 const _expectedRuntimeConstraints = {
   'android': 'API 24',

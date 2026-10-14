@@ -20,6 +20,7 @@ tests=(
   test/models/potion32m_test.dart
   test/models/potion8m_test.dart
   test/models/pyannote_test.dart
+  test/models/sense_voice_test.dart
   test/models/silero_vad_test.dart
   test/models/whisper_test.dart
   test/ort_native_asset_test.dart

@@ -113,6 +113,18 @@ const nativePrebuiltRuntimeFiles = <String, RuntimeFile>{
     bytes: 5986908,
     url: 'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/pyannote_seg3.onnx',
   ),
+  'sense_voice_small_int8.onnx': RuntimeFile(
+    name: 'sense_voice_small_int8.onnx',
+    sha256: 'c71f0ce00bec95b07744e116345e33d8cbbe08cef896382cf907bf4b51a2cd51',
+    bytes: 239233841,
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/db1f48ed984ac1d6cf6be71226c0343dc29f0cb9/sense_voice_small_int8.onnx',
+  ),
+  'sense_voice_small_tokens.txt': RuntimeFile(
+    name: 'sense_voice_small_tokens.txt',
+    sha256: 'f449eb28dc567533d7fa59be34e2abca8784f771850c78a47fb731a31429a1dc',
+    bytes: 315894,
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/db1f48ed984ac1d6cf6be71226c0343dc29f0cb9/sense_voice_small_tokens.txt',
+  ),
   'silero_vad_v6.2.1.onnx': RuntimeFile(
     name: 'silero_vad_v6.2.1.onnx',
     sha256: '1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3',

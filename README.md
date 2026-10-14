@@ -279,7 +279,7 @@ Whisper's `ai.onnx.contrib:BpeDecoder`.
 
 The model files are on Hugging Face in
 [`telosnex/fonnx`](https://huggingface.co/telosnex/fonnx), not in Git. The
-generated `nativePrebuiltRuntimeFiles` catalog pins the 21 models: each URL
+generated `nativePrebuiltRuntimeFiles` catalog pins the 23 model files: each URL
 names a Hugging Face commit, and the catalog has each file's size and SHA-256.
 Apps download a model after install:
 
@@ -302,7 +302,7 @@ The tests and the example app read the models in `example/assets/models`.
 To download them there, run:
 
 ```bash
-dart run tool/fetch_hf_models.dart            # all models, 1.3 GB
+dart run tool/fetch_hf_models.dart            # all models, 1.5 GB
 dart run tool/fetch_hf_models.dart whisper    # one directory
 ```
 

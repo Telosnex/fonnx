@@ -6,7 +6,7 @@
 // Usage: dart run tool/fetch_hf_models.dart [<path> ...]
 //
 // Each <path> is below example/assets/models: a file, or a directory such as
-// `futoSwipe`. With no <path>, the tool downloads every model (1.3 GB).
+// `futoSwipe`. With no <path>, the tool downloads every model (1.5 GB).
 import 'dart:io';
 
 import 'package:native_prebuilt/runtime.dart';

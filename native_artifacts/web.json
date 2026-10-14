@@ -4,7 +4,7 @@
   "release": "https://github.com/Telosnex/fonnx/releases/tag/native-5bd7d7db83bf5139",
   "runner": "ubuntu-22.04",
   "toolchain": "onnxruntime-web 1.27.0 (npm)",
-  "webVersion": "0557eac6d020e9fe",
+  "webVersion": "ebad04bb6266218d",
   "files": [
     {
       "name": "fonnx_worker_rpc.js",
@@ -119,6 +119,18 @@
       "sha256": "7afe421a01bf35618a094b19893eb5e61bd202409ce866466ea801c5a0c345b4",
       "bytes": 10045,
       "source": "lib/web/pyannote_worker.js"
+    },
+    {
+      "name": "sense_voice_init.js",
+      "sha256": "3c02fea03016754d44277f244bef7783bcf365ffe8064d8fc6109dbd33ce5cb4",
+      "bytes": 809,
+      "source": "lib/web/sense_voice_init.js"
+    },
+    {
+      "name": "sense_voice_worker.js",
+      "sha256": "728bac9c27817d465fbef24061d0d58ac5139c6215c0cb1a870cc9101b14a6b3",
+      "bytes": 3530,
+      "source": "lib/web/sense_voice_worker.js"
     },
     {
       "name": "silero_vad_init.js",

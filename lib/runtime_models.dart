@@ -46,6 +46,8 @@ const runtimeModelNamesByPath = <String, String>{
   'nemoAsr/parakeet_tdt_v3_joiner_int8.onnx':
       'parakeet_tdt_v3_joiner_int8.onnx',
   'pyannote/pyannote_seg3.onnx': 'pyannote_seg3.onnx',
+  'senseVoice/sense_voice_small_int8.onnx': 'sense_voice_small_int8.onnx',
+  'senseVoice/sense_voice_small_tokens.txt': 'sense_voice_small_tokens.txt',
   'sileroVad/silero_vad_v6.2.1.onnx': 'silero_vad_v6.2.1.onnx',
   'whisper/whisper_tiny_decoder.onnx': 'whisper_tiny_decoder.onnx',
   'whisper/whisper_tiny_encoder.onnx': 'whisper_tiny_encoder.onnx',
