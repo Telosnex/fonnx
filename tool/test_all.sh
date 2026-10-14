@@ -16,6 +16,7 @@ tests=(
   test/models/magika_test.dart
   test/models/mini_lm_l6_v2_test.dart
   test/models/msmarco_mini_lm_l6_v3_test.dart
+  test/models/nemo_asr_test.dart
   test/models/potion32m_test.dart
   test/models/potion8m_test.dart
   test/models/pyannote_test.dart
@@ -26,6 +27,7 @@ tests=(
   test/wordpiece_tokenizer_perf_test.dart
 )
 
+dart run tool/fetch_hf_models.dart
 flutter analyze
 dart run tool/verify_artifacts.dart
 # The browser tests load the web files from lib/web/ (native_prebuilt ADR 002

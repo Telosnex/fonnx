@@ -14,6 +14,9 @@ doc/api/
 # dotenv environment variables file
 .env*
 
+# Model files from Hugging Face: dart run tool/fetch_hf_models.dart
+example/assets/models/nemoAsr/*.onnx
+
 # dsstore
 .DS_Store
 

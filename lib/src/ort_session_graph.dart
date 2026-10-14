@@ -55,6 +55,18 @@ final class OrtSessionGraph {
     );
   }
 
+  OwnedOrtValue int32Tensor(Int32List values, List<int> shape) {
+    final data = calloc<Int32>(values.length);
+    data.asTypedList(values.length).setAll(0, values);
+    return _tensor(
+      data: data.cast<Void>(),
+      byteLength: values.length * sizeOf<Int32>(),
+      shape: shape,
+      type: ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_INT32.value,
+      backing: data.cast<Void>(),
+    );
+  }
+
   OwnedOrtValue zeroInt64Tensor(List<int> shape) {
     final count = shape.fold<int>(1, (total, dimension) => total * dimension);
     final data = calloc<Int64>(count);

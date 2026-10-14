@@ -22,7 +22,8 @@ import 'package:fonnx/src/web_runtime.g.dart';
 /// generated files first: `dart run native_prebuilt:web install-dev`.
 ///
 /// The test server serves test/ at the root, so the models come from the
-/// test/web_models link to example/assets/models (hydrate Git LFS first).
+/// test/web_models link to example/assets/models (hydrate Git LFS and run
+/// tool/fetch_hf_models.dart first).
 void main() {
   setUpAll(() => FonnxWeb.runtimeUri = Uri.parse('packages/fonnx/web/'));
 
@@ -64,6 +65,21 @@ void main() {
     );
     expect(transcript, startsWith('The rain in Spain falls mainly'));
     expect(transcript, contains('How are you doing?'));
+  });
+
+  test('NemoAsr', () async {
+    final asr = NemoAsr.load(
+      NemoAsrBundle.fastConformerCtcMultilingual('web_models/nemoAsr'),
+    );
+    expect(
+      await asr.doInference(await _bytes('data/audio_sample_ac1_ar16000.pcm')),
+      'The rain in Spain falls mainly on the plain.',
+    );
+    final transcript = await asr.doInference(
+      await _bytes('data/talkovergpt.pcm'),
+    );
+    expect(transcript, contains('are you doing'));
+    expect(transcript, contains('como'));
   });
 
   test('Silero VAD', () async {

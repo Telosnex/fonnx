@@ -213,6 +213,8 @@ jobs:
       - name: Hydrate Git LFS model fixtures
         run: dart tool/hydrate_lfs_models.dart
       - run: flutter pub get --no-example
+      - name: Fetch Hugging Face model fixtures
+        run: dart run tool/fetch_hf_models.dart
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: native-web

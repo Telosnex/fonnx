@@ -1,5 +1,12 @@
 ## 0.0.1
 
+* Add `NemoAsr`: speech-to-text with NVIDIA's multilingual FastConformer CTC
+  (10 languages, 132 MB) or Parakeet TDT 0.6B v3 (25 European languages,
+  670 MB). Both are the int8 exports of sherpa-onnx, downloaded from Hugging
+  Face. Native and web. Log-mel features, greedy CTC and TDT decoding, and
+  token decoding are in shared Dart. On FLEURS, the CTC model is about as
+  accurate as Whisper small and 3x faster than Whisper tiny; v3 is more
+  accurate than Whisper small outside English.
 * Whisper runs the split fp32 export of `onnx-community/whisper-tiny`
   (encoder, and merged decoder with a key/value cache) on stock ORT, native
   and web. Log-mel features, a 2-beam search with Whisper's token

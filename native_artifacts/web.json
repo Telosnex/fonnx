@@ -4,7 +4,7 @@
   "release": "https://github.com/Telosnex/fonnx/releases/tag/native-d044dc5f7a165aed",
   "runner": "ubuntu-22.04",
   "toolchain": "onnxruntime-web 1.27.0 (npm)",
-  "webVersion": "9767fcf50cded8f3",
+  "webVersion": "0557eac6d020e9fe",
   "files": [
     {
       "name": "fonnx_worker_rpc.js",
@@ -71,6 +71,18 @@
       "sha256": "d3ccd7c7ebc19e721f7c7c2369995d34fb0fb857efe8ba65a97c02c4509274ca",
       "bytes": 3867,
       "source": "lib/web/minish_lab_worker.js"
+    },
+    {
+      "name": "nemo_asr_init.js",
+      "sha256": "7fa95466d5752fb3e0c9d879f7d0b0af0e2e0db8a41912d5b38bf8218d461098",
+      "bytes": 1028,
+      "source": "lib/web/nemo_asr_init.js"
+    },
+    {
+      "name": "nemo_asr_worker.js",
+      "sha256": "4dd2d87743a0736b738a12b827229d05a5fb0d4dab08efc72a072ab19a89f457",
+      "bytes": 6876,
+      "source": "lib/web/nemo_asr_worker.js"
     },
     {
       "name": "ort-wasm-simd-threaded.mjs",
