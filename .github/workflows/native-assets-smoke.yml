@@ -65,8 +65,10 @@ jobs:
           path: example/assets/models/**/*.onnx
           key: hf-models-smoke-${{ runner.os }}-${{ hashFiles('native_artifacts/manifest.json') }}
           restore-keys: hf-models-smoke-${{ runner.os }}-
+      # The tests use futoSwipe and magika. flutter analyze checks the assets
+      # of example/pubspec.yaml, which lists the other models.
       - name: Fetch Hugging Face models
-        run: dart run tool/fetch_hf_models.dart futoSwipe magika
+        run: dart run tool/fetch_hf_models.dart futoSwipe bpe_decoder.onnx keywordSpotter magika miniLmL6V2 minishLab msmarcoMiniLmL6V3 pyannote sileroVad whisper
       - run: flutter analyze
       - name: Verify source, native, Web, and model manifest
         env:
