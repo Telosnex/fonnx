@@ -48,10 +48,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
-        with:
-          flutter-version: 3.47.0
-          cache: true
+      # flutter-action caches with an unpinned actions/cache, which the
+      # repository's action policy rejects. Same install as native_release.yml.
+      - name: Install Flutter
+        shell: bash
+        run: |
+          git clone -q --depth 1 --branch 3.47.0 \
+            https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/flutter/bin/flutter" config --no-analytics > /dev/null
+          "$RUNNER_TEMP/flutter/bin/flutter" --version
       - run: flutter pub get
       - name: Cache Hugging Face models
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
