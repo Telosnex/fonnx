@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Execute core and selected-op sessions against exact Android artifacts on a
+# Execute an ORT session against exact Android artifacts on a
 # connected device/emulator. Set FONNX_ANDROID_AVD to start an AVD.
 set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
@@ -41,16 +41,16 @@ build="$root/build/runtime/$target"
 dart run "$root/tool/materialize_runtime_artifacts.dart" "$target" "$build"
 "$cc" -std=c11 -O2 -Wall -Wextra -Werror \
   -I"$root/onnx_runtime/headers" "$root/tool/support/ort_runtime_smoke.c" \
-  -L"$build" -lortextensions -lonnxruntime \
+  -L"$build" -lonnxruntime \
   -Wl,--allow-shlib-undefined -Wl,-rpath,'$ORIGIN' \
   -o "$build/ort_runtime_smoke"
 libcxx="$ndk/toolchains/llvm/prebuilt/$host/sysroot/usr/lib/$triple/libc++_shared.so"
 [[ -f "$libcxx" ]] || { echo "Missing $libcxx" >&2; exit 1; }
-cp "$root/test/models/identity.onnx" "$root/test/models/bpe_decoder.onnx" "$build/"
+cp "$root/test/models/identity.onnx" "$build/"
 remote=/data/local/tmp/fonnx_runtime_smoke
 "$adb" shell "rm -rf $remote && mkdir $remote"
 "$adb" push "$build/ort_runtime_smoke" "$build/libonnxruntime.so" \
-  "$build/libortextensions.so" "$libcxx" "$build/identity.onnx" \
-  "$build/bpe_decoder.onnx" "$remote/" >/dev/null
-"$adb" shell "chmod 755 $remote/ort_runtime_smoke && cd $remote && LD_LIBRARY_PATH=. ./ort_runtime_smoke identity.onnx bpe_decoder.onnx"
+  "$libcxx" "$build/identity.onnx" \
+  "$remote/" >/dev/null
+"$adb" shell "chmod 755 $remote/ort_runtime_smoke && cd $remote && LD_LIBRARY_PATH=. ./ort_runtime_smoke identity.onnx"
 echo "PASS: exact $target manifest artifacts on Android API $("$adb" shell getprop ro.build.version.sdk | tr -d '\r')"

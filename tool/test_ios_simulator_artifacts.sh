@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Execute core and selected-op sessions against the exact iOS Simulator archive.
+# Execute an ORT session against the exact iOS Simulator archive.
 set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
 [[ "$(uname -s)-$(uname -m)" == Darwin-arm64 ]] || {
@@ -8,15 +8,15 @@ root="$(cd "$(dirname "$0")/.." && pwd)"
 target=ios-arm64-iphonesimulator
 build="$root/build/runtime/$target"
 dart run "$root/tool/materialize_runtime_artifacts.dart" "$target" "$build"
-cp "$root/test/models/identity.onnx" "$root/test/models/bpe_decoder.onnx" "$build/"
+cp "$root/test/models/identity.onnx" "$build/"
 sdk="$(xcrun --sdk iphonesimulator --show-sdk-path)"
 xcrun --sdk iphonesimulator clang -std=c11 -O2 -Wall -Wextra -Werror \
   -arch arm64 -mios-simulator-version-min=15.1 -isysroot "$sdk" \
   -I"$root/onnx_runtime/headers" "$root/tool/support/ort_runtime_smoke.c" \
-  -L"$build" -lortextensions -lonnxruntime -Wl,-rpath,@executable_path \
+  -L"$build" -lonnxruntime -Wl,-rpath,@executable_path \
   -o "$build/ort_runtime_smoke"
 codesign -s - --force "$build/ort_runtime_smoke" \
-  "$build/libonnxruntime.dylib" "$build/libortextensions.dylib" >/dev/null
+  "$build/libonnxruntime.dylib" >/dev/null
 
 read -r udid state < <(xcrun simctl list devices available -j | python3 -c '
 import json,sys
@@ -37,5 +37,5 @@ trap cleanup EXIT
 if [[ "$state" != Booted ]]; then xcrun simctl boot "$udid"; booted_here=true; fi
 xcrun simctl bootstatus "$udid" -b
 xcrun simctl spawn "$udid" "$build/ort_runtime_smoke" \
-  "$build/identity.onnx" "$build/bpe_decoder.onnx"
+  "$build/identity.onnx"
 echo "PASS: exact $target manifest artifacts on simulator $udid"

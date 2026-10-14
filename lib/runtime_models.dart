@@ -17,7 +17,6 @@ export 'src/native_prebuilt.g.dart' show nativePrebuiltRuntimeFiles;
 /// Runtime releases require unique plain file names. In particular, the two
 /// FUTO Swipe `model_fp32.onnx` files therefore have distinct release names.
 const runtimeModelNamesByPath = <String, String>{
-  'bpe_decoder.onnx': 'bpe_decoder.onnx',
   'futoSwipe/honorable_sturgeon/model_fp32.onnx':
       'futo_swipe_encoder_honorable_sturgeon.onnx',
   'futoSwipe/hungry_jellyfish/context_lm.onnx':

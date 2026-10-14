@@ -106,7 +106,6 @@ class SileroVadIsolateManager {
     List<int> audioBytes,
     Map<String, dynamic> previousState, {
     String? ortDylibPathOverride,
-    String? ortExtensionsDylibPathOverride,
   }) async {
     await start();
     final response = ReceivePort();

@@ -24,14 +24,13 @@ const _nativeTargets = {
 const _expectedSources = {
   'ortVersion': '1.27.0',
   'ortCommit': '8f0278c77bf44b0cc83c098c6c722b92a36ac4b5',
-  'ortxCommit': 'fe4e13f46b19fb490c90b09fe280277308bd5bb7',
   'webVersion': '1.27.0',
   'webTarballSha256':
       'b59c9819434a7519f334f77e8d4bf22b69808d531a57724cabc4bb2c0704c835',
 };
 
 /// The number of entries of the models section on Hugging Face.
-const _expectedHfModels = 23;
+const _expectedHfModels = 22;
 
 const _expectedRuntimeConstraints = {
   'android': 'API 24',
@@ -82,7 +81,6 @@ Future<void> main(List<String> arguments) async {
   for (final target in native.targets.entries) {
     _expectKeys(target.value.files.map((f) => f.asset!).toSet(), const {
       ortAsset,
-      extensionsAsset,
       finalizerAsset,
     }, target.key);
     final ort = target.value.files.singleWhere((f) => f.asset == ortAsset);
@@ -136,25 +134,15 @@ Future<void> main(List<String> arguments) async {
 
 void _verifySources(Map<String, Object?> sources) {
   final ort = _object(sources['onnxRuntime'], 'sources.onnxRuntime');
-  final ortx = _object(
-    sources['onnxRuntimeExtensions'],
-    'sources.onnxRuntimeExtensions',
-  );
   final web = _object(sources['onnxRuntimeWeb'], 'sources.onnxRuntimeWeb');
-  final operators = ortx['operators'];
   if (ort['version'] != _expectedSources['ortVersion'] ||
       ort['commit'] != _expectedSources['ortCommit'] ||
-      ortx['commit'] != _expectedSources['ortxCommit'] ||
-      operators is! List ||
-      operators.length != 1 ||
-      operators.single != 'ai.onnx.contrib:BpeDecoder' ||
+      sources.containsKey('onnxRuntimeExtensions') ||
       web['version'] != _expectedSources['webVersion'] ||
       web['sha256'] != _expectedSources['webTarballSha256'] ||
       web['npmTarball'] !=
           'https://registry.npmjs.org/onnxruntime-web/-/onnxruntime-web-1.27.0.tgz') {
-    throw const FormatException(
-      'Unexpected source pins or selected-op inventory',
-    );
+    throw const FormatException('Unexpected source pins');
   }
 }
 
@@ -182,7 +170,7 @@ Future<List<HfModel>> _verifyModels(
       for (final entry in records.entries)
         if (!entry.key.startsWith('$modelRoot/')) entry.key: entry.value,
     },
-    expectedCount: 2,
+    expectedCount: 1,
     label: 'test fixture',
   );
 

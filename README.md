@@ -42,9 +42,8 @@ framework."
   Kotlin/Swift platform channels with SHA-256-verified native code assets and
   one Dart FFI inference implementation.
 - Added Linux aarch64 support for Raspberry Pi/flutter-pi.
-- Pinned a selected-op ONNX Runtime Extensions build for Whisper's
-  `ai.onnx.contrib:BpeDecoder`; Magika and Pyannote were verified as core-ORT
-  models and no longer register Extensions.
+- Removed ONNX Runtime Extensions. Every model runs on core ORT; tokenizers
+  and token decoding are in Dart.
 - Native support is Android armv7/arm64/x64, iOS arm64 device/simulator, Linux
   x64/aarch64, macOS arm64, and Windows x64/arm64. Intel macOS is dropped.
 
@@ -214,16 +213,16 @@ and the example's realtime phrase editor.
 Android, iOS, Linux, macOS, and Windows use the same Dart FFI implementation.
 `hook/build.dart` uses `package:native_prebuilt` and
 `native_artifacts/prebuilt.json`. If the package sources match the release,
-it downloads and checks three bundled code assets: ONNX Runtime, selected-op
-Extensions, and the session finalizer. No C compiler is needed for a released
-package. Microsoft supplies the pinned ORT archives except on iOS, where FONNX
-supplies its existing dynamic ORT base. FONNX release CI builds Extensions and
-the finalizer through the same hook that runs local source builds.
+it downloads and checks two bundled code assets: ONNX Runtime and the session
+finalizer. No C compiler is needed for a released package. Microsoft supplies
+the pinned ORT archives except on iOS, where FONNX supplies its existing
+dynamic ORT base. FONNX release CI builds the finalizer through the same hook
+that runs local source builds.
 
 The `native_build` user define selects `auto` (default), `download`, or
-`source`. In auto mode, a source change makes the hook compile Extensions and
-the finalizer. ORT remains a pinned upstream input in both modes. Source builds
-need git, CMake, Python, and a target compiler. Apple targets build on macOS,
+`source`. In auto mode, a source change makes the hook compile the finalizer.
+ORT remains a pinned upstream input in both modes. Source builds need CMake
+and a target compiler. Apple targets build on macOS,
 Linux on Linux, Windows on Windows, and Android with the pinned NDK.
 
 ```yaml
@@ -263,17 +262,12 @@ ORT 1.27's Apple Mach-O binaries require iOS 15.1. App Store Connect rejects a
 framework that advertises a lower minimum than its binary with `ITMS-90208`.
 Until Flutter propagates the app target into native-asset packaging, add a Run
 Script phase immediately **after** Flutter's `Thin Binary` phase. The phase
-must set `MinimumOSVersion` on `onnxruntime.framework` and
-`ortextensions.framework` to `IPHONEOS_DEPLOYMENT_TARGET`, verify that this
-minimum is not lower than any embedded Mach-O minimum, and re-sign the modified
-frameworks. The complete fail-closed
+must set `MinimumOSVersion` on `onnxruntime.framework` to
+`IPHONEOS_DEPLOYMENT_TARGET`, verify that this minimum is not lower than the
+embedded Mach-O minimum, and re-sign the modified framework. The complete fail-closed
 implementation is in
 [`example/ios/fix_fonnx_framework_minimum_os.sh`](example/ios/fix_fonnx_framework_minimum_os.sh),
 and the example Xcode project shows the required phase ordering.
-
-ONNX Runtime Extensions is also a separately bundled code asset. The build is
-selected to the one custom operator in the current model inventory:
-Whisper's `ai.onnx.contrib:BpeDecoder`.
 
 ## Runtime model downloads
 
@@ -339,7 +333,7 @@ tool/test_all.sh
 It downloads the models, verifies source/artifact/model hashes, executes a
 real local Web identity and Magika Worker model, runs the package-owned
 finalizer through 8,192 ASan/UBSan ownership states, checks exact native
-ORT/Extensions artifacts plus model goldens/RSS tests serially, and
+ORT artifacts plus model goldens/RSS tests serially, and
 runs the deterministic frontend corpus through VM, Chrome JavaScript, and
 Chrome Wasm. Set `FONNX_FULL_RUNTIME_MATRIX=1` to include iOS Simulator,
 Android, Linux arm64/x64, and Windows/Wine artifact execution.

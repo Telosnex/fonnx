@@ -5,12 +5,6 @@ import 'package:native_prebuilt/runtime.dart';
 
 /// Runtime files of this package, by file name.
 const nativePrebuiltRuntimeFiles = <String, RuntimeFile>{
-  'bpe_decoder.onnx': RuntimeFile(
-    name: 'bpe_decoder.onnx',
-    sha256: '80525e3754c09e2f33c144388520b0050a7a2f414fb951c3d0bf7425aeb108ab',
-    bytes: 375,
-    url: 'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/bpe_decoder.onnx',
-  ),
   'decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx': RuntimeFile(
     name: 'decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx',
     sha256: 'e40ff43297abe815e8898494c17e71bba2152d9d40fa3eb803f75d0f7533329a',

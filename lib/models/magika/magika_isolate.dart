@@ -105,7 +105,6 @@ class MagikaIsolateManager {
     String modelPath,
     List<int> bytes, {
     String? ortDylibPathOverride,
-    String? ortExtensionsDylibPathOverride,
   }) async {
     await start();
     final response = ReceivePort();

@@ -6,12 +6,6 @@
       "version": "1.27.0",
       "commit": "8f0278c77bf44b0cc83c098c6c722b92a36ac4b5"
     },
-    "onnxRuntimeExtensions": {
-      "commit": "fe4e13f46b19fb490c90b09fe280277308bd5bb7",
-      "operators": [
-        "ai.onnx.contrib:BpeDecoder"
-      ]
-    },
     "onnxRuntimeWeb": {
       "version": "1.27.0",
       "npmTarball": "https://registry.npmjs.org/onnxruntime-web/-/onnxruntime-web-1.27.0.tgz",
@@ -20,13 +14,6 @@
     }
   },
   "models": {
-    "example/assets/models/bpe_decoder.onnx": {
-      "path": "example/assets/models/bpe_decoder.onnx",
-      "name": "bpe_decoder.onnx",
-      "sha256": "80525e3754c09e2f33c144388520b0050a7a2f414fb951c3d0bf7425aeb108ab",
-      "bytes": 375,
-      "commit": "4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979"
-    },
     "example/assets/models/futoSwipe/honorable_sturgeon/model_fp32.onnx": {
       "path": "example/assets/models/futoSwipe/honorable_sturgeon/model_fp32.onnx",
       "name": "futo_swipe_encoder_honorable_sturgeon.onnx",
@@ -180,11 +167,6 @@
       "sha256": "6642befb640f950d4a8cbbd17834d59e7e75f575b81ccf213e06b050623ab1dd",
       "bytes": 32904992,
       "commit": "4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979"
-    },
-    "test/models/bpe_decoder.onnx": {
-      "path": "test/models/bpe_decoder.onnx",
-      "sha256": "80525e3754c09e2f33c144388520b0050a7a2f414fb951c3d0bf7425aeb108ab",
-      "bytes": 375
     },
     "test/models/identity.onnx": {
       "path": "test/models/identity.onnx",

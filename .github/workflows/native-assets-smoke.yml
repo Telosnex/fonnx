@@ -17,7 +17,6 @@ on:
       - 'test/data/futo_swipe/**'
       - '.gitattributes'
       - 'test/ort_native_asset_test.dart'
-      - 'test/models/bpe_decoder.onnx'
       - 'test/models/identity.onnx'
       - 'pubspec.yaml'
       - '.github/workflows/native-assets-smoke.yml'
@@ -68,7 +67,7 @@ jobs:
       # The tests use futoSwipe and magika. flutter analyze checks the assets
       # of example/pubspec.yaml, which lists the other models.
       - name: Fetch Hugging Face models
-        run: dart run tool/fetch_hf_models.dart futoSwipe bpe_decoder.onnx keywordSpotter magika miniLmL6V2 minishLab msmarcoMiniLmL6V3 pyannote sileroVad whisper
+        run: dart run tool/fetch_hf_models.dart futoSwipe keywordSpotter magika miniLmL6V2 minishLab msmarcoMiniLmL6V3 pyannote sileroVad whisper
       - run: flutter analyze
       - name: Verify source, native, Web, and model manifest
         env:
@@ -83,7 +82,7 @@ jobs:
         run: tool/test_native_sanitizers.sh
       - name: Run deterministic operation corpus
         run: flutter test test/deterministic_operation_corpus_test.dart --reporter expanded
-      - name: Resolve ORT + Extensions and create real sessions
+      - name: Resolve ORT and create real sessions
         run: flutter test test/ort_native_asset_test.dart --reporter expanded
       - name: Run FUTO Swipe conversion and native inference regressions
         run: flutter test test/models/futo_swipe_core_test.dart test/models/futo_swipe_converter_test.dart test/models/futo_swipe_test.dart test/models/futo_swipe_api_test.dart --concurrency=1 --reporter expanded

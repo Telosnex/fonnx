@@ -8,9 +8,6 @@
 #include <windows.h>
 #endif
 
-extern OrtStatus *ORT_API_CALL RegisterCustomOps(OrtSessionOptions *options,
-                                                  const OrtApiBase *api_base);
-
 #define CHECK(condition)                                                       \
   do {                                                                         \
     if (!(condition)) {                                                        \
@@ -46,8 +43,7 @@ static const ORTCHAR_T *model_path(const char *utf8, char *buffer,
 }
 #endif
 
-static void create_session(OrtEnv *env, const OrtApiBase *base,
-                           const char *path, int extensions) {
+static void create_session(OrtEnv *env, const char *path) {
   OrtSessionOptions *options = NULL;
   OrtSession *session = NULL;
 #ifdef _WIN32
@@ -56,9 +52,6 @@ static void create_session(OrtEnv *env, const OrtApiBase *base,
   char native_path[1];
 #endif
   check_status(ort->CreateSessionOptions(&options), "CreateSessionOptions");
-  if (extensions) {
-    check_status(RegisterCustomOps(options, base), "RegisterCustomOps");
-  }
   check_status(ort->CreateSession(env, model_path(path, native_path, 4096),
                                   options, &session),
                "CreateSession");
@@ -68,7 +61,7 @@ static void create_session(OrtEnv *env, const OrtApiBase *base,
 }
 
 int main(int argc, char **argv) {
-  CHECK(argc == 3);
+  CHECK(argc == 2);
   const OrtApiBase *base = OrtGetApiBase();
   CHECK(base != NULL && base->GetApi != NULL && base->GetVersionString != NULL);
   ort = base->GetApi(ORT_API_VERSION);
@@ -79,11 +72,9 @@ int main(int argc, char **argv) {
   check_status(ort->CreateEnv(ORT_LOGGING_LEVEL_ERROR, "fonnx-runtime-smoke", &env),
                "CreateEnv");
   CHECK(env != NULL);
-  create_session(env, base, argv[1], 0);
-  create_session(env, base, argv[2], 1);
+  create_session(env, argv[1]);
   ort->ReleaseEnv(env);
-  printf("  ORT %s core identity + selected BpeDecoder sessions\n",
-         base->GetVersionString());
-  printf("PASS: exact ONNX Runtime + Extensions artifacts\n");
+  printf("  ORT %s identity session\n", base->GetVersionString());
+  printf("PASS: exact ONNX Runtime artifacts\n");
   return 0;
 }

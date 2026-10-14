@@ -6,4 +6,3 @@
 // configuration without making the web compiler parse FFI declarations.
 
 String? fonnxOrtDylibPathOverride;
-String? fonnxOrtExtensionsDylibPathOverride;

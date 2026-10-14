@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:native_prebuilt/native_prebuilt.dart';
 import 'package:path/path.dart' as p;
 
-/// Downloads exactly the files that the consumer hook publishes. The native
-/// smoke scripts use these files, not the superseded Extensions archives.
+/// Downloads exactly the files that the consumer hook publishes, for the
+/// native smoke scripts.
 Future<void> main(List<String> arguments) async {
   if (arguments.length != 2) {
     throw const FormatException(
@@ -30,11 +30,8 @@ Future<void> main(List<String> arguments) async {
         targetName.startsWith('macos-') || targetName.startsWith('ios-');
     final alias = switch (file.asset) {
       'onnx/ort_ffi_bindings.dart' when apple => 'libonnxruntime.1.dylib',
-      'onnx/ort_extensions.dart' when apple => 'libortextensions.0.dylib',
       'onnx/ort_ffi_bindings.dart' when targetName.startsWith('linux-') =>
         'libonnxruntime.so.1',
-      'onnx/ort_extensions.dart' when targetName.startsWith('linux-') =>
-        'libortextensions.so.0',
       _ => null,
     };
     if (alias != null) {

@@ -11,11 +11,9 @@ import 'package:path/path.dart' as p;
 
 import 'upstream_ort.dart';
 
-const _ortxCommit = 'fe4e13f46b19fb490c90b09fe280277308bd5bb7';
-
-/// The hook and CI use this same build: pinned upstream ORT, selected-op
-/// Extensions, and the package-owned session finalizer. No output goes into
-/// the package. The tiny finalizer is also prebuilt for consumer builds.
+/// The hook and CI use this same build: pinned upstream ORT and the
+/// package-owned session finalizer. No output goes into the package. The tiny
+/// finalizer is also prebuilt for consumer builds.
 Future<void> buildFromSource(
   BuildInput input,
   BuildOutputBuilder output,
@@ -116,209 +114,76 @@ Future<void> buildFromSource(
       .substring(0, 16);
   final work = Directory.fromUri(
     input.outputDirectoryShared.resolve(
-      // Leave room for git pack names and CMake object paths on Windows.
+      // Leave room for CMake object paths on Windows.
       's/${source.sourceKey.short}/${target.name}/$toolchainKey/',
     ),
   );
   await withFileLock(File(p.join(work.path, 'build.lock')), () async {
     await work.create(recursive: true);
-    final checkout = Directory(p.join(work.path, 'extensions'));
-    if (!await Directory(p.join(checkout.path, '.git')).exists()) {
-      await checkout.create(recursive: true);
-      await _run('git', ['init', checkout.path], log);
-      await _run('git', [
-        '-C',
-        checkout.path,
-        'config',
-        'core.longpaths',
-        'true',
-      ], log);
-      await _run('git', [
-        '-C',
-        checkout.path,
-        'remote',
-        'add',
-        'origin',
-        'https://github.com/microsoft/onnxruntime-extensions.git',
-      ], log);
-      await _run('git', [
-        '-C',
-        checkout.path,
-        'fetch',
-        '--depth=1',
-        'origin',
-        _ortxCommit,
-      ], log);
-      await _run('git', [
-        '-C',
-        checkout.path,
-        'checkout',
-        '--detach',
-        'FETCH_HEAD',
-      ], log);
-    }
-    final revision = await _run('git', [
-      '-C',
-      checkout.path,
-      'rev-parse',
-      'HEAD',
-    ], log);
-    if (revision.trim() != _ortxCommit) {
-      throw StateError('Extensions source commit differs');
-    }
-    final patch = input.packageRoot
-        .resolve('tool/extensions/bpe_decoder_only.patch')
-        .toFilePath();
-    // Keep the cached checkout unpatched between builds. A failed build can
-    // leave the patch in place, so detect that state before applying it again.
-    final applied = await Process.run('git', [
-      '-C',
-      checkout.path,
-      'apply',
-      '-R',
-      '--check',
-      patch,
-    ]);
-    if (applied.exitCode != 0) {
-      await _run('git', ['-C', checkout.path, 'apply', '--check', patch], log);
-      await _run('git', ['-C', checkout.path, 'apply', patch], log);
-    }
-    final selected = File(
-      p.join(checkout.path, 'cmake', '_selectedoplist.cmake'),
-    );
-    await selected.writeAsString(
-      'set(OCOS_ENABLE_GPT2_TOKENIZER ON CACHE INTERNAL "")\n',
-    );
-    try {
-      final headers = Directory(p.join(work.path, 'ort-package', 'include'));
-      await headers.create(recursive: true);
-      final sourceHeaders = Directory.fromUri(
-        input.packageRoot.resolve('onnx_runtime/headers/'),
-      );
-      await for (final entity in sourceHeaders.list(recursive: true)) {
-        if (entity is! File) continue;
-        final copy = File(
-          p.join(
-            headers.path,
-            p.relative(entity.path, from: sourceHeaders.path),
-          ),
-        );
-        await copy.parent.create(recursive: true);
-        await entity.copy(copy.path);
-      }
-      final build = Directory(p.join(work.path, 'build'));
-      final finalizerProject = File(p.join(work.path, 'finalizer.cmake'));
-      String cmakePath(Uri uri) => uri.toFilePath().replaceAll(r'\', '/');
-      await finalizerProject.writeAsString('''
-if(NOT TARGET fonnx_ort_session_finalizer)
-  add_library(fonnx_ort_session_finalizer SHARED "${cmakePath(input.packageRoot.resolve('src/ort_session_finalizer.c'))}")
-  target_include_directories(fonnx_ort_session_finalizer PRIVATE "${cmakePath(input.packageRoot.resolve('src/'))}")
-  if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
-    # This C-only shim needs no ORT APIs. Keep its old iOS 13 minimum so
-    # Flutter's framework plist is correct without another packaging fix.
-    set_target_properties(fonnx_ort_session_finalizer PROPERTIES
-      XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "13.0")
-  endif()
-  if(WIN32)
-    target_link_libraries(fonnx_ort_session_finalizer PRIVATE ole32)
-  endif()
+    final build = Directory(p.join(work.path, 'build'));
+    final project = Directory(p.join(work.path, 'finalizer'));
+    await project.create(recursive: true);
+    String cmakePath(Uri uri) => uri.toFilePath().replaceAll(r'\', '/');
+    await File(p.join(project.path, 'CMakeLists.txt')).writeAsString('''
+cmake_minimum_required(VERSION 3.15)
+project(fonnx_ort_session_finalizer C)
+add_library(fonnx_ort_session_finalizer SHARED "${cmakePath(input.packageRoot.resolve('src/ort_session_finalizer.c'))}")
+target_include_directories(fonnx_ort_session_finalizer PRIVATE "${cmakePath(input.packageRoot.resolve('src/'))}")
+if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+  # This C-only shim needs no ORT APIs. Keep its old iOS 13 minimum so
+  # Flutter's framework plist is correct without another packaging fix.
+  set_target_properties(fonnx_ort_session_finalizer PROPERTIES
+    XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "13.0")
+endif()
+if(WIN32)
+  target_link_libraries(fonnx_ort_session_finalizer PRIVATE ole32)
 endif()
 ''');
-      final args = <String>[
-        '-S',
-        checkout.path,
-        '-B',
-        build.path,
-        '-DCMAKE_POLICY_VERSION_MINIMUM=3.5',
-        '-DCMAKE_BUILD_TYPE=Release',
-        '-DONNXRUNTIME_PKG_DIR=${headers.parent.path}',
-        '-DOCOS_ONNXRUNTIME_VERSION=1.27.0',
-        '-DOCOS_ENABLE_SELECTED_OPLIST=ON',
-        '-DOCOS_ENABLE_CTEST=OFF',
-        '-DOCOS_BUILD_SHARED_LIB=ON',
-        '-DCMAKE_PROJECT_INCLUDE=${finalizerProject.path}',
-        ...targetArguments,
-      ];
-      await _run('cmake', args, log);
-      await _run('cmake', [
-        '--build',
-        build.path,
-        '--config',
-        'Release',
-        '--target',
-        'extensions_shared',
-        'fonnx_ort_session_finalizer',
-        '--parallel',
-        '8',
-      ], log);
-      final candidates = await build
-          .list(recursive: true, followLinks: false)
-          .where((e) => e is File && _isLibrary(p.basename(e.path), target.os))
-          .cast<File>()
-          .toList();
-      if (candidates.length != 1) {
-        throw StateError('Expected one Extensions library, got $candidates');
+    final args = <String>[
+      '-S',
+      project.path,
+      '-B',
+      build.path,
+      '-DCMAKE_BUILD_TYPE=Release',
+      ...targetArguments,
+    ];
+    await _run('cmake', args, log);
+    await _run('cmake', [
+      '--build',
+      build.path,
+      '--config',
+      'Release',
+      '--target',
+      'fonnx_ort_session_finalizer',
+      '--parallel',
+      '8',
+    ], log);
+    final finalizerName = target.os.dylibFileName(
+      'fonnx_ort_session_finalizer',
+    );
+    final finalizers = await build
+        .list(recursive: true, followLinks: false)
+        .where((e) => e is File && p.basename(e.path) == finalizerName)
+        .cast<File>()
+        .toList();
+    if (finalizers.length != 1) {
+      throw StateError('Expected one finalizer library, got $finalizers');
+    }
+    final finalizer = await finalizers.single.copy(
+      p.join(out.path, finalizerName),
+    );
+    output.assets.code.add(
+      CodeAsset(
+        package: input.packageName,
+        name: finalizerAsset,
+        linkMode: DynamicLoadingBundled(),
+        file: finalizer.uri,
+      ),
+    );
+    if (source.release != null && target.os == OS.linux) {
+      for (final file in [File(p.join(out.path, upstream.name)), finalizer]) {
+        await _checkLinuxBaseline(file, log);
       }
-      final library = candidates.single;
-      final strings = latin1.decode(await library.readAsBytes());
-      if (!strings.contains('RegisterCustomOps')) {
-        throw StateError('RegisterCustomOps is missing');
-      }
-      for (final unexpected in [
-        'GPT2Tokenizer',
-        'CLIPTokenizer',
-        'RobertaTokenizer',
-        'SpmTokenizer',
-        'HfJsonTokenizer',
-      ]) {
-        if (strings.contains(unexpected)) {
-          throw StateError('Unexpected custom op $unexpected');
-        }
-      }
-      final name = target.os.dylibFileName('ortextensions');
-      final published = await library.copy(p.join(out.path, name));
-      output.assets.code.add(
-        CodeAsset(
-          package: input.packageName,
-          name: extensionsAsset,
-          linkMode: DynamicLoadingBundled(),
-          file: published.uri,
-        ),
-      );
-      final finalizerName = target.os.dylibFileName(
-        'fonnx_ort_session_finalizer',
-      );
-      final finalizers = await build
-          .list(recursive: true, followLinks: false)
-          .where((e) => e is File && p.basename(e.path) == finalizerName)
-          .cast<File>()
-          .toList();
-      if (finalizers.length != 1) {
-        throw StateError('Expected one finalizer library, got $finalizers');
-      }
-      final finalizer = await finalizers.single.copy(
-        p.join(out.path, finalizerName),
-      );
-      output.assets.code.add(
-        CodeAsset(
-          package: input.packageName,
-          name: finalizerAsset,
-          linkMode: DynamicLoadingBundled(),
-          file: finalizer.uri,
-        ),
-      );
-      if (source.release != null && target.os == OS.linux) {
-        for (final file in [
-          File(p.join(out.path, upstream.name)),
-          published,
-          finalizer,
-        ]) {
-          await _checkLinuxBaseline(file, log);
-        }
-      }
-    } finally {
-      if (await selected.exists()) await selected.delete();
-      await _run('git', ['-C', checkout.path, 'apply', '-R', patch], log);
     }
   });
 }
@@ -329,13 +194,6 @@ bool _canBuild(TargetName target) => switch (target.os) {
   OS.windows => Platform.isWindows,
   OS.linux => Platform.isLinux,
   _ => false,
-};
-
-bool _isLibrary(String name, OS os) => switch (os) {
-  OS.windows => name.toLowerCase() == 'ortextensions.dll',
-  OS.macOS ||
-  OS.iOS => RegExp(r'^libortextensions\.[0-9.]+dylib$').hasMatch(name),
-  _ => RegExp(r'^libortextensions\.so(?:\.[0-9]+)*$').hasMatch(name),
 };
 
 List<String> _targetArguments(BuildInput input, TargetName target) {

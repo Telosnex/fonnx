@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:fonnx/dylib_path_overrides.dart';
-import 'package:fonnx/onnx/ort_extensions.dart';
 import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free, malloc;
 import 'package:ffi/ffi.dart';
 
@@ -973,7 +972,6 @@ void releaseOrtSessionObjects(OrtSessionObjects? objects) {
 /// workarounds. Entries are copied into the session options before creation.
 OrtSessionObjects createOrtSession(
   String modelPath, {
-  bool includeOnnxExtensionsOps = false,
   Map<String, String> sessionConfigEntries = const {},
 }) {
   // Normal builds resolve the hook's code asset through @Native. The explicit
@@ -1016,21 +1014,6 @@ OrtSessionObjects createOrtSession(
         value: entry.value,
       );
     }
-    if (includeOnnxExtensionsOps) {
-      final extensionsStatus = registerOrtExtensions(
-        options: sessionOptionsPtr.value,
-        apiBase: answer,
-        libraryPathOverride: fonnxOrtExtensionsDylibPathOverride,
-      );
-      if (extensionsStatus.isError) {
-        final error =
-            'Register custom ops failed. '
-            'Code: ${ortApi.getErrorCodeMessage(extensionsStatus)}\n'
-            'Message: ${ortApi.consumeErrorMessage(extensionsStatus)}';
-        throw Exception(error);
-      }
-    }
-
     // Avoiding explicit inter/intra-op thread counts currently performs best.
     // CoreML was also measured around 10x slower than CPU on an M2 Max for the
     // package's embedding graphs, so provider selection remains ORT's default.

@@ -38,13 +38,4 @@ void main() {
     expect(session.sessionPtr.value, isNot(nullptr));
     releaseOrtSessionObjects(session);
   });
-
-  test('bundled Extensions registers Whisper BpeDecoder', () {
-    final session = createOrtSession(
-      'test/models/bpe_decoder.onnx',
-      includeOnnxExtensionsOps: true,
-    );
-    expect(session.sessionPtr.value, isNot(nullptr));
-    releaseOrtSessionObjects(session);
-  });
 }

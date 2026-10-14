@@ -20,7 +20,6 @@ Each file has the license of its source model.
 
 | File | Source | License |
 |---|---|---|
-| `bpe_decoder.onnx` | fonnx: a graph with the ORT Extensions `BpeDecoder` operator | GPL-2.0, the license of fonnx |
 | `decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx`, `encoder-…`, `joiner-…` | [sherpa-onnx keyword spotter](https://github.com/k2-fsa/sherpa-onnx/releases/tag/kws-models), GigaSpeech Zipformer 3M | Apache-2.0 |
 | `fastconformer_ctc_multilingual_int8.onnx` | [NVIDIA stt_multilingual_fastconformer_hybrid_large_pc](https://catalog.ngc.nvidia.com/orgs/nvidia/teams/nemo/models/stt_multilingual_fastconformer_hybrid_large_pc), CTC branch, int8 export of [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx/releases/tag/asr-models) | CC-BY-4.0 |
 | `futo_swipe_*.onnx` | Derived from FUTO Swipe (see below) | FUTO Model Weights License 1.0 |
@@ -39,8 +38,8 @@ Each file has the license of its source model.
 `whisper_{base,small}_{encoder,decoder}.onnx` are from
 [onnx-community/whisper-base](https://huggingface.co/onnx-community/whisper-base)
 and [onnx-community/whisper-small](https://huggingface.co/onnx-community/whisper-small)
-(MIT). `silero_vad.onnx`, `whisper_{tiny,base,small}.onnx` and
-`whisper_v3_turbo_olive.onnx` are files of earlier fonnx versions.
+(MIT). `bpe_decoder.onnx`, `silero_vad.onnx`, `whisper_{tiny,base,small}.onnx`
+and `whisper_v3_turbo_olive.onnx` are files of earlier fonnx versions.
 
 ## Attribution
 

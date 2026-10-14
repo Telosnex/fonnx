@@ -5,7 +5,6 @@ import 'package:code_assets/code_assets.dart';
 import 'package:native_prebuilt/native_prebuilt.dart';
 
 const ortAsset = 'onnx/ort_ffi_bindings.dart';
-const extensionsAsset = 'onnx/ort_extensions.dart';
 const finalizerAsset = 'onnx/ort_session_finalizer.dart';
 
 /// Microsoft's ORT files, plus the pinned dynamic iOS base. These URLs remain

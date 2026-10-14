@@ -26,7 +26,7 @@ else
   signing_identity="-"
 fi
 
-for name in onnxruntime ortextensions; do
+for name in onnxruntime; do
   framework="$frameworks_dir/$name.framework"
   plist="$framework/Info.plist"
   binary="$framework/$name"

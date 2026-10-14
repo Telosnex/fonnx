@@ -46,7 +46,6 @@ void main() {
         ).writeAsString('name: fonnx\n');
         final files = [
           ('libonnxruntime.dylib', ortAsset, 'ORT upstream bytes'),
-          ('libortextensions.dylib', extensionsAsset, 'Extensions bytes'),
           (
             'libfonnx_ort_session_finalizer.dylib',
             finalizerAsset,
@@ -105,7 +104,7 @@ void main() {
           publisher: publisher,
         );
         final target = released.targets[platform]!;
-        expect(target.files, hasLength(3));
+        expect(target.files, hasLength(2));
         expect(target.minOSVersion, platform.startsWith('ios-') ? 15 : 14);
         final ort = target.files.singleWhere((f) => f.asset == ortAsset);
         if (platform.startsWith('ios-')) {
@@ -116,11 +115,11 @@ void main() {
             ),
           );
           expect(ort.archiveEntry, isNull);
-          expect(publisher.uploaded, hasLength(3));
+          expect(publisher.uploaded, hasLength(2));
         } else {
           expect(ort.url, upstreamUrl);
           expect(ort.archiveEntry, 'upstream/lib/libonnxruntime.dylib');
-          expect(publisher.uploaded, hasLength(2));
+          expect(publisher.uploaded, hasLength(1));
           expect(
             publisher.uploaded!.every(
               (f) => !f.path.contains('-libonnxruntime.'),

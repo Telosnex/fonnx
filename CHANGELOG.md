@@ -1,5 +1,10 @@
 ## 0.0.1
 
+* Remove ONNX Runtime Extensions. No model needs a custom operator, so the
+  native assets are ONNX Runtime and the session finalizer, and the release
+  builds no Extensions. `createOrtSession` no longer takes
+  `includeOnnxExtensionsOps`, and `fonnxOrtExtensionsDylibPathOverride` is
+  gone. On iOS, the Run Script phase aligns only `onnxruntime.framework`.
 * Add `SenseVoice`: speech-to-text with Alibaba's SenseVoice Small (239 MB,
   int8 sherpa-onnx export): Mandarin, Cantonese, English, Japanese and
   Korean, with the language detected or set. Native and web. Kaldi filter
@@ -27,8 +32,8 @@
   `Whisper.removeTimestamps` is removed because timestamp tokens are
   suppressed.
 * Use `native_prebuilt` for the native hook, shared verified cache, source-key
-  selection, and build modes. Release CI builds selected-op Extensions and the
-  session finalizer through the hook for all ten targets. Consumer builds no
+  selection, and build modes. Release CI builds the session finalizer through
+  the hook for all ten targets. Consumer builds no
   longer compile the finalizer. Upstream ONNX Runtime URLs stay unchanged.
 * Publish the 16 example ONNX models as verified runtime downloads. The
   `runtime_models.dart` API exposes their pinned catalog and download helper.

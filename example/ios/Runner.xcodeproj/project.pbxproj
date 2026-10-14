@@ -326,7 +326,6 @@
 			);
 			inputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/onnxruntime.framework/Info.plist",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ortextensions.framework/Info.plist",
 			);
 			name = "Align FONNX Framework Minimum OS";
 			outputPaths = (

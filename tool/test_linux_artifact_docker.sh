@@ -17,7 +17,7 @@ case "$target" in
 esac
 build="$root/build/runtime/$target"
 dart run "$root/tool/materialize_runtime_artifacts.dart" "$target" "$build"
-cp "$root/test/models/identity.onnx" "$root/test/models/bpe_decoder.onnx" "$build/"
+cp "$root/test/models/identity.onnx" "$build/"
 
 docker run --rm --platform "$platform" -v "$root:/workspace" -w /workspace \
   "$image" bash -lc '
@@ -29,8 +29,8 @@ docker run --rm --platform "$platform" -v "$root:/workspace" -w /workspace \
     build="build/runtime/$target"
     gcc -std=c11 -O2 -Wall -Wextra -Werror -I onnx_runtime/headers \
       tool/support/ort_runtime_smoke.c -L "$build" \
-      -lortextensions -lonnxruntime -Wl,-rpath,'"'"'$ORIGIN'"'"' \
+      -lonnxruntime -Wl,-rpath,'"'"'$ORIGIN'"'"' \
       -o "$build/ort_runtime_smoke"
-    "$build/ort_runtime_smoke" "$build/identity.onnx" "$build/bpe_decoder.onnx"
+    "$build/ort_runtime_smoke" "$build/identity.onnx"
   '
 echo "PASS: exact $target manifest artifacts in clean $platform container"

@@ -15,7 +15,7 @@
 # Microsoft's pinned ORT libraries are upstream inputs. tool/release_native.dart
 # preserves the Microsoft and Maven URLs, but rehosts the two unchanged iOS
 # ORT files because their old fonnx release was mutable. It also uploads the
-# package-owned Extensions and finalizer libraries (22 assets in total).
+# package-owned finalizer libraries (12 assets in total).
 name: native release
 run-name: Native release / ${{ (github.ref_name == 'native-release-dry' || inputs.dry_run) && 'build only' || 'publish' }}
 
