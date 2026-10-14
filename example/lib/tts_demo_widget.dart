@@ -9,7 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fonnx_example/padding.dart';
 import 'package:fonnx_example/stt_service.dart';
-import 'package:fonnx_example/whisper_widget.dart';
+import 'package:fonnx_example/stt_models.dart';
+import 'package:fonnx_example/stt_widget.dart';
 import 'dart:async';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:path/path.dart' as path;
@@ -27,6 +28,8 @@ class _TtsDemoWidgetState extends State<TtsDemoWidget> {
   SttService? _sttService;
   AudioPlayer? _audioPlayer;
   var _sttIsVoiceThreshold = SttService.kVadPIsVoiceThreshold;
+  var _sttModel = SttModel.fastConformer;
+  String? _status;
 
   @override
   Widget build(BuildContext context) {
@@ -47,13 +50,21 @@ class _TtsDemoWidgetState extends State<TtsDemoWidget> {
           style: Theme.of(context).textTheme.headlineLarge,
         ),
         const Text(
-            'Mic to Silero VAD for voice detection and Whisper Tiny for STT.\nOther Whisper models are available and much higher quality.'),
+            'Mic to Silero VAD for voice detection, and the chosen model for '
+            'speech-to-text.'),
+        heightPadding,
+        SttModelPicker(
+          value: _sttModel,
+          onChanged: _sttService == null && _status == null
+              ? (model) => setState(() => _sttModel = model)
+              : null,
+        ),
         heightPadding,
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             ElevatedButton.icon(
-              onPressed: _runVadDemo,
+              onPressed: _status == null ? _runVadDemo : null,
               icon: _sttService == null
                   ? const Icon(Icons.mic)
                   : const Icon(Icons.mic_off),
@@ -61,6 +72,7 @@ class _TtsDemoWidgetState extends State<TtsDemoWidget> {
                   ? const Text('Listen')
                   : const Text('Stop'),
             ),
+            if (_status != null) ...[widthPadding, Flexible(child: Text(_status!))],
           ],
         ),
         if (_sttServiceResponse != null) ...[
@@ -288,10 +300,27 @@ class _TtsDemoWidgetState extends State<TtsDemoWidget> {
       return;
     }
     final vadModelPath = await getModelPath('silero_vad_v6.2.1.onnx');
-    final whisperBundle = await getWhisperBundle();
+    final SttInference inference;
+    setState(() => _status = 'Loading ${_sttModel.label}…');
+    try {
+      inference = await _sttModel.load(
+        onProgress: (received, total) {
+          if (total == null || total == 0) return;
+          setState(
+            () => _status =
+                'Downloading ${_sttModel.label}: '
+                '${(100 * received / total).floor()}%',
+          );
+        },
+      );
+    } catch (e) {
+      setState(() => _status = 'Error: $e');
+      return;
+    }
+    setState(() => _status = null);
     final service = SttService(
       vadModelPath: vadModelPath,
-      whisperBundle: whisperBundle,
+      inference: inference,
       voiceThreshold: _sttIsVoiceThreshold,
       maxDuration: const Duration(seconds: 10),
     );

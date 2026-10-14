@@ -4,11 +4,10 @@ import 'package:fonnx_example/magika_widget.dart';
 import 'package:fonnx_example/minilml6v2_widget.dart';
 import 'package:fonnx_example/minishlab_widget.dart';
 import 'package:fonnx_example/msmarco_minilm_l6v3_widget.dart';
-import 'package:fonnx_example/nemo_asr_widget.dart';
 import 'package:fonnx_example/pyannote_widget.dart';
 import 'package:fonnx_example/silero_vad_widget.dart';
 import 'package:fonnx_example/tts_demo_widget.dart';
-import 'package:fonnx_example/whisper_widget.dart';
+import 'package:fonnx_example/stt_widget.dart';
 import 'package:libmonet/libmonet.dart';
 
 void main() {
@@ -94,9 +93,7 @@ class _MyAppState extends State<MyApp> {
                       SizedBox(height: 16),
                       PyannoteWidget(),
                       SizedBox(height: 16),
-                      WhisperWidget(),
-                      SizedBox(height: 16),
-                      NemoAsrWidget(),
+                      SttWidget(),
                       SizedBox(height: 16),
                     ],
                   ),

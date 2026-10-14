@@ -5,7 +5,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:fonnx/models/sileroVad/silero_vad.dart';
-import 'package:fonnx/models/whisper/whisper.dart';
+import 'package:fonnx_example/stt_models.dart';
 import 'package:record/record.dart';
 
 /// A single frame of audio data.
@@ -88,7 +88,8 @@ class SttService {
   /// then the recording will stop.
   final Duration maxSilenceDuration;
   final String vadModelPath;
-  final WhisperBundle whisperBundle;
+  /// The speech-to-text model.
+  final SttInference inference;
 
   /// Values >= this are considered speech.
   ///
@@ -97,7 +98,7 @@ class SttService {
   /// deciding which frames to keep and when to stop recording.
   final double voiceThreshold;
 
-  final sessionManager = WhisperSessionManager();
+  final sessionManager = SttSessionManager();
 
   var lastVadState = <String, dynamic>{};
   var lastVadStateIndex = 0;
@@ -106,7 +107,7 @@ class SttService {
 
   SttService({
     required this.vadModelPath,
-    required this.whisperBundle,
+    required this.inference,
     this.maxDuration = const Duration(seconds: 10),
     this.maxSilenceDuration = const Duration(milliseconds: 1000),
     this.voiceThreshold = kVadPIsVoiceThreshold,
@@ -157,11 +158,7 @@ class SttService {
       audioBuffer = audioBuffer.sublist(vadBufferLength);
     });
     _vadInferenceLoop(vad, frames, streamController);
-    _whisperInferenceLoop(
-      Whisper.load(whisperBundle),
-      frames,
-      streamController,
-    );
+    _sttInferenceLoop(frames, streamController);
   }
 
   final Queue<Uint8List> _vadBufferQueue = Queue<Uint8List>();
@@ -245,9 +242,8 @@ class SttService {
     return lastNSilenceDuration >= maxSilenceDuration.inMilliseconds;
   }
 
-  // Recursively run whisper inference on collected frames
-  void _whisperInferenceLoop(
-    Whisper whisper,
+  // Recursively run speech-to-text on collected frames
+  void _sttInferenceLoop(
     List<AudioFrame> frames,
     StreamController<SttServiceResponse> streamController,
   ) async {
@@ -265,7 +261,7 @@ class SttService {
         bytesToInferBuilder.add(frame.bytes);
       }
       final bytesToInfer = bytesToInferBuilder.takeBytes();
-      final result = (await whisper.doInference(bytesToInfer)).trim();
+      final result = (await inference(bytesToInfer)).trim();
       sessionManager.addInferenceResult(result, voiceFrames.first);
       streamController.add(SttServiceResponse(
         transcription: sessionManager.transcription,
@@ -276,7 +272,7 @@ class SttService {
     void scheduleNextInference() async {
       if (!stopped) {
         Future.delayed(const Duration(milliseconds: 16),
-            () => _whisperInferenceLoop(whisper, frames, streamController));
+            () => _sttInferenceLoop(frames, streamController));
         return;
       }
       // Stopped.
@@ -290,7 +286,7 @@ class SttService {
   }
 }
 
-class WhisperSessionManager {
+class SttSessionManager {
   var _frozenTranscription = '';
   String? _lastInferenceResult;
   AudioFrame? _lastFirstInferenceInputFrame;
