@@ -218,7 +218,7 @@ jobs:
           key: hf-models-web-test-${{ runner.os }}-${{ hashFiles('native_artifacts/manifest.json') }}
           restore-keys: hf-models-web-test-${{ runner.os }}-
       - name: Fetch Hugging Face models
-        run: dart run tool/fetch_hf_models.dart futoSwipe keywordSpotter magika miniLmL6V2 minishLab/potion8m.onnx msmarcoMiniLmL6V3 nemoAsr/fastconformer_ctc_multilingual_int8.onnx pyannote sileroVad whisper
+        run: dart run tool/fetch_hf_models.dart futoSwipe keywordSpotter magika miniLmL6V2 minishLab/potion8m.onnx msmarcoMiniLmL6V3 nemoAsr/fastconformer_ctc_multilingual_int8.onnx pyannote senseVoice sileroVad whisper
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: native-web
