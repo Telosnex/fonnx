@@ -23,3 +23,7 @@ example/assets/models/senseVoice/*.txt
 
 .flutter-plugins
 .flutter-plugins-dependencies
+
+# Kokoro generated artifacts (tool/kokoro/prepare_bundle.dart)
+example/assets/models/kokoro/
+/corpus/

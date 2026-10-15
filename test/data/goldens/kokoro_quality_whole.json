@@ -1,0 +1,706 @@
+{
+  "af_heart\tI read the book yesterday, and now I want to read it again.": {
+    "phonemes": "ˌI ɹˈɛd ðə bˈʊk jˈɛstəɹdˌA, ænd nˈW ˌI wˈɑnt tə ɹˈid ɪt əɡˈɛn.",
+    "transcript": "I read the book yesterday, and now I want to read it again."
+  },
+  "af_heart\tShe will lead the team, but the pipe is made of lead.": {
+    "phonemes": "ʃˌi wɪl lˈid ðə tˈim, bˌʌt ðə pˈIp ɪz mˌAd ʌv lˈid.",
+    "transcript": "She will lead the team, but the pipe is made of lead."
+  },
+  "af_heart\tThey live in a house where they record live music.": {
+    "phonemes": "ðˌA lˈɪv ɪn ɐ hˈWs wˌɛɹ ðA ɹəkˈɔɹd lˈIv mjˈuzɪk.",
+    "transcript": "They live in a house where they record live music."
+  },
+  "af_heart\tI used to think that used cars were a bad idea.": {
+    "phonemes": "ˌI jˈust tə θˈɪŋk ðæt jˈuzd kˈɑɹz wɜɹ ɐ bˈæd Idˈiə.",
+    "transcript": "I used to think that used cars were a bad idea."
+  },
+  "af_heart\tDon't worry, it's fine. We'll see; they're coming, aren't they?": {
+    "phonemes": "dˈOnt wˈɜɹi, ɪts fˈIn. wˌil sˈi; ðɛɹ kˈʌmɪŋ, ˌɑɹnt ðA?",
+    "transcript": "Don't worry it's fine. We'll see they're coming aren't they?"
+  },
+  "af_heart\tThe children's toys were in the boys' room.": {
+    "phonemes": "ðə ʧˈɪldɹᵊnz tˈYz wɜɹ ɪn ðə bˈYz ɹˈum.",
+    "transcript": "The children's toys were in the boys' room."
+  },
+  "af_heart\t\"Hello,\" she said, \"how are you?\"": {
+    "phonemes": "“həlˈO,” ʃi sˈɛd, “hˌW ɑɹ ju?”",
+    "transcript": "Hello, she said, how are you?"
+  },
+  "af_heart\tIt's a well-known fact that state-of-the-art models are expensive.": {
+    "phonemes": "ˌɪts ɐ wˌɛlnˈOn fˈækt ðæt stˈAtʌvðiˈɑɹt mˈɑdᵊlz ɑɹ ɪkspˈɛnsɪv.",
+    "transcript": "It's a well-known fact that state-of-the-art models are expensive."
+  },
+  "af_heart\tThe meeting is at 3:30 PM on March 5th, 2024.": {
+    "phonemes": "ðə mˈiTɪŋ ɪz æt ˈæksˌiz pˌiˈɛm ˌɔn mˈɑɹʧ fˈɪfθ, twˈɛnti twˈɛnti fˈɔɹ.",
+    "transcript": "The meeting is at Axies p.m. on March 5, 2024."
+  },
+  "af_heart\tOver 70% of users said yes; 15% said no.": {
+    "phonemes": "ˈOvəɹ sˈɛvənti pəɹsˈɛnt ʌv jˈuzəɹz sˈɛd jˈɛs; fˌɪftˈin pəɹsˈɛnt sˈɛd nˈO.",
+    "transcript": "Over 70% of users said yes, 15% said no."
+  },
+  "af_heart\tNASA launched the rocket, and the FBI investigated the CIA.": {
+    "phonemes": "nˈæsə lˈɔnʧt ðə ɹˈɑkət, ænd ði ˌɛfbˌiˈI ɪnvˈɛstəɡˌATᵻd ðə sˌiˌIˈA.",
+    "transcript": "NASA launched the rocket, and the FBI investigated the CIA."
+  },
+  "af_heart\tVersion 3.5 is 2x faster than version 2.0.": {
+    "phonemes": "vˈɜɹʒən θɹˈi pYnt fˈIv ɪz tˈu ˈɛks fˈæstəɹ ðən vˈɜɹʒən tˈu.",
+    "transcript": "Version 3.5 is 2x faster than version 2."
+  },
+  "af_heart\tRock & roll, salt + pepper, and 100% effort @ home.": {
+    "phonemes": "ɹˈɑk ænd ɹˈOl, sˈɔlt plˈʌs pˈɛpəɹ, ænd wˈʌn hˈʌndɹəd pəɹsˈɛnt ˈɛfəɹt æt hˈOm.",
+    "transcript": "Rock and roll, salt plus pepper, and 100% effort at home."
+  },
+  "af_heart\tThe population is 7,900,000,000 people.": {
+    "phonemes": "ðə pˌɑpjəlˈAʃən ɪz sˈɛvən bˈɪljən nˈIn hˈʌndɹəd mˈɪljᵊn pˈipᵊl.",
+    "transcript": "The population is 7,900,000,000,000 people."
+  },
+  "af_heart\tThe project is open source under the Apache 2.0 license.": {
+    "phonemes": "ðə pɹˈɑʤˌɛkt ɪz ˈOpᵊn sˈɔɹs ˈʌndəɹ ði əpˈæʧi tˈu lˈIsᵊns.",
+    "transcript": "The project is open source under the Apache 2 license."
+  },
+  "af_heart\tThe wind was too strong to wind the sail.": {
+    "phonemes": "ðə wˈɪnd wʌz tˈu stɹˈɔŋ tə wˈInd ðə sˈAl.",
+    "transcript": "The wind was too strong to wind the sail."
+  },
+  "af_heart\tMix 2 cups of flour with 1/2 cup of sugar.": {
+    "phonemes": "mˈɪks tˈu kˈʌps ʌv flˈWəɹ wɪð wˈʌn tˈu kˈʌp ʌv ʃˈʊɡəɹ.",
+    "transcript": "Mix 2 cups of flour with one two cup of sugar."
+  },
+  "af_heart\tHere's what I found: three options, ranked by cost.": {
+    "phonemes": "hˈɪɹz wˌʌt ˌI fˈWnd: θɹˈi ˈɑpʃənz, ɹˈæŋkt bI kˈɔst.",
+    "transcript": "Here's what I found, three options ranked by cost."
+  },
+  "af_heart\tIt was $0.50, then £1, then €1.01, then $1,000,000.": {
+    "phonemes": "ˌɪt wʌz fˈɪfti sˈɛnts, ðˈɛn wˈʌn pˈWnd, ðˈɛn wˈʌn jˈʊɹO ænd wˈʌn sˈɛnt, ðˈɛn wˈʌn mˈɪljᵊn dˈɑləɹz.",
+    "transcript": "It was 50 cents, then one pound, then one euro and one cent, then one million dollars."
+  },
+  "af_heart\tLakers vs. Celtics, AM or PM, at 7 AM sharp.": {
+    "phonemes": "lˈAkəɹz vˈɜɹsəs kˈɛltɪks, ˌAˈɛm ɔɹ pˌiˈɛm, æt sˈɛvən ˌAˈɛm ʃˈɑɹp.",
+    "transcript": "Lakers vs. Celtics, AM or PM, at 7 a.m. sharp."
+  },
+  "af_heart\tRead the docs. I've read them. Will you read it? She reads daily.": {
+    "phonemes": "ɹˈid ðə dˈɑks. ˌIv ɹˈɛd ðˌɛm. wˌɪl ju ɹˈid ɪt? ʃˌi ɹˈidz dˈAli.",
+    "transcript": "Read the docs, I've read them. Will you read it? She reads daily."
+  },
+  "af_heart\tPolish the Polish furniture. May I go in May?": {
+    "phonemes": "pˈOlɪʃ ðə pˈOlɪʃ fˈɜɹnəʧəɹ. mˈA ˌI ɡˌO ɪn mˈA?",
+    "transcript": "Polish the Polish furniture, May I Go in May."
+  },
+  "af_heart\tIt weighs 5kg, runs at 60fps, uses 16GB, and costs 9.99.": {
+    "phonemes": "ˌɪt wˈAz ˈɛkɡ, ɹˈʌnz æt ˈɛfs, jˈuzᵻz sˌɪkstˈin ʤˌibˈi, ænd kˈɔsts nˈIn pYnt nˈIn nˈIn.",
+    "transcript": "It weighs ek, runs at Fs, uses 16 GB, and costs 9.99."
+  },
+  "af_heart\t“Just think of what work it would make with the day and night!": {
+    "phonemes": "“ʤˈʌst θˈɪŋk ʌv wˌʌt wˈɜɹk ɪt wʊd mˌAk wɪð ðə dˈA ænd nˈIt!",
+    "transcript": "Just think of what work it would make with the day and night."
+  },
+  "af_heart\t“A cat may look at a king,” said Alice.": {
+    "phonemes": "“ɐ kˈæt mˈA lˈʊk æt ɐ kˈɪŋ,” sˈɛd ˈælɪs.",
+    "transcript": "A cat may look at a king, said Alice."
+  },
+  "af_heart\t“Hold your tongue!” added the Gryphon, before Alice could speak again.": {
+    "phonemes": "“hˈOld jʊɹ tˈʌŋ!” ˈædᵻd ðə ɡɹˈɪfən, bəfˈɔɹ ˈælɪs kʊd spˈik əɡˈɛn.",
+    "transcript": "Hold your tongue, added the griffin before Alice could speak again."
+  },
+  "af_heart\t“Pray don’t trouble yourself to say it any longer than that,” said Alice.": {
+    "phonemes": "“pɹˈA dˈOnt tɹˈʌbᵊl jəɹsˈɛlf tə sˈA ɪt ˈɛni lˈɔŋɡəɹ ðən ðˈæt,” sˈɛd ˈælɪs.",
+    "transcript": "Pray don't trouble yourself to say it any longer than that, said Alice."
+  },
+  "af_heart\t“As if _I_ would talk on such a subject!": {
+    "phonemes": "“ˌæz ɪf ˈI wʊd tˈɔk ˌɔn sˈʌʧ ɐ sˈʌbʤɛkt!",
+    "transcript": "As if I would talk on such a subject."
+  },
+  "af_heart\t“Then it ought to be Number One,” said Alice.": {
+    "phonemes": "“ðˈɛn ɪt ˈɔt tə bi nˈʌmbəɹ wˈʌn,” sˈɛd ˈælɪs.",
+    "transcript": "Then it ought to be number one, said Alice."
+  },
+  "af_heart\t“Come, it’s pleased so far,” thought Alice, and she went on.": {
+    "phonemes": "“kˈʌm, ɪts plˈizd sˌO fˈɑɹ,” θˈɔt ˈælɪs, ænd ʃi wˈɛnt ˌɔn.",
+    "transcript": "Come it's pleased so far, thought Alice and she went on."
+  },
+  "af_heart\tHush!” said the Rabbit in a low, hurried tone.": {
+    "phonemes": "hˈʌʃ!” sˈɛd ðə ɹˈæbət ɪn ɐ lˈO, hˈɜɹid tˈOn.",
+    "transcript": "Hush, said the rabbit in a low, hurried tone."
+  },
+  "af_heart\tThe Cat only grinned when it saw Alice.": {
+    "phonemes": "ðə kˈæt ˈOnli ɡɹˈɪnd wˌɛn ɪt sˈɔ ˈælɪs.",
+    "transcript": "The cat only grinned when it saw Alice."
+  },
+  "af_heart\tLet me think: was I the same when I got up this morning?": {
+    "phonemes": "lˈɛt mˌi θˈɪŋk: wʌz ˌI ðə sˈAm wˌɛn ˌI ɡɑt ˌʌp ðɪs mˈɔɹnɪŋ?",
+    "transcript": "Let me think, was I the same when I got up this morning?"
+  },
+  "af_heart\t“—so long as I get _somewhere_,” Alice added as an explanation.": {
+    "phonemes": "“—sˌO lˈɔŋ æz ˌI ɡɛt sˈʌmhwˌɛɹ,” ˈælɪs ˈædᵻd æz ɐn ˌɛksplənˈAʃən.",
+    "transcript": "So long as I get somewhere, Alice added as an explanation."
+  },
+  "af_heart\t“I don’t quite understand you,” she said, as politely as she could.": {
+    "phonemes": "“ˌI dˈOnt kwˈIt ˌʌndəɹstˈænd ju,” ʃi sˈɛd, æz pəlˈItli æz ʃi kˈʊd.",
+    "transcript": "I don't quite understand you, she said, as politely as she could."
+  },
+  "af_heart\t“Never mind!” said the King, with an air of great relief.": {
+    "phonemes": "“nˈɛvəɹ mˈInd!” sˈɛd ðə kˈɪŋ, wɪð ɐn ˈɛɹ ʌv ɡɹˈAt ɹəlˈif.",
+    "transcript": "Never mind, said the king, with an air of great relief."
+  },
+  "af_heart\t“It proves nothing of the sort!” said Alice.": {
+    "phonemes": "“ˌɪt pɹˈuvz nˈʌθɪŋ ʌv ðə sˈɔɹt!” sˈɛd ˈælɪs.",
+    "transcript": "It proves nothing of the sort, said Alice."
+  },
+  "af_heart\tShe’ll get me executed, as sure as ferrets are ferrets!": {
+    "phonemes": "ʃˌil ɡɛt mˌi ˈɛksəkjˌuTᵻd, æz ʃˈʊɹ æz fˈɛɹəts ɑɹ fˈɛɹəts!",
+    "transcript": "She'll get me executed, as sure as ferrets are ferrets."
+  },
+  "af_heart\t“I thought it would,” said the Cat, and vanished again.": {
+    "phonemes": "“ˌI θˈɔt ɪt wˈʊd,” sˈɛd ðə kˈæt, ænd vˈænɪʃt əɡˈɛn.",
+    "transcript": "I thought it would, said the cat and vanished again."
+  },
+  "af_heart\tHowever, “jury-men” would have done just as well.": {
+    "phonemes": "hWˈɛvəɹ, “ʤˈʊɹimˌɛn” wʊd hæv dˈʌn ʤˈʌst æz wˈɛl.",
+    "transcript": "However, Jury Man would have done just as well."
+  },
+  "af_heart\t“Did you say pig, or fig?” said the Cat.": {
+    "phonemes": "“dˈɪd ju sˈA pˈɪɡ, ɔɹ fˈɪɡ?” sˈɛd ðə kˈæt.",
+    "transcript": "Did you say pig or fig? said the cat."
+  },
+  "af_heart\tI said ‘What for?’” “She boxed the Queen’s ears—” the Rabbit began.": {
+    "phonemes": "ˌI sˈɛd “wˌʌt fɔɹ?”” “ʃˌi bˈɑkst ðə kwˈinz ˈɪɹz—” ðə ɹˈæbət bəɡˈæn.",
+    "transcript": "I said what for? She boxed the queen's ears, the rabbit began."
+  },
+  "af_heart\tAt last the Gryphon said to the Mock Turtle, “Drive on, old fellow!": {
+    "phonemes": "ˌæt lˈæst ðə ɡɹˈɪfən sˈɛd tə ðə mˈɑk tˈɜɹTᵊl, “dɹˈIv ˌɔn, ˈOld fˈɛlO!",
+    "transcript": "At last the griffin said to the mock turtle, Drive on, old fellow."
+  },
+  "af_heart\t“It’s all her fancy, that: they never executes nobody, you know.": {
+    "phonemes": "“ˌɪts ˈɔl hɜɹ fˈænsi, ðˈæt: ðA nˈɛvəɹ ˈɛksəkjˌuts nˈObˌɑdi, ju nˈO.",
+    "transcript": "It's all her fancy that they never executes nobody, you know."
+  },
+  "af_heart\tBut I knew I should persuade you at last.": {
+    "phonemes": "bˌʌt ˌI nˈu ˌI ʃˌʊd pəɹswˈAd ju æt lˈæst.",
+    "transcript": "But I knew I should persuade you at last."
+  },
+  "af_heart\tThey had all been very ill-used since she last saw her sister.": {
+    "phonemes": "ðˌA hæd ˈɔl bɪn vˈɛɹi ˈɪljˌuzd sˈɪns ʃi lˈæst sˈɔ hɜɹ sˈɪstəɹ.",
+    "transcript": "They had all been very ill-used since she last saw her sister."
+  },
+  "af_heart\tBingley, it is very hard to have her taken away from me.": {
+    "phonemes": "bˈɪŋli, ɪt ɪz vˈɛɹi hˈɑɹd tə hæv hɜɹ tˈAkən əwˈA fɹʌm mˌi.",
+    "transcript": "Bingley, it is very hard to have her taken away from me."
+  },
+  "af_heart\tHaggerston has our directions, and all will be completed in a week.": {
+    "phonemes": "hˈæɡəɹstən hæz ˌWəɹ dəɹˈɛkʃənz, ænd ˈɔl wɪl bi kəmplˈiTᵻd ɪn ɐ wˈik.",
+    "transcript": "Hagerston has our directions, and all will be completed in a week."
+  },
+  "af_heart\tWickham’s attention was caught; and after observing Mr.": {
+    "phonemes": "wˈɪkhˌæmz ətˈɛnʧən wʌz kˈɔt; ænd ˈæftəɹ əbzˈɜɹvɪŋ mˈɪstəɹ",
+    "transcript": "Wakam's attention was caught, and after observing Mr."
+  },
+  "af_heart\t“Come here, child,” cried her father as she appeared.": {
+    "phonemes": "“kˈʌm hˈɪɹ, ʧˈIld,” kɹˈId hɜɹ fˈɑðəɹ æz ʃi əpˈɪɹd.",
+    "transcript": "Come here, child, cried her father as she appeared."
+  },
+  "af_heart\t“That is all very proper and civil, I am sure,” said Mrs.": {
+    "phonemes": "“ðˈæt ɪz ˈɔl vˈɛɹi pɹˈɑpəɹ ænd sˈɪvəl, ˌI ɐm ʃˈʊɹ,” sˈɛd mˈɪsɪz",
+    "transcript": "That is all very proper and civil, I am sure, said Mrs."
+  },
+  "af_heart\t“Come, Darcy,” said he, “I must have you dance.": {
+    "phonemes": "“kˈʌm, dˈɑɹsi,” sˈɛd hi, “ˌI mˈʌst hæv ju dˈæns.",
+    "transcript": "Come, Darcy, said he, I must have you dance."
+  },
+  "af_heart\tDarcy to me, pray, that I should be afraid of him?": {
+    "phonemes": "dˈɑɹsi tə mˌi, pɹˈA, ðæt ˌI ʃˌʊd bi əfɹˈAd ʌv hˌɪm?",
+    "transcript": "Darcy to me pray that I should be afraid of him."
+  },
+  "af_heart\tWickham’s adieus were much more affectionate than his wife’s.": {
+    "phonemes": "wˈɪkhˌæmz ədjˈuz wɜɹ mˈʌʧ mˈɔɹ əfˈɛkʃᵊnət ðən hɪz wˈIf”ˈɛs.",
+    "transcript": "Wiccam's adieu were much more affectionate than his wife, S."
+  },
+  "af_heart\tIf she is half as sharp as her mother, she is saving enough.": {
+    "phonemes": "ˌɪf ʃi ɪz hˈæf æz ʃˈɑɹp æz hɜɹ mˈʌðəɹ, ʃi ɪz sˈAvɪŋ ɪnˈʌf.",
+    "transcript": "If she is half as sharp as her mother, she is saving enough."
+  },
+  "af_heart\t“_You_ began the evening well, Charlotte,” said Mrs.": {
+    "phonemes": "“jˌu bəɡˈæn ði ˈivnɪŋ wˈɛl, ʃˈɑɹlət,” sˈɛd mˈɪsɪz",
+    "transcript": "You began the evening well, Charlotte, said Mrs."
+  },
+  "af_heart\tWhen she was discontented, she fancied herself nervous.": {
+    "phonemes": "wˌɛn ʃi wʌz dˌɪskəntˈɛntᵻd, ʃi fˈænsid həɹsˈɛlf nˈɜɹvəs.",
+    "transcript": "When she was discontented, she fancy herself nervous."
+  },
+  "af_heart\tShe had a sister married to a Mr.": {
+    "phonemes": "ʃˌi hæd ɐ sˈɪstəɹ mˈɛɹid tə ɐ mˈɪstəɹ",
+    "transcript": "She had a sister, married to a mister."
+  },
+  "af_heart\tMiss Lucas is married and settled: and one of my own daughters.": {
+    "phonemes": "mˈɪs lˈukəz ɪz mˈɛɹid ænd sˈɛTᵊld: ænd wˈʌn ʌv mI ˈOn dˈɔTəɹz.",
+    "transcript": "Miss Lucas is married and settled, and one of my own daughters."
+  },
+  "af_heart\t“What! is he coming home, and without poor Lydia?” she cried.": {
+    "phonemes": "“wˌʌt! ɪz hi kˈʌmɪŋ hˈOm, ænd wɪðˈWt pˈʊɹ lˈɪdiə?” ʃi kɹˈId.",
+    "transcript": "What, is he coming home and without poor Lydia? she cried."
+  },
+  "af_heart\tShe found it difficult to obtain even a word from her beyond a monosyllable.": {
+    "phonemes": "ʃˌi fˈWnd ɪt dˈɪfəkəlt tʊ əbtˈAn ˈivən ɐ wˈɜɹd fɹʌm hɜɹ bijˈɑnd ɐ mˌɑnəsˈɪləbᵊl.",
+    "transcript": "She found it difficult to obtain even a word from her beyond a monosyllable."
+  },
+  "af_heart\tWhat could be more natural than his asking you again?": {
+    "phonemes": "wˌʌt kʊd bi mˈɔɹ nˈæʧəɹᵊl ðən hɪz ˈæskɪŋ ju əɡˈɛn?",
+    "transcript": "What could be more natural, than his asking you again?"
+  },
+  "af_heart\tShe could not help frequently glancing her eye at Mr.": {
+    "phonemes": "ʃˌi kʊd nˌɑt hˈɛlp fɹˈikwəntli ɡlˈænsɪŋ hɜɹ ˈI æt mˈɪstəɹ",
+    "transcript": "She could not help frequently glancing her eye at Mr."
+  },
+  "af_heart\tBingley thought her quite beautiful, and danced with her twice.": {
+    "phonemes": "bˈɪŋli θˈɔt hɜɹ kwˈIt bjˈuTəfəl, ænd dˈænst wɪð hɜɹ twˈIs.",
+    "transcript": "Bing Li thought her quite beautiful and danced with her twice."
+  },
+  "af_heart\t“I do not know when I have been more shocked,” said she.": {
+    "phonemes": "“ˌI dˈu nˌɑt nˈO wˌɛn ˌI hæv bɪn mˈɔɹ ʃˈɑkt,” sˈɛd ʃi.",
+    "transcript": "I do not know when I have been more shocked, said she."
+  },
+  "af_heart\t“Well, Monday morning came, and I was in such a fuss!": {
+    "phonemes": "“wˈɛl, mˈʌndˌA mˈɔɹnɪŋ kˈAm, ænd ˌI wʌz ɪn sˈʌʧ ɐ fˈʌs!",
+    "transcript": "Well Monday morning came, and I was in such a fuss."
+  },
+  "af_heart\tDarcy in anything, and persevered, therefore, in requiring an explanation of his two motives.": {
+    "phonemes": "dˈɑɹsi ɪn ˈɛniθˌɪŋ, ænd pˌɜɹsəvˈɪɹd, ðˈɛɹfˌɔɹ, ɪn ɹəkwˈIəɹɪŋ ɐn ˌɛksplənˈAʃən ʌv hɪz tˈu mˈOTɪvz.",
+    "transcript": "Darcy in anything, and persevered therefore in requiring an explanation of his two motives."
+  },
+  "af_heart\t“What will be his surprise,” thought she, “when he knows who they are!": {
+    "phonemes": "“wˌʌt wɪl bi hɪz səɹpɹˈIz,” θˈɔt ʃi, “wˌɛn hi nˈOz hˌu ðA ɑɹ!",
+    "transcript": "What will be his surprise, thought she, when he knows who they are."
+  },
+  "af_heart\tI wonder that the very pride of this Mr.": {
+    "phonemes": "ˌI wˈʌndəɹ ðæt ðə vˈɛɹi pɹˈId ʌv ðɪs mˈɪstəɹ",
+    "transcript": "I wonder that the very pride of this mister."
+  },
+  "af_heart\tAllowing for the common demands of the game, Mr.": {
+    "phonemes": "əlˈWɪŋ fɔɹ ðə kˈɑmən dəmˈændz ʌv ðə ɡˈAm, mˈɪstəɹ",
+    "transcript": "Allowing for the common demands of the game, Mr."
+  },
+  "af_heart\tI will not be in a hurry to believe myself his first object.": {
+    "phonemes": "ˌI wɪl nˌɑt bi ɪn ɐ hˈɜɹi tə bəlˈiv mIsˈɛlf hɪz fˈɜɹst ˈɑbʤəkt.",
+    "transcript": "I will not be in a hurry to believe myself his first object."
+  },
+  "af_heart\tI do assure you that my intimacy has not yet taught me _that_.": {
+    "phonemes": "ˌI dˈu əʃˈʊɹ ju ðæt mI ˈɪntəməsi hæz nˌɑt jˈɛt tˈɔt mˌi ðˈæt.",
+    "transcript": "I do assure you, that my intimacy has not yet taught me that."
+  },
+  "af_heart\tAnd even when it was settled that Lydia should go with Mrs.": {
+    "phonemes": "ˌænd ˈivən wˌɛn ɪt wʌz sˈɛTᵊld ðæt lˈɪdiə ʃˌʊd ɡˌO wɪð mˈɪsɪz",
+    "transcript": "And even when it was settled, that Lydia should go with Mrs."
+  },
+  "af_heart\tGardiner, looking at the picture; “it is a handsome face.": {
+    "phonemes": "ɡˈɑɹdᵊnəɹ, lˈʊkɪŋ æt ðə pˈɪkʧəɹ; “ɪt ɪz ɐ hˈænsəm fˈAs.",
+    "transcript": "Gardner looking at the picture, it is a handsome face."
+  },
+  "af_heart\tCollins, however, was not discouraged from speaking again, and Mr.": {
+    "phonemes": "kˈɑlənz, hWˈɛvəɹ, wʌz nˌɑt dəskˈɜɹɪʤd fɹʌm spˈikɪŋ əɡˈɛn, ænd mˈɪstəɹ",
+    "transcript": "Collins, however, was not discouraged from speaking again, and missed her."
+  },
+  "af_heart\tCollins to join his daughters in their walk; and Mr.": {
+    "phonemes": "kˈɑlənz tə ʤˈYn hɪz dˈɔTəɹz ɪn ðɛɹ wˈɔk; ænd mˈɪstəɹ",
+    "transcript": "Collins to join his daughters in their walk, and Mr."
+  },
+  "af_heart\tGardiner and her niece, however, did her justice, and pitied her.": {
+    "phonemes": "ɡˈɑɹdᵊnəɹ ænd hɜɹ nˈis, hWˈɛvəɹ, dˈɪd hɜɹ ʤˈʌstəs, ænd pˈɪTid hˌɜɹ.",
+    "transcript": "Gardiner and her niece, however, did her justice and pitied her."
+  },
+  "af_heart\tHer understanding excellent, her mind improved, and her manners captivating.": {
+    "phonemes": "hˌɜɹ ˌʌndəɹstˈændɪŋ ˈɛksᵊlənt, hɜɹ mˈInd ɪmpɹˈuvd, ænd hɜɹ mˈænəɹz kˈæptəvˌATɪŋ.",
+    "transcript": "Her understanding excellent, her mind improved, and her manners captivating."
+  },
+  "af_heart\tLydia left a few lines for his wife, informing her of their intention.": {
+    "phonemes": "lˈɪdiə lˈɛft ɐ fjˈu lˈInz fɔɹ hɪz wˈIf, ɪnfˈɔɹmɪŋ hɜɹ ʌv ðɛɹ ɪntˈɛnʧən.",
+    "transcript": "Lydia left a few lines for his wife, informing her of their intention."
+  },
+  "af_heart\tI do not know the particulars, but I know very well that Mr.": {
+    "phonemes": "ˌI dˈu nˌɑt nˈO ðə pəɹtˈɪkjələɹz, bˌʌt ˌI nˈO vˈɛɹi wˈɛl ðæt mˈɪstəɹ",
+    "transcript": "I do not know the particulars, but I know very well that Mr."
+  },
+  "af_heart\tMy reproofs at Hunsford could not work such a change as this.": {
+    "phonemes": "mˌI ɹəpɹˈufs æt hˈʌnsfəɹd kʊd nˌɑt wˈɜɹk sˈʌʧ ɐ ʧˈAnʤ æz ðˈɪs.",
+    "transcript": "My reproofs at Hunsford could not work such a change as this."
+  },
+  "af_heart\tYou thought the waiter must not hear, as if he cared!": {
+    "phonemes": "jˌu θˈɔt ðə wˈATəɹ mˈʌst nˌɑt hˈɪɹ, æz ɪf hi kˈɛɹd!",
+    "transcript": "You thought the waiter must not hear, as if he cared."
+  },
+  "af_heart\tWell, he certainly is very agreeable, and I give you leave to like him.": {
+    "phonemes": "wˈɛl, hi sˈɜɹtnli ɪz vˈɛɹi əɡɹˈiəbəl, ænd ˌI ɡˈɪv ju lˈiv tə lˈIk hˌɪm.",
+    "transcript": "Well, he certainly is very agreeable, and I give you leave to like him."
+  },
+  "af_heart\tDarcy, she saw, on looking up, that Colonel Fitzwilliam was meeting her.": {
+    "phonemes": "dˈɑɹsi, ʃi sˈɔ, ˌɔn lˈʊkɪŋ ˌʌp, ðæt kˈɜɹnᵊl fɪtswˈɪliəm wʌz mˈiTɪŋ hˌɜɹ.",
+    "transcript": "Darcy, she saw, on looking up, that Colonel Fitzwilli was meeting her."
+  },
+  "af_heart\tBingley, in consequence of it, before _they_ did.": {
+    "phonemes": "bˈɪŋli, ɪn kˈɑnsəkwəns ʌv ɪt, bəfˈɔɹ ðA dˈɪd.",
+    "transcript": "Bingli, in consequence of it, before they did."
+  },
+  "af_heart\tIn the intervals of her discourse with Mrs.": {
+    "phonemes": "ɪn ði ˈɪntəɹvᵊlz ʌv hɜɹ dˈɪskˌɔɹs wɪð mˈɪsɪz",
+    "transcript": "In the intervals of her discourse with Mrs."
+  },
+  "af_heart\tJane will be quite an old maid soon, I declare.": {
+    "phonemes": "ʤˈAn wɪl bi kwˈIt ɐn ˈOld mˈAd sˈun, ˌI dəklˈɛɹ.",
+    "transcript": "Jane will be quite an old maid soon, I declare."
+  },
+  "af_heart\tThe easy assurance of the young couple, indeed, was enough to provoke him.": {
+    "phonemes": "ði ˈizi əʃˈʊɹəns ʌv ðə jˈʌŋ kˈʌpᵊl, ɪndˈid, wʌz ɪnˈʌf tə pɹəvˈOk hˌɪm.",
+    "transcript": "The easy assurance of the young couple indeed, was enough to provoke him."
+  },
+  "bf_emma\tI read the book yesterday, and now I want to read it again.": {
+    "phonemes": "ˌI ɹˈɛd ðə bˈʊk jˈɛstədA, and nˈW ˌI wˈɒnt tə ɹˈiːd ɪt əɡˈɛn.",
+    "transcript": "I read the book yesterday, and now I want to read it again."
+  },
+  "bf_emma\tShe will lead the team, but the pipe is made of lead.": {
+    "phonemes": "ʃˌiː wɪl lˈiːd ðə tˈiːm, bˌʌt ðə pˈIp ɪz mˌAd ɒv lˈiːd.",
+    "transcript": "She will lead the team but the pipe is made of lead."
+  },
+  "bf_emma\tThey live in a house where they record live music.": {
+    "phonemes": "ðˌA lˈɪv ɪn ɐ hˈWs wˌɛː ðA ɹɪkˈɔːd lˈIv mjˈuːzɪk.",
+    "transcript": "They live in a house where they record live music."
+  },
+  "bf_emma\tI used to think that used cars were a bad idea.": {
+    "phonemes": "ˌI jˈuːst tə θˈɪŋk ðat jˈuːzd kˈɑːz wɜː ɐ bˈad Idˈɪə.",
+    "transcript": "I used to think that used cars were a bad idea."
+  },
+  "bf_emma\tDon't worry, it's fine. We'll see; they're coming, aren't they?": {
+    "phonemes": "dˈQnt wˈʌɹi, ɪts fˈIn. wˌiːl sˈiː; ðɛː kˈʌmɪŋ, ˌɑːnt ðA?",
+    "transcript": "Don't worry it's fine, we'll see they're coming aren't they?"
+  },
+  "bf_emma\tThe children's toys were in the boys' room.": {
+    "phonemes": "ðə ʧˈɪldɹᵊnz tˈYz wɜː ɪn ðə bˈYz ɹˈuːm.",
+    "transcript": "The children's toys were in the boys' room."
+  },
+  "bf_emma\t\"Hello,\" she said, \"how are you?\"": {
+    "phonemes": "“həlˈQ,” ʃiː sˈɛd, “hˌW ɑː juː?”",
+    "transcript": "Hello she said, how are you?"
+  },
+  "bf_emma\tIt's a well-known fact that state-of-the-art models are expensive.": {
+    "phonemes": "ˌɪts ɐ wˌɛlnˈQn fˈakt ðat stˈAtɒvðiˈɑːt mˈɒdᵊlz ɑː ɪkspˈɛnsɪv.",
+    "transcript": "It's a well-known fact that state-of-the-art models are expensive."
+  },
+  "bf_emma\tThe meeting is at 3:30 PM on March 5th, 2024.": {
+    "phonemes": "ðə mˈiːtɪŋ ɪz at ˈæksˌiz pˌiːˈɛm ˌɒn mˈɑːʧ fˈɪfθ, twˈɛnti twˈɛnti fˈɔː.",
+    "transcript": "The meeting is at Axis pm on March 5, 2024."
+  },
+  "bf_emma\tOver 70% of users said yes; 15% said no.": {
+    "phonemes": "ˈQvə sˈɛvnti pəsˈɛnt ɒv jˈuːzəz sˈɛd jˈɛs; fˌɪftˈiːn pəsˈɛnt sˈɛd nˈQ.",
+    "transcript": "Over 70% of users said yes, 15% said no."
+  },
+  "bf_emma\tNASA launched the rocket, and the FBI investigated the CIA.": {
+    "phonemes": "nˈasə lˈɔːnʧt ðə ɹˈɒkɪt, and ði ˌɛfbˌiːˈI ɪnvˈɛstɪɡAtɪd ðə sˌiːˌIˈA.",
+    "transcript": "NASA launched the rocket, and the FBI investigated the CIA."
+  },
+  "bf_emma\tVersion 3.5 is 2x faster than version 2.0.": {
+    "phonemes": "vˈɜːʃᵊn θɹˈiː pYnt fˈIv ɪz tˈuː ˈɛks fˈɑːstə ðən vˈɜːʃᵊn tˈuː.",
+    "transcript": "Version 3.5 is 2x faster than version 2."
+  },
+  "bf_emma\tRock & roll, salt + pepper, and 100% effort @ home.": {
+    "phonemes": "ɹˈɒk and ɹˈQl, sˈɒlt plˈʌs pˈɛpə, and wˈʌn hˈʌndɹəd pəsˈɛnt ˈɛfət at hˈQm.",
+    "transcript": "Rock and roll, salt plus pepper, and 100% effort at home."
+  },
+  "bf_emma\tThe population is 7,900,000,000 people.": {
+    "phonemes": "ðə pˌɒpjʊlˈAʃᵊn ɪz sˈɛvᵊn bˈɪljən nˈIn hˈʌndɹəd mˈɪljən pˈiːpᵊl.",
+    "transcript": "The population is 7,900,000,000,000 people."
+  },
+  "bf_emma\tThe project is open source under the Apache 2.0 license.": {
+    "phonemes": "ðə pɹˈɒʤɛkt ɪz ˈQpᵊn sˈɔːs ˈʌndə ði əpˈaʧi tˈuː lˈIsᵊns.",
+    "transcript": "The project is open source under the Apache 2 license."
+  },
+  "bf_emma\tThe wind was too strong to wind the sail.": {
+    "phonemes": "ðə wˈɪnd wɒz tˈuː stɹˈɒŋ tə wˈInd ðə sˈAl.",
+    "transcript": "The wind was too strong to wind the sail."
+  },
+  "bf_emma\tMix 2 cups of flour with 1/2 cup of sugar.": {
+    "phonemes": "mˈɪks tˈuː kˈʌps ɒv flˈWə wɪð wˈʌn tˈuː kˈʌp ɒv ʃˈʊɡə.",
+    "transcript": "Mix two cups of flour with one two cup of sugar."
+  },
+  "bf_emma\tHere's what I found: three options, ranked by cost.": {
+    "phonemes": "hˈɪəz wˌɒt ˌI fˈWnd: θɹˈiː ˈɒpʃᵊnz, ɹˈaŋkt bI kˈɒst.",
+    "transcript": "Here's what I found, three options ranked by cost."
+  },
+  "bf_emma\tIt was $0.50, then £1, then €1.01, then $1,000,000.": {
+    "phonemes": "ˌɪt wɒz fˈɪfti sˈɛnts, ðˈɛn wˈʌn pˈWnd, ðˈɛn wˈʌn jˈʊəɹQ and wˈʌn sˈɛnt, ðˈɛn wˈʌn mˈɪljən dˈɒləz.",
+    "transcript": "It was 50 cents, then £1, then 1 Euro and 1 cent then 1 million dollars."
+  },
+  "bf_emma\tLakers vs. Celtics, AM or PM, at 7 AM sharp.": {
+    "phonemes": "lˈAkəz vˈɜːsəs kˈɛltɪks, ˌAˈɛm ɔː pˌiːˈɛm, at sˈɛvᵊn ˌAˈɛm ʃˈɑːp.",
+    "transcript": "Lakers vs Celtics, a.m. or pm at 7am sharp"
+  },
+  "bf_emma\tRead the docs. I've read them. Will you read it? She reads daily.": {
+    "phonemes": "ɹˈiːd ðə dˈɒks. ˌIv ɹˈɛd ðˌɛm. wˌɪl juː ɹˈiːd ɪt? ʃˌiː ɹˈiːdz dˈAli.",
+    "transcript": "Read the docs I've read them. Will you read it? she reads daily."
+  },
+  "bf_emma\tPolish the Polish furniture. May I go in May?": {
+    "phonemes": "pˈQlɪʃ ðə pˈQlɪʃ fˈɜːnɪʧə. mˈA ˌI ɡˌQ ɪn mˈA?",
+    "transcript": "Polish the Polish furniture, May I Go in May."
+  },
+  "bf_emma\tIt weighs 5kg, runs at 60fps, uses 16GB, and costs 9.99.": {
+    "phonemes": "ˌɪt wˈAz ˈɛkɡ, ɹˈʌnz at ˈɛfs, jˈuːzɪz sˌɪkstˈiːn ʤˌiːbˈiː, and kˈɒsts nˈIn pYnt nˈIn nˈIn.",
+    "transcript": "It weigh, runs at Fs, uses 16 GB and costs 9.99."
+  },
+  "bf_emma\t“Just think of what work it would make with the day and night!": {
+    "phonemes": "“ʤˈʌst θˈɪŋk ɒv wˌɒt wˈɜːk ɪt wʊd mˌAk wɪð ðə dˈA and nˈIt!",
+    "transcript": "Just think of what work it would make with the day and night."
+  },
+  "bf_emma\t“A cat may look at a king,” said Alice.": {
+    "phonemes": "“ɐ kˈat mˈA lˈʊk at ɐ kˈɪŋ,” sˈɛd ˈalɪs.",
+    "transcript": "A cat may look at a king, said Alice."
+  },
+  "bf_emma\t“Hold your tongue!” added the Gryphon, before Alice could speak again.": {
+    "phonemes": "“hˈQld jɔː tˈʌŋ!” ˈadɪd ðə ɡɹˈɪfᵊn, bɪfˈɔː ˈalɪs kʊd spˈiːk əɡˈɛn.",
+    "transcript": "Hold your tongue, added the Griffin before Alice could speak again."
+  },
+  "bf_emma\t“Pray don’t trouble yourself to say it any longer than that,” said Alice.": {
+    "phonemes": "“pɹˈA dˈQnt tɹˈʌbᵊl jɔːsˈɛlf tə sˈA ɪt ˈɛni lˈɒŋɡə ðən ðˈat,” sˈɛd ˈalɪs.",
+    "transcript": "Pray don't trouble yourself to say it any longer than that, said Alice."
+  },
+  "bf_emma\t“As if _I_ would talk on such a subject!": {
+    "phonemes": "“ˌaz ɪf ˈI wʊd tˈɔːk ˌɒn sˈʌʧ ɐ sˈʌbʤɛkt!",
+    "transcript": "As if I would talk on such a subject."
+  },
+  "bf_emma\t“Then it ought to be Number One,” said Alice.": {
+    "phonemes": "“ðˈɛn ɪt ˈɔːt tə biː nˈʌmbə wˈʌn,” sˈɛd ˈalɪs.",
+    "transcript": "Then it ought to be number one, said Alice."
+  },
+  "bf_emma\t“Come, it’s pleased so far,” thought Alice, and she went on.": {
+    "phonemes": "“kˈʌm, ɪts plˈiːzd sˌQ fˈɑː,” θˈɔːt ˈalɪs, and ʃiː wˈɛnt ˌɒn.",
+    "transcript": "Come it's pleased so far, thought Alice and she went on."
+  },
+  "bf_emma\tHush!” said the Rabbit in a low, hurried tone.": {
+    "phonemes": "hˈʌʃ!” sˈɛd ðə ɹˈabɪt ɪn ɐ lˈQ, hˈʌɹɪd tˈQn.",
+    "transcript": "Hush, said the rabbit in a low, hurried tone."
+  },
+  "bf_emma\tThe Cat only grinned when it saw Alice.": {
+    "phonemes": "ðə kˈat ˈQnli ɡɹˈɪnd wˌɛn ɪt sˈɔː ˈalɪs.",
+    "transcript": "The cat only grinned when it saw Alice."
+  },
+  "bf_emma\tLet me think: was I the same when I got up this morning?": {
+    "phonemes": "lˈɛt mˌiː θˈɪŋk: wɒz ˌI ðə sˈAm wˌɛn ˌI ɡɒt ˌʌp ðɪs mˈɔːnɪŋ?",
+    "transcript": "Let me think, was I the same when I got up this morning."
+  },
+  "bf_emma\t“—so long as I get _somewhere_,” Alice added as an explanation.": {
+    "phonemes": "“—sˌQ lˈɒŋ az ˌI ɡɛt sˈʌmwɛː,” ˈalɪs ˈadɪd az ɐn ˌɛksplənˈAʃᵊn.",
+    "transcript": "So long as I get somewhere, Alice added as an explanation."
+  },
+  "bf_emma\t“I don’t quite understand you,” she said, as politely as she could.": {
+    "phonemes": "“ˌI dˈQnt kwˈIt ˌʌndəstˈand juː,” ʃiː sˈɛd, az pəlˈItli az ʃiː kˈʊd.",
+    "transcript": "I don't quite understand you, she said as politely as she could."
+  },
+  "bf_emma\t“Never mind!” said the King, with an air of great relief.": {
+    "phonemes": "“nˈɛvə mˈInd!” sˈɛd ðə kˈɪŋ, wɪð ɐn ˈɛː ɒv ɡɹˈAt ɹɪlˈiːf.",
+    "transcript": "Never mind, said the king with an air of great relief."
+  },
+  "bf_emma\t“It proves nothing of the sort!” said Alice.": {
+    "phonemes": "“ˌɪt pɹˈuːvz nˈʌθɪŋ ɒv ðə sˈɔːt!” sˈɛd ˈalɪs.",
+    "transcript": "It proves nothing of the sort, said Alice."
+  },
+  "bf_emma\tShe’ll get me executed, as sure as ferrets are ferrets!": {
+    "phonemes": "ʃˌiːl ɡɛt mˌiː ˈɛksɪkjuːtɪd, az ʃˈʊə az fˈɛɹɪts ɑː fˈɛɹɪts!",
+    "transcript": "She'll get me executed, as sure as ferrets are ferrets."
+  },
+  "bf_emma\t“I thought it would,” said the Cat, and vanished again.": {
+    "phonemes": "“ˌI θˈɔːt ɪt wˈʊd,” sˈɛd ðə kˈat, and vˈanɪʃt əɡˈɛn.",
+    "transcript": "I thought it would, said the cat and vanished again."
+  },
+  "bf_emma\tHowever, “jury-men” would have done just as well.": {
+    "phonemes": "hWˈɛvə, “ʤˈʊəɹimˌɛn” wʊd hav dˈʌn ʤˈʌst az wˈɛl.",
+    "transcript": "However, jurymen would have done just as well."
+  },
+  "bf_emma\t“Did you say pig, or fig?” said the Cat.": {
+    "phonemes": "“dˈɪd juː sˈA pˈɪɡ, ɔː fˈɪɡ?” sˈɛd ðə kˈat.",
+    "transcript": "Did you say pig or fig? said the cat."
+  },
+  "bf_emma\tI said ‘What for?’” “She boxed the Queen’s ears—” the Rabbit began.": {
+    "phonemes": "ˌI sˈɛd “wˌɒt fɔː?”” “ʃˌiː bˈɒkst ðə kwˈiːnz ˈɪəz—” ðə ɹˈabɪt bɪɡˈan.",
+    "transcript": "I said what for? She boxed the queen's ears, the rabbit began."
+  },
+  "bf_emma\tAt last the Gryphon said to the Mock Turtle, “Drive on, old fellow!": {
+    "phonemes": "ˌat lˈɑːst ðə ɡɹˈɪfᵊn sˈɛd tə ðə mˈɒk tˈɜːtᵊl, “dɹˈIv ˌɒn, ˈQld fˈɛlQ!",
+    "transcript": "At last the griffin said to the mock turtle, Drive on old fellow."
+  },
+  "bf_emma\t“It’s all her fancy, that: they never executes nobody, you know.": {
+    "phonemes": "“ˌɪts ˈɔːl hɜː fˈansi, ðˈat: ðA nˈɛvə ˈɛksɪkjuːts nˈQbədi, juː nˈQ.",
+    "transcript": "It's all her fancy that, they never executes nobody you know."
+  },
+  "bf_emma\tBut I knew I should persuade you at last.": {
+    "phonemes": "bˌʌt ˌI njˈuː ˌI ʃˌʊd pəswˈAd juː at lˈɑːst.",
+    "transcript": "But I knew I should persuade you at last."
+  },
+  "bf_emma\tThey had all been very ill-used since she last saw her sister.": {
+    "phonemes": "ðˌA had ˈɔːl biːn vˈɛɹi ɪljˈuːst sˈɪns ʃiː lˈɑːst sˈɔː hɜː sˈɪstə.",
+    "transcript": "They had all been very elused since her sister."
+  },
+  "bf_emma\tBingley, it is very hard to have her taken away from me.": {
+    "phonemes": "bˈɪŋli, ɪt ɪz vˈɛɹi hˈɑːd tə hav hɜː tˈAkᵊn əwˈA fɹɒm mˌiː.",
+    "transcript": "Bing Li, it is very hard to have her taken away from me."
+  },
+  "bf_emma\tHaggerston has our directions, and all will be completed in a week.": {
+    "phonemes": "hˈæɡəɹstən haz ˌWə dɪɹˈɛkʃᵊnz, and ˈɔːl wɪl biː kəmplˈiːtɪd ɪn ɐ wˈiːk.",
+    "transcript": "Hagerston has our directions, and all will be completed in a week."
+  },
+  "bf_emma\tWickham’s attention was caught; and after observing Mr.": {
+    "phonemes": "wˈɪkhˌæmz ətˈɛnʃᵊn wɒz kˈɔːt; and ˈɑːftə ɒbzˈɜːvɪŋ mˈɪstə",
+    "transcript": "Wickham's attention was caught, and after observing Mr."
+  },
+  "bf_emma\t“Come here, child,” cried her father as she appeared.": {
+    "phonemes": "“kˈʌm hˈɪə, ʧˈIld,” kɹˈId hɜː fˈɑːðə az ʃiː əpˈɪəd.",
+    "transcript": "Come here, child, cried her father as she appeared."
+  },
+  "bf_emma\t“That is all very proper and civil, I am sure,” said Mrs.": {
+    "phonemes": "“ðˈat ɪz ˈɔːl vˈɛɹi pɹˈɒpə and sˈɪvᵊl, ˌI ɐm ʃˈʊə,” sˈɛd mˈɪsɪz",
+    "transcript": "That is all very proper and civil I am sure, said Mrs."
+  },
+  "bf_emma\t“Come, Darcy,” said he, “I must have you dance.": {
+    "phonemes": "“kˈʌm, dˈɑɹsi,” sˈɛd hiː, “ˌI mˈʌst hav juː dˈɑːns.",
+    "transcript": "Come Darcy, said he, I must have you dance."
+  },
+  "bf_emma\tDarcy to me, pray, that I should be afraid of him?": {
+    "phonemes": "dˈɑɹsi tə mˌiː, pɹˈA, ðat ˌI ʃˌʊd biː əfɹˈAd ɒv hˌɪm?",
+    "transcript": "Darcy to me pray that I should be afraid of him."
+  },
+  "bf_emma\tWickham’s adieus were much more affectionate than his wife’s.": {
+    "phonemes": "wˈɪkhˌæmz ədjˈuːz wɜː mˈʌʧ mˈɔː əfˈɛkʃənət ðən hɪz wˈIf”ˈɛs.",
+    "transcript": "Wickham's adieu were much more affectionate than his wife, S."
+  },
+  "bf_emma\tIf she is half as sharp as her mother, she is saving enough.": {
+    "phonemes": "ˌɪf ʃiː ɪz hˈɑːf az ʃˈɑːp az hɜː mˈʌðə, ʃiː ɪz sˈAvɪŋ ɪnˈʌf.",
+    "transcript": "If she is half as sharp as her mother, she is saving enough."
+  },
+  "bf_emma\t“_You_ began the evening well, Charlotte,” said Mrs.": {
+    "phonemes": "“jˌuː bɪɡˈan ði ˈiːvnɪŋ wˈɛl, ʃˈɑːlət,” sˈɛd mˈɪsɪz",
+    "transcript": "You began the evening well, Charlotte, said Mrs."
+  },
+  "bf_emma\tWhen she was discontented, she fancied herself nervous.": {
+    "phonemes": "wˌɛn ʃiː wɒz dˌɪskəntˈɛntɪd, ʃiː fˈænsid həːsˈɛlf nˈɜːvəs.",
+    "transcript": "When she was discontented, she fancied herself nervous."
+  },
+  "bf_emma\tShe had a sister married to a Mr.": {
+    "phonemes": "ʃˌiː had ɐ sˈɪstə mˈaɹɪd tə ɐ mˈɪstə",
+    "transcript": "She had a sister married to a Mr."
+  },
+  "bf_emma\tMiss Lucas is married and settled: and one of my own daughters.": {
+    "phonemes": "mˈɪs lˈukəz ɪz mˈaɹɪd and sˈɛtᵊld: and wˈʌn ɒv mI ˈQn dˈɔːtəz.",
+    "transcript": "Miss Lucas is married and settled, and one of my own daughters."
+  },
+  "bf_emma\t“What! is he coming home, and without poor Lydia?” she cried.": {
+    "phonemes": "“wˌɒt! ɪz hiː kˈʌmɪŋ hˈQm, and wɪðˈWt pˈɔː lˈɪdɪə?” ʃiː kɹˈId.",
+    "transcript": "What is he coming home and without poor Lydia, she cried."
+  },
+  "bf_emma\tShe found it difficult to obtain even a word from her beyond a monosyllable.": {
+    "phonemes": "ʃˌiː fˈWnd ɪt dˈɪfɪklt tʊ əbtˈAn ˈiːvᵊn ɐ wˈɜːd fɹɒm hɜː bɪjˈɒnd ɐ mˈɒnQsˌɪləbᵊl.",
+    "transcript": "She found it difficult to obtain even a word from her, beyond a monosyllable."
+  },
+  "bf_emma\tWhat could be more natural than his asking you again?": {
+    "phonemes": "wˌɒt kʊd biː mˈɔː nˈaʧəɹəl ðən hɪz ˈaskɪŋ juː əɡˈɛn?",
+    "transcript": "What could be more natural than his asking you again?"
+  },
+  "bf_emma\tShe could not help frequently glancing her eye at Mr.": {
+    "phonemes": "ʃˌiː kʊd nˌɒt hˈɛlp fɹˈiːkwᵊntli ɡlˈɑːnsɪŋ hɜː ˈI at mˈɪstə",
+    "transcript": "She could not help frequently glancing her eye at Mr."
+  },
+  "bf_emma\tBingley thought her quite beautiful, and danced with her twice.": {
+    "phonemes": "bˈɪŋli θˈɔːt hɜː kwˈIt bjˈuːtɪfʊl, and dˈɑːnst wɪð hɜː twˈIs.",
+    "transcript": "Bingli thought her quite beautiful, and danced with her twice."
+  },
+  "bf_emma\t“I do not know when I have been more shocked,” said she.": {
+    "phonemes": "“ˌI dˈuː nˌɒt nˈQ wˌɛn ˌI hav biːn mˈɔː ʃˈɒkt,” sˈɛd ʃiː.",
+    "transcript": "I do not know when I have been more shocked, said she."
+  },
+  "bf_emma\t“Well, Monday morning came, and I was in such a fuss!": {
+    "phonemes": "“wˈɛl, mˈʌndA mˈɔːnɪŋ kˈAm, and ˌI wɒz ɪn sˈʌʧ ɐ fˈʌs!",
+    "transcript": "Well Monday morning came and I was in such a fuss."
+  },
+  "bf_emma\tDarcy in anything, and persevered, therefore, in requiring an explanation of his two motives.": {
+    "phonemes": "dˈɑɹsi ɪn ˈɛnɪθɪŋ, and pˌɜːsɪvˈɪəd, ðˈɛːfɔː, ɪn ɹɪkwˈIəɹɪŋ ɐn ˌɛksplənˈAʃᵊn ɒv hɪz tˈuː mˈQtɪvz.",
+    "transcript": "Darcy in anything, and persevered therefore, in requiring an explanation of his two motives."
+  },
+  "bf_emma\t“What will be his surprise,” thought she, “when he knows who they are!": {
+    "phonemes": "“wˌɒt wɪl biː hɪz səpɹˈIz,” θˈɔːt ʃiː, “wˌɛn hiː nˈQz hˌuː ðA ɑː!",
+    "transcript": "What will be his surprise, thought she, when he knows who they are."
+  },
+  "bf_emma\tI wonder that the very pride of this Mr.": {
+    "phonemes": "ˌI wˈʌndə ðat ðə vˈɛɹi pɹˈId ɒv ðɪs mˈɪstə",
+    "transcript": "I wonder that the very pride of this Mr."
+  },
+  "bf_emma\tAllowing for the common demands of the game, Mr.": {
+    "phonemes": "əlˈWɪŋ fɔː ðə kˈɒmən dɪmˈɑːndz ɒv ðə ɡˈAm, mˈɪstə",
+    "transcript": "Allowing for the common demands of the game, Mr."
+  },
+  "bf_emma\tI will not be in a hurry to believe myself his first object.": {
+    "phonemes": "ˌI wɪl nˌɒt biː ɪn ɐ hˈʌɹi tə bɪlˈiːv mIsˈɛlf hɪz fˈɜːst ˈɒbʤɛkt.",
+    "transcript": "I will not be in a hurry to believe myself his first object."
+  },
+  "bf_emma\tI do assure you that my intimacy has not yet taught me _that_.": {
+    "phonemes": "ˌI dˈuː əʃˈʊə juː ðat mI ˈɪntɪməsi haz nˌɒt jˈɛt tˈɔːt mˌiː ðˈat.",
+    "transcript": "I do assure you that my intimacy has not yet taught me that."
+  },
+  "bf_emma\tAnd even when it was settled that Lydia should go with Mrs.": {
+    "phonemes": "ˌand ˈiːvᵊn wˌɛn ɪt wɒz sˈɛtᵊld ðat lˈɪdɪə ʃˌʊd ɡˌQ wɪð mˈɪsɪz",
+    "transcript": "And even when it was settled that Lydia should go with Mrs."
+  },
+  "bf_emma\tGardiner, looking at the picture; “it is a handsome face.": {
+    "phonemes": "ɡˈɑɹdᵊnəɹ, lˈʊkɪŋ at ðə pˈɪkʧə; “ɪt ɪz ɐ hˈansəm fˈAs.",
+    "transcript": "God know looking at the picture, it is a handsome face."
+  },
+  "bf_emma\tCollins, however, was not discouraged from speaking again, and Mr.": {
+    "phonemes": "kˈɒlɪnz, hWˈɛvə, wɒz nˌɒt dɪskˈʌɹɪʤd fɹɒm spˈiːkɪŋ əɡˈɛn, and mˈɪstə",
+    "transcript": "Collins however was not discouraged from speaking again, and Mr."
+  },
+  "bf_emma\tCollins to join his daughters in their walk; and Mr.": {
+    "phonemes": "kˈɒlɪnz tə ʤˈYn hɪz dˈɔːtəz ɪn ðɛː wˈɔːk; and mˈɪstə",
+    "transcript": "Collins to join his daughters in their walk, and Mr."
+  },
+  "bf_emma\tGardiner and her niece, however, did her justice, and pitied her.": {
+    "phonemes": "ɡˈɑɹdᵊnəɹ and hɜː nˈiːs, hWˈɛvə, dˈɪd hɜː ʤˈʌstɪs, and pˈɪTid hˌɜː.",
+    "transcript": "Gardiner and her niece however, did her justice and pitied her."
+  },
+  "bf_emma\tHer understanding excellent, her mind improved, and her manners captivating.": {
+    "phonemes": "hˌɜː ˌʌndəstˈandɪŋ ˈɛksələnt, hɜː mˈInd ɪmpɹˈuːvd, and hɜː mˈanəz kˈaptɪvAtɪŋ.",
+    "transcript": "Her understanding excellent, her mind improved and her manners captivating."
+  },
+  "bf_emma\tLydia left a few lines for his wife, informing her of their intention.": {
+    "phonemes": "lˈɪdɪə lˈɛft ɐ fjˈuː lˈInz fɔː hɪz wˈIf, ɪnfˈɔːmɪŋ hɜː ɒv ðɛː ɪntˈɛnʃᵊn.",
+    "transcript": "Lydia left a few lines for his wife, informing her of their intention."
+  },
+  "bf_emma\tI do not know the particulars, but I know very well that Mr.": {
+    "phonemes": "ˌI dˈuː nˌɒt nˈQ ðə pətˈɪkjʊləz, bˌʌt ˌI nˈQ vˈɛɹi wˈɛl ðat mˈɪstə",
+    "transcript": "I do not know the particulars, but I know very well that Mr."
+  },
+  "bf_emma\tMy reproofs at Hunsford could not work such a change as this.": {
+    "phonemes": "mˌI ɹɪpɹˈuːfs at hˈʌnsfəɹd kʊd nˌɒt wˈɜːk sˈʌʧ ɐ ʧˈAnʤ az ðˈɪs.",
+    "transcript": "My reproofs at Hunsford could not work such a change as this."
+  },
+  "bf_emma\tYou thought the waiter must not hear, as if he cared!": {
+    "phonemes": "jˌuː θˈɔːt ðə wˈAtə mˈʌst nˌɒt hˈɪə, az ɪf hiː kˈɛːd!",
+    "transcript": "You thought the waiter must not hear, as if he cared."
+  },
+  "bf_emma\tWell, he certainly is very agreeable, and I give you leave to like him.": {
+    "phonemes": "wˈɛl, hiː sˈɜːtɪnli ɪz vˈɛɹi əɡɹˈiːəbᵊl, and ˌI ɡˈɪv juː lˈiːv tə lˈIk hˌɪm.",
+    "transcript": "Well he certainly is very agreeable, and I give you leave to like him."
+  },
+  "bf_emma\tDarcy, she saw, on looking up, that Colonel Fitzwilliam was meeting her.": {
+    "phonemes": "dˈɑɹsi, ʃiː sˈɔː, ˌɒn lˈʊkɪŋ ˌʌp, ðat kˈɜːnᵊl fɪtswˈɪliəm wɒz mˈiːtɪŋ hˌɜː.",
+    "transcript": "Darcy, she saw on looking up that Colonel Fitzwilliam was meeting her."
+  },
+  "bf_emma\tBingley, in consequence of it, before _they_ did.": {
+    "phonemes": "bˈɪŋli, ɪn kˈɒnsɪkwᵊns ɒv ɪt, bɪfˈɔː ðA dˈɪd.",
+    "transcript": "Bingley in consequence of it before they did."
+  },
+  "bf_emma\tIn the intervals of her discourse with Mrs.": {
+    "phonemes": "ɪn ði ˈɪntəvᵊlz ɒv hɜː dˈɪskɔːs wɪð mˈɪsɪz",
+    "transcript": "In the intervals of her discourse with Mrs."
+  },
+  "bf_emma\tJane will be quite an old maid soon, I declare.": {
+    "phonemes": "ʤˈAn wɪl biː kwˈIt ɐn ˈQld mˈAd sˈuːn, ˌI dɪklˈɛː.",
+    "transcript": "Jane will be quite an old maid soon, I declare."
+  },
+  "bf_emma\tThe easy assurance of the young couple, indeed, was enough to provoke him.": {
+    "phonemes": "ði ˈiːzi əʃˈɔːɹəns ɒv ðə jˈʌŋ kˈʌpᵊl, ɪndˈiːd, wɒz ɪnˈʌf tə pɹəvˈQk hˌɪm.",
+    "transcript": "The easurance of the young couple indeed, was enough to provoke him."
+  }
+}

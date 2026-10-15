@@ -1,0 +1,96 @@
+Hello from Dart, running on ONNX. The quick brown fox jumped over 3 lazy dogs.
+I read the book yesterday, and now I want to read it again.
+She will lead the team, but the pipe is made of lead.
+They live in a house where they record live music.
+I used to think that used cars were a bad idea.
+The meeting is at 3:30 PM on March 5th, 2024.
+It costs $5.99, or about £4.50 in the UK.
+The company raised $2.5 million in 2019, then $40 million in 2021.
+Over 70% of users said yes; 15% said no.
+Dr. Smith and Mrs. Jones met Mr. Brown at 10 a.m.
+Call me at 555-123-4567 or email jane.doe@example.com.
+Visit https://example.com/docs for more info.
+NASA launched the rocket, and the FBI investigated the CIA.
+My iPhone and MacBook are synced via iCloud.
+Don't worry, it's fine. We'll see; they're coming, aren't they?
+The children's toys were in the boys' room.
+"Hello," she said, "how are you?"
+Wait... what? Really?!
+He was born in 1984, moved in 2005, and retired in 2010.
+The 1990s were great, and the 80s were even better.
+Version 3.5 is 2x faster than version 2.0.
+The temperature dropped to -5 degrees overnight.
+Chapter 1: The Beginning (part one).
+She finished 1st, he was 2nd, and they came 23rd.
+Use the GPU for inference; the CPU is too slow.
+Kokoro is an open-weight TTS model with 82 million parameters.
+The API returns JSON, not XML.
+Rock & roll, salt + pepper, and 100% effort @ home.
+It's a well-known fact that state-of-the-art models are expensive.
+The U.S. and the E.U. signed the deal.
+I can't believe it's already 2026!
+A cat, an apple, and the end of the story.
+Are you going to the store? I am.
+Pi is approximately 3.14159.
+The population is 7,900,000,000 people.
+We need 1,234 widgets by Friday.
+Room 101 is on the 3rd floor.
+Her score was 0.5 out of 10.
+In the beginning, God created the heaven and the earth.
+Come in, sit down, and make yourself at home.
+The project is open source under the Apache 2.0 license.
+They're over there with their friends.
+Whose turn is it? It's yours.
+To be or not to be, that is the question.
+The object of the game is to object to everything.
+Please present the present to the president.
+The wind was too strong to wind the sail.
+The dove dove into the bushes.
+I object! You can't record this record.
+The bandage was wound around the wound.
+Who's ready for the 4th of July?
+At 6 o'clock, the sun sets over the hills.
+OpenAI, Google, and Anthropic build large language models.
+Raspberry Pi 5 has 8GB of RAM.
+The Flutter app runs on iOS, Android, macOS, Windows, and Linux.
+Mix 2 cups of flour with 1/2 cup of sugar.
+He scored 98 points — a new record.
+Well, um, I guess that's okay - maybe.
+John's car is faster than Mary's.
+WHY ARE YOU SHOUTING AT ME?
+The CEO's plan was approved in Q3.
+Turn left on 5th Avenue, then right on Main St.
+It was the best of times, it was the worst of times.
+Thanks! Let me know if you have any questions.
+Here's what I found: three options, ranked by cost.
+First, install the package. Second, run the tests. Third, ship it.
+The answer is 42.
+You owe me $1.
+That'll be $100.
+He paid €20 for 3 tickets.
+[Kokoro](/kˈOkəɹO/) is a TTS model.
+This is [really](+2) important, and [not](-1) a joke.
+The year [1984](#a#) was famous.
+It was $0.50, then £1, then €1.01, then $1,000,000.
+Version 1.2.3 shipped; -3.5 is negative and 0.5% is small.
+The 1990s, the '90s, the 10,000th visitor, and his 2nd attempt.
+B2B sales, iPhone15 users, COVID-19 cases, an A1 grade, a 4x4 truck, and U2 songs.
+Agent 007 ranked #1, e.g. first, i.e. the best, etc.
+Lakers vs. Celtics, AM or PM, at 7 AM sharp.
+I'm sure you'd agree y'all love rock'n'roll.
+O'Brien ate at McDonald's with an ice-cream cone in a self-driving car.
+R2-D2 parsed CamelCaseWords, snake_case names, and an HTTPServer.
+The apple, the banana, to eat, to go, used to, in it, an hour, a unicorn.
+They used it. I used to. It's used. He's been used to it.
+Read the docs. I've read them. Will you read it? She reads daily.
+Live from New York, it's Saturday Night Live!
+I'll live. He lives. We lived. A live wire.
+Polish the Polish furniture. May I go in May?
+THIS IS IMPORTANT. Do NOT touch the RED button.
+Call 911, or dial 1-800-555-0199 now.
+The ratio was 3:1 and the score 21-14.
+It weighs 5kg, runs at 60fps, uses 16GB, and costs 9.99.
+He said—quietly—that it was over… or was it?
+“Smart quotes” and ‘single ones’ too.
+The 3rd, 21st, 22nd, 101st, and 1000th items.
+In 1066, 1492, 1776, 1800, 1905, 2000, 2008, and 2100.
