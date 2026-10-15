@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "sources": [
+    {
+      "name": "onnxruntime-android-1.27.0",
+      "targets": [
+        "android-arm",
+        "android-arm64",
+        "android-x64"
+      ],
+      "url": "https://repo.maven.apache.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/1.27.0/onnxruntime-android-1.27.0.aar",
+      "sha256": "077dec5e2d821234c7dc0aba584bec8f999854b546c754cab93a90741c56fbeb"
+    },
+    {
+      "name": "fonnx-ios-arm64-ort-1.27.0-ortx-fe4e13f4",
+      "targets": [
+        "ios-arm64-iphoneos",
+        "ios-arm64-iphonesimulator"
+      ],
+      "url": "https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.27.0-ortx-fe4e13f-bpe-only-v2/fonnx-ios-arm64-ort-1.27.0-ortx-fe4e13f4.zip",
+      "sha256": "0ce93d30e305b1331a73c54b4739fde473f28270037a7d908838ff5c8b87a369"
+    },
+    {
+      "name": "onnxruntime-linux-aarch64-1.27.0",
+      "targets": [
+        "linux-arm64"
+      ],
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.27.0/onnxruntime-linux-aarch64-1.27.0.tgz",
+      "sha256": "3e4d83ac06924a32a07b6d7f91ce6f852876153fc0bbdf931bf517a140bfbe48"
+    },
+    {
+      "name": "onnxruntime-linux-x64-1.27.0",
+      "targets": [
+        "linux-x64"
+      ],
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.27.0/onnxruntime-linux-x64-1.27.0.tgz",
+      "sha256": "547e40a48f1fe73e3f812d7c88a948612c23f896b91e4e2ee1e232d7b468246f"
+    },
+    {
+      "name": "onnxruntime-osx-arm64-1.27.0",
+      "targets": [
+        "macos-arm64"
+      ],
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.27.0/onnxruntime-osx-arm64-1.27.0.tgz",
+      "sha256": "545e81c58152353acb0d1e8bd6ce4b62f830c0961f5b3acfedc790ffd76e477a"
+    },
+    {
+      "name": "onnxruntime-win-arm64-1.27.0",
+      "targets": [
+        "windows-arm64"
+      ],
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.27.0/onnxruntime-win-arm64-1.27.0.zip",
+      "sha256": "a32f2650575b3c20df462e337519fd1cc4105356130d11dba9771c6f374d952f"
+    },
+    {
+      "name": "onnxruntime-win-x64-1.27.0",
+      "targets": [
+        "windows-x64"
+      ],
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.27.0/onnxruntime-win-x64-1.27.0.zip",
+      "sha256": "c5c81710938e68079ff1a192b04897faabe4b43830d48f39f27ecd4e16138bfc"
+    }
+  ]
+}

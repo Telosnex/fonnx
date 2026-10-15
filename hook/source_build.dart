@@ -14,6 +14,40 @@ import 'upstream_ort.dart';
 /// The hook and CI use this same build: pinned upstream ORT and the
 /// package-owned session finalizer. No output goes into the package. The tiny
 /// finalizer is also prebuilt for consumer builds.
+/// Puts the upstream ORT archive of native_artifacts/sources.json where
+/// [fetchVerified] looks for it (`<cache>/<downloadSha256>/<file name>`).
+/// SourceBuild.pinnedSource fetches it, or finds it where a packager put
+/// it for a build without network (Flatpak).
+Future<void> _placePinnedArchive(
+  SourceBuild source,
+  PrebuiltFile upstream,
+  Directory cacheRoot,
+) async {
+  final spec = upstream.fetchSpec;
+  final digest = spec.downloadSha256!;
+  final pinned = source.pinnedSources
+      .where((s) => s.url == spec.url && s.sha256 == digest)
+      .firstOrNull;
+  if (pinned == null) {
+    throw StateError(
+      'native_artifacts/sources.json has no source with url ${spec.url} '
+      'and sha256 $digest (upstream_ort.json).',
+    );
+  }
+  final extracted = File(
+    p.join(cacheRoot.path, upstream.sha256, upstream.name),
+  );
+  final archive = File(p.join(cacheRoot.path, digest, pinned.fileName));
+  if (await extracted.exists() || await archive.exists()) return;
+  final from = File(
+    p.join((await source.pinnedSource(pinned.name)).path, pinned.fileName),
+  );
+  await archive.parent.create(recursive: true);
+  final partial = File('${archive.path}.$pid.pinned');
+  await from.copy(partial.path);
+  await partial.rename(archive.path);
+}
+
 Future<void> buildFromSource(
   BuildInput input,
   BuildOutputBuilder output,
@@ -33,6 +67,7 @@ Future<void> buildFromSource(
   final cacheRoot = cache == null
       ? defaultCacheRoot()
       : Directory.fromUri(cache);
+  await _placePinnedArchive(source, upstream, cacheRoot);
   final ort = await fetchVerified(
     upstream.fetchSpec,
     File(p.join(cacheRoot.path, upstream.sha256, upstream.name)),
@@ -296,9 +331,11 @@ Future<void> _checkLinuxBaseline(
   final versions = await _run('readelf', ['--version-info', library.path], log);
   for (final (prefix, ceiling) in [('GLIBC', '2.35'), ('GLIBCXX', '3.4.30')]) {
     final required =
-        RegExp(
-            '${prefix}_([0-9]+(?:\\.[0-9]+)*)',
-          ).allMatches(versions).map((m) => m.group(1)!).toSet().toList()
+        RegExp('${prefix}_([0-9]+(?:\\.[0-9]+)*)')
+            .allMatches(versions)
+            .map((m) => m.group(1)!)
+            .toSet()
+            .toList()
           ..sort(_compareVersions);
     if (required.isEmpty) continue;
     final maximum = required.last;

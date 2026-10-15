@@ -21,7 +21,7 @@ dependencies:
   native_prebuilt:
     git:
       url: https://github.com/Telosnex/native_prebuilt.git
-      ref: bf489921cbd79f96a41d3ac08d88df6cdab97366
+      ref: dfe2a5bfeb95426e87f6243cab14f4affd879b38
   path: ^1.9.1
 
 dev_dependencies:
