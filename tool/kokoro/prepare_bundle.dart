@@ -144,7 +144,7 @@ for name in ['us_gold.json','us_silver.json','gb_gold.json','gb_silver.json']:
   if (record) {
     // This is a staging lock, not the published ADR 001 runtime catalog.
     lockFile.writeAsStringSync(
-      '${const JsonEncoder.withIndent('  ').convert({'status': 'unpublished; license and speech-quality release reviews pending', 'kokoroRevision': kokoroRevision, 'fallbackRevision': fallbackRevision, 'moonshineRevision': '234f60faa0eb388b01cdf7e60aca232af37aefda', 'files': files})}\n',
+      '${const JsonEncoder.withIndent('  ').convert({'status': 'published to Hugging Face telosnex/fonnx; pins in native_artifacts/manifest.json', 'kokoroRevision': kokoroRevision, 'fallbackRevision': fallbackRevision, 'moonshineRevision': '234f60faa0eb388b01cdf7e60aca232af37aefda', 'files': files})}\n',
     );
   }
   stdout.writeln(

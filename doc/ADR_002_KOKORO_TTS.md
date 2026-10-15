@@ -385,9 +385,14 @@ Add `--dart-define=KOKORO_QUALITY_UPDATE=true` to make the whole-sentence
 transcripts again after a model, voice, phoneme, or recognizer change.
 
 Web inference, the cross-platform hash change, five-platform/device checks,
-full voice listening checks, final license review, and ADR 001 publication are
-not complete. The example preview plays individual WAV chunks; applications
+and full voice listening checks are not complete. The example preview plays individual WAV chunks; applications
 need a continuous PCM player for gapless output.
+
+**Publication:** the 38 bundle files (two model stages, 28 English voices,
+dictionaries, fallback model and spaCy data; 214 MB) are on Hugging Face
+`telosnex/fonnx` at commit `4322a6e7ef82e0e483ad795466f60e370701cba0`, pinned
+in `native_artifacts/manifest.json`. The model card lists the source and
+license of each file. All are Apache-2.0 except the spaCy data (MIT).
 
 **Existing repository license:** the root `LICENSE` identifies fonnx itself as
 GPL version 2. Replacing the LGPL-derived number converter does not change that

@@ -1,8 +1,10 @@
 # Kokoro English development tools
 
 Native streaming is implemented and passes the speech-quality gate in ADR 002.
-Web inference is not implemented. Model files remain local and
-are ignored by Git; `artifacts.json` records staging hashes, not published URLs.
+Web inference is not implemented. The bundle files are on Hugging Face and
+pinned in `native_artifacts/manifest.json` (`lib/runtime_models.dart` maps
+`kokoro/...` paths to their names). `artifacts.json` records the staging hashes
+that `prepare_bundle.dart` checks.
 
 ## Prepare local artifacts
 
@@ -68,17 +70,16 @@ flutter test test/models/kokoro_chunking_test.dart \
   test/models/misaki_en_test.dart test/models/misaki_gb_test.dart
 ```
 
-The opt-in release test currently fails the ADR's one-percentage-point WER
-limit. It writes transcripts to `build/kokoro/quality.json`:
+The opt-in release test checks the ADR's one-percentage-point WER limit with
+Parakeet TDT v3. It writes transcripts to `build/kokoro/quality.json`:
 
 ```
 flutter test test/models/kokoro_quality_test.dart \
   --dart-define=KOKORO_RELEASE_QUALITY=true
 ```
 
-It needs the repository's Whisper tiny artifacts too. Do not use the default
-skip as evidence that the release gate passed. Review this test, voice listening,
-licenses, device results, and artifact publication before landing a release.
+It needs the repository's Parakeet artifacts too. Do not use the default skip
+as evidence that the release gate passed.
 
 The existing root `LICENSE` identifies fonnx as GPLv2. No repository relicensing
 was done here. Resolve that with the owner before claiming the complete package

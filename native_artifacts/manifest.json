@@ -63,6 +63,272 @@
       "bytes": 163380,
       "commit": "4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979"
     },
+    "example/assets/models/kokoro/misaki/g2p_fallback_en_us.json": {
+      "path": "example/assets/models/kokoro/misaki/g2p_fallback_en_us.json",
+      "name": "kokoro_g2p_fallback_en_us.json",
+      "sha256": "f00d62722850b438f0712f285c44ae2a47b604e24ed508546cb9690e26f0ee5d",
+      "bytes": 305,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/misaki/g2p_fallback_en_us.onnx": {
+      "path": "example/assets/models/kokoro/misaki/g2p_fallback_en_us.onnx",
+      "name": "kokoro_g2p_fallback_en_us.onnx",
+      "sha256": "afaa95241151346059b5e56d8bf4eb4c883a5c7594833f7f81ed528454e016c3",
+      "bytes": 3101005,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/misaki/gb_gold.json": {
+      "path": "example/assets/models/kokoro/misaki/gb_gold.json",
+      "name": "kokoro_misaki_gb_gold.json",
+      "sha256": "29e62f4b60261c88f7f3c2c7811ca3825978948090b72d2b27d565b729282f71",
+      "bytes": 2838552,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/misaki/gb_silver.json": {
+      "path": "example/assets/models/kokoro/misaki/gb_silver.json",
+      "name": "kokoro_misaki_gb_silver.json",
+      "sha256": "48131e2d92ccc41655f4543e87e0f938e71463eb5a54be7f0693bb712ebb6bce",
+      "bytes": 3663898,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/misaki/us_gold.json": {
+      "path": "example/assets/models/kokoro/misaki/us_gold.json",
+      "name": "kokoro_misaki_us_gold.json",
+      "sha256": "dc414872a49a28ae6c141463d502fd945f3b2fde040484fdc47d00cc4612686f",
+      "bytes": 3000469,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/misaki/us_silver.json": {
+      "path": "example/assets/models/kokoro/misaki/us_silver.json",
+      "name": "kokoro_misaki_us_silver.json",
+      "sha256": "de8f67be911bb6c659187b4a65fd966b6a30e56350e0f790d763210b053ac475",
+      "bytes": 3099517,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/onnx/stages/decoder.onnx": {
+      "path": "example/assets/models/kokoro/onnx/stages/decoder.onnx",
+      "name": "kokoro_decoder.onnx",
+      "sha256": "c1a4b4071773752db6f6f54def1f80d9a8bf81bc840ad03f186175bd13fec4e7",
+      "bytes": 99511063,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/onnx/stages/prosody.onnx": {
+      "path": "example/assets/models/kokoro/onnx/stages/prosody.onnx",
+      "name": "kokoro_prosody.onnx",
+      "sha256": "8f046e7144d1327ee2800ae19b6678083101e6b950271d78a1fb570d0b601026",
+      "bytes": 77962643,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/spacy/en_core_web_sm.json": {
+      "path": "example/assets/models/kokoro/spacy/en_core_web_sm.json",
+      "name": "kokoro_spacy_en_core_web_sm.json",
+      "sha256": "c49e8004f581804a021ab2e78bdde8a4af526f15aecfb2fe961ec22959bb3620",
+      "bytes": 231990,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/spacy/en_core_web_sm_tagger.bin": {
+      "path": "example/assets/models/kokoro/spacy/en_core_web_sm_tagger.bin",
+      "name": "kokoro_spacy_en_core_web_sm_tagger.bin",
+      "sha256": "0f884fe5841b110c7457a3dd46c78236ad91dc6d028d4ebc37bb9f4c93c22bf3",
+      "bytes": 6282056,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/af_alloy.bin": {
+      "path": "example/assets/models/kokoro/voices/af_alloy.bin",
+      "name": "kokoro_voice_af_alloy.bin",
+      "sha256": "c4a6b876047fd7fb472edf4ebd63cfac7c3b958a7cae7c106e8f038ca6308c45",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/af_aoede.bin": {
+      "path": "example/assets/models/kokoro/voices/af_aoede.bin",
+      "name": "kokoro_voice_af_aoede.bin",
+      "sha256": "4a004c33430762e2461eedb2013fad808ef4ab3121f5300f554476caf58d8361",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/af_bella.bin": {
+      "path": "example/assets/models/kokoro/voices/af_bella.bin",
+      "name": "kokoro_voice_af_bella.bin",
+      "sha256": "f69d836209b78eb8c66e75e3cda491e26ea838a3674257e9d4e5703cbaf55c8b",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/af_heart.bin": {
+      "path": "example/assets/models/kokoro/voices/af_heart.bin",
+      "name": "kokoro_voice_af_heart.bin",
+      "sha256": "d583ccff3cdca2f7fae535cb998ac07e9fcb90f09737b9a41fa2734ec44a8f0b",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/af_jessica.bin": {
+      "path": "example/assets/models/kokoro/voices/af_jessica.bin",
+      "name": "kokoro_voice_af_jessica.bin",
+      "sha256": "a240a5e3c15b43563d6e923bdca8ef5613a23471d9b77653694012435df23bd8",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/af_kore.bin": {
+      "path": "example/assets/models/kokoro/voices/af_kore.bin",
+      "name": "kokoro_voice_af_kore.bin",
+      "sha256": "9be5221b6a941c04b561959b8ff0b06e809444dcc4ab7e75a7b23606f691819e",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/af_nicole.bin": {
+      "path": "example/assets/models/kokoro/voices/af_nicole.bin",
+      "name": "kokoro_voice_af_nicole.bin",
+      "sha256": "cd2191ab31b914ed7b318416b0e4440fdf392ddad9106a060819aa600a64f59a",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/af_nova.bin": {
+      "path": "example/assets/models/kokoro/voices/af_nova.bin",
+      "name": "kokoro_voice_af_nova.bin",
+      "sha256": "18778272caa0d0eebaea251c35fd635f038434f9eee5e691d02a174bd328414f",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/af_river.bin": {
+      "path": "example/assets/models/kokoro/voices/af_river.bin",
+      "name": "kokoro_voice_af_river.bin",
+      "sha256": "00a2bcf82b1d86e8f19902ede58c65ccf6c0e43b44b7d74fad54e5d8933c9c30",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/af_sarah.bin": {
+      "path": "example/assets/models/kokoro/voices/af_sarah.bin",
+      "name": "kokoro_voice_af_sarah.bin",
+      "sha256": "4409fbc125afabacc615d94db5398d847006a737b0247d6892b7a9a0007a2f0a",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/af_sky.bin": {
+      "path": "example/assets/models/kokoro/voices/af_sky.bin",
+      "name": "kokoro_voice_af_sky.bin",
+      "sha256": "4435255c9744f3f31659e0d714ab7689bf65d9e77ec1cce060f083912614f0b9",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/am_adam.bin": {
+      "path": "example/assets/models/kokoro/voices/am_adam.bin",
+      "name": "kokoro_voice_am_adam.bin",
+      "sha256": "162b035ed91cfc48b6046982184c645f72edcdd1b82843347f605d7bf7b15716",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/am_echo.bin": {
+      "path": "example/assets/models/kokoro/voices/am_echo.bin",
+      "name": "kokoro_voice_am_echo.bin",
+      "sha256": "3968b92c3c4cd1c4416dbded36c13eaa388a90d5788d02a13e4d781f5f8cf3c3",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/am_eric.bin": {
+      "path": "example/assets/models/kokoro/voices/am_eric.bin",
+      "name": "kokoro_voice_am_eric.bin",
+      "sha256": "e8b5be17edd1e3636901ce7598baafe2dc8dd8ff707a0c23bf9e461add7e2832",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/am_fenrir.bin": {
+      "path": "example/assets/models/kokoro/voices/am_fenrir.bin",
+      "name": "kokoro_voice_am_fenrir.bin",
+      "sha256": "c27989f741f7ee34d273a39d8a595cc0837d35f5ced9a29b7cc162614616df43",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/am_liam.bin": {
+      "path": "example/assets/models/kokoro/voices/am_liam.bin",
+      "name": "kokoro_voice_am_liam.bin",
+      "sha256": "52403be32fd047c6a44517cb0bcd6b134f2a18baa73e70ef41651e0eab921ade",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/am_michael.bin": {
+      "path": "example/assets/models/kokoro/voices/am_michael.bin",
+      "name": "kokoro_voice_am_michael.bin",
+      "sha256": "1d1f21dd8da39c30705cd4c75d039d265e9bc4a2a93ed09bc9e1b1225eb95ba1",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/am_onyx.bin": {
+      "path": "example/assets/models/kokoro/voices/am_onyx.bin",
+      "name": "kokoro_voice_am_onyx.bin",
+      "sha256": "da5d135b424164916d75a68ffb4c2abce3d7d5ccc82dd1ee6cf447ce286145e6",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/am_puck.bin": {
+      "path": "example/assets/models/kokoro/voices/am_puck.bin",
+      "name": "kokoro_voice_am_puck.bin",
+      "sha256": "fcf73c989033e9233e0b98713eca600c8c74dcc1614b37009d5450ff4a2274a0",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/am_santa.bin": {
+      "path": "example/assets/models/kokoro/voices/am_santa.bin",
+      "name": "kokoro_voice_am_santa.bin",
+      "sha256": "61150cf726ab6c5ed7a99f90a304f91f5a72c00c592e89ec94e5df11c319227a",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/bf_alice.bin": {
+      "path": "example/assets/models/kokoro/voices/bf_alice.bin",
+      "name": "kokoro_voice_bf_alice.bin",
+      "sha256": "08afa6ba24da61ea5e8efa139e5aadc938d83f0a6da5a900adaf763ac1da5573",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/bf_emma.bin": {
+      "path": "example/assets/models/kokoro/voices/bf_emma.bin",
+      "name": "kokoro_voice_bf_emma.bin",
+      "sha256": "669fe0647f9dd04fcab92f1439a40eeb4c8b4ab1f82e4996fe3d918ce4a63b73",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/bf_isabella.bin": {
+      "path": "example/assets/models/kokoro/voices/bf_isabella.bin",
+      "name": "kokoro_voice_bf_isabella.bin",
+      "sha256": "3754352c4aaa46d17f27654ab7518d65b62ad6163a0f55a5f4330c2da2c4e94f",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/bf_lily.bin": {
+      "path": "example/assets/models/kokoro/voices/bf_lily.bin",
+      "name": "kokoro_voice_bf_lily.bin",
+      "sha256": "5e0ee32ebe64a467124976b14e69590746f1c4ce41a12b587a50c862edfea335",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/bm_daniel.bin": {
+      "path": "example/assets/models/kokoro/voices/bm_daniel.bin",
+      "name": "kokoro_voice_bm_daniel.bin",
+      "sha256": "6b3194bbceffb746733cbc22c8f593dd44e401a71d53895a2dca891bc595a1e8",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/bm_fable.bin": {
+      "path": "example/assets/models/kokoro/voices/bm_fable.bin",
+      "name": "kokoro_voice_bm_fable.bin",
+      "sha256": "f889083196807b4adb15e9204252165f503b8d33d3982e681c52443c49d798f1",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/bm_george.bin": {
+      "path": "example/assets/models/kokoro/voices/bm_george.bin",
+      "name": "kokoro_voice_bm_george.bin",
+      "sha256": "c4b235a4c1f2cd3b939fed08b899ce9385638b763f7b73a59616c4fc9bd6c9bc",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
+    "example/assets/models/kokoro/voices/bm_lewis.bin": {
+      "path": "example/assets/models/kokoro/voices/bm_lewis.bin",
+      "name": "kokoro_voice_bm_lewis.bin",
+      "sha256": "b8f671cef828c30e66fdf0b0756a76bba58f6bb3398cbbf27058642acbcedb97",
+      "bytes": 522240,
+      "commit": "4322a6e7ef82e0e483ad795466f60e370701cba0"
+    },
     "example/assets/models/magika/magika.onnx": {
       "path": "example/assets/models/magika/magika.onnx",
       "name": "magika.onnx",

@@ -23,6 +23,11 @@ Each file has the license of its source model.
 | `decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx`, `encoder-…`, `joiner-…` | [sherpa-onnx keyword spotter](https://github.com/k2-fsa/sherpa-onnx/releases/tag/kws-models), GigaSpeech Zipformer 3M | Apache-2.0 |
 | `fastconformer_ctc_multilingual_int8.onnx` | [NVIDIA stt_multilingual_fastconformer_hybrid_large_pc](https://catalog.ngc.nvidia.com/orgs/nvidia/teams/nemo/models/stt_multilingual_fastconformer_hybrid_large_pc), CTC branch, int8 export of [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx/releases/tag/asr-models) | CC-BY-4.0 |
 | `futo_swipe_*.onnx` | Derived from FUTO Swipe (see below) | FUTO Model Weights License 1.0 |
+| `kokoro_prosody.onnx`, `kokoro_decoder.onnx` | [hexgrad/Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M) v1.0, uint8 export of [onnx-community/Kokoro-82M-v1.0-ONNX](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX) at `1939ad2a8e416c0acfeecc08a694d14ef25f2231`, split in two by fonnx | Apache-2.0 |
+| `kokoro_voice_*.bin` | The 28 English voices of the same onnx-community revision, unchanged | Apache-2.0 |
+| `kokoro_misaki_{us,gb}_{gold,silver}.json` | Pronunciation dictionaries of [hexgrad/misaki](https://github.com/hexgrad/misaki) 0.9.4, unchanged | Apache-2.0 |
+| `kokoro_g2p_fallback_en_us.onnx`, `….json` | [PeterReid/graphemes_to_phonemes_en_us](https://huggingface.co/PeterReid/graphemes_to_phonemes_en_us) at `a5631b285d18d59483c32c0c3379cb9fac924f4b`, ONNX export by fonnx | Apache-2.0 |
+| `kokoro_spacy_en_core_web_sm.json`, `…_tagger.bin` | [spaCy en_core_web_sm](https://github.com/explosion/spacy-models) 3.8.0, tokenizer rules and tagger weights converted by fonnx | MIT |
 | `magika.onnx` | [Google Magika](https://github.com/google/magika) | Apache-2.0 |
 | `miniLmL6V2.onnx` | [sentence-transformers/all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) | Apache-2.0 |
 | `msmarcoMiniLmL6V3.onnx` | [sentence-transformers/msmarco-MiniLM-L-6-v3](https://huggingface.co/sentence-transformers/msmarco-MiniLM-L-6-v3) | Apache-2.0 |
@@ -46,6 +51,11 @@ and `whisper_v3_turbo_olive.onnx` are files of earlier fonnx versions.
 The NeMo ASR files are exports of NVIDIA models, used under
 [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/). fonnx did not
 change the files of the sherpa-onnx exports.
+
+The Kokoro files are from Kokoro-82M by hexgrad, used under Apache-2.0.
+fonnx split the onnx-community export into a prosody model and a decoder
+model; the weights are unchanged. The misaki dictionaries, the fallback
+model and the spaCy data are used under their licenses above.
 
 The SenseVoice files are the sherpa-onnx export of SenseVoice Small by
 Tongyi Lab, Alibaba, unchanged, used under the FunASR Model License.

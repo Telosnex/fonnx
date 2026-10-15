@@ -1,5 +1,5 @@
 {
-  "status": "unpublished; license and speech-quality release reviews pending",
+  "status": "published to Hugging Face telosnex/fonnx; pins in native_artifacts/manifest.json",
   "kokoroRevision": "1939ad2a8e416c0acfeecc08a694d14ef25f2231",
   "fallbackRevision": "a5631b285d18d59483c32c0c3379cb9fac924f4b",
   "moonshineRevision": "234f60faa0eb388b01cdf7e60aca232af37aefda",
