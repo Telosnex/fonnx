@@ -2,7 +2,10 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'kokoro_chunking.dart';
 import 'kokoro_sentence_splitter.dart';
-import 'kokoro_none.dart' if (dart.library.io) 'kokoro_native.dart' as platform;
+import 'kokoro_none.dart'
+    if (dart.library.io) 'kokoro_native.dart'
+    if (dart.library.js_interop) 'kokoro_web.dart'
+    as platform;
 
 export 'kokoro_chunking.dart' show KokoroChunkPolicy;
 
@@ -14,7 +17,8 @@ class KokoroVoice {
   final KokoroLanguage language;
 }
 
-/// Local paths to verified artifacts. No model is downloaded by the engine.
+/// Locations of verified artifacts: local paths on native, URLs on web. No
+/// model is downloaded by the engine.
 class KokoroBundle {
   KokoroBundle({
     required this.prosodyModel,
@@ -94,8 +98,10 @@ class KokoroChunk {
   int get sampleRate => 24000;
 }
 
-/// English-only Kokoro. Native work runs on one long-lived worker isolate.
-/// Web currently throws UnsupportedError rather than blocking the UI thread.
+/// English-only Kokoro. Phonemes, chunking and both model stages run on one
+/// long-lived worker: an isolate on native, a Web Worker on web.
+///
+/// On web, bundle locations are URLs, relative to the document base URI.
 abstract class Kokoro {
   static Future<Kokoro> load(
     KokoroBundle bundle, {

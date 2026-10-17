@@ -1,6 +1,7 @@
 /// Writes the generated FONNX web runtime files to --out: the ONNX Runtime
 /// Web files of web_build/onnxruntime_web.json, extracted from the pinned npm
-/// tarball. The tarball and each file are checked by SHA-256.
+/// tarball, and the Kokoro Worker engine, compiled from Dart. The tarball and
+/// each ORT file are checked by SHA-256.
 ///
 /// The release workflow runs it (native_prebuilt ADR 002 D10). For a local
 /// copy in lib/web/:
@@ -51,7 +52,7 @@ Future<void> main(List<String> args) async {
   };
 
   if (await out.exists() && await out.list().isEmpty == false) {
-    final names = pin.files.map((f) => f.name).toSet();
+    final names = {...pin.files.map((f) => f.name), _kokoroEngine};
     await for (final entity in out.list()) {
       if (!names.contains(entity.uri.pathSegments.lastWhere((s) => s != ''))) {
         _exit('--out holds other files: ${entity.path}', 1);
@@ -98,6 +99,35 @@ Future<void> main(List<String> args) async {
       await source.copy('${out.path}/${file.name}');
       stdout.writeln('  $hash  ${file.name}');
     }
+  } finally {
+    await work.delete(recursive: true);
+  }
+  await _compileKokoroEngine(root, out);
+}
+
+/// The Dart program of the Kokoro Worker (fonnx ADR 002 D10).
+const _kokoroEngine = 'kokoro_engine.dart.js';
+
+Future<void> _compileKokoroEngine(Directory root, Directory out) async {
+  final work = await Directory.systemTemp.createTemp('fonnx_kokoro_engine_');
+  try {
+    final compiled = '${work.path}/$_kokoroEngine';
+    final result = await Process.run(Platform.resolvedExecutable, [
+      'compile',
+      'js',
+      '-O2',
+      '--no-source-maps',
+      'lib/models/kokoro/web/kokoro_engine_worker.dart',
+      '-o',
+      compiled,
+    ], workingDirectory: root.path);
+    if (result.exitCode != 0) {
+      _exit('dart compile js failed:\n${result.stdout}${result.stderr}', 1);
+    }
+    final file = await File(compiled).copy('${out.path}/$_kokoroEngine');
+    stdout.writeln(
+      '  ${await sha256.bind(file.openRead()).first}  $_kokoroEngine',
+    );
   } finally {
     await work.delete(recursive: true);
   }

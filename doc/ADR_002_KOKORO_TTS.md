@@ -29,7 +29,7 @@ chunking algorithm, ported to Dart. No non-English phonemizer is in scope.
 | R3 | Model and phoneme work never runs on the UI isolate. | platform | hard |
 | R4 | American and British English pass reference and speech tests. | assumed | hard |
 | R5 | Support macOS, Windows, Linux, iOS, and Android. | assumed | hard |
-| R6 | Support web. | assumed | soft |
+| R6 | Support web. fonnx offers every model on every platform. | founder | hard |
 | R7 | Publish artifacts under ADR 001, with SHA-256 pins in Git. | ADR001 | hard |
 | R8 | Record and ship required licenses and attribution. | license | hard |
 | R9 | American English synthesis exceeds real-time speed on a Raspberry Pi 5. | assumed | soft |
@@ -100,6 +100,11 @@ D10: Use a long-lived native isolate or web worker. Keep model sessions and
      discards queued text and results for that request. Bound the output
      queue so a paused consumer cannot cause unbounded audio generation.
      The voice sets the language: each bundle voice has one.
+     On web, the worker engine is the same Dart code, compiled to
+     JavaScript. tool/build_web.dart writes it as the generated web file
+     kokoro_engine.dart.js. ORT Web is asynchronous, so the fallback model
+     cannot answer misaki synchronously. The engine runs misaki again with
+     the fallback words that it computed, until misaki asks for no new word.
      Because: R2, R3
      Instead of: a language argument. A British voice with American
      phonemes, or the reverse, has no use.
@@ -171,6 +176,8 @@ I5: Whole fp32 inference matches Python onnxruntime within 2e-3 per sample.
 I6: Native sessions and inference run outside the UI isolate.
     If violated: speech generation blocks the UI.
     Pinned by: worker lifecycle and session-factory tests.
+    On web, sessions, phonemes, and chunking run in one Web Worker.
+    Pinned by: test/models/kokoro_web_test.dart (timer ticks on the page).
 
 I7: With D9's deviations off, frame boundaries, decode spans, and emitted
     sample counts match the pinned Moonshine implementation. The shipped
@@ -234,6 +241,21 @@ Defaults from that revision:
   with `am_michael`, `bf_emma`, and `am_onyx`. With a guard on the start
   side only, `am_michael` put the first seam in its longer leading silence
   in 20 of 35 sentences.
+- Deviation: each decode window holds at least 40 speech frames (1 s). The
+  window grows, alternately before and after, past the 8 padding frames;
+  the kept range does not change. The decoder normalizes over its whole
+  input, so a slice with little speech decodes its pauses as loud noise. In
+  "Mr. Darcy paid $5.99 for three tickets." (`bf_emma`), the last slice is
+  "ts" and a 0.7 s pause; it decoded as a breath-like noise at -65 to
+  -75 dB, where one whole-sentence decode is near silence. Against
+  whole-sentence decodes of 10 sentences (`bf_emma`, `af_heart`), the worst
+  20 ms excess fell from 56 dB to 17 dB. 40 padding frames per side reach
+  23 dB. Total decode time rose 14% (4.9 s to 5.6 s); 40 padding frames
+  cost 55%. First audio rose from about 110 ms to 155 ms on an M-series
+  Mac. The growth limit is unchanged: the minimum window is a fixed cost
+  per slice, so slower growth cannot pay for it. A device whose decode
+  costs more than about 0.5 s per second of audio can play the first slice
+  before the second is ready. A longer first slice is the remedy there.
 - Kokoro: 40 frames/s, 600 samples/frame.
 - Port the sustainable-growth calculation, including padding cost.
 - Sentence splitting: English abbreviation rules, colon splitting enabled,
@@ -335,7 +357,8 @@ NG5: Changes to model training or architecture.
 
 ### B. Open questions for the founder
 
-1. Is web required for the first release?
+1. Is web required for the first release? Answered: yes. fonnx offers every
+   model on every platform (R6).
 2. Is the Pi 5 the right minimum device, or is a specific phone the target?
 
 ### C. Revision history
@@ -344,8 +367,24 @@ NG5: Changes to model training or architecture.
 - Draft revision: The founder limited this release to English and selected
   Moonshine's chunking. Removed non-English implementation phases. Pinned
   the Moonshine source and added split-model and stream release gates.
+- Web revision: R6 is hard. The founder requires every fonnx model on every
+  platform. Added the web Worker design to D10 and I6.
 
 ### D. Implementation checkpoint — native English
+
+**Web, phase 2 steps 1 and 2 (local, not released):** spaCy hashes use two
+32-bit halves (`spacy_hash.dart`). Tokens, tags, and US and GB phonemes match
+Python in Chrome (`test/models/misaki_web_test.dart`, every 10th sentence).
+The Kokoro web Worker passes `test/models/kokoro_web_test.dart`.
+Step 3: the chunking fixtures (`test/models/kokoro_chunking_test.dart`) pass
+in Chrome. Web and native run the same Dart engine, so the quality gate runs
+on native only; the web test checks that web audio matches native (envelope
+correlation 0.996 or more). Phonemes,
+including fallback-model words, are equal to native. With a fixed span plan,
+sample counts are equal and loudness envelopes correlate at 0.99 or more.
+The native engine uses the same Dart engine code and passes the release
+quality gate. `kokoro_engine.dart.js` is a generated file. It reaches apps
+only after the next native release.
 
 Implemented locally:
 
@@ -366,7 +405,8 @@ sentences (1,240 words per voice), Whisper tiny measured +1.6 points
 The gate now uses Parakeet on 88 sentences (945 words per voice): the 8
 original regression sentences, then a stride through reference sentences of
 8 to 14 words, which have the most seams per second. Results: `af_heart`
-6.46% whole, 7.20% streamed (+0.74); `bf_emma` 6.67%, 6.98% (+0.32).
+6.46% whole, 7.41% streamed (+0.95); `bf_emma` 6.67%, 6.46% (-0.21). Before
+the 40-speech-frame decode window, the same run gave +0.74 and +0.32.
 Whole-sentence transcripts are in `test/data/goldens/kokoro_quality_whole.json`,
 so a run renders only the streamed audio (about 2 minutes). Word errors do not
 show clicks: a policy with no crossfade scored the same as the shipped one.
@@ -384,8 +424,8 @@ flutter test test/models/kokoro_quality_test.dart \
 Add `--dart-define=KOKORO_QUALITY_UPDATE=true` to make the whole-sentence
 transcripts again after a model, voice, phoneme, or recognizer change.
 
-Web inference, the cross-platform hash change, five-platform/device checks,
-and full voice listening checks are not complete. The example preview plays individual WAV chunks; applications
+Five-platform/device checks and full voice listening checks are not
+complete. The example preview plays individual WAV chunks; applications
 need a continuous PCM player for gapless output.
 
 **Publication:** the 38 bundle files (two model stages, 28 English voices,

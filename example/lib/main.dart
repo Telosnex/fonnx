@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'kokoro_widget_none.dart' if (dart.library.io) 'kokoro_widget.dart';
+import 'package:fonnx_example/kokoro_widget.dart';
 import 'package:fonnx_example/keyword_spotter_widget.dart';
 import 'package:fonnx_example/magika_widget.dart';
 import 'package:fonnx_example/minilml6v2_widget.dart';

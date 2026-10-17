@@ -6,13 +6,14 @@
 /// regexes, special cases, norm tables, layer manifest) and
 /// `en_core_web_sm_tagger.bin` (little-endian float32 weights).
 ///
-/// Hashing uses wrapping 64-bit integer math, so this runs on the Dart VM
-/// (native/Flutter mobile and desktop), not when compiled to JavaScript.
+/// Hashing uses [U64], so tags are the same on the Dart VM and on web.
 library;
 
 import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
+
+import 'spacy_hash.dart';
 
 /// A spaCy token: text, trailing whitespace, character offset, tag.
 class SpacyToken {
@@ -48,13 +49,8 @@ class SpacyEnglish {
             for (final t in value as List) (t[0] as String, t[1] as String?),
           ],
       },
-      _lexemeNorm = {
-        for (final MapEntry(:key, :value)
-            in (_config['lexeme_norm'] as Map<String, dynamic>).entries)
-          int.parse(key.substring(0, 8), radix: 16) << 32 |
-                  int.parse(key.substring(8), radix: 16):
-              value as String,
-      },
+      // Keyed by the 16-digit hex string id that the export writes.
+      _lexemeNorm = (_config['lexeme_norm'] as Map).cast<String, String>(),
       _baseNorms = (_config['base_norms'] as Map).cast<String, String>(),
       _symbols = (_config['symbols'] as Map).cast<String, int>(),
       labels = (_config['labels'] as List).cast<String>() {
@@ -80,7 +76,7 @@ class SpacyEnglish {
   final Map<String, dynamic> _config;
   final RegExp _prefix, _suffix, _infix, _url;
   final Map<String, List<(String, String?)>> _rules;
-  final Map<int, String> _lexemeNorm;
+  final Map<String, String> _lexemeNorm;
   final Map<String, String> _baseNorms;
   final Map<String, int> _symbols;
   final List<String> labels;
@@ -283,74 +279,16 @@ class SpacyEnglish {
   // ---------------------------------------------------------------------
   // Lexical attributes and hashing.
 
-  static const _mask32 = 0xFFFFFFFF;
-
-  /// MurmurHash64A, seed 1: spaCy's `hash_string`.
-  static int _murmur64a(List<int> data, {int seed = 1}) {
-    const m = 0xc6a4a7935bd1e995;
-    const r = 47;
-    var h = seed ^ (data.length * m);
-    final n = data.length ~/ 8;
-    for (var i = 0; i < n; i++) {
-      var k = 0;
-      for (var b = 7; b >= 0; b--) {
-        k = (k << 8) | data[i * 8 + b];
-      }
-      k *= m;
-      k ^= k >>> r;
-      k *= m;
-      h ^= k;
-      h *= m;
-    }
-    final tail = data.length & 7;
-    if (tail != 0) {
-      for (var i = 0; i < tail; i++) {
-        h ^= data[n * 8 + i] << (8 * i);
-      }
-      h *= m;
-    }
-    h ^= h >>> r;
-    h *= m;
-    h ^= h >>> r;
-    return h;
-  }
-
   /// spaCy `StringStore` id: 0 for "", symbol ids for symbols, else hash.
-  int stringId(String s) {
-    if (s.isEmpty) return 0;
-    return _symbols[s] ?? _murmur64a(utf8.encode(s));
-  }
-
-  /// thinc's `MurmurHash3_x86_128_uint64`, returning 4 32-bit keys.
-  static List<int> _hash128(int val, int seed) {
-    int fmix(int k) {
-      k ^= k >>> 33;
-      k *= 0xff51afd7ed558ccd;
-      k ^= k >>> 33;
-      k *= 0xc4ceb9fe1a85ec53;
-      k ^= k >>> 33;
-      return k;
-    }
-
-    var h1 = val;
-    h1 *= 0x87c37b91114253d5;
-    h1 = (h1 << 31) | (h1 >>> 33);
-    h1 *= 0x4cf5ad432745937f;
-    h1 ^= seed;
-    h1 ^= 8;
-    var h2 = seed ^ 8;
-    h1 += h2;
-    h2 += h1;
-    h1 = fmix(h1);
-    h2 = fmix(h2);
-    h1 += h2;
-    h2 += h1;
-    return [h1 & _mask32, h1 >>> 32, h2 & _mask32, h2 >>> 32];
+  U64 stringId(String s) {
+    if (s.isEmpty) return U64.zero;
+    final symbol = _symbols[s];
+    return symbol == null ? spacyHashString(s) : U64.from(symbol);
   }
 
   String norm(SpacyToken t) {
     if (t.norm != null) return t.norm!;
-    final fromTable = _lexemeNorm[stringId(t.text)];
+    final fromTable = _lexemeNorm[stringId(t.text).hex];
     if (fromTable != null) return fromTable;
     return _baseNorms[t.text] ?? t.text.toLowerCase();
   }
@@ -387,7 +325,7 @@ class SpacyEnglish {
   }
 
   /// Feature ids per token: NORM, PREFIX, SUFFIX, SHAPE, SPACY, IS_SPACE.
-  List<List<int>> features(List<SpacyToken> doc) => [
+  List<List<U64>> features(List<SpacyToken> doc) => [
     for (final t in doc)
       () {
         final runes = t.text.runes.toList();
@@ -400,8 +338,8 @@ class SpacyEnglish {
           stringId(prefix),
           stringId(suffix),
           stringId(wordShape(t.text)),
-          t.spacy ? 1 : 0,
-          _allSpaceRe.hasMatch(t.text) ? 1 : 0,
+          U64.from(t.spacy ? 1 : 0),
+          U64.from(_allSpaceRe.hasMatch(t.text) ? 1 : 0),
         ];
       }(),
   ];
@@ -528,7 +466,7 @@ class SpacyEnglish {
       final (e, rows, seed) = _embed[c];
       for (var t = 0; t < n; t++) {
         final o = t * nIn + c * _width;
-        for (final k in _hash128(feats[t][c], seed)) {
+        for (final k in thincHash128(feats[t][c], seed)) {
           final row = (k % rows) * _width;
           for (var i = 0; i < _width; i++) {
             x0[o + i] += e[row + i];

@@ -10,9 +10,17 @@ class KokoroChunkPolicy {
     this.crossfadeSeconds = .025,
     this.growth = 2,
     this.padFrames = 8,
+    this.decodeSpeechFrames = 40,
   });
   final double firstChunkSeconds, toleranceSeconds, crossfadeSeconds, growth;
   final int padFrames;
+
+  /// The least number of speech frames in each decode window. The decoder
+  /// normalizes over its whole input, so a slice with little speech, such as
+  /// a last word and its trailing pause, decodes as noise. When the planner
+  /// knows which frames have speech, it widens the window, alternately
+  /// before and after, until it holds this many speech frames.
+  final int decodeSpeechFrames;
 
   void validate() {
     for (final value in [
@@ -25,7 +33,10 @@ class KokoroChunkPolicy {
         throw ArgumentError('Invalid chunk policy');
       }
     }
-    if (firstChunkSeconds <= 0 || growth < 1 || padFrames < 0) {
+    if (firstChunkSeconds <= 0 ||
+        growth < 1 ||
+        padFrames < 0 ||
+        decodeSpeechFrames < 0) {
       throw ArgumentError('Invalid chunk policy');
     }
   }
@@ -181,14 +192,21 @@ class KokoroChunkSpan {
   final int decodeFirst, decodeLast, keepFirst, keepLast;
 }
 
+/// The decode and keep ranges of each slice. With [speech], each decode
+/// window also holds at least [KokoroChunkPolicy.decodeSpeechFrames] speech
+/// frames, if the part has that many.
 List<KokoroChunkSpan> kokoroPlanSpans(
   List<int> boundaries,
   int frames, {
   KokoroChunkPolicy policy = const KokoroChunkPolicy(),
   int samplesPerFrame = 600,
   int sampleRate = 24000,
+  List<bool>? speech,
 }) {
   policy.validate();
+  if (speech != null && speech.length != frames) {
+    throw ArgumentError('speech must have one value per frame');
+  }
   if (boundaries.length < 2 || frames <= 0 || samplesPerFrame <= 0) return [];
   final total = frames * samplesPerFrame;
   final half = _f(_f(policy.crossfadeSeconds) * sampleRate).round() ~/ 2;
@@ -200,15 +218,27 @@ List<KokoroChunkSpan> kokoroPlanSpans(
           total,
           boundaries[i + 1] * samplesPerFrame + half,
         );
-        return KokoroChunkSpan(
-          math.max(0, first ~/ samplesPerFrame - policy.padFrames),
-          math.min(
-            frames,
-            (last + samplesPerFrame - 1) ~/ samplesPerFrame + policy.padFrames,
-          ),
-          first,
-          last,
+        var from = math.max(0, first ~/ samplesPerFrame - policy.padFrames);
+        var to = math.min(
+          frames,
+          (last + samplesPerFrame - 1) ~/ samplesPerFrame + policy.padFrames,
         );
+        if (speech != null) {
+          var count = 0;
+          for (var j = from; j < to; j++) {
+            if (speech[j]) count++;
+          }
+          while (count < policy.decodeSpeechFrames &&
+              (from > 0 || to < frames)) {
+            if (from > 0 && speech[--from]) count++;
+            if (count < policy.decodeSpeechFrames &&
+                to < frames &&
+                speech[to++]) {
+              count++;
+            }
+          }
+        }
+        return KokoroChunkSpan(from, to, first, last);
       })(),
   ];
 }

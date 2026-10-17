@@ -1,15 +1,17 @@
 import 'dart:async';
-import 'dart:io';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fonnx/models/kokoro/kokoro.dart';
-import 'package:fonnx/models/kokoro/kokoro_ffi.dart' show kokoroWav;
-import 'package:path_provider/path_provider.dart';
+import 'package:fonnx/models/kokoro/kokoro_tokens.dart' show kokoroWav;
+import 'package:fonnx_example/kokoro_models.dart';
 
-/// Native preview using a prepared local bundle. Playback is per WAV chunk;
-/// production apps should feed KokoroChunk.samples to their continuous PCM sink.
+/// Kokoro preview. It downloads the pinned bundle, or on native platforms
+/// uses a local one. It plays one WAV per sentence. Production apps should
+/// feed each KokoroChunk.samples to a continuous PCM sink, for the earliest
+/// first audio.
 class KokoroWidget extends StatefulWidget {
   const KokoroWidget({super.key});
   @override
@@ -26,9 +28,8 @@ class _KokoroWidgetState extends State<KokoroWidget> {
   Kokoro? _engine;
   StreamIterator<KokoroChunk>? _iterator;
   Completer<void>? _playing;
-  String _voice = 'af_heart';
-  String _status =
-      'Select a directory prepared by tool/kokoro/prepare_bundle.dart.';
+  String _voice = kokoroExampleVoices.first;
+  String _status = 'Load downloads about 200 MB the first time.';
   bool _busy = false;
   int _epoch = 0;
   Future<void>? _playTask;
@@ -37,19 +38,43 @@ class _KokoroWidgetState extends State<KokoroWidget> {
     if (mounted) setState(() => _status = status);
   }
 
-  Future<void> _load() async {
+  Future<void> _download() => _load(() async {
+    final timer = Stopwatch()..start();
+    final bundle = await kokoroExampleBundle(
+      onProgress: (received, total) => _update(
+        'Downloading: ${received ~/ 1000000} of ${total ~/ 1000000} MB',
+      ),
+    );
+    _update('Loading models...');
+    final engine = await Kokoro.load(bundle);
+    _update('Loaded in ${timer.elapsedMilliseconds} ms.');
+    return engine;
+  });
+
+  /// A directory prepared by tool/kokoro/prepare_bundle.dart.
+  Future<void> _pickLocal() async {
     final directory = await FilePicker.platform.getDirectoryPath();
-    if (directory == null || !mounted) return;
+    if (directory == null) return;
+    await _load(() async {
+      final engine = await Kokoro.load(
+        KokoroBundle.fromDirectory(directory, voiceNames: kokoroExampleVoices),
+      );
+      _update('Loaded $directory.');
+      return engine;
+    });
+  }
+
+  Future<void> _load(Future<Kokoro> Function() load) async {
+    if (!mounted) return;
     setState(() => _busy = true);
     try {
-      final engine = await Kokoro.load(KokoroBundle.fromDirectory(directory));
+      final engine = await load();
       if (!mounted) {
         await engine.dispose();
         return;
       }
       await _engine?.dispose();
       _engine = engine;
-      _update('Loaded American and British English.');
     } catch (e) {
       _update('$e');
     } finally {
@@ -64,44 +89,51 @@ class _KokoroWidgetState extends State<KokoroWidget> {
     if (engine == null) return;
     final epoch = ++_epoch;
     setState(() => _busy = true);
-    Directory? temporary;
     StreamSubscription<void>? completion;
     final iterator = StreamIterator(engine.speak(_text.text, voice: _voice));
     _iterator = iterator;
     final timer = Stopwatch()..start();
+
+    /// The samples of the next sentence, or null at the end. Chunks split a
+    /// sentence mid-word, so they must play without gaps; one WAV per
+    /// sentence does that. Sentences end in silence.
+    Future<Float32List?> nextSentence() async {
+      final samples = <double>[];
+      while (await iterator.moveNext()) {
+        samples.addAll(iterator.current.samples);
+        if (iterator.current.isFinal) break;
+      }
+      return samples.isEmpty ? null : Float32List.fromList(samples);
+    }
+
     try {
-      temporary = await (await getTemporaryDirectory()).createTemp(
-        'kokoro_preview_',
-      );
-      var available = await iterator.moveNext();
+      var sentence = await nextSentence();
       var count = 0;
-      while (available && epoch == _epoch) {
-        final chunk = iterator.current;
-        final path = '${temporary.path}/${count++}.wav';
-        await File(path).writeAsBytes(kokoroWav(chunk.samples));
-        if (epoch != _epoch) break;
+      while (sentence != null && epoch == _epoch) {
+        count++;
         final done = Completer<void>();
         _playing = done;
         completion = _player.onPlayerComplete.listen((_) {
           if (!done.isCompleted) done.complete();
         });
-        // At most one future chunk is prefetched while the current one plays.
-        final next = iterator.moveNext();
-        // Attach an error handler immediately, even if it completes during playback.
-        final nextResult = next.then<Object>(
+        // The next sentence is synthesized while this one plays.
+        final next = nextSentence();
+        // Attach an error handler now, in case it fails during playback.
+        final nextResult = next.then<Object?>(
           (value) => value,
           onError: (Object e) => e,
         );
         if (count == 1) _update('First audio: ${timer.elapsedMilliseconds} ms');
-        await _player.play(DeviceFileSource(path));
+        await _player.play(
+          BytesSource(kokoroWav(sentence), mimeType: 'audio/wav'),
+        );
         await done.future;
         await completion.cancel();
         completion = null;
         _playing = null;
-        await File(path).delete();
         final result = await nextResult;
-        if (result is! bool) throw result;
-        available = result;
+        if (result is Object && result is! Float32List) throw result;
+        sentence = result as Float32List?;
       }
     } catch (e) {
       if (epoch == _epoch) _update('$e');
@@ -109,7 +141,6 @@ class _KokoroWidgetState extends State<KokoroWidget> {
       await completion?.cancel();
       await iterator.cancel();
       await _player.stop();
-      if (temporary != null) await temporary.delete(recursive: true);
       if (epoch == _epoch) {
         _iterator = null;
         _playing = null;
@@ -142,11 +173,7 @@ class _KokoroWidgetState extends State<KokoroWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (kIsWeb) {
-      return const Text(
-        'Kokoro streaming preview: native platforms only for now.',
-      );
-    }
+    final loaded = _engine != null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -169,24 +196,27 @@ class _KokoroWidgetState extends State<KokoroWidget> {
         Wrap(
           spacing: 8,
           children: [
+            if (!loaded)
+              ElevatedButton(
+                onPressed: _busy ? null : _download,
+                child: const Text('Load'),
+              ),
+            if (!loaded && !kIsWeb)
+              TextButton(
+                onPressed: _busy ? null : _pickLocal,
+                child: const Text('Use local bundle'),
+              ),
             ElevatedButton(
-              onPressed: _busy ? null : _load,
-              child: const Text('Select bundle'),
-            ),
-            ElevatedButton(
-              onPressed: _busy || _engine == null ? null : _speak,
+              onPressed: _busy || !loaded ? null : _speak,
               child: const Text('Speak'),
             ),
             TextButton(
-              onPressed: _busy ? _stop : null,
+              onPressed: _busy && loaded ? _stop : null,
               child: const Text('Stop'),
             ),
           ],
         ),
         Text(_status),
-        const Text(
-          'Preview plays WAV chunks; continuous PCM playback belongs in the app.',
-        ),
       ],
     );
   }

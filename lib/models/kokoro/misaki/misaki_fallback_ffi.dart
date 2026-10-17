@@ -1,63 +1,27 @@
-import 'dart:convert';
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
 import 'package:fonnx/models/kokoro/misaki/misaki_en.dart';
+import 'package:fonnx/models/kokoro/misaki/misaki_fallback.dart';
 import 'package:fonnx/onnx/ort.dart';
 import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free, malloc;
 
-/// misaki's out-of-vocabulary fallback: PeterReid/graphemes_to_phonemes_en_us
-/// (BART, 752k params, Apache-2.0), exported to ONNX as
-/// `(input_ids, decoder_input_ids) -> logits`, decoded greedily.
-///
-/// Mirrors misaki main's `FallbackNetwork`, except decoding runs to the
-/// model's 64-position limit instead of transformers' default of 20 tokens,
-/// which truncates long words.
+/// [MisakiFallbackVocab] on the native ORT session.
 class MisakiFallbackFfi {
-  MisakiFallbackFfi(this.session, String configJson) {
-    final config = jsonDecode(configJson) as Map<String, dynamic>;
-    final graphemes = config['grapheme_chars'] as String;
-    // Python's {g: i for i, g in enumerate(...)}: later duplicates win.
-    final g = graphemes.runes.toList();
-    for (var i = 0; i < g.length; i++) {
-      _graphemeToToken[String.fromCharCode(g[i])] = i;
-    }
-    _phonemes = (config['phoneme_chars'] as String).runes
-        .map(String.fromCharCode)
-        .toList();
-    maxPositions = config['max_positions'] as int;
-  }
+  MisakiFallbackFfi(this.session, String configJson)
+    : vocab = MisakiFallbackVocab(configJson);
 
   final OrtSessionObjects session;
-  final Map<String, int> _graphemeToToken = {};
-  late final List<String> _phonemes;
-  late final int maxPositions;
-
-  static const _bos = 1, _eos = 2, _unk = 3;
+  final MisakiFallbackVocab vocab;
 
   MisakiPs call(MToken token) {
-    final src = [
-      _bos,
-      for (final r in token.text.runes)
-        _graphemeToToken[String.fromCharCode(r)] ?? _unk,
-      _eos,
-    ];
-    if (src.length > maxPositions) return (null, null);
-    final dec = <int>[_bos];
-    while (dec.length < maxPositions) {
-      if (dec.length == maxPositions - 1) {
-        dec.add(_eos); // transformers' forced_eos_token_id at max_length
-        break;
-      }
-      final next = _argmaxLast(src, dec);
-      dec.add(next);
-      if (next == _eos) break;
+    final src = vocab.source(token.text);
+    if (src == null) return (null, null);
+    final dec = <int>[MisakiFallbackVocab.bos];
+    while (!vocab.done(dec)) {
+      dec.add(_argmaxLast(src, dec));
     }
-    final out = StringBuffer();
-    for (final t in dec) {
-      if (t > _unk && t < _phonemes.length) out.write(_phonemes[t]);
-    }
-    return (out.toString(), 1);
+    return vocab.phonemes(dec);
   }
 
   int _argmaxLast(List<int> src, List<int> dec) {

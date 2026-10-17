@@ -5,11 +5,9 @@ import 'package:ffi/ffi.dart';
 import 'package:fonnx/onnx/ort.dart';
 import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, malloc, free;
 
-class KokoroTensor {
-  KokoroTensor(this.data, this.shape);
-  final Float32List data;
-  final List<int> shape;
-}
+import 'kokoro_stages.dart';
+
+export 'kokoro_stages.dart' show KokoroProsody, KokoroTensor;
 
 /// Copies outputs out of ORT before releasing any native input/output storage.
 Map<String, KokoroTensor> _run(
@@ -134,33 +132,13 @@ Map<String, KokoroTensor> _run(
   }
 }
 
-class KokoroProsody {
-  KokoroProsody(this.asr, this.f0, this.energy) {
-    if (asr.shape.length != 3 ||
-        asr.shape[0] != 1 ||
-        asr.shape[1] != 512 ||
-        f0.shape.length != 2 ||
-        energy.shape.length != 2 ||
-        f0.shape[0] != 1 ||
-        energy.shape[0] != 1 ||
-        f0.shape[1] != 2 * frames ||
-        energy.shape[1] != 2 * frames) {
-      throw StateError('Unsupported Kokoro stage shapes');
-    }
-  }
-  final KokoroTensor asr, f0, energy;
-  int get frames => asr.shape.last;
-}
-
 KokoroProsody runKokoroProsody(
   OrtSessionObjects session, {
   required List<int> ids,
   required Float32List style,
   double speed = 1,
 }) {
-  if (ids.isEmpty || ids.length > 510 || !speed.isFinite || speed <= 0) {
-    throw ArgumentError('Invalid phoneme count or speed');
-  }
+  kokoroCheckProsodyRequest(ids, speed);
   final result = _run(
     session,
     {
@@ -180,31 +158,14 @@ Float32List runKokoroDecoder(
   int first,
   int last,
 ) {
-  if (first < 0 || last > prosody.frames || first >= last) {
-    throw RangeError('Invalid frame span');
-  }
+  final inputs = kokoroDecoderInputs(prosody, first, last);
   final count = last - first;
-  final asr = Float32List(512 * count);
-  for (var c = 0; c < 512; c++) {
-    asr.setRange(
-      c * count,
-      (c + 1) * count,
-      prosody.asr.data,
-      c * prosody.frames + first,
-    );
-  }
   final result = _run(
     session,
     {
-      'asr': ([1, 512, count], asr),
-      'f0': (
-        [1, 2 * count],
-        Float32List.sublistView(prosody.f0.data, 2 * first, 2 * last),
-      ),
-      'n': (
-        [1, 2 * count],
-        Float32List.sublistView(prosody.energy.data, 2 * first, 2 * last),
-      ),
+      'asr': ([1, 512, count], inputs.asr),
+      'f0': ([1, 2 * count], inputs.f0),
+      'n': ([1, 2 * count], inputs.energy),
       'style': ([1, 256], style),
     },
     ['waveform'],

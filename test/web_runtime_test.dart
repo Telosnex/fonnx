@@ -221,6 +221,34 @@ void main() {
       worker.terminate();
     }
   });
+
+  // The Kokoro Worker also loads its compiled Dart engine. The model test is
+  // test/models/kokoro_web_test.dart: the Kokoro bundle is built locally.
+  test('the Kokoro Worker loads ORT and its engine with the query', () async {
+    final worker = _Worker(
+      fonnxWebModuleUrl('kokoro_worker.js').toString().toJS,
+      _WorkerOptions(type: 'module'),
+    );
+    try {
+      final urls = [
+        for (final url
+            in ((await _request(worker, 'resourceUrls', {}))['urls']!
+                    as JSArray<JSString>)
+                .toDart)
+          Uri.parse(url.toDart),
+      ];
+      final loaded = urls.where((u) => u.path.contains('/packages/fonnx/web/'));
+      expect(loaded.map((u) => u.pathSegments.last).toSet(), {
+        'ort.min.mjs',
+        'kokoro_engine.dart.js',
+      });
+      for (final url in loaded) {
+        expect(url.queryParameters['v'], webRuntimeVersion, reason: '$url');
+      }
+    } finally {
+      worker.terminate();
+    }
+  });
 }
 
 Future<Uint8List> _bytes(String path) async {

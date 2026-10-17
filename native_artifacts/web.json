@@ -4,7 +4,7 @@
   "release": "https://github.com/Telosnex/fonnx/releases/tag/native-8a4fa2ddab394287",
   "runner": "ubuntu-22.04",
   "toolchain": "onnxruntime-web 1.27.0 (npm)",
-  "webVersion": "ebad04bb6266218d",
+  "webVersion": "efceee903d0e4013",
   "files": [
     {
       "name": "fonnx_worker_rpc.js",
@@ -23,6 +23,18 @@
       "sha256": "e8a49aa614eff711f53e00a30f797620d34a40013c179869fce29dd32db9d611",
       "bytes": 5664,
       "source": "lib/web/futo_swipe_worker.js"
+    },
+    {
+      "name": "kokoro_init.js",
+      "sha256": "a0f08ccc943f2c6432890e3f9bcefc10c5fa329e1203f4937cc3ec6076f87be7",
+      "bytes": 1099,
+      "source": "lib/web/kokoro_init.js"
+    },
+    {
+      "name": "kokoro_worker.js",
+      "sha256": "4a324038165bed81c4ca7c56bc0e10291e227c5697d119e4150d78dbb5dfcc02",
+      "bytes": 7248,
+      "source": "lib/web/kokoro_worker.js"
     },
     {
       "name": "kws_init.js",

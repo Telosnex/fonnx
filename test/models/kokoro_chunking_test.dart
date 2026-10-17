@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,12 +6,13 @@ import 'package:fonnx/models/kokoro/kokoro_chunking.dart';
 import 'package:fonnx/models/kokoro/kokoro_sentence_splitter.dart';
 import 'package:fonnx/models/kokoro/kokoro_normalizer.dart';
 
+import 'test_files.dart';
+
 void main() {
-  test('acoustic policy and crossfade match pinned C++ reference', () {
+  // Also runs in Chrome: flutter test --platform chrome <this file>.
+  test('acoustic policy and crossfade match pinned C++ reference', () async {
     final golden =
-        jsonDecode(
-              File('test/data/goldens/kokoro_chunking.json').readAsStringSync(),
-            )
+        jsonDecode(await readTestText('data/goldens/kokoro_chunking.json'))
             as Map;
     for (final c in golden['cases'] as List) {
       final frames = c['frames'] as int;
@@ -178,6 +178,41 @@ void main() {
     expect(first, greaterThanOrEqualTo(20 + kokoroSpeechMinFrames));
     // Energy above 2 is speech.
     expect(kokoroSpeechFrames([6, 6, -9, -9, 3, 2], 3), [true, false, true]);
+  });
+
+  test('each decode window holds enough speech', () {
+    // Speech, then a last word of 6 frames and a 1 s trailing pause.
+    final speech = [
+      for (var i = 0; i < 200; i++) i < 120 || (i >= 150 && i < 156),
+    ];
+    const boundaries = [0, 24, 72, 150, 200];
+    const policy = KokoroChunkPolicy();
+    int count(KokoroChunkSpan s) =>
+        speech.sublist(s.decodeFirst, s.decodeLast).where((v) => v).length;
+    final plain = kokoroPlanSpans(boundaries, 200, policy: policy);
+    expect(count(plain.last), lessThan(policy.decodeSpeechFrames));
+    final spans = kokoroPlanSpans(
+      boundaries,
+      200,
+      policy: policy,
+      speech: speech,
+    );
+    for (var i = 0; i < spans.length; i++) {
+      expect(count(spans[i]), greaterThanOrEqualTo(policy.decodeSpeechFrames));
+      // Only the decode window grows; what is kept does not change.
+      expect(spans[i].keepFirst, plain[i].keepFirst);
+      expect(spans[i].keepLast, plain[i].keepLast);
+      expect(spans[i].decodeFirst, lessThanOrEqualTo(plain[i].decodeFirst));
+      expect(spans[i].decodeLast, greaterThanOrEqualTo(plain[i].decodeLast));
+    }
+    // A part with less speech than the minimum decodes whole.
+    final short = [for (var i = 0; i < 30; i++) i < 10];
+    final whole = kokoroPlanSpans([0, 30], 30, policy: policy, speech: short);
+    expect([whole.single.decodeFirst, whole.single.decodeLast], [0, 30]);
+    expect(
+      () => kokoroPlanSpans(boundaries, 200, speech: [true]),
+      throwsArgumentError,
+    );
   });
 
   test('unmatched quotes and brackets cannot stop later splits', () {
