@@ -42,6 +42,16 @@ void main() {
     expect(transcript, contains('How are you doing?'));
   });
 
+  test('Whisper transcribes a tongue twister', () async {
+    final bytes = await File(
+      'test/data/woodchuck_ac1_ar16000.pcm',
+    ).readAsBytes();
+    expect(
+      await whisper.doInference(bytes),
+      'How much wood could a wood chuck chuck if a wood chuck could chuck wood?',
+    );
+  });
+
   test('Whisper rejects more than 30 seconds of audio', () async {
     final bytes = Uint8List(30 * 32000 + 2);
     await expectLater(whisper.doInference(bytes), throwsArgumentError);

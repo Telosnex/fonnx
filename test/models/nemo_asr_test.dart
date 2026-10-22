@@ -11,6 +11,8 @@ import 'package:fonnx/models/nemoAsr/src/nemo_asr_features.dart';
 import 'package:fonnx/models/nemoAsr/src/nemo_asr_vocabulary.dart';
 
 const _rain = 'test/data/audio_sample_ac1_ar16000.pcm';
+const _woodchuck = 'test/data/woodchuck_ac1_ar16000.pcm';
+const _beijing = 'test/data/what_time_is_it_in_beijing_ac1_ar16000.pcm';
 
 void main() {
   group('features', () {
@@ -113,6 +115,13 @@ void main() {
     expect(transcript, contains('como'));
   });
 
+  test('FastConformer CTC transcribes a short question', () async {
+    expect(
+      await ctc.doInference(await File(_beijing).readAsBytes()),
+      'What time is it in Beijing?',
+    );
+  });
+
   test('NemoAsr rejects more than 60 seconds of audio', () async {
     await expectLater(
       ctc.doInference(Uint8List(nemoAsrMaxSamples * 2 + 2)),
@@ -140,6 +149,10 @@ void main() {
         await File('test/data/talkovergpt.pcm').readAsBytes(),
       ),
       'Estoy bien, gracias.',
+    );
+    expect(
+      await v3.doInference(await File(_woodchuck).readAsBytes()),
+      'How much wood could a woodchuck chuck if a woodchuck could chuck wood?',
     );
   });
 
