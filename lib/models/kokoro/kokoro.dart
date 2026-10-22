@@ -8,6 +8,8 @@ import 'kokoro_none.dart'
     as platform;
 
 export 'kokoro_chunking.dart' show KokoroChunkPolicy;
+export 'kokoro_sentence_splitter.dart'
+    show KokoroSentenceSplit, kokoroSplitMayChange, kokoroSplitSentences;
 
 enum KokoroLanguage { americanEnglish, britishEnglish }
 
@@ -90,12 +92,31 @@ class KokoroChunk {
     required this.isFinal,
     this.text,
     this.phonemes,
+    this.sourceStart,
+    this.sourceEnd,
   });
   final Float32List samples;
   final int utteranceId;
   final bool isFinal;
   final String? text, phonemes;
+
+  /// For [KokoroTextInput] audio: the unit of this chunk in all text given
+  /// to [KokoroTextInput.add], as UTF-16 offsets. [sourceStart] is inclusive
+  /// and [sourceEnd] is exclusive. All chunks of one unit have the same range.
+  /// Ranges of later units start at or after the end of earlier ones.
+  /// Null for [Kokoro.speak] and [Kokoro.synthesize].
+  final int? sourceStart, sourceEnd;
   int get sampleRate => 24000;
+
+  KokoroChunk _withSource(int start, int end) => KokoroChunk(
+    samples: samples,
+    utteranceId: utteranceId,
+    isFinal: isFinal,
+    text: text,
+    phonemes: phonemes,
+    sourceStart: start,
+    sourceEnd: end,
+  );
 }
 
 /// English-only Kokoro. Phonemes, chunking and both model stages run on one
@@ -118,12 +139,22 @@ abstract class Kokoro {
     required String voice,
     double speed = 1,
     bool normalize = true,
-  }) => _speakInput(
-    Stream.value(text),
-    voice: voice,
-    speed: speed,
-    normalize: normalize,
-  );
+  }) async* {
+    validateRequest(voice, speed);
+    final split = kokoroSplitSentences(text);
+    if (split.remainder.length > 65536) {
+      throw StateError('Unterminated input exceeds 64K characters; flush it');
+    }
+    final last = kokoroSplitSentences(split.remainder, finalInput: true);
+    for (final unit in [...split.units, ...last.units]) {
+      yield* renderUtterance(
+        unit,
+        voice: voice,
+        speed: speed,
+        normalize: normalize,
+      );
+    }
+  }
 
   Future<Float32List> synthesize(
     String text, {
@@ -151,6 +182,7 @@ abstract class Kokoro {
     return output;
   }
 
+  /// Streaming text input. See [KokoroTextInput].
   KokoroTextInput input({
     required String voice,
     double speed = 1,
@@ -160,44 +192,22 @@ abstract class Kokoro {
     return KokoroTextInput._(this, voice, speed, normalize);
   }
 
+  /// Loads [voice] and runs the models once on a short text, so the first
+  /// [speak] or [input] for [voice] does not pay that cost. Optional.
+  Future<void> prepare(String voice) async {
+    validateRequest(voice, 1);
+    await renderUtterance(
+      'Hi.',
+      voice: voice,
+      speed: 1,
+      normalize: false,
+    ).drain<void>();
+  }
+
   void validateRequest(String voice, double speed) {
     if (!voices.containsKey(voice)) throw ArgumentError.value(voice, 'voice');
     if (!speed.isFinite || speed <= 0) {
       throw ArgumentError.value(speed, 'speed');
-    }
-  }
-
-  Stream<KokoroChunk> _speakInput(
-    Stream<String?> input, {
-    required String voice,
-    required double speed,
-    required bool normalize,
-  }) async* {
-    validateRequest(voice, speed);
-    var buffer = '';
-    await for (final text in input) {
-      if (text != null) buffer += text;
-      final split = kokoroSplitSentences(buffer, finalInput: text == null);
-      buffer = split.remainder;
-      if (buffer.length > 65536) {
-        throw StateError('Unterminated input exceeds 64K characters; flush it');
-      }
-      for (final unit in split.units) {
-        yield* renderUtterance(
-          unit,
-          voice: voice,
-          speed: speed,
-          normalize: normalize,
-        );
-      }
-    }
-    for (final unit in kokoroSplitSentences(buffer, finalInput: true).units) {
-      yield* renderUtterance(
-        unit,
-        voice: voice,
-        speed: speed,
-        normalize: normalize,
-      );
     }
   }
 
@@ -212,34 +222,64 @@ abstract class Kokoro {
 }
 
 /// Single-subscription streaming text input. Fragments concatenate verbatim.
-/// There is a 64K pending-character limit; add throws rather than buffering
-/// unlimited LLM output while the audio consumer is paused.
+///
+/// For LLM output: [add] each fragment as it arrives, [flush] where the text
+/// pauses (for example, before a tool call), and [close] at the end.
+///
+/// Text that [audio] has not read yet is held in one buffer, so the number of
+/// [add] calls has no limit. The buffer has a 64K character limit: [add]
+/// throws rather than hold unlimited text while the audio consumer is paused.
+/// Text that has no unit end also has a 64K limit; past it, [audio] gives a
+/// [StateError]. Call [flush] to end a unit.
 class KokoroTextInput {
-  KokoroTextInput._(Kokoro engine, String voice, double speed, bool normalize) {
-    _controller = StreamController<String?>(
+  KokoroTextInput._(this._engine, this._voice, this._speed, this._normalize) {
+    StreamSubscription<KokoroChunk>? units;
+    late final StreamController<KokoroChunk> controller;
+    controller = StreamController<KokoroChunk>(
+      onListen: () {
+        units = _units().listen(
+          controller.add,
+          onError: controller.addError,
+          onDone: controller.close,
+        );
+      },
+      onPause: () {
+        units?.pause();
+      },
+      onResume: () {
+        units?.resume();
+      },
       onCancel: () {
         _cancelled = true;
+        _wakeReader();
+        return units?.cancel();
       },
     );
-    final drained = _controller.stream.map((text) {
-      _pending -= text?.length ?? 0;
-      _events--;
-      return text;
-    });
-    audio = engine._speakInput(
-      drained,
-      voice: voice,
-      speed: speed,
-      normalize: normalize,
-    );
+    audio = controller.stream;
   }
-  late final StreamController<String?> _controller;
+
+  final Kokoro _engine;
+  final String _voice;
+  final double _speed;
+  final bool _normalize;
   late final Stream<KokoroChunk> audio;
-  int _pending = 0, _events = 0;
+
+  /// Text before each unread flush, oldest first. Text after the last unread
+  /// flush is in [_open].
+  final _flushed = <String>[];
+  final _open = StringBuffer();
+  Completer<void>? _wake;
+  int _pending = 0;
   bool _closed = false, _cancelled = false;
+
   void _checkOpen() {
     if (_closed || _cancelled) throw StateError('Kokoro text input is closed');
-    if (_events >= 1024) throw StateError('Too many pending text events');
+  }
+
+  void _wakeReader() {
+    final wake = _wake;
+    _wake = null;
+    if (wake != null && !wake.isCompleted) wake.complete();
   }
 
   void add(String text) {
@@ -247,15 +287,20 @@ class KokoroTextInput {
     if (_pending + text.length > 65536) {
       throw StateError('Pending text exceeds 64K characters');
     }
-    _events++;
+    if (text.isEmpty) return;
     _pending += text.length;
-    _controller.add(text);
+    _open.write(text);
+    _wakeReader();
   }
 
+  /// Ends a unit at the text added so far, even with no sentence end.
   void flush() {
     _checkOpen();
-    _events++;
-    _controller.add(null);
+    // A flush right after an unread flush adds nothing.
+    if (_open.isEmpty && _flushed.isNotEmpty) return;
+    _flushed.add(_open.toString());
+    _open.clear();
+    _wakeReader();
   }
 
   /// Ends the text. Pending text is still spoken. Completes at once; the
@@ -263,6 +308,73 @@ class KokoroTextInput {
   Future<void> close() async {
     if (_closed || _cancelled) return;
     _closed = true;
-    unawaited(_controller.close());
+    _wakeReader();
+  }
+
+  /// Renders the units of [split], which is a split of [source]. [base] is
+  /// the offset of [source] in all added text.
+  Stream<KokoroChunk> _render(
+    KokoroSentenceSplit split,
+    String source,
+    int base,
+  ) async* {
+    var cursor = 0;
+    for (final unit in split.units) {
+      // Units are trimmed slices of the source, in order.
+      final at = source.indexOf(unit, cursor);
+      final start = at < 0 ? cursor : at;
+      final end = at < 0
+          ? source.length - split.remainder.length
+          : at + unit.length;
+      cursor = end;
+      yield* _engine
+          .renderUtterance(
+            unit,
+            voice: _voice,
+            speed: _speed,
+            normalize: _normalize,
+          )
+          .map((chunk) => chunk._withSource(base + start, base + end));
+    }
+  }
+
+  Stream<KokoroChunk> _units() async* {
+    // Text read from the buffer that has no unit end yet, and its offset in
+    // all added text. The remainder of a split is a suffix of its source.
+    var carry = '';
+    var base = 0;
+    while (true) {
+      while (_flushed.isEmpty && _open.isEmpty && !_closed) {
+        await (_wake = Completer<void>()).future;
+        if (_cancelled) return;
+      }
+      if (_cancelled) return;
+      final flushed = List.of(_flushed);
+      final open = _open.toString();
+      final closed = _closed;
+      _flushed.clear();
+      _open.clear();
+      _pending = 0;
+      for (final text in flushed) {
+        final source = carry + text;
+        final split = kokoroSplitSentences(source, finalInput: true);
+        yield* _render(split, source, base);
+        carry = '';
+        base += source.length;
+      }
+      if (closed || kokoroSplitMayChange(carry, open)) {
+        final source = carry + open;
+        final split = kokoroSplitSentences(source, finalInput: closed);
+        yield* _render(split, source, base);
+        carry = split.remainder;
+        base += source.length - carry.length;
+      } else {
+        carry += open;
+      }
+      if (carry.length > 65536) {
+        throw StateError('Unterminated input exceeds 64K characters; flush it');
+      }
+      if (closed) return;
+    }
   }
 }

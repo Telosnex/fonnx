@@ -90,7 +90,12 @@ void main() {
 
   test('Moonshine English sentence rules and incremental fragments', () {
     expect(kokoroSplitSentences('Hello ').remainder, 'Hello ');
-    expect(kokoroSplitSentences('Hello there. ').units, ['Hello there.']);
+    // The word after ". " decides the split, so it waits for that word.
+    expect(kokoroSplitSentences('Hello there. ').units, isEmpty);
+    expect(kokoroSplitSentences('Hello there. ').remainder, 'Hello there. ');
+    expect(kokoroSplitSentences('Hello there. N').units, ['Hello there.']);
+    expect(kokoroSplitSentences('Hello there! ').units, ['Hello there!']);
+    expect(kokoroSplitSentences('Hello there!').units, isEmpty);
     expect(kokoroSplitSentences('3.').units, isEmpty);
     expect(kokoroSplitSentences('3.14 is pi. Next. ', finalInput: true).units, [
       '3.14 is pi.',
@@ -124,7 +129,7 @@ void main() {
       ['Prof. Smith waited. then left.'],
     );
     expect(
-      kokoroSplitSentences('Hi. Longer sentence. ', minCodepoints: 10).units,
+      kokoroSplitSentences('Hi. Longer sentence. N', minCodepoints: 10).units,
       ['Hi. Longer sentence.'],
     );
   });
