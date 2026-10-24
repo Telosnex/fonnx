@@ -50,8 +50,9 @@ class _TtsDemoWidgetState extends State<TtsDemoWidget> {
           style: Theme.of(context).textTheme.headlineLarge,
         ),
         const Text(
-            'Mic to Silero VAD for voice detection, and the chosen model for '
-            'speech-to-text.'),
+          'Mic to Silero VAD for voice detection, and the chosen model for '
+          'speech-to-text.',
+        ),
         heightPadding,
         SttModelPicker(
           value: _sttModel,
@@ -72,7 +73,10 @@ class _TtsDemoWidgetState extends State<TtsDemoWidget> {
                   ? const Text('Listen')
                   : const Text('Stop'),
             ),
-            if (_status != null) ...[widthPadding, Flexible(child: Text(_status!))],
+            if (_status != null) ...[
+              widthPadding,
+              Flexible(child: Text(_status!)),
+            ],
           ],
         ),
         if (_sttServiceResponse != null) ...[
@@ -87,8 +91,7 @@ class _TtsDemoWidgetState extends State<TtsDemoWidget> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.end,
-              children: _sttServiceResponse!.audioFrames
-                  .mapIndexed((index, e) {
+              children: _sttServiceResponse!.audioFrames.mapIndexed((index, e) {
                 final Color color;
                 if (e?.vadP == null) {
                   color = Colors.transparent;
@@ -120,23 +123,24 @@ class _TtsDemoWidgetState extends State<TtsDemoWidget> {
           if (lastVoiceFrameIndex != null && lastVoiceFrameIndex >= 0) ...[
             heightPadding,
             Text(
-                'Last detected voice: @${lastVoiceFrameIndex * SttService.kMaxVadFrameMs}ms'),
+              'Last detected voice: @${lastVoiceFrameIndex * SttService.kMaxVadFrameMs}ms',
+            ),
             if (_sttService == null && _sttServiceResponse != null)
               Text(
-                  'Endpointer: @${(_sttServiceResponse!.audioFrames.length - 1) * SttService.kMaxVadFrameMs}ms'),
+                'Endpointer: @${(_sttServiceResponse!.audioFrames.length - 1) * SttService.kMaxVadFrameMs}ms',
+              ),
           ],
           heightPadding,
           Text(
-              'Voice threshold: ${(_sttIsVoiceThreshold * 100).toStringAsFixed(0)}%'),
+            'Voice threshold: ${(_sttIsVoiceThreshold * 100).toStringAsFixed(0)}%',
+          ),
           Slider(
             label: '${(_sttIsVoiceThreshold * 100).toStringAsFixed(0)}%',
             value: _sttIsVoiceThreshold,
             onChanged: (value) {
-              setState(
-                () {
-                  _sttIsVoiceThreshold = value;
-                },
-              );
+              setState(() {
+                _sttIsVoiceThreshold = value;
+              });
             },
           ),
           ElevatedButton.icon(
@@ -144,7 +148,7 @@ class _TtsDemoWidgetState extends State<TtsDemoWidget> {
             label: const Text("Play"),
             onPressed: _playButtonPressed,
           ),
-        ]
+        ],
       ],
     );
   }
@@ -177,7 +181,8 @@ class _TtsDemoWidgetState extends State<TtsDemoWidget> {
       math.min(lastFrameIndex + 10, frames.length),
     );
     debugPrint(
-        'Detected ${framesToProcess.length} frames of voice (from ${frames.whereType<AudioFrame>().toList().length} of audio @ threshold $_sttIsVoiceThreshold)');
+      'Detected ${framesToProcess.length} frames of voice (from ${frames.whereType<AudioFrame>().toList().length} of audio @ threshold $_sttIsVoiceThreshold)',
+    );
     final indexOfFirstSpeech = frames.indexWhere((frame) {
       return frame?.vadP != null && frame!.vadP! >= _sttIsVoiceThreshold;
     });
@@ -221,7 +226,10 @@ class _TtsDemoWidgetState extends State<TtsDemoWidget> {
       // data subchunk
       buffer.setUint32(36, 0x64617461, Endian.big); // 'data'
       buffer.setUint32(
-          40, pcmDataLength, Endian.little); // Subchunk2 size (PCM data size)
+        40,
+        pcmDataLength,
+        Endian.little,
+      ); // Subchunk2 size (PCM data size)
 
       return header;
     }
@@ -245,8 +253,10 @@ class _TtsDemoWidgetState extends State<TtsDemoWidget> {
     }
 
     /// Returns null if no frames are above the threshold.
-    Uint8List? wavFromFrames(
-        {required List<AudioFrame> frames, required double minVadP}) {
+    Uint8List? wavFromFrames({
+      required List<AudioFrame> frames,
+      required double minVadP,
+    }) {
       final bytes = frames
           .where((e) => e.vadP != null && e.vadP! >= minVadP)
           .map((e) => e.bytes)
@@ -343,8 +353,8 @@ class _TtsDemoWidgetState extends State<TtsDemoWidget> {
     if (kIsWeb) {
       return 'assets/models/sileroVad/$modelFilenameWithExtension';
     }
-    final assetCacheDirectory =
-        await path_provider.getApplicationSupportDirectory();
+    final assetCacheDirectory = await path_provider
+        .getApplicationSupportDirectory();
     final modelPath = path.join(
       assetCacheDirectory.path,
       modelFilenameWithExtension,

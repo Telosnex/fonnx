@@ -31,7 +31,8 @@ class _MinishLabWidgetState extends State<MinishLabWidget> {
           style: Theme.of(context).textTheme.headlineLarge,
         ),
         const Text(
-            '102 MB model, runs ~30x as fast as MiniLM-L6-v2 with ~the same performance.'),
+          '102 MB model, runs ~30x as fast as MiniLM-L6-v2 with ~the same performance.',
+        ),
         heightPadding,
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -67,7 +68,8 @@ class _MinishLabWidgetState extends State<MinishLabWidget> {
     var completed = 0;
     while (completed < 1000) {
       await model.getEmbeddingAsVector(
-          textAndTokens[completed % textAndTokens.length].tokens);
+        textAndTokens[completed % textAndTokens.length].tokens,
+      );
       completed++;
     }
     stopwatch.stop();
@@ -85,10 +87,12 @@ Future<String> getModelPath(String modelFilenameWithExtension) async {
   if (kIsWeb) {
     return 'assets/models/minishLab/$modelFilenameWithExtension';
   }
-  final assetCacheDirectory =
-      await path_provider.getApplicationSupportDirectory();
-  final modelPath =
-      path.join(assetCacheDirectory.path, modelFilenameWithExtension);
+  final assetCacheDirectory = await path_provider
+      .getApplicationSupportDirectory();
+  final modelPath = path.join(
+    assetCacheDirectory.path,
+    modelFilenameWithExtension,
+  );
 
   File file = File(modelPath);
   bool fileExists = await file.exists();
@@ -104,9 +108,10 @@ Future<String> getModelPath(String modelFilenameWithExtension) async {
   final fileSameSize = fileExists && fileLength == assetLength;
   if (!fileExists || !fileSameSize) {
     debugPrint(
-        'Copying model to $modelPath. Why? Either the file does not exist (${!fileExists}), '
-        'or it does exist but is not the same size as the one in the assets '
-        'directory. (${!fileSameSize})');
+      'Copying model to $modelPath. Why? Either the file does not exist (${!fileExists}), '
+      'or it does exist but is not the same size as the one in the assets '
+      'directory. (${!fileSameSize})',
+    );
 
     List<int> bytes = assetByteData.buffer.asUint8List(
       assetByteData.offsetInBytes,

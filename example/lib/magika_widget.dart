@@ -28,12 +28,10 @@ class _MagikaWidgetState extends State<MagikaWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         heightPadding,
-        Text(
-          'Magika',
-          style: Theme.of(context).textTheme.headlineLarge,
-        ),
+        Text('Magika', style: Theme.of(context).textTheme.headlineLarge),
         const Text(
-            '1 MB model detects 113 types of documents from 1.5 KB. By Google.'),
+          '1 MB model detects 113 types of documents from 1.5 KB. By Google.',
+        ),
         heightPadding,
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -51,10 +49,7 @@ class _MagikaWidgetState extends State<MagikaWidget> {
             ),
             if (_fileBytes != null) widthPadding,
             if (_fileBytes != null)
-              const Icon(
-                Icons.check,
-                color: Colors.green,
-              ),
+              const Icon(Icons.check, color: Colors.green),
             if (_fileBytes != null) widthPadding,
             if (_fileBytes != null)
               Text('Size: ${_fileBytes?.length ?? 0} bytes'),
@@ -107,10 +102,12 @@ Future<String> getMagikaModelPath(String modelFilenameWithExtension) async {
   if (kIsWeb) {
     return 'assets/models/magika/$modelFilenameWithExtension';
   }
-  final assetCacheDirectory =
-      await path_provider.getApplicationSupportDirectory();
-  final modelPath =
-      path.join(assetCacheDirectory.path, modelFilenameWithExtension);
+  final assetCacheDirectory = await path_provider
+      .getApplicationSupportDirectory();
+  final modelPath = path.join(
+    assetCacheDirectory.path,
+    modelFilenameWithExtension,
+  );
 
   File file = File(modelPath);
   bool fileExists = await file.exists();
@@ -126,9 +123,10 @@ Future<String> getMagikaModelPath(String modelFilenameWithExtension) async {
   final fileSameSize = fileLength == assetLength;
   if (!fileExists || !fileSameSize) {
     debugPrint(
-        'Copying model to $modelPath. Why? Either the file does not exist (${!fileExists}), '
-        'or it does exist but is not the same size as the one in the assets '
-        'directory. (${!fileSameSize})');
+      'Copying model to $modelPath. Why? Either the file does not exist (${!fileExists}), '
+      'or it does exist but is not the same size as the one in the assets '
+      'directory. (${!fileSameSize})',
+    );
     debugPrint('About to get byte data for $modelPath');
 
     List<int> bytes = assetByteData.buffer.asUint8List(

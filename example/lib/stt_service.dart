@@ -37,16 +37,20 @@ class GetMicrophoneResponse {
   final Stream<Uint8List> audioStream;
   final AudioRecorder audioRecorder;
 
-  GetMicrophoneResponse(
-      {required this.audioStream, required this.audioRecorder});
+  GetMicrophoneResponse({
+    required this.audioStream,
+    required this.audioRecorder,
+  });
 }
 
 class GetExistingBytesResponse {
   final Stream<Uint8List> audioStream;
   final StreamController<Uint8List> audioStreamController;
 
-  GetExistingBytesResponse(
-      {required this.audioStream, required this.audioStreamController});
+  GetExistingBytesResponse({
+    required this.audioStream,
+    required this.audioStreamController,
+  });
 }
 
 class SttService {
@@ -88,6 +92,7 @@ class SttService {
   /// then the recording will stop.
   final Duration maxSilenceDuration;
   final String vadModelPath;
+
   /// The speech-to-text model.
   final SttInference inference;
 
@@ -146,7 +151,8 @@ class SttService {
         return;
       }
       audioBuffer = Uint8List.fromList(audioBuffer + event);
-      const maxVadFrameSizeInBytes = kSampleRate *
+      const maxVadFrameSizeInBytes =
+          kSampleRate *
           kMaxVadFrameMs *
           kChannels *
           (kBitsPerSample / 8) ~/
@@ -176,21 +182,24 @@ class SttService {
       await _processBufferAndVad(vad, buffer, frames, streamController);
       _vadInferenceLoop(vad, frames, streamController);
     } else {
-      Future.delayed(const Duration(milliseconds: kMaxVadFrameMs),
-          () => _vadInferenceLoop(vad, frames, streamController));
+      Future.delayed(
+        const Duration(milliseconds: kMaxVadFrameMs),
+        () => _vadInferenceLoop(vad, frames, streamController),
+      );
     }
   }
 
   Future<void> _processBufferAndVad(
-      SileroVad vad,
-      Uint8List buffer,
-      List<AudioFrame> frames,
-      StreamController<SttServiceResponse> streamController) async {
+    SileroVad vad,
+    Uint8List buffer,
+    List<AudioFrame> frames,
+    StreamController<SttServiceResponse> streamController,
+  ) async {
     // Process buffer into frames for VAD
     final frameSizeInBytes =
         (kSampleRate * kMaxVadFrameMs * kChannels * (kBitsPerSample / 8))
-                .toInt() ~/
-            1000;
+            .toInt() ~/
+        1000;
     int index = 0;
     while ((index + 1) * frameSizeInBytes <= buffer.length) {
       final startIdx = index * frameSizeInBytes;
@@ -199,17 +208,21 @@ class SttService {
       final frame = AudioFrame(bytes: frameBytes);
       frames.add(frame);
       final idx = frames.length - 1;
-      final nextVdState =
-          await vad.doInference(frameBytes, previousState: lastVadState);
+      final nextVdState = await vad.doInference(
+        frameBytes,
+        previousState: lastVadState,
+      );
       lastVadState = nextVdState;
       lastVadStateIndex = idx;
       final p = (nextVdState['output'] as Float32List).first;
       frames[idx].vadP = p;
       if (!stopped) {
-        streamController.add(SttServiceResponse(
-          transcription: sessionManager.transcription,
-          audioFrames: frames,
-        ));
+        streamController.add(
+          SttServiceResponse(
+            transcription: sessionManager.transcription,
+            audioFrames: frames,
+          ),
+        );
       } else {
         break;
       }
@@ -263,16 +276,20 @@ class SttService {
       final bytesToInfer = bytesToInferBuilder.takeBytes();
       final result = (await inference(bytesToInfer)).trim();
       sessionManager.addInferenceResult(result, voiceFrames.first);
-      streamController.add(SttServiceResponse(
-        transcription: sessionManager.transcription,
-        audioFrames: frames,
-      ));
+      streamController.add(
+        SttServiceResponse(
+          transcription: sessionManager.transcription,
+          audioFrames: frames,
+        ),
+      );
     }
 
     void scheduleNextInference() async {
       if (!stopped) {
-        Future.delayed(const Duration(milliseconds: 16),
-            () => _sttInferenceLoop(frames, streamController));
+        Future.delayed(
+          const Duration(milliseconds: 16),
+          () => _sttInferenceLoop(frames, streamController),
+        );
         return;
       }
       // Stopped.
@@ -302,10 +319,10 @@ class SttSessionManager {
     return _frozenTranscription;
   }
 
-
   List<AudioFrame> getAudioFrames({
     required List<AudioFrame> frames,
     required double voiceThresholdSegmentEnd,
+
     /// If true, all frames without speech are discarded.
     /// If false, only the first frames without speech are discarded.
     /// This significantly helps inference quality on at least Whisper Tiny.
@@ -314,20 +331,23 @@ class SttSessionManager {
     required bool multipleSegments,
   }) {
     if (!multipleSegments) {
-      final firstVoiceFrameIndex = frames.indexWhere((frame) =>
-          frame.vadP != null && frame.vadP! >= voiceThresholdSegmentEnd);
+      final firstVoiceFrameIndex = frames.indexWhere(
+        (frame) =>
+            frame.vadP != null && frame.vadP! >= voiceThresholdSegmentEnd,
+      );
       if (firstVoiceFrameIndex == -1) {
         return <AudioFrame>[];
       }
       return frames.sublist(firstVoiceFrameIndex);
     }
-    
+
     var indexOfLastSegmentStart = -1;
     for (var i = frames.length - 1; i >= 0; i--) {
       final currentIndexInSegment =
           frames[i].vadP != null && frames[i].vadP! >= voiceThresholdSegmentEnd;
       final hasPreviousIndex = i - 1 >= 0;
-      final previousIndexIsOutsideSegment = hasPreviousIndex &&
+      final previousIndexIsOutsideSegment =
+          hasPreviousIndex &&
           frames[i - 1].vadP != null &&
           frames[i - 1].vadP! < voiceThresholdSegmentEnd;
       if (currentIndexInSegment && previousIndexIsOutsideSegment) {
@@ -344,7 +364,8 @@ class SttSessionManager {
 
   void addInferenceResult(String result, AudioFrame firstInferenceInputFrame) {
     final lastResult = _lastInferenceResult;
-    final isNewSegment = lastResult != null &&
+    final isNewSegment =
+        lastResult != null &&
         _lastFirstInferenceInputFrame != firstInferenceInputFrame;
     if (isNewSegment) {
       if (_frozenTranscription.isNotEmpty && lastResult.isNotEmpty) {

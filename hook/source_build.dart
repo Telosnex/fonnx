@@ -331,11 +331,9 @@ Future<void> _checkLinuxBaseline(
   final versions = await _run('readelf', ['--version-info', library.path], log);
   for (final (prefix, ceiling) in [('GLIBC', '2.35'), ('GLIBCXX', '3.4.30')]) {
     final required =
-        RegExp('${prefix}_([0-9]+(?:\\.[0-9]+)*)')
-            .allMatches(versions)
-            .map((m) => m.group(1)!)
-            .toSet()
-            .toList()
+        RegExp(
+            '${prefix}_([0-9]+(?:\\.[0-9]+)*)',
+          ).allMatches(versions).map((m) => m.group(1)!).toSet().toList()
           ..sort(_compareVersions);
     if (required.isEmpty) continue;
     final maximum = required.last;

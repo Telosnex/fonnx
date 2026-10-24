@@ -12,32 +12,31 @@ void main() {
     'Hello world',
     '',
     ' ',
-    
+
     // Languages
-    '中国是世界上最大的国家之一',  // Chinese
-    'こんにちは世界、元気ですか',    // Japanese
-    'Hello 世界 and こんにちは',    // Mixed
-    
+    '中国是世界上最大的国家之一', // Chinese
+    'こんにちは世界、元気ですか', // Japanese
+    'Hello 世界 and こんにちは', // Mixed
     // Length variations
     'The quick brown fox jumps over the lazy dog ' * 10,
     'a',
     'a ' * 100,
-    
+
     // Special characters and whitespace
     '  Multiple   Spaces  ',
     'With\tTabs\tand\nNewlines\r\n',
     'With.punctuation!and?marks',
     'With-hyphens_and_underscores',
-    
+
     // Numbers and mixed content
     '123 456 789',
     'Mix3d with numb3rs',
     'URL: https://example.com',
-    
+
     // Edge cases
-    'a'.padLeft(1000, 'a'),  // Very long input
-    'αβγδ',  // Non-ASCII
-    '👨‍👩‍👧‍👦 👾 🤖',  // Emojis
+    'a'.padLeft(1000, 'a'), // Very long input
+    'αβγδ', // Non-ASCII
+    '👨‍👩‍👧‍👦 👾 🤖', // Emojis
   ];
 
   final originalTokenizer = WordpieceTokenizer(
@@ -84,10 +83,7 @@ void main() {
     },
   );
 
-  perfTest.run(
-    warmupRuns: 100,
-    benchmarkRuns: 100,
-  );
+  perfTest.run(warmupRuns: 100, benchmarkRuns: 100);
 }
 
 class WordpieceTokenizerNew {
@@ -173,8 +169,9 @@ class WordpieceTokenizerNew {
       // Try wordpiece matches
       while (start < end) {
         final piece = word.substring(start, end);
-        final token =
-            start == 0 ? _prefixTokens[piece] : _wordpieceTokens[piece];
+        final token = start == 0
+            ? _prefixTokens[piece]
+            : _wordpieceTokens[piece];
 
         if (token != null) {
           tokens.add(token);
@@ -208,7 +205,7 @@ class WordpieceTokenizerNew {
     text = text.trim();
     if (text.isEmpty) {
       return [
-        TextAndTokens(text: '', tokens: [startToken, endToken])
+        TextAndTokens(text: '', tokens: [startToken, endToken]),
       ];
     }
 
@@ -223,8 +220,9 @@ class WordpieceTokenizerNew {
       if (word.length > maxInputCharsPerWord) continue;
 
       // Get or compute normalized word
-      final normalizedWord =
-          _normalizedCache[word] ??= removeDiacritics(word.toLowerCase());
+      final normalizedWord = _normalizedCache[word] ??= removeDiacritics(
+        word.toLowerCase(),
+      );
       final wordTokens = _tokenizeWord(normalizedWord);
 
       if (currentTokens.length + wordTokens.length >= max - 1) {
@@ -249,10 +247,8 @@ class WordpieceTokenizerNew {
 
     return List<TextAndTokens>.generate(
       allOutputStrings.length,
-      (i) => TextAndTokens(
-        text: allOutputStrings[i],
-        tokens: allOutputTokens[i],
-      ),
+      (i) =>
+          TextAndTokens(text: allOutputStrings[i], tokens: allOutputTokens[i]),
     );
   }
 

@@ -11,7 +11,7 @@ class PerfTester<Input, Output> {
   final String impl1Name;
   final String impl2Name;
   final bool Function(Output?, Output?)? equalityCheck;
-  
+
   final _random = math.Random(42);
   final List<double> impl1Times = [];
   final List<double> impl2Times = [];
@@ -133,7 +133,9 @@ class PerfTester<Input, Output> {
         : (list[list.length ~/ 2 - 1] + list[list.length ~/ 2]) / 2;
     double stdDev(List<double> list, double mean) {
       var squaredDiffs = list.map((x) => math.pow(x - mean, 2));
-      return math.sqrt(squaredDiffs.reduce((a, b) => a + b) / (list.length - 1));
+      return math.sqrt(
+        squaredDiffs.reduce((a, b) => a + b) / (list.length - 1),
+      );
     }
 
     var impl1Mean = mean(impl1Times);
@@ -142,17 +144,27 @@ class PerfTester<Input, Output> {
 
     print('\n=== $testName Performance Summary ===');
     print('                  $impl2Name    $impl1Name     Improvement');
-    print('Min (ms):         ${impl2Times.first.toStringAsFixed(3).padRight(12)} '
-        '${impl1Times.first.toStringAsFixed(3).padRight(12)}');
-    print('Max (ms):         ${impl2Times.last.toStringAsFixed(3).padRight(12)} '
-        '${impl1Times.last.toStringAsFixed(3).padRight(12)}');
-    print('Median (ms):      ${median(impl2Times).toStringAsFixed(3).padRight(12)} '
-        '${median(impl1Times).toStringAsFixed(3).padRight(12)}');
-    print('Mean (ms):        ${impl2Mean.toStringAsFixed(3).padRight(12)} '
-        '${impl1Mean.toStringAsFixed(3).padRight(12)} '
-        '${improvement.toStringAsFixed(1)}%');
-    print('Std Dev (ms):     ${stdDev(impl2Times, impl2Mean).toStringAsFixed(3).padRight(12)} '
-        '${stdDev(impl1Times, impl1Mean).toStringAsFixed(3).padRight(12)}');
+    print(
+      'Min (ms):         ${impl2Times.first.toStringAsFixed(3).padRight(12)} '
+      '${impl1Times.first.toStringAsFixed(3).padRight(12)}',
+    );
+    print(
+      'Max (ms):         ${impl2Times.last.toStringAsFixed(3).padRight(12)} '
+      '${impl1Times.last.toStringAsFixed(3).padRight(12)}',
+    );
+    print(
+      'Median (ms):      ${median(impl2Times).toStringAsFixed(3).padRight(12)} '
+      '${median(impl1Times).toStringAsFixed(3).padRight(12)}',
+    );
+    print(
+      'Mean (ms):        ${impl2Mean.toStringAsFixed(3).padRight(12)} '
+      '${impl1Mean.toStringAsFixed(3).padRight(12)} '
+      '${improvement.toStringAsFixed(1)}%',
+    );
+    print(
+      'Std Dev (ms):     ${stdDev(impl2Times, impl2Mean).toStringAsFixed(3).padRight(12)} '
+      '${stdDev(impl1Times, impl1Mean).toStringAsFixed(3).padRight(12)}',
+    );
   }
 
   void _printVisualizations() {
@@ -214,8 +226,12 @@ class PerfTester<Input, Output> {
     return result.toString();
   }
 
-  String _generateHistogram(List<double> data,
-      {int bins = 10, int width = 50, String title = ''}) {
+  String _generateHistogram(
+    List<double> data, {
+    int bins = 10,
+    int width = 50,
+    String title = '',
+  }) {
     if (data.isEmpty) return '';
 
     var min = data.reduce(math.min);
@@ -245,8 +261,9 @@ class PerfTester<Input, Output> {
       var bars = (count / maxCount * width).round();
 
       result.writeln(
-          '${binStart.toStringAsFixed(1).padLeft(7)}-${binEnd.toStringAsFixed(1).padLeft(7)}ms '
-          '|${'█' * bars}${' ' * (width - bars)}| $count');
+        '${binStart.toStringAsFixed(1).padLeft(7)}-${binEnd.toStringAsFixed(1).padLeft(7)}ms '
+        '|${'█' * bars}${' ' * (width - bars)}| $count',
+      );
     }
 
     return result.toString();

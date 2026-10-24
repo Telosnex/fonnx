@@ -30,7 +30,8 @@ class _PyannoteWidgetState extends State<PyannoteWidget> {
           style: Theme.of(context).textTheme.headlineLarge,
         ),
         const Text(
-            'Speaker diarization model that identifies who speaks when in audio.'),
+          'Speaker diarization model that identifies who speaks when in audio.',
+        ),
         heightPadding,
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -62,8 +63,9 @@ class _PyannoteWidgetState extends State<PyannoteWidget> {
 
   Future<String> testPerformance(Pyannote pyannote) async {
     // Get test audio file as Float32List
-    final wavFile =
-        await rootBundle.load('assets/audio_sample_ac1_ar16000.pcm');
+    final wavFile = await rootBundle.load(
+      'assets/audio_sample_ac1_ar16000.pcm',
+    );
     final audioData = wavFile.buffer.asFloat32List();
 
     const iterations = 3;
@@ -97,10 +99,12 @@ class _PyannoteWidgetState extends State<PyannoteWidget> {
       return 'assets/models/pyannote/$modelFilenameWithExtension';
     }
 
-    final assetCacheDirectory =
-        await path_provider.getApplicationSupportDirectory();
-    final modelPath =
-        path.join(assetCacheDirectory.path, modelFilenameWithExtension);
+    final assetCacheDirectory = await path_provider
+        .getApplicationSupportDirectory();
+    final modelPath = path.join(
+      assetCacheDirectory.path,
+      modelFilenameWithExtension,
+    );
 
     File file = File(modelPath);
     bool fileExists = await file.exists();
@@ -114,9 +118,10 @@ class _PyannoteWidgetState extends State<PyannoteWidget> {
 
     if (!fileExists || !fileSameSize) {
       debugPrint(
-          'Copying model to $modelPath. Why? Either the file does not exist (${!fileExists}), '
-          'or it does exist but is not the same size as the one in the assets '
-          'directory. (${!fileSameSize})');
+        'Copying model to $modelPath. Why? Either the file does not exist (${!fileExists}), '
+        'or it does exist but is not the same size as the one in the assets '
+        'directory. (${!fileSameSize})',
+      );
       debugPrint('About to get byte data for $modelPath');
 
       List<int> bytes = assetByteData.buffer.asUint8List(

@@ -116,7 +116,8 @@ void main() {
       code.writeln('      MagikaGroup.${object['group']},');
       code.writeln('    },');
       code.writeln(
-          '  )${label == labelsInScopeForOutputContentType.last ? ';' : ','}');
+        '  )${label == labelsInScopeForOutputContentType.last ? ';' : ','}',
+      );
     }
     code.writeln();
     code.write('''

@@ -24,12 +24,10 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         heightPadding,
-        Text(
-          'Silero VAD',
-          style: Theme.of(context).textTheme.headlineLarge,
-        ),
+        Text('Silero VAD', style: Theme.of(context).textTheme.headlineLarge),
         const Text(
-            '2 MB model detects when speech is present in audio. By Silero.'),
+          '2 MB model detects when speech is present in audio. By Silero.',
+        ),
         heightPadding,
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -89,10 +87,12 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
     if (kIsWeb) {
       return 'assets/models/sileroVad/$modelFilenameWithExtension';
     }
-    final assetCacheDirectory =
-        await path_provider.getApplicationSupportDirectory();
-    final modelPath =
-        path.join(assetCacheDirectory.path, modelFilenameWithExtension);
+    final assetCacheDirectory = await path_provider
+        .getApplicationSupportDirectory();
+    final modelPath = path.join(
+      assetCacheDirectory.path,
+      modelFilenameWithExtension,
+    );
 
     File file = File(modelPath);
     bool fileExists = await file.exists();
@@ -108,9 +108,10 @@ class _SileroVadWidgetState extends State<SileroVadWidget> {
     final fileSameSize = fileLength == assetLength;
     if (!fileExists || !fileSameSize) {
       debugPrint(
-          'Copying model to $modelPath. Why? Either the file does not exist (${!fileExists}), '
-          'or it does exist but is not the same size as the one in the assets '
-          'directory. (${!fileSameSize})');
+        'Copying model to $modelPath. Why? Either the file does not exist (${!fileExists}), '
+        'or it does exist but is not the same size as the one in the assets '
+        'directory. (${!fileSameSize})',
+      );
       debugPrint('About to get byte data for $modelPath');
 
       List<int> bytes = assetByteData.buffer.asUint8List(

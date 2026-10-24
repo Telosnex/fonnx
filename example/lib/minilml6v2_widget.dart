@@ -25,12 +25,10 @@ class _MiniLmL6V2WidgetState extends State<MiniLmL6V2Widget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         heightPadding,
-        Text(
-          'MiniLM L6 V2',
-          style: Theme.of(context).textTheme.headlineLarge,
-        ),
+        Text('MiniLM L6 V2', style: Theme.of(context).textTheme.headlineLarge),
         const Text(
-            '23 MB model can convert text to a 384-dimensional vector. By Microsoft.\nFor symmetric search: matching a query to other text like it.'),
+          '23 MB model can convert text to a 384-dimensional vector. By Microsoft.\nFor symmetric search: matching a query to other text like it.',
+        ),
         heightPadding,
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -66,7 +64,8 @@ class _MiniLmL6V2WidgetState extends State<MiniLmL6V2Widget> {
     var completed = 0;
     while (completed < 1000) {
       await model.getEmbeddingAsVector(
-          textAndTokens[completed % textAndTokens.length].tokens);
+        textAndTokens[completed % textAndTokens.length].tokens,
+      );
       completed++;
     }
     stopwatch.stop();
@@ -84,10 +83,12 @@ Future<String> getModelPath(String modelFilenameWithExtension) async {
   if (kIsWeb) {
     return 'assets/models/miniLmL6V2/$modelFilenameWithExtension';
   }
-  final assetCacheDirectory =
-      await path_provider.getApplicationSupportDirectory();
-  final modelPath =
-      path.join(assetCacheDirectory.path, modelFilenameWithExtension);
+  final assetCacheDirectory = await path_provider
+      .getApplicationSupportDirectory();
+  final modelPath = path.join(
+    assetCacheDirectory.path,
+    modelFilenameWithExtension,
+  );
 
   File file = File(modelPath);
   bool fileExists = await file.exists();
@@ -103,9 +104,10 @@ Future<String> getModelPath(String modelFilenameWithExtension) async {
   final fileSameSize = fileExists && fileLength == assetLength;
   if (!fileExists || !fileSameSize) {
     debugPrint(
-        'Copying model to $modelPath. Why? Either the file does not exist (${!fileExists}), '
-        'or it does exist but is not the same size as the one in the assets '
-        'directory. (${!fileSameSize})');
+      'Copying model to $modelPath. Why? Either the file does not exist (${!fileExists}), '
+      'or it does exist but is not the same size as the one in the assets '
+      'directory. (${!fileSameSize})',
+    );
 
     List<int> bytes = assetByteData.buffer.asUint8List(
       assetByteData.offsetInBytes,
