@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:fonnx/models/kokoro/kokoro.dart';
 import 'package:fonnx/models/kokoro/kokoro_ffi.dart';
 import 'package:fonnx/models/kokoro/kokoro_stages_ffi.dart';

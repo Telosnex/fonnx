@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:fonnx/models/keyword_spotter/keyword_spotter.dart';
 import 'package:fonnx/models/keyword_spotter/src/streaming_fbank.dart';
 import 'package:fonnx/models/magika/magika.dart';

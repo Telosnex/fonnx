@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:code_assets/code_assets.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:hooks/hooks.dart';
 
 import '../hook/apple_compatibility.dart';

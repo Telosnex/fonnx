@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:isolate';
 
-import 'package:flutter/foundation.dart';
 import 'package:fonnx/dylib_path_overrides.dart';
 import 'package:fonnx/models/sileroVad/silero_vad_v6_ffi.dart';
 import 'package:fonnx/onnx/ort.dart';
@@ -55,7 +54,6 @@ void sileroVadIsolateEntryPoint(SendPort mainSendPort) {
       }
       Isolate.exit();
     } else {
-      debugPrint('Unknown message received in the ONNX isolate.');
       throw Exception('Unknown message received in the ONNX isolate.');
     }
   });

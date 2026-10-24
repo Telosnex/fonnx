@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'dart:typed_data';
+import 'package:test/test.dart';
 import 'package:fonnx/extensions/uint8list.dart';
 import 'package:fonnx/models/senseVoice/sense_voice.dart';
 import 'package:fonnx/models/senseVoice/sense_voice_native.dart';
@@ -108,9 +108,9 @@ void main() {
     }
     sw.stop();
     final average = sw.elapsedMilliseconds / (iterations - 1);
-    debugPrint('SenseVoice performance:');
-    debugPrint('  Average: ${average.toStringAsFixed(0)} ms');
-    debugPrint(
+    print('SenseVoice performance:');
+    print('  Average: ${average.toStringAsFixed(0)} ms');
+    print(
       '  Speed multiplier: '
       '${(bytes.length / 32 / math.max(average, 1)).toStringAsFixed(2)}x',
     );

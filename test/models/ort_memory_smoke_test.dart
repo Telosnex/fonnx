@@ -3,7 +3,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:fonnx/models/magika/magika.dart';
 import 'package:fonnx/models/magika/magika_native.dart';
 import 'package:fonnx/models/minilml6v2/mini_lm_l6_v2.dart';

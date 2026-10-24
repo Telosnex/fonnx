@@ -1,7 +1,7 @@
 import 'dart:ffi';
 import 'dart:io';
+import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
 import 'package:fonnx/dylib_path_overrides.dart';
 import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free, malloc;
 import 'package:ffi/ffi.dart';
@@ -1042,7 +1042,6 @@ OrtSessionObjects createOrtSession(
       ..releaseSession = ortApi.ReleaseSession
       ..releaseEnv = ortApi.ReleaseEnv;
     ownershipTransferred = true;
-    debugPrint('ORT Session created');
     return OrtSessionObjects._(
       sessionPtr: sessionPtr,
       envPtr: envPtr,

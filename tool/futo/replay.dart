@@ -1,5 +1,5 @@
 // Optional, network-enabled end-to-end regression for the public FutoSwipe API.
-// flutter test tool/futo/replay.dart --concurrency=1 --reporter expanded
+// dart test tool/futo/replay.dart --concurrency=1 --reporter expanded
 //
 // Raw public traces go through FutoSwipe.decode: Dart resampling, native ONNX
 // Runtime, and lexicon search. Results are compared with frozen ExecuTorch
@@ -9,7 +9,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:fonnx/fonnx.dart';
 
 import 'bundle.dart';

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:ml_linalg/linalg.dart';
 
 /// Runs [embed] with a checked-in input and compares every output component.

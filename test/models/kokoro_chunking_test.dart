@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:fonnx/models/kokoro/kokoro_chunking.dart';
 import 'package:fonnx/models/kokoro/kokoro_sentence_splitter.dart';
 import 'package:fonnx/models/kokoro/kokoro_normalizer.dart';
@@ -9,7 +9,7 @@ import 'package:fonnx/models/kokoro/kokoro_normalizer.dart';
 import 'test_files.dart';
 
 void main() {
-  // Also runs in Chrome: flutter test --platform chrome <this file>.
+  // Also runs in Chrome: dart test -p chrome <this file>.
   test('acoustic policy and crossfade match pinned C++ reference', () async {
     final golden =
         jsonDecode(await readTestText('data/goldens/kokoro_chunking.json'))

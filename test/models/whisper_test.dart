@@ -1,8 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:fonnx/models/whisper/whisper.dart';
 import 'package:fonnx/models/whisper/whisper_native.dart';
 
@@ -101,13 +100,13 @@ void main() {
       await whisper.doInference(bytes);
     }
     sw.stop();
-    debugPrint('Whisper performance:');
+    print('Whisper performance:');
     final average =
         sw.elapsedMilliseconds.toDouble() / (iterations - 1).toDouble();
-    debugPrint('  Average: ${average.toStringAsFixed(0)} ms');
-    debugPrint('  Total: ${sw.elapsedMilliseconds} ms');
+    print('  Average: ${average.toStringAsFixed(0)} ms');
+    print('  Total: ${sw.elapsedMilliseconds} ms');
     final fileDurationMs = bytes.length / 32;
     final speedMultiplier = fileDurationMs / average;
-    debugPrint('  Speed multiplier: ${speedMultiplier.toStringAsFixed(2)}x');
+    print('  Speed multiplier: ${speedMultiplier.toStringAsFixed(2)}x');
   });
 }

@@ -1,9 +1,9 @@
 // Runs on the VM and in Chrome:
-//   flutter test test/models/spacy_hash_test.dart
-//   flutter test --platform chrome test/models/spacy_hash_test.dart
+//   dart test test/models/spacy_hash_test.dart
+//   dart test -p chrome test/models/spacy_hash_test.dart
 import 'dart:convert';
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:fonnx/models/kokoro/misaki/spacy_hash.dart';
 
 import 'spacy_hash_refs.dart';

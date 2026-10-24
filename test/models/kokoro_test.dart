@@ -3,7 +3,7 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:fonnx/models/kokoro/kokoro_ffi.dart';
 import 'package:fonnx/models/kokoro/misaki/misaki.dart';
 import 'package:fonnx/models/kokoro/misaki/misaki_fallback_ffi.dart';

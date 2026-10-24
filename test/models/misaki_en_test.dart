@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:fonnx/models/kokoro/misaki/misaki.dart';
 import 'package:fonnx/models/kokoro/misaki/misaki_fallback_ffi.dart';
 import 'package:fonnx/onnx/ort.dart';

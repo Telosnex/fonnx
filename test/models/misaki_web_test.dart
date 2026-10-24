@@ -6,7 +6,7 @@ import 'dart:convert';
 import 'dart:js_interop';
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:fonnx/models/kokoro/misaki/misaki.dart';
 import 'package:fonnx/models/kokoro/misaki/spacy_en.dart';
 
@@ -19,7 +19,7 @@ import 'spacy_hash_refs.dart';
 /// test/web_models link to example/assets/models. Build it first with
 /// tool/kokoro/prepare_bundle.dart.
 ///
-///   flutter test --platform chrome test/models/misaki_web_test.dart
+///   dart test -p chrome test/models/misaki_web_test.dart
 void main() {
   const dir = '/web_models/kokoro';
   late SpacyEnglish spacy;

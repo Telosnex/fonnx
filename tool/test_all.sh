@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Authoritative FONNX package gate. Every Flutter test path is explicit so the
+# Authoritative FONNX package gate. Every test path is explicit so the
 # large model/RSS corpus runs in one serialized process.
 set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
@@ -29,7 +29,7 @@ tests=(
 )
 
 dart run tool/fetch_hf_models.dart
-flutter analyze
+dart analyze
 dart run tool/verify_artifacts.dart
 # The browser tests load the web files from lib/web/ (native_prebuilt ADR 002
 # D13). Pass a tool/build_web.dart output in FONNX_WEB_FROM to use it.
@@ -39,23 +39,14 @@ tool/test_native_sanitizers.sh
 if [[ "$(uname -s)-$(uname -m)" == Darwin-arm64 ]]; then
   tool/test_macos_artifacts.sh
 fi
-flutter test --concurrency=1 -r compact "${tests[@]}"
+dart test --concurrency=1 -r compact "${tests[@]}"
 # RSS baselines must start in a fresh process. Running them after every other
 # hydrated model leaves allocator arenas from unrelated sessions in the same
 # process and turns ordinary high-water fluctuations into false leak reports.
-flutter test test/models/ort_memory_smoke_test.dart \
+dart test test/models/ort_memory_smoke_test.dart \
   --concurrency=1 -r compact
-flutter test test/deterministic_operation_corpus_test.dart \
-  test/web_runtime_test.dart --platform chrome -r compact
-# dart2wasm. With the default skwasm renderer, the test server sends COOP and
-# COEP on the .html page only. The page is then cross-origin isolated, and
-# Chrome refuses each model Worker script, because it has no COEP header. The
-# CanvasKit renderer keeps the page not isolated, as in the dart2js run.
-flutter test test/deterministic_operation_corpus_test.dart \
-  test/web_runtime_test.dart --platform chrome --wasm \
-  --no-cross-origin-isolation \
-  --dart-define=FLUTTER_WEB_USE_SKIA=true \
-  --dart-define=FLUTTER_WEB_USE_SKWASM=false -r compact
+dart test test/deterministic_operation_corpus_test.dart \
+  test/web_runtime_test.dart -p chrome -c dart2js,dart2wasm -r compact
 
 if [[ "${FONNX_FULL_RUNTIME_MATRIX:-0}" == 1 ]]; then
   tool/test_linux_artifact_docker.sh linux-arm64

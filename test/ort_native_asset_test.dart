@@ -1,6 +1,6 @@
 import 'dart:ffi';
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:fonnx/onnx/ort.dart';
 import 'package:fonnx/onnx/ort_ffi_bindings.dart';
 

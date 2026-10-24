@@ -3,7 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:fonnx/models/futo_swipe/futo_swipe.dart';
 import 'package:fonnx/models/futo_swipe/src/futo_swipe_ort_backend.dart';
 

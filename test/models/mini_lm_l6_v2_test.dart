@@ -1,5 +1,4 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:fonnx/extensions/vector.dart';
 import 'package:fonnx/models/minilml6v2/mini_lm_l6_v2.dart';
 import 'package:fonnx/models/minilml6v2/mini_lm_l6_v2_native.dart';
@@ -65,7 +64,7 @@ void main() {
     await Future.wait(futures);
     sw.stop();
     final elapsed = sw.elapsedMilliseconds;
-    debugPrint(
+    print(
       'Elapsed: $elapsed ms for $count embeddings (${elapsed / count} ms per embedding)',
     );
   });

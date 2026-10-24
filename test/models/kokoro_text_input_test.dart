@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 // Only kokoro.dart: the splitter must be exported from it.
 import 'package:fonnx/models/kokoro/kokoro.dart';
 

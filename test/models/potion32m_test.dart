@@ -1,5 +1,4 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:fonnx/extensions/vector.dart';
 import 'package:fonnx/models/minishLab/minish_lab_native.dart';
 import 'package:fonnx/tokenizers/potion_32m_tokenizer.dart';
@@ -65,7 +64,7 @@ void main() {
     await Future.wait(futures);
     sw.stop();
     final elapsed = sw.elapsedMilliseconds;
-    debugPrint(
+    print(
       'Elapsed: $elapsed ms for $count embeddings (${elapsed / count} ms per embedding)',
     );
   });

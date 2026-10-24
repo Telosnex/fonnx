@@ -1,5 +1,5 @@
 // Kokoro first-audio benchmark. Skipped unless KOKORO_BENCH is set:
-//   KOKORO_BENCH=1 flutter test test/models/kokoro_benchmark_test.dart
+//   KOKORO_BENCH=1 dart test test/models/kokoro_benchmark_test.dart
 //
 // Prints one table for the first utterance of each case. "first" is from
 // the request (or the first add) to the first chunk. "total" is to the last
@@ -11,7 +11,7 @@
 // so the first unit ends when the next word arrives (D3 in ADR 014).
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:fonnx/models/kokoro/kokoro.dart';
 
 import 'kokoro_stream_test.dart' show bundle;

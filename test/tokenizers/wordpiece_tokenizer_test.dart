@@ -1,7 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:fonnx/models/minilml6v2/mini_lm_l6_v2.dart';
 
 void main() {
@@ -75,7 +74,7 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
         final _ = tokenizer.tokenize(lipsum);
       }
       sw.stop();
-      debugPrint(
+      print(
           'Speed test: ${sw.elapsedMilliseconds / trials} ms. Total: ${sw.elapsedMilliseconds} ms');
     });
 
@@ -355,11 +354,11 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
     for (final line in string.split('\n')) {
       final string = line.trimRight();
       if (string.isEmpty) {
-        debugPrint('WARNING: vocab has empty string');
+        print('WARNING: vocab has empty string');
         continue;
       }
       if (stringToTokenIndex.containsKey(string)) {
-        debugPrint('WARNING: vocab has seemingly duplicate string `$string`');
+        print('WARNING: vocab has seemingly duplicate string `$string`');
         continue;
       }
       strings.add(string);
@@ -396,11 +395,11 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
     for (final line in string.split('\n')) {
       final string = line.trimRight();
       if (string.isEmpty) {
-        debugPrint('WARNING: vocab has empty string');
+        print('WARNING: vocab has empty string');
         continue;
       }
       if (stringToTokenIndex.containsKey(string)) {
-        debugPrint('WARNING: vocab has seemingly duplicate string `$string`');
+        print('WARNING: vocab has seemingly duplicate string `$string`');
         continue;
       }
       strings.add(string);
@@ -437,11 +436,11 @@ Qui rebum delectus et, ad elit deserunt inimicus quo, vix ne molestie dissentias
     for (final line in string.split('\n')) {
       final string = line.trimRight();
       if (string.isEmpty) {
-        debugPrint('WARNING: vocab has empty string');
+        print('WARNING: vocab has empty string');
         continue;
       }
       if (stringToTokenIndex.containsKey(string)) {
-        debugPrint('WARNING: vocab has seemingly duplicate string `$string`');
+        print('WARNING: vocab has seemingly duplicate string `$string`');
         continue;
       }
       strings.add(string);

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:fonnx/models/futo_swipe/futo_swipe.dart';
 import 'package:fonnx/models/futo_swipe/src/context_hash.dart';
 import 'package:fonnx/models/futo_swipe/src/ctc_prefix_search.dart';

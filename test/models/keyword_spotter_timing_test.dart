@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:fonnx/models/keyword_spotter/keyword_spotter.dart';
 import 'package:fonnx/models/keyword_spotter/src/context_graph.dart';
 import 'package:fonnx/models/keyword_spotter/src/keyword_spotter_engine.dart';

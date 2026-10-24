@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'dart:js_interop';
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:fonnx/fonnx.dart';
 
 import 'kokoro_web_golden.dart';
@@ -21,7 +21,7 @@ import 'kokoro_web_golden.dart';
 /// The test server serves test/ at the root, so the bundle comes from the
 /// test/web_models link to example/assets/models (tool/kokoro/prepare_bundle.dart).
 ///
-///     flutter test --platform chrome test/models/kokoro_web_test.dart
+///     dart test -p chrome test/models/kokoro_web_test.dart
 void main() {
   late Kokoro kokoro;
   var loaded = false;

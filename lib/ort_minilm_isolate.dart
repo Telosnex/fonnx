@@ -1,9 +1,9 @@
 import 'dart:isolate';
 import 'dart:async';
 import 'dart:ffi';
+import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
-import 'package:flutter/foundation.dart';
 import 'package:fonnx/dylib_path_overrides.dart';
 import 'package:fonnx/onnx/ort_ffi_bindings.dart' hide calloc, free, malloc;
 import 'package:fonnx/onnx/ort.dart';
@@ -136,7 +136,6 @@ void ortMiniLmIsolateEntryPoint(SendPort mainSendPort) {
       }
       Isolate.exit();
     } else {
-      debugPrint('Unknown message received in the ONNX isolate.');
       throw Exception('Unknown message received in the ONNX isolate.');
     }
   });
@@ -297,9 +296,6 @@ void ortMinishLabIsolateEntryPoint(SendPort mainSendPort) {
       }
       Isolate.exit();
     } else {
-      debugPrint(
-        'Unknown message received in the ONNX isolate. Message: $message',
-      );
       throw Exception(
         'Unknown message received in the ONNX isolate. Message: $message',
       );

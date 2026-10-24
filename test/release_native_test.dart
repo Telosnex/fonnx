@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:native_prebuilt/native_prebuilt.dart';
 import 'package:native_prebuilt/src/publisher.dart';
 
