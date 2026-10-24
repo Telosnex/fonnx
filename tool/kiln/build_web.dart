@@ -1,13 +1,14 @@
 /// Writes the generated FONNX web runtime files to --out: the ONNX Runtime
 /// Web files of web_build/onnxruntime_web.json, extracted from the pinned npm
 /// tarball, and the Kokoro Worker engine, compiled from Dart. The tarball and
-/// each ORT file are checked by SHA-256.
+/// each ORT file are checked by SHA-256. --toolchain-file gets the toolchain
+/// description for web.json.
 ///
-/// The release workflow runs it (native_prebuilt ADR 002 D10). For a local
-/// copy in lib/web/:
+/// The kiln release workflow runs it (kiln ADR 002 D10). For a local copy in
+/// lib/web/:
 ///
-///     dart run tool/build_web.dart --out /tmp/fonnx_web
-///     dart run native_prebuilt:web install-dev --from /tmp/fonnx_web
+///     dart run tool/kiln/build_web.dart --out /tmp/fonnx_web
+///     dart run kiln:web install-dev --from /tmp/fonnx_web
 library;
 
 import 'dart:convert';
@@ -15,15 +16,20 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 
-const _usage = 'dart run tool/build_web.dart --out <dir>';
+const _usage =
+    'dart run tool/kiln/build_web.dart --out <dir> [--toolchain-file <file>]';
 
 Future<void> main(List<String> args) async {
-  final out = switch (args) {
-    ['--out', final dir] => Directory(dir).absolute,
+  final (out, toolchainFile) = switch (args) {
+    ['--out', final dir] => (Directory(dir).absolute, null),
+    ['--out', final dir, '--toolchain-file', final file] => (
+      Directory(dir).absolute,
+      File(file),
+    ),
     ['-h' || '--help'] => _exit(_usage, 0),
     _ => _exit(_usage, 1),
   };
-  final root = Directory.fromUri(Platform.script.resolve('..'));
+  final root = Directory.fromUri(Platform.script.resolve('../..'));
   final pin = switch (jsonDecode(
     await File('${root.path}/web_build/onnxruntime_web.json').readAsString(),
   )) {
@@ -50,6 +56,18 @@ Future<void> main(List<String> args) async {
       ),
     _ => _exit('Malformed web_build/onnxruntime_web.json', 1),
   };
+  if (toolchainFile != null) {
+    final version = switch (jsonDecode(
+      await File('${root.path}/web_build/onnxruntime_web.json').readAsString(),
+    )) {
+      {'version': final String version} => version,
+      _ => _exit('web_build/onnxruntime_web.json has no version', 1),
+    };
+    await toolchainFile.parent.create(recursive: true);
+    await toolchainFile.writeAsString(
+      'onnxruntime-web $version (npm), Dart ${Platform.version.split(' ').first}\n',
+    );
+  }
 
   if (await out.exists() && await out.list().isEmpty == false) {
     final names = {...pin.files.map((f) => f.name), _kokoroEngine};

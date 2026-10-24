@@ -1,20 +1,20 @@
 # Pinned production inputs
 
 `prebuilt.json` is the native and runtime-download manifest. The hook uses
-`package:native_prebuilt` to select the release, check the source key and file
+`package:kiln` to select the release, check the source key and file
 hashes, and publish three bundled libraries. The session finalizer is prebuilt
 alongside Extensions, so consumer builds need no C compiler.
 
 `upstream_ort.json` pins the upstream ORT URLs, archive hashes, exact archive
 entries, and extracted library hashes. Source builds use these same inputs.
-`tool/release_native.dart` preserves the Microsoft/Maven URLs. It uploads
+`tool/kiln/release.dart` preserves the Microsoft/Maven URLs. It uploads
 Extensions, the finalizer, and unchanged copies of the two dynamic iOS ORT
 files. The source build uses the existing pinned iOS base. The release workflow runs the hook for all ten supported targets.
 
 `manifest.json` keeps the source pins, Web assets, model publication inputs, and
 runtime constraints. Runtime models have their own immutable release and the
 `runtimeFiles` section in `prebuilt.json`. The generated Dart catalog is in
-`lib/src/native_prebuilt.g.dart`.
+`lib/src/kiln.g.dart`.
 
 ## Source profile 2
 
@@ -78,7 +78,7 @@ tool/test_windows_artifact_wine.sh
 ```
 
 The normal build hook checks both the archive hash and each extracted file
-hash. `dart run native_prebuilt:check` checks the native and model release URLs.
+hash. `dart run kiln:check` checks the native and model release URLs.
 Use `--download` to independently download and hash every file.
 Licenses for bundled Microsoft runtime code are in the package `LICENSE`,
 in the Flutter multi-license format.

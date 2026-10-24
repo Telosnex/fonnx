@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:test/test.dart';
 import 'package:fonnx/runtime_models.dart';
-import 'package:native_prebuilt/runtime.dart';
+import 'package:kiln/runtime.dart';
 
 void main() {
   test('runtime model map covers each model file on Hugging Face', () async {
@@ -30,7 +30,7 @@ void main() {
             as Map<String, dynamic>;
     final models = manifest['models'] as Map<String, dynamic>;
     expect(
-      nativePrebuiltRuntimeFiles.keys.toSet(),
+      prebuiltRuntimeFiles.keys.toSet(),
       runtimeModelNamesByPath.values.toSet(),
     );
     for (final path in runtimeModelNamesByPath.keys) {
@@ -73,7 +73,7 @@ void main() {
     );
   });
 
-  test('download uses native_prebuilt verification', () async {
+  test('download uses kiln verification', () async {
     final bytes = utf8.encode('verified ONNX test bytes');
     final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     addTearDown(server.close);

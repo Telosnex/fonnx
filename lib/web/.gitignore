@@ -1,7 +1,7 @@
-# native_prebuilt web install-dev: generated, do not edit.
-/.native_prebuilt_web_version
+# kiln web install-dev: generated, do not edit.
+/.kiln_web_version
 /kokoro_engine.dart.js
 /ort-wasm-simd-threaded.mjs
 /ort-wasm-simd-threaded.wasm
 /ort.min.mjs
-# End of native_prebuilt web install-dev.
+# End of kiln web install-dev.

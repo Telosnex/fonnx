@@ -31,9 +31,9 @@ tests=(
 dart run tool/fetch_hf_models.dart
 dart analyze
 dart run tool/verify_artifacts.dart
-# The browser tests load the web files from lib/web/ (native_prebuilt ADR 002
-# D13). Pass a tool/build_web.dart output in FONNX_WEB_FROM to use it.
-dart run native_prebuilt:web install-dev ${FONNX_WEB_FROM:+--from "$FONNX_WEB_FROM"}
+# The browser tests load the web files from lib/web/ (kiln ADR 002
+# D13). Pass a tool/kiln/build_web.dart output in FONNX_WEB_FROM to use it.
+dart run kiln:web install-dev ${FONNX_WEB_FROM:+--from "$FONNX_WEB_FROM"}
 node tool/test_web_runtime.mjs
 tool/test_native_sanitizers.sh
 if [[ "$(uname -s)-$(uname -m)" == Darwin-arm64 ]]; then

@@ -9,7 +9,7 @@
 // `futoSwipe`. With no <path>, the tool downloads every model (1.5 GB).
 import 'dart:io';
 
-import 'package:native_prebuilt/runtime.dart';
+import 'package:kiln/runtime.dart';
 
 import 'hf/models.dart';
 

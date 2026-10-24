@@ -1,5 +1,5 @@
 /// The Dart program of the Kokoro web Worker, compiled to
-/// `lib/web/kokoro_engine.dart.js` by tool/build_web.dart. It runs the
+/// `lib/web/kokoro_engine.dart.js` by tool/kiln/build_web.dart. It runs the
 /// phonemizer and the chunking in the Worker, so they never block the page
 /// (ADR 002 R3). `lib/web/kokoro_worker.js` loads ORT Web, provides the ORT
 /// calls as `self.fonnxKokoroOrt`, and passes the requests on.

@@ -1,5 +1,9 @@
 ## 0.0.1
 
+* Use `kiln`, the new name of `native_prebuilt`, from pub.dev.
+  `nativePrebuiltRuntimeFiles` is now `prebuiltRuntimeFiles`, and the web
+  files load from `kiln/fonnx/` (`FonnxWeb.runtimeUri`). The release
+  workflow is `kiln_release.yml`, from `Telosnex/telosnex_ci_tools`.
 * Remove ONNX Runtime Extensions. No model needs a custom operator, so the
   native assets are ONNX Runtime and the session finalizer, and the release
   builds no Extensions. `createOrtSession` no longer takes

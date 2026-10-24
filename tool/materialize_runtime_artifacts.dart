@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:native_prebuilt/native_prebuilt.dart';
+import 'package:kiln/kiln.dart';
 import 'package:path/path.dart' as p;
 
 /// Downloads exactly the files that the consumer hook publishes, for the

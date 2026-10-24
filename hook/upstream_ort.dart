@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:code_assets/code_assets.dart';
-import 'package:native_prebuilt/native_prebuilt.dart';
+import 'package:kiln/kiln.dart';
 
 const ortAsset = 'onnx/ort_ffi_bindings.dart';
 const finalizerAsset = 'onnx/ort_session_finalizer.dart';

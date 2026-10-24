@@ -47,11 +47,11 @@ D2: Each URL contains a Hugging Face commit hash. No URL contains `main`.
     Instead of: `main`. A new file on `main` changes the bytes under an old
     pin. The SHA-256 check then fails for every user at the same time.
 
-D3: The catalog stays in the native_prebuilt format: the `runtimeFiles`
-    section of native_artifacts/prebuilt.json, and lib/src/native_prebuilt.g.dart.
+D3: The catalog stays in the kiln format: the `runtimeFiles`
+    section of native_artifacts/prebuilt.json, and lib/src/kiln.g.dart.
     A fonnx tool writes them with Hugging Face URLs and no compression.
     Because: R1, R4
-    Instead of: a new catalog format. `native_prebuilt:check --downloads`
+    Instead of: a new catalog format. `kiln:check --downloads`
     already checks each runtimeFiles entry, and runtimeModelFile already
     reads the generated Dart.
 
@@ -106,7 +106,7 @@ I3: Git tracks no .onnx file under example/assets/models.
 
 I4: A download with the wrong SHA-256 does not replace a file.
     If violated: an app runs a model that is not pinned.
-    Pinned by: native_prebuilt fetchVerified tests (existing).
+    Pinned by: kiln fetchVerified tests (existing).
 ```
 
 ## 5. Formats and names
@@ -148,8 +148,8 @@ NG4: A second host as a mirror.
 
 1. Done. Upload to `telosnex/fonnx` the 13 catalog models that are not there: `bpe_decoder.onnx`, the 4 FUTO Swipe files, the 3 keyword spotter files, `magika.onnx`, the 2 MinishLab files, `pyannote_seg3.onnx` and `silero_vad_v6.2.1.onnx`. The `silero_vad.onnx` on Hugging Face is a different file. Use the release names. Record the commit. The tool of step 4 uploaded all 17 in commit `4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979`.
 2. Done. Add `name` and `commit` to each entry in the `models` section of `manifest.json`. Add the CTC NemoAsr model and the 3 Parakeet TDT v3 files.
-3. Done. Make sure that native_prebuilt accepts a Hugging Face URL in `runtimeFiles`. It does: a URL without `.gz` downloads unchanged. native_prebuilt did not change.
-4. Done. Replace `tool/publish_models.dart` with a tool that checks the local files against `manifest.json`, uploads them with `hf upload`, and writes `prebuilt.json` `runtimeFiles` and `lib/src/native_prebuilt.g.dart`.
+3. Done. Make sure that kiln accepts a Hugging Face URL in `runtimeFiles`. It does: a URL without `.gz` downloads unchanged. kiln did not change.
+4. Done. Replace `tool/publish_models.dart` with a tool that checks the local files against `manifest.json`, uploads them with `hf upload`, and writes `prebuilt.json` `runtimeFiles` and `lib/src/kiln.g.dart`.
 5. Done. Change `tool/fetch_hf_models.dart` so that it downloads every catalog model, not a fixed list. It also takes paths, so that a CI job downloads only the models of its tests.
 6. Done. Add I1, I2 and I3 to `tool/verify_artifacts.dart`.
 7. Done. In CI, replace the hydrate step with the fetch tool and `actions/cache`. The cache key has the hash of `manifest.json`, which has the pins.
@@ -161,7 +161,7 @@ NG4: A second host as a mirror.
 
 ### A. Alternatives and notes
 
-- **native_prebuilt `runtimeRelease` with an `assetUrl` for Hugging Face.** The tool uploads `.gz` copies. Hugging Face then stores a second copy of each file, and Telosnex cannot read the file by its plain name. Ruled out by R2.
+- **kiln `runtimeRelease` with an `assetUrl` for Hugging Face.** The tool uploads `.gz` copies. Hugging Face then stores a second copy of each file, and Telosnex cannot read the file by its plain name. Ruled out by R2.
 - **Hugging Face deduplicates.** The NemoAsr upload sent 0 bytes, because Hugging Face already stores the same files for sherpa-onnx. An upload of an unchanged public export is fast and adds no storage.
 - **Git LFS and plain Git.** 11 of the 17 models in `example/assets/models` are plain Git objects. A plain Git object is in every clone, even a clone that skips LFS.
 

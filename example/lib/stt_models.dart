@@ -80,7 +80,7 @@ Future<String> _runtimeModel(
   DownloadProgress? onProgress,
 ) async {
   if (kIsWeb) {
-    return nativePrebuiltRuntimeFiles[path.basename(modelPath)]!.url;
+    return prebuiltRuntimeFiles[path.basename(modelPath)]!.url;
   }
   final support = await path_provider.getApplicationSupportDirectory();
   final file = await ensureFonnxRuntimeModel(

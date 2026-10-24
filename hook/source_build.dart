@@ -5,8 +5,8 @@ import 'dart:io';
 import 'package:code_assets/code_assets.dart';
 import 'package:crypto/crypto.dart';
 import 'package:hooks/hooks.dart';
-import 'package:native_prebuilt/native_prebuilt.dart';
-import 'package:native_prebuilt/src/locks.dart';
+import 'package:kiln/kiln.dart';
+import 'package:kiln/src/locks.dart';
 import 'package:path/path.dart' as p;
 
 import 'upstream_ort.dart';
@@ -63,7 +63,7 @@ Future<void> buildFromSource(
   }
   final out = Directory.fromUri(input.outputDirectory);
   await out.create(recursive: true);
-  final cache = input.userDefines.path('native_prebuilt_cache');
+  final cache = input.userDefines.path('kiln_cache');
   final cacheRoot = cache == null
       ? defaultCacheRoot()
       : Directory.fromUri(cache);

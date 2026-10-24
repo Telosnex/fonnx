@@ -3,11 +3,11 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:test/test.dart';
-import 'package:native_prebuilt/native_prebuilt.dart';
-import 'package:native_prebuilt/src/publisher.dart';
+import 'package:kiln/kiln.dart';
+import 'package:kiln/src/publisher.dart';
 
 import '../hook/upstream_ort.dart';
-import '../tool/release_native.dart';
+import '../tool/kiln/release.dart';
 
 final class RecordingPublisher implements Publisher {
   List<File>? uploaded;
