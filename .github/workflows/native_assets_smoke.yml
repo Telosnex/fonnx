@@ -19,7 +19,7 @@ on:
       - 'test/ort_native_asset_test.dart'
       - 'test/models/identity.onnx'
       - 'pubspec.yaml'
-      - '.github/workflows/native-assets-smoke.yml'
+      - '.github/workflows/native_assets_smoke.yml'
   workflow_dispatch:
 
 permissions:
@@ -47,16 +47,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      # flutter-action caches with an unpinned actions/cache, which the
-      # repository's action policy rejects. Same install as native_release.yml.
-      - name: Install Flutter
-        shell: bash
-        run: |
-          git clone -q --depth 1 --branch 3.47.0 \
-            https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
-          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
-          "$RUNNER_TEMP/flutter/bin/flutter" config --no-analytics > /dev/null
-          "$RUNNER_TEMP/flutter/bin/flutter" --version
+      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@9c31ac7cfbe75c690fa5cd2489bb401cd1d32647 # main
       - run: flutter pub get
       - name: Cache Hugging Face models
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -74,7 +65,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: dart run tool/verify_artifacts.dart
       - name: Install the pinned web files into lib/web
-        run: dart run native_prebuilt:web install-dev
+        run: dart run kiln:web install-dev
       - name: Run pinned local ORT Web identity inference
         run: node tool/test_web_runtime.mjs
       - name: Sanitize package-owned finalizer boundary

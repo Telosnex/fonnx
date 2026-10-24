@@ -7,10 +7,10 @@ library;
 
 import 'dart:io';
 
-import 'package:native_prebuilt/runtime.dart';
+import 'package:kiln/runtime.dart';
 
-import 'src/native_prebuilt.g.dart';
-export 'src/native_prebuilt.g.dart' show nativePrebuiltRuntimeFiles;
+import 'src/kiln.g.dart';
+export 'src/kiln.g.dart' show prebuiltRuntimeFiles;
 
 /// Maps each model's source path to its stable runtime-release file name.
 ///
@@ -119,7 +119,7 @@ String runtimeModelPath(String releaseName) {
 /// Finds [modelPath] in the published runtime-file catalog.
 RuntimeFile runtimeModelFile(
   String modelPath, [
-  Map<String, RuntimeFile> runtimeFiles = nativePrebuiltRuntimeFiles,
+  Map<String, RuntimeFile> runtimeFiles = prebuiltRuntimeFiles,
 ]) {
   final name = runtimeModelName(modelPath);
   final file = runtimeFiles[name];
@@ -139,11 +139,11 @@ RuntimeFile runtimeModelFile(
 ///
 /// An already downloaded file is reused only after it passes the same check.
 /// The atomic download and verification are provided by
-/// `native_prebuilt/runtime.dart` (native_prebuilt ADR 001 D13).
+/// `kiln/runtime.dart` (kiln ADR 001 D13).
 Future<File> ensureFonnxRuntimeModel(
   String modelPath,
   Directory directory, {
-  Map<String, RuntimeFile> runtimeFiles = nativePrebuiltRuntimeFiles,
+  Map<String, RuntimeFile> runtimeFiles = prebuiltRuntimeFiles,
   HttpClient? client,
   void Function(int received, int? total)? onProgress,
 }) {

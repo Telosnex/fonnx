@@ -1,0 +1,19 @@
+name: Kiln check
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - native_artifacts/prebuilt.json
+      - lib/src/kiln.g.dart
+      - .github/workflows/kiln_check.yml
+  schedule:
+    - cron: '27 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  kiln-check:
+    uses: Telosnex/telosnex_ci_tools/.github/workflows/kiln_check.yml@9c31ac7cfbe75c690fa5cd2489bb401cd1d32647 # main

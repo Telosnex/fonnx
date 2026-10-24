@@ -15,8 +15,8 @@ import 'kokoro_web_golden.dart';
 /// Kokoro through its public API in the browser, on the web runtime files in
 /// lib/web/. Build them first:
 ///
-///     dart run tool/build_web.dart --out /tmp/fonnx_web
-///     dart run native_prebuilt:web install-dev --from /tmp/fonnx_web
+///     dart run tool/kiln/build_web.dart --out /tmp/fonnx_web
+///     dart run kiln:web install-dev --from /tmp/fonnx_web
 ///
 /// The test server serves test/ at the root, so the bundle comes from the
 /// test/web_models link to example/assets/models (tool/kokoro/prepare_bundle.dart).

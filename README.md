@@ -211,7 +211,7 @@ and the example's realtime phrase editor.
 ## Native platforms via Dart FFI and code assets
 
 Android, iOS, Linux, macOS, and Windows use the same Dart FFI implementation.
-`hook/build.dart` uses `package:native_prebuilt` and
+`hook/build.dart` uses `package:kiln` and
 `native_artifacts/prebuilt.json`. If the package sources match the release,
 it downloads and checks two bundled code assets: ONNX Runtime and the session
 finalizer. No C compiler is needed for a released package. Microsoft supplies
@@ -273,7 +273,7 @@ and the example Xcode project shows the required phase ordering.
 
 The model files are on Hugging Face in
 [`telosnex/fonnx`](https://huggingface.co/telosnex/fonnx), not in Git. The
-generated `nativePrebuiltRuntimeFiles` catalog pins the 23 model files: each URL
+generated `prebuiltRuntimeFiles` catalog pins the 23 model files: each URL
 names a Hugging Face commit, and the catalog has each file's size and SHA-256.
 Apps download a model after install:
 
@@ -308,11 +308,13 @@ Face commit with `hf upload`, records the commit, and writes the catalog. A
 published file never changes. `doc/ADR_001_MODELS_ON_HUGGING_FACE.md` has the
 design.
 
-To publish the native libraries, push to `native-release` and merge the
-`native-manifest/<tag>` branch from `.github/workflows/native_release.yml`.
-Push to `native-release-dry` for a build-only run. `tool/release_native.dart`
-preserves the upstream ORT URLs when it writes the manifest. The two iOS ORT
-files are copied unchanged into the new immutable release.
+To publish the native libraries and the web files, push to `kiln-release`,
+then merge the `kiln-manifest/<tag>` branch that
+`.github/workflows/kiln_release.yml` pushes. Push to `kiln-release-dry` for
+a build-only run. The shared workflow of `Telosnex/telosnex_ci_tools` runs
+the fonnx steps in `tool/kiln/`. `tool/kiln/release.dart` preserves the
+upstream ORT URLs when it writes the manifest. The two iOS ORT files are
+copied unchanged into the new immutable release.
 
 ## Web
 

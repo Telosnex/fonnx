@@ -18,8 +18,8 @@ import 'package:fonnx/src/web_loader.dart';
 import 'package:fonnx/src/web_runtime.g.dart';
 
 /// Runs every FONNX web model through its public API in the browser, on the
-/// web runtime files in lib/web/ (native_prebuilt ADR 002 D13). Install the
-/// generated files first: `dart run native_prebuilt:web install-dev`.
+/// web runtime files in lib/web/ (kiln ADR 002 D13). Install the
+/// generated files first: `dart run kiln:web install-dev`.
 ///
 /// The test server serves test/ at the root, so the models come from the
 /// test/web_models link to example/assets/models (run

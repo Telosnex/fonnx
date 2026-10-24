@@ -2,13 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:native_prebuilt/native_prebuilt.dart';
-import 'package:native_prebuilt/src/cli.dart';
-import 'package:native_prebuilt/src/publisher.dart';
-import 'package:native_prebuilt/src/release_tool.dart';
+import 'package:kiln/kiln.dart';
+import 'package:kiln/src/cli.dart';
+import 'package:kiln/src/publisher.dart';
+import 'package:kiln/src/release_tool.dart';
 import 'package:path/path.dart' as p;
 
-import '../hook/upstream_ort.dart';
+import '../../hook/upstream_ort.dart';
 
 /// The shared release command publishes the hook outputs. FONNX retains ORT's
 /// upstream URLs. It also rehosts the existing dynamic iOS ORT base, unchanged,
@@ -19,11 +19,11 @@ Future<void> main(List<String> arguments) => runCommand(
     ..addOption('package', defaultsTo: '.')
     ..addOption('repo')
     ..addOption('staging')
-    ..addOption('web', help: 'Output directory of tool/build_web.dart.')
+    ..addOption('web', help: 'Output directory of tool/kiln/build_web.dart.')
     ..addOption('web-runner')
     ..addOption('web-toolchain')
     ..addFlag('dry-run'),
-  'dart run tool/release_native.dart [--dry-run] [--repo owner/name] '
+  'dart run tool/kiln/release.dart [--dry-run] [--repo owner/name] '
   '[--web <dir> --web-runner <s> --web-toolchain <s>] <build dirs...>',
   (args) async {
     if (args.rest.isEmpty) {

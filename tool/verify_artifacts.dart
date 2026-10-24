@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
-import 'package:native_prebuilt/native_prebuilt.dart';
-import 'package:native_prebuilt/src/release_tool.dart';
+import 'package:kiln/kiln.dart';
+import 'package:kiln/src/release_tool.dart';
 import '../hook/upstream_ort.dart';
 import 'futo/bundle.dart';
 import 'hf/models.dart';
@@ -98,7 +98,7 @@ Future<void> main(List<String> arguments) async {
     if (manifest.containsKey(key)) {
       throw FormatException(
         '$key: the package web files belong in native_artifacts/web.json '
-        '(native_prebuilt ADR 002). native_prebuilt:check verifies them.',
+        '(kiln ADR 002). kiln:check verifies them.',
       );
     }
   }

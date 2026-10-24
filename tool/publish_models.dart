@@ -11,14 +11,14 @@
 //    those files, the model card (tool/hf/README.md) and the FUTO license in
 //    one Hugging Face commit with `hf upload`. It records the commit.
 // 3. Writes the runtimeFiles section of native_artifacts/prebuilt.json and
-//    lib/src/native_prebuilt.g.dart from the manifest.
+//    lib/src/kiln.g.dart from the manifest.
 //
 // --dry-run does steps 1 and 2 without the upload, and writes nothing.
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
-import 'package:native_prebuilt/native_prebuilt.dart';
+import 'package:kiln/kiln.dart';
 
 import 'hf/models.dart';
 

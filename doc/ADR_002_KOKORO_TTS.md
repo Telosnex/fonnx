@@ -101,7 +101,7 @@ D10: Use a long-lived native isolate or web worker. Keep model sessions and
      queue so a paused consumer cannot cause unbounded audio generation.
      The voice sets the language: each bundle voice has one.
      On web, the worker engine is the same Dart code, compiled to
-     JavaScript. tool/build_web.dart writes it as the generated web file
+     JavaScript. tool/kiln/build_web.dart writes it as the generated web file
      kokoro_engine.dart.js. ORT Web is asynchronous, so the fallback model
      cannot answer misaki synchronously. The engine runs misaki again with
      the fallback words that it computed, until misaki asks for no new word.

@@ -4,7 +4,7 @@
   "release": "https://github.com/Telosnex/fonnx/releases/tag/native-d389dc8d7a1e1f37",
   "runner": "ubuntu-22.04",
   "toolchain": "onnxruntime-web 1.27.0 (npm)",
-  "webVersion": "e4c20f6d6624885f",
+  "webVersion": "355ab4dee702bd40",
   "files": [
     {
       "name": "fonnx_worker_rpc.js",
@@ -14,14 +14,14 @@
     },
     {
       "name": "futo_swipe_init.js",
-      "sha256": "1a2989ca8c1f4da62bcf7dc45d23db604b2772975a4d58e2b5ccb13e5aae280b",
-      "bytes": 1925,
+      "sha256": "077c630075a1dabf0db24f0f6ecc36ffa05ca59c64d87f73c8839d422df6cc5d",
+      "bytes": 1914,
       "source": "lib/web/futo_swipe_init.js"
     },
     {
       "name": "futo_swipe_worker.js",
-      "sha256": "e8a49aa614eff711f53e00a30f797620d34a40013c179869fce29dd32db9d611",
-      "bytes": 5664,
+      "sha256": "4cbb6be65709f2f7896448025e6e2af151b75464e049e9f079d6d75a00014b0e",
+      "bytes": 5653,
       "source": "lib/web/futo_swipe_worker.js"
     },
     {
@@ -34,74 +34,74 @@
     },
     {
       "name": "kokoro_init.js",
-      "sha256": "a0f08ccc943f2c6432890e3f9bcefc10c5fa329e1203f4937cc3ec6076f87be7",
-      "bytes": 1099,
+      "sha256": "6298e6289d9caf9d571da0345791d5dfcbd8346ae357e5b5a425bb93dc6200af",
+      "bytes": 1088,
       "source": "lib/web/kokoro_init.js"
     },
     {
       "name": "kokoro_worker.js",
-      "sha256": "4a324038165bed81c4ca7c56bc0e10291e227c5697d119e4150d78dbb5dfcc02",
-      "bytes": 7248,
+      "sha256": "690a35bb73ecbb767a92217859e93024f65be7935fc22db9df6d1f51c172222e",
+      "bytes": 7237,
       "source": "lib/web/kokoro_worker.js"
     },
     {
       "name": "kws_init.js",
-      "sha256": "681e0e768c2c445e2501d22608657b7e598e2d100871c9590a36164fc0078500",
-      "bytes": 1268,
+      "sha256": "4a02ac9353f579ea1b1c3062aa079497439bc30ba642ababe981f9c93f677d28",
+      "bytes": 1257,
       "source": "lib/web/kws_init.js"
     },
     {
       "name": "kws_worker.js",
-      "sha256": "7f3092493b2a7d4ce9af56838bbedaf10d3a1f11ccf561e51392094e041e7a81",
-      "bytes": 7191,
+      "sha256": "8e5244cc256f482a55a5f05872132fe8c8510e205741a669615c1b4ea9b7051f",
+      "bytes": 7180,
       "source": "lib/web/kws_worker.js"
     },
     {
       "name": "magika_init.js",
-      "sha256": "9e2f5a6a68f6c9942ecdbbf968b58b0046d4f5d02237a4ed7b8184e72fafc92b",
-      "bytes": 859,
+      "sha256": "a0855e3cab32f4d7a69eb8cdf4d75fd10771a5eba8019b91fb52f82ffcef6fbc",
+      "bytes": 848,
       "source": "lib/web/magika_init.js"
     },
     {
       "name": "magika_worker.js",
-      "sha256": "6acc958dc9191a61e74411170c6879cf1492cf936ec6aff6e7f34ee623665c63",
-      "bytes": 3546,
+      "sha256": "43394dde551e1f42fc1581d56b5ae4d452410fb848c66b42c1a3fdc490954eac",
+      "bytes": 3535,
       "source": "lib/web/magika_worker.js"
     },
     {
       "name": "minilm_init.js",
-      "sha256": "119b402b82d0e3c8fc582db86846024c2840d630f907d609b82372dd069725c4",
-      "bytes": 848,
+      "sha256": "6c26208f73c095c56a0a7bcd802d350a94420977a32283cb9e6c6f0ac1abdf57",
+      "bytes": 837,
       "source": "lib/web/minilm_init.js"
     },
     {
       "name": "minilm_worker.js",
-      "sha256": "afb5e111d730e42c5ee9a8505b6f2a00846143fca44066b5bf019d569b518d59",
-      "bytes": 4921,
+      "sha256": "8355157bba802712bd8aa3626e702879ce189989d6d40aff596806d8a6b178fc",
+      "bytes": 4910,
       "source": "lib/web/minilm_worker.js"
     },
     {
       "name": "minish_lab_init.js",
-      "sha256": "64a76ddbc3f7185f64eb7f4ac262b2ad8eaf23c86ffcd8001755c5efc314f625",
-      "bytes": 865,
+      "sha256": "a75f21204be127aee6f0e46ef6b6f2b8aacf14914972f950e903ee53b3732839",
+      "bytes": 854,
       "source": "lib/web/minish_lab_init.js"
     },
     {
       "name": "minish_lab_worker.js",
-      "sha256": "d3ccd7c7ebc19e721f7c7c2369995d34fb0fb857efe8ba65a97c02c4509274ca",
-      "bytes": 3867,
+      "sha256": "09062c0e6aad2904873f0e4660bb1f99b390307efcb18ea8e355aa85ca23d4d4",
+      "bytes": 3856,
       "source": "lib/web/minish_lab_worker.js"
     },
     {
       "name": "nemo_asr_init.js",
-      "sha256": "7fa95466d5752fb3e0c9d879f7d0b0af0e2e0db8a41912d5b38bf8218d461098",
-      "bytes": 1028,
+      "sha256": "9bf780a71003db925f4377393ae959f16959608e80d81b6bae07e7527dd96b25",
+      "bytes": 1017,
       "source": "lib/web/nemo_asr_init.js"
     },
     {
       "name": "nemo_asr_worker.js",
-      "sha256": "4dd2d87743a0736b738a12b827229d05a5fb0d4dab08efc72a072ab19a89f457",
-      "bytes": 6876,
+      "sha256": "5d8c32c8f2c3198e05548c56bea6bd6063a8e482f34e54c1f1964f9c7919d1ce",
+      "bytes": 6865,
       "source": "lib/web/nemo_asr_worker.js"
     },
     {
@@ -130,50 +130,50 @@
     },
     {
       "name": "pyannote_init.js",
-      "sha256": "d7d7f3dd1a6b5b49e321dae9fcc3454a52a67004afdcc8547cfb6359906ef97a",
-      "bytes": 851,
+      "sha256": "b7b23d48d9c276cb14dbb343c07914064010aa4bae9b81c2745702b48534992c",
+      "bytes": 840,
       "source": "lib/web/pyannote_init.js"
     },
     {
       "name": "pyannote_worker.js",
-      "sha256": "7afe421a01bf35618a094b19893eb5e61bd202409ce866466ea801c5a0c345b4",
-      "bytes": 10045,
+      "sha256": "00257716a633920593003cb3e63bfd7d9f07b134e694d85fcb0299d9eeeaccdf",
+      "bytes": 10034,
       "source": "lib/web/pyannote_worker.js"
     },
     {
       "name": "sense_voice_init.js",
-      "sha256": "3c02fea03016754d44277f244bef7783bcf365ffe8064d8fc6109dbd33ce5cb4",
-      "bytes": 809,
+      "sha256": "6282fe04b058f717165ce0f6826a094d293456c4d42a693519e84031ea674cd8",
+      "bytes": 798,
       "source": "lib/web/sense_voice_init.js"
     },
     {
       "name": "sense_voice_worker.js",
-      "sha256": "728bac9c27817d465fbef24061d0d58ac5139c6215c0cb1a870cc9101b14a6b3",
-      "bytes": 3530,
+      "sha256": "47ecf040b20bf9a6f37f9e229944c226647d195af02caa797342d13189e255bf",
+      "bytes": 3519,
       "source": "lib/web/sense_voice_worker.js"
     },
     {
       "name": "silero_vad_init.js",
-      "sha256": "8d82b892ef9141ae3f792135b7defcbca5ac49f6716c69ca72e2a2250236cb45",
-      "bytes": 956,
+      "sha256": "708151f161d230e26ca07f09ccd11b5450ec5ceeb58ea16142aaf0b0a6429999",
+      "bytes": 945,
       "source": "lib/web/silero_vad_init.js"
     },
     {
       "name": "silero_vad_worker.js",
-      "sha256": "5a59f8390dbf860268a7130d495bdc53879a75623a056cf5fe98b3d97d785005",
-      "bytes": 4715,
+      "sha256": "83ba908ffab9c2a308cb7250b4337863bf59e765ebb2baa847d5f1921a648a7f",
+      "bytes": 4704,
       "source": "lib/web/silero_vad_worker.js"
     },
     {
       "name": "whisper_init.js",
-      "sha256": "b07902470b39b07854c32b7043cc3e8222a89fe701bf9fbf869f3267e4f9b2b9",
-      "bytes": 1056,
+      "sha256": "a7c3fac0a46be36f58222d1ff3cbf7715ac2626637c429801631c13646125ebc",
+      "bytes": 1045,
       "source": "lib/web/whisper_init.js"
     },
     {
       "name": "whisper_worker.js",
-      "sha256": "20be4c60633bdaff462bcee764977e2a3dc2082557c6767575e985f1b86ed102",
-      "bytes": 8479,
+      "sha256": "1ae0017830dbebcdd5ca893d89c73e7a0ef16863849f01dfbb3226bc53af5730",
+      "bytes": 8468,
       "source": "lib/web/whisper_worker.js"
     }
   ]

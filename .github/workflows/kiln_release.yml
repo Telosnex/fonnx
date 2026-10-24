@@ -1,0 +1,41 @@
+# Builds the native libraries and the web runtime files, and publishes them
+# as a GitHub release. Telosnex/telosnex_ci_tools has the jobs; tool/kiln/
+# has the fonnx steps:
+#
+#   build_web.dart  Extracts the pinned ONNX Runtime Web files from their npm
+#                   tarball and compiles the Kokoro Worker engine.
+#   test_web.dart   The Node and Chrome tests of the web files.
+#   release.dart    Keeps the Microsoft and Maven URLs of the pinned ORT
+#                   libraries, rehosts the two unchanged iOS ORT files, and
+#                   uploads the package-owned finalizer libraries.
+#
+# Start it with
+#   git push -f origin HEAD:kiln-release       (release)
+#   git push -f origin HEAD:kiln-release-dry   (build only, no upload)
+# or with workflow_dispatch. On success it pushes the branch
+# kiln-manifest/<tag>. Merge that branch to use the release.
+name: Kiln release
+run-name: Kiln release / ${{ (github.ref_name == 'kiln-release-dry' || inputs.dry_run) && 'build only' || 'publish' }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Build only, upload nothing.
+        type: boolean
+        default: false
+  push:
+    branches: [kiln-release, kiln-release-dry]
+
+permissions:
+  contents: read
+
+jobs:
+  kiln-release:
+    uses: Telosnex/telosnex_ci_tools/.github/workflows/kiln_release.yml@9c31ac7cfbe75c690fa5cd2489bb401cd1d32647 # main
+    permissions:
+      contents: write
+    with:
+      dry-run: ${{ inputs.dry_run == true }}
+      build-args: '{"*": ["--ios-version", "15", "--macos-version", "14"]}'
+      web-test-cache-path: example/assets/models/**/*.onnx

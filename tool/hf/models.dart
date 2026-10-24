@@ -5,9 +5,9 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:fonnx/runtime_models.dart';
-import 'package:native_prebuilt/native_prebuilt.dart';
-import 'package:native_prebuilt/src/release_tool.dart' show runtimeFilesDart;
-import 'package:native_prebuilt/src/runtime_file.dart' show validateFileName;
+import 'package:kiln/kiln.dart';
+import 'package:kiln/src/release_tool.dart' show runtimeFilesDart;
+import 'package:kiln/src/runtime_file.dart' show validateFileName;
 
 /// The Hugging Face repository with the model files.
 const hfRepository = 'telosnex/fonnx';
@@ -16,7 +16,7 @@ const hfRepository = 'telosnex/fonnx';
 const modelRoot = 'example/assets/models';
 
 const fonnxManifestPath = 'native_artifacts/manifest.json';
-const catalogDartPath = 'lib/src/native_prebuilt.g.dart';
+const catalogDartPath = 'lib/src/kiln.g.dart';
 
 final _commitPattern = RegExp(r'^[0-9a-f]{40}$');
 final _digestPattern = RegExp(r'^[0-9a-f]{64}$');
