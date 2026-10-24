@@ -47,7 +47,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@2e308d55df8812118ac5d2948f1a4712a28705e1 # main
+      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@2e308d55df8812118ac5d2948f1a4712a28705e1 # v0.1.0
       - run: flutter pub get
       - name: Cache Hugging Face models
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
