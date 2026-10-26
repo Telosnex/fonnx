@@ -84,7 +84,13 @@ void main() {
   test('silence gives a short false transcript, as in sherpa-onnx', () async {
     // The model, not this port: sherpa-onnx gives the same for silence and
     // quiet noise. Run a VAD first.
-    expect(await senseVoice.doInference(Uint8List(32000)), '그。');
+    //
+    // The exact text varies by CPU: '그。' on Apple ARM (M1, M4), '그.' on
+    // x64 and Windows ARM64 (ORT's kernels round differently, and the last
+    // token flips). The point is a short, non-empty false transcript.
+    final text = await senseVoice.doInference(Uint8List(32000));
+    expect(text, isNotEmpty);
+    expect(text.runes.length, lessThanOrEqualTo(3), reason: text);
   });
 
   test('rejects more than 60 seconds of audio', () async {
