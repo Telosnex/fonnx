@@ -32,7 +32,6 @@ jobs:
           - { name: Linux x64, runner: ubuntu-24.04, device: linux }
           - { name: Linux ARM64, runner: ubuntu-24.04-arm, device: linux }
           - { name: macOS ARM64, runner: macos-26, device: macos }
-          - { name: macOS x64, runner: macos-15-intel, device: macos }
           - { name: Windows x64, runner: windows-2025, device: windows }
           - { name: Windows ARM64, runner: windows-11-arm, device: windows }
     steps:
@@ -86,9 +85,13 @@ jobs:
           DEVICE: ${{ matrix.device }}
         run: |
           flutter pub get
-          run=(flutter test integration_test -d "$DEVICE" -r expanded)
-          if [[ "$RUNNER_OS" == Linux ]]; then run=(xvfb-run -a "${run[@]}"); fi
-          "${run[@]}"
+          # One file per flutter test: a second app launch in one run lost
+          # its debug connection on macOS.
+          for f in integration_test/*_test.dart; do
+            run=(flutter test "$f" -d "$DEVICE" -r expanded)
+            if [[ "$RUNNER_OS" == Linux ]]; then run=(xvfb-run -a "${run[@]}"); fi
+            "${run[@]}"
+          done
 
   web:
     name: ${{ matrix.name }}
@@ -171,4 +174,6 @@ jobs:
           SERIAL: ${{ steps.emulator.outputs.serial }}
         run: |
           flutter pub get
-          flutter test integration_test -d "$SERIAL" -r expanded
+          for f in integration_test/*_test.dart; do
+            flutter test "$f" -d "$SERIAL" -r expanded
+          done
