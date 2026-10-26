@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- The speech and keyword demos record the microphone. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <application
         android:label="fonnx_example"
         android:name="${applicationName}"

@@ -1,12 +1,11 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fonnx_example/audio.dart';
 import 'package:fonnx_example/padding.dart';
 import 'package:fonnx_example/stt_service.dart';
 import 'package:fonnx_example/stt_models.dart';
@@ -26,7 +25,7 @@ class _TtsDemoWidgetState extends State<TtsDemoWidget> {
   SttServiceResponse? _sttServiceResponse;
   StreamSubscription? _sttStreamSubscription;
   SttService? _sttService;
-  AudioPlayer? _audioPlayer;
+  WavPlayer? _audioPlayer;
   var _sttIsVoiceThreshold = SttService.kVadPIsVoiceThreshold;
   var _sttModel = SttModel.fastConformer;
   String? _status;
@@ -281,22 +280,8 @@ class _TtsDemoWidgetState extends State<TtsDemoWidget> {
       debugPrint('No frames with voice, skipping WAV creation.');
       return;
     }
-    if (kIsWeb) {
-      String base64String = base64Encode(playWav);
-
-      // Step 4: Create the data URL
-      final url = 'data:audio/wav;base64,$base64String';
-      _audioPlayer ??= AudioPlayer();
-      _audioPlayer!.play(UrlSource(url));
-    } else {
-      final tempDir = await path_provider.getTemporaryDirectory();
-      final playWavPath = path.join(tempDir.path, 'voice.wav');
-      final playWavFile = File(playWavPath);
-      await playWavFile.writeAsBytes(playWav);
-      debugPrint('Wrote voice to $playWavPath');
-      _audioPlayer ??= AudioPlayer();
-      _audioPlayer!.play(DeviceFileSource(playWavPath));
-    }
+    _audioPlayer ??= WavPlayer();
+    unawaited(_audioPlayer!.play(playWav));
   }
 
   void _runVadDemo() async {

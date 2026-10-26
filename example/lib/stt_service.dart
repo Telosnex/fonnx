@@ -6,7 +6,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:fonnx/models/sileroVad/silero_vad.dart';
 import 'package:fonnx_example/stt_models.dart';
-import 'package:record/record.dart';
+import 'package:fonnx_example/audio.dart';
 
 /// A single frame of audio data.
 ///
@@ -35,12 +35,8 @@ class SttServiceResponse {
 
 class GetMicrophoneResponse {
   final Stream<Uint8List> audioStream;
-  final AudioRecorder audioRecorder;
 
-  GetMicrophoneResponse({
-    required this.audioStream,
-    required this.audioRecorder,
-  });
+  GetMicrophoneResponse({required this.audioStream});
 }
 
 class GetExistingBytesResponse {
@@ -54,15 +50,8 @@ class GetExistingBytesResponse {
 }
 
 class SttService {
-  // Rationale for PCM:
-  // - PCM streaming is universally supported on all platforms.
-  // - Streaming is not supported for all other codecs.
-  // - Not all codecs are supported on all platforms.
-  // - Whisper input expects at least WAV/MP3, and PCM is trival to convert
-  //   to WAV. (only requires adding header)
-  // - Observed when using `record` package on 2024 Feb 2.
-  /// Format of audio bytes from microphone.
-  static const kEncoder = AudioEncoder.pcm16bits;
+  // The microphone gives mono 16-bit PCM (telosnex_audio CaptureFrame); the
+  // VAD and Whisper take it as is.
 
   /// Sample rate in Hz
   static const int kSampleRate = 16000;
@@ -143,11 +132,11 @@ class SttService {
     });
 
     final vad = SileroVad.load(vadModelPath);
-    var stoppedAudioRecorderForStoppedStream = false;
-    audioStream.listen((event) {
-      if (stopped && !stoppedAudioRecorderForStoppedStream) {
-        stoppedAudioRecorderForStoppedStream = true;
-        getMicrophoneResponse.audioRecorder.stop();
+    late final StreamSubscription<Uint8List> microphone;
+    microphone = audioStream.listen((event) {
+      if (stopped) {
+        // Cancelling stops the capture.
+        microphone.cancel();
         return;
       }
       audioBuffer = Uint8List.fromList(audioBuffer + event);
@@ -380,25 +369,9 @@ class SttSessionManager {
 
 // Throws an error if the microphone stream cannot be obtained.
 Future<GetMicrophoneResponse> _getMicrophoneStreamThrows() async {
-  final audioRecorder = AudioRecorder();
-
-  final hasPermission = await audioRecorder.hasPermission();
-  if (!hasPermission) {
-    throw 'Denied permission to record audio.';
-  }
-
-  final stream = await audioRecorder.startStream(
-    const RecordConfig(
-      encoder: AudioEncoder.pcm16bits,
-      numChannels: SttService.kChannels,
-      sampleRate: SttService.kSampleRate,
-      echoCancel: false,
-      noiseSuppress: false,
-    ),
-  );
-
+  // telosnex_audio captures mono; kChannels is 1.
+  assert(SttService.kChannels == 1);
   return GetMicrophoneResponse(
-    audioStream: stream,
-    audioRecorder: audioRecorder,
+    audioStream: await microphonePcm16(sampleRate: SttService.kSampleRate),
   );
 }
