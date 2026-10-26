@@ -31,7 +31,6 @@ jobs:
       - run: git ls-files 'lib/*.dart' 'test/*.dart' 'tool/*.dart' | grep -v '\.g\.dart$' | xargs dart format --output=none --set-exit-if-changed
       # The package only: the example's assets are the models (Integration).
       - run: dart analyze --fatal-warnings lib test tool
-      - run: dart run tool/verify_artifacts.dart
       - run: dart run kiln:check
       - run: dart run kiln:web install-dev
       - name: ORT Web identity inference (Node)

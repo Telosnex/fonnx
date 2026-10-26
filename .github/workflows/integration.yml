@@ -50,6 +50,9 @@ jobs:
           path: example/assets/models/**/*.onnx
           key: hf-models-${{ runner.os }}-${{ hashFiles('native_artifacts/manifest.json', 'tool/fetch_hf_models.dart') }}
       - run: dart run tool/fetch_hf_models.dart
+      # Pins, models and the FUTO bundle; needs the models.
+      - if: matrix.name == 'Linux x64'
+        run: dart run tool/verify_artifacts.dart
       # The tests of tool/test_all.sh.
       - name: Model tests
         run: |
