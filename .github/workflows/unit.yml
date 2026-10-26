@@ -33,6 +33,8 @@ jobs:
       - run: dart analyze --fatal-warnings lib test tool
       - run: dart run kiln:check
       - run: dart run kiln:web install-dev
+      # The Node test runs the magika model (8 MB).
+      - run: dart run tool/fetch_hf_models.dart magika
       - name: ORT Web identity inference (Node)
         run: node tool/test_web_runtime.mjs
       - run: dart test test/deterministic_operation_corpus_test.dart -r expanded
