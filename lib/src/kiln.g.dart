@@ -9,420 +9,360 @@ const prebuiltRuntimeFiles = <String, RuntimeFile>{
     name: 'decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx',
     sha256: 'e40ff43297abe815e8898494c17e71bba2152d9d40fa3eb803f75d0f7533329a',
     bytes: 277985,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx',
   ),
   'encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx': RuntimeFile(
     name: 'encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx',
     sha256: '1e721676515bcd42a186979733981213c66c80db680e1cc582dfedf3be76e678',
     bytes: 4807159,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx',
   ),
   'fastconformer_ctc_multilingual_int8.onnx': RuntimeFile(
     name: 'fastconformer_ctc_multilingual_int8.onnx',
     sha256: 'e3ea888bcc90cafdeeedeea26f6e8ca2186d8af7939236e0eb246206f5098c00',
     bytes: 132445134,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/bbecfb3bf170f508901dba5ae70afb482a3d65ca/fastconformer_ctc_multilingual_int8.onnx',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/bbecfb3bf170f508901dba5ae70afb482a3d65ca/fastconformer_ctc_multilingual_int8.onnx',
   ),
   'futo_swipe_context_lm_hungry_jellyfish.onnx': RuntimeFile(
     name: 'futo_swipe_context_lm_hungry_jellyfish.onnx',
     sha256: '95722c67e2efde6cd925ddf57a0d44bf879824e53b7db45f32572bff97276979',
     bytes: 5955586,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/futo_swipe_context_lm_hungry_jellyfish.onnx',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/futo_swipe_context_lm_hungry_jellyfish.onnx',
   ),
   'futo_swipe_decoder_magic_macaw.onnx': RuntimeFile(
     name: 'futo_swipe_decoder_magic_macaw.onnx',
     sha256: '16e478c542406f4c8a43a16a0a68b83a8f73b516975d66e691a1e1b46bd6dadf',
     bytes: 1228537,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/futo_swipe_decoder_magic_macaw.onnx',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/futo_swipe_decoder_magic_macaw.onnx',
   ),
   'futo_swipe_embeddings_hungry_jellyfish.onnx': RuntimeFile(
     name: 'futo_swipe_embeddings_hungry_jellyfish.onnx',
     sha256: 'd64902693fec59fb99a1ba986e9fd0668147d5e1e3b3b23cb91e100e2a5d71a1',
     bytes: 4456995,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/futo_swipe_embeddings_hungry_jellyfish.onnx',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/futo_swipe_embeddings_hungry_jellyfish.onnx',
   ),
   'futo_swipe_encoder_honorable_sturgeon.onnx': RuntimeFile(
     name: 'futo_swipe_encoder_honorable_sturgeon.onnx',
     sha256: 'e60b80b77c28e7bd426fa400435584991614d44ce4ba61eba408d8eb81f5f63b',
     bytes: 2591063,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/futo_swipe_encoder_honorable_sturgeon.onnx',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/futo_swipe_encoder_honorable_sturgeon.onnx',
   ),
   'joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx': RuntimeFile(
     name: 'joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx',
     sha256: 'eae9da0c7e1e6c6a3f4cc42d167899c388f6c6701b94cb96320e4f55df79624c',
     bytes: 163380,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx',
   ),
   'kokoro_decoder.onnx': RuntimeFile(
     name: 'kokoro_decoder.onnx',
     sha256: 'c1a4b4071773752db6f6f54def1f80d9a8bf81bc840ad03f186175bd13fec4e7',
     bytes: 99511063,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_decoder.onnx',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_decoder.onnx',
   ),
   'kokoro_g2p_fallback_en_us.json': RuntimeFile(
     name: 'kokoro_g2p_fallback_en_us.json',
     sha256: 'f00d62722850b438f0712f285c44ae2a47b604e24ed508546cb9690e26f0ee5d',
     bytes: 305,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_g2p_fallback_en_us.json',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_g2p_fallback_en_us.json',
   ),
   'kokoro_g2p_fallback_en_us.onnx': RuntimeFile(
     name: 'kokoro_g2p_fallback_en_us.onnx',
     sha256: 'afaa95241151346059b5e56d8bf4eb4c883a5c7594833f7f81ed528454e016c3',
     bytes: 3101005,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_g2p_fallback_en_us.onnx',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_g2p_fallback_en_us.onnx',
   ),
   'kokoro_misaki_gb_gold.json': RuntimeFile(
     name: 'kokoro_misaki_gb_gold.json',
     sha256: '29e62f4b60261c88f7f3c2c7811ca3825978948090b72d2b27d565b729282f71',
     bytes: 2838552,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_misaki_gb_gold.json',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_misaki_gb_gold.json',
   ),
   'kokoro_misaki_gb_silver.json': RuntimeFile(
     name: 'kokoro_misaki_gb_silver.json',
     sha256: '48131e2d92ccc41655f4543e87e0f938e71463eb5a54be7f0693bb712ebb6bce',
     bytes: 3663898,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_misaki_gb_silver.json',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_misaki_gb_silver.json',
   ),
   'kokoro_misaki_us_gold.json': RuntimeFile(
     name: 'kokoro_misaki_us_gold.json',
     sha256: 'dc414872a49a28ae6c141463d502fd945f3b2fde040484fdc47d00cc4612686f',
     bytes: 3000469,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_misaki_us_gold.json',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_misaki_us_gold.json',
   ),
   'kokoro_misaki_us_silver.json': RuntimeFile(
     name: 'kokoro_misaki_us_silver.json',
     sha256: 'de8f67be911bb6c659187b4a65fd966b6a30e56350e0f790d763210b053ac475',
     bytes: 3099517,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_misaki_us_silver.json',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_misaki_us_silver.json',
   ),
   'kokoro_prosody.onnx': RuntimeFile(
     name: 'kokoro_prosody.onnx',
     sha256: '8f046e7144d1327ee2800ae19b6678083101e6b950271d78a1fb570d0b601026',
     bytes: 77962643,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_prosody.onnx',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_prosody.onnx',
   ),
   'kokoro_spacy_en_core_web_sm.json': RuntimeFile(
     name: 'kokoro_spacy_en_core_web_sm.json',
     sha256: 'c49e8004f581804a021ab2e78bdde8a4af526f15aecfb2fe961ec22959bb3620',
     bytes: 231990,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_spacy_en_core_web_sm.json',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_spacy_en_core_web_sm.json',
   ),
   'kokoro_spacy_en_core_web_sm_tagger.bin': RuntimeFile(
     name: 'kokoro_spacy_en_core_web_sm_tagger.bin',
     sha256: '0f884fe5841b110c7457a3dd46c78236ad91dc6d028d4ebc37bb9f4c93c22bf3',
     bytes: 6282056,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_spacy_en_core_web_sm_tagger.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_spacy_en_core_web_sm_tagger.bin',
   ),
   'kokoro_voice_af_alloy.bin': RuntimeFile(
     name: 'kokoro_voice_af_alloy.bin',
     sha256: 'c4a6b876047fd7fb472edf4ebd63cfac7c3b958a7cae7c106e8f038ca6308c45',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_af_alloy.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_af_alloy.bin',
   ),
   'kokoro_voice_af_aoede.bin': RuntimeFile(
     name: 'kokoro_voice_af_aoede.bin',
     sha256: '4a004c33430762e2461eedb2013fad808ef4ab3121f5300f554476caf58d8361',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_af_aoede.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_af_aoede.bin',
   ),
   'kokoro_voice_af_bella.bin': RuntimeFile(
     name: 'kokoro_voice_af_bella.bin',
     sha256: 'f69d836209b78eb8c66e75e3cda491e26ea838a3674257e9d4e5703cbaf55c8b',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_af_bella.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_af_bella.bin',
   ),
   'kokoro_voice_af_heart.bin': RuntimeFile(
     name: 'kokoro_voice_af_heart.bin',
     sha256: 'd583ccff3cdca2f7fae535cb998ac07e9fcb90f09737b9a41fa2734ec44a8f0b',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_af_heart.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_af_heart.bin',
   ),
   'kokoro_voice_af_jessica.bin': RuntimeFile(
     name: 'kokoro_voice_af_jessica.bin',
     sha256: 'a240a5e3c15b43563d6e923bdca8ef5613a23471d9b77653694012435df23bd8',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_af_jessica.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_af_jessica.bin',
   ),
   'kokoro_voice_af_kore.bin': RuntimeFile(
     name: 'kokoro_voice_af_kore.bin',
     sha256: '9be5221b6a941c04b561959b8ff0b06e809444dcc4ab7e75a7b23606f691819e',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_af_kore.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_af_kore.bin',
   ),
   'kokoro_voice_af_nicole.bin': RuntimeFile(
     name: 'kokoro_voice_af_nicole.bin',
     sha256: 'cd2191ab31b914ed7b318416b0e4440fdf392ddad9106a060819aa600a64f59a',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_af_nicole.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_af_nicole.bin',
   ),
   'kokoro_voice_af_nova.bin': RuntimeFile(
     name: 'kokoro_voice_af_nova.bin',
     sha256: '18778272caa0d0eebaea251c35fd635f038434f9eee5e691d02a174bd328414f',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_af_nova.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_af_nova.bin',
   ),
   'kokoro_voice_af_river.bin': RuntimeFile(
     name: 'kokoro_voice_af_river.bin',
     sha256: '00a2bcf82b1d86e8f19902ede58c65ccf6c0e43b44b7d74fad54e5d8933c9c30',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_af_river.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_af_river.bin',
   ),
   'kokoro_voice_af_sarah.bin': RuntimeFile(
     name: 'kokoro_voice_af_sarah.bin',
     sha256: '4409fbc125afabacc615d94db5398d847006a737b0247d6892b7a9a0007a2f0a',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_af_sarah.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_af_sarah.bin',
   ),
   'kokoro_voice_af_sky.bin': RuntimeFile(
     name: 'kokoro_voice_af_sky.bin',
     sha256: '4435255c9744f3f31659e0d714ab7689bf65d9e77ec1cce060f083912614f0b9',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_af_sky.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_af_sky.bin',
   ),
   'kokoro_voice_am_adam.bin': RuntimeFile(
     name: 'kokoro_voice_am_adam.bin',
     sha256: '162b035ed91cfc48b6046982184c645f72edcdd1b82843347f605d7bf7b15716',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_am_adam.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_am_adam.bin',
   ),
   'kokoro_voice_am_echo.bin': RuntimeFile(
     name: 'kokoro_voice_am_echo.bin',
     sha256: '3968b92c3c4cd1c4416dbded36c13eaa388a90d5788d02a13e4d781f5f8cf3c3',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_am_echo.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_am_echo.bin',
   ),
   'kokoro_voice_am_eric.bin': RuntimeFile(
     name: 'kokoro_voice_am_eric.bin',
     sha256: 'e8b5be17edd1e3636901ce7598baafe2dc8dd8ff707a0c23bf9e461add7e2832',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_am_eric.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_am_eric.bin',
   ),
   'kokoro_voice_am_fenrir.bin': RuntimeFile(
     name: 'kokoro_voice_am_fenrir.bin',
     sha256: 'c27989f741f7ee34d273a39d8a595cc0837d35f5ced9a29b7cc162614616df43',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_am_fenrir.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_am_fenrir.bin',
   ),
   'kokoro_voice_am_liam.bin': RuntimeFile(
     name: 'kokoro_voice_am_liam.bin',
     sha256: '52403be32fd047c6a44517cb0bcd6b134f2a18baa73e70ef41651e0eab921ade',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_am_liam.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_am_liam.bin',
   ),
   'kokoro_voice_am_michael.bin': RuntimeFile(
     name: 'kokoro_voice_am_michael.bin',
     sha256: '1d1f21dd8da39c30705cd4c75d039d265e9bc4a2a93ed09bc9e1b1225eb95ba1',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_am_michael.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_am_michael.bin',
   ),
   'kokoro_voice_am_onyx.bin': RuntimeFile(
     name: 'kokoro_voice_am_onyx.bin',
     sha256: 'da5d135b424164916d75a68ffb4c2abce3d7d5ccc82dd1ee6cf447ce286145e6',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_am_onyx.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_am_onyx.bin',
   ),
   'kokoro_voice_am_puck.bin': RuntimeFile(
     name: 'kokoro_voice_am_puck.bin',
     sha256: 'fcf73c989033e9233e0b98713eca600c8c74dcc1614b37009d5450ff4a2274a0',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_am_puck.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_am_puck.bin',
   ),
   'kokoro_voice_am_santa.bin': RuntimeFile(
     name: 'kokoro_voice_am_santa.bin',
     sha256: '61150cf726ab6c5ed7a99f90a304f91f5a72c00c592e89ec94e5df11c319227a',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_am_santa.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_am_santa.bin',
   ),
   'kokoro_voice_bf_alice.bin': RuntimeFile(
     name: 'kokoro_voice_bf_alice.bin',
     sha256: '08afa6ba24da61ea5e8efa139e5aadc938d83f0a6da5a900adaf763ac1da5573',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_bf_alice.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_bf_alice.bin',
   ),
   'kokoro_voice_bf_emma.bin': RuntimeFile(
     name: 'kokoro_voice_bf_emma.bin',
     sha256: '669fe0647f9dd04fcab92f1439a40eeb4c8b4ab1f82e4996fe3d918ce4a63b73',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_bf_emma.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_bf_emma.bin',
   ),
   'kokoro_voice_bf_isabella.bin': RuntimeFile(
     name: 'kokoro_voice_bf_isabella.bin',
     sha256: '3754352c4aaa46d17f27654ab7518d65b62ad6163a0f55a5f4330c2da2c4e94f',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_bf_isabella.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_bf_isabella.bin',
   ),
   'kokoro_voice_bf_lily.bin': RuntimeFile(
     name: 'kokoro_voice_bf_lily.bin',
     sha256: '5e0ee32ebe64a467124976b14e69590746f1c4ce41a12b587a50c862edfea335',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_bf_lily.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_bf_lily.bin',
   ),
   'kokoro_voice_bm_daniel.bin': RuntimeFile(
     name: 'kokoro_voice_bm_daniel.bin',
     sha256: '6b3194bbceffb746733cbc22c8f593dd44e401a71d53895a2dca891bc595a1e8',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_bm_daniel.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_bm_daniel.bin',
   ),
   'kokoro_voice_bm_fable.bin': RuntimeFile(
     name: 'kokoro_voice_bm_fable.bin',
     sha256: 'f889083196807b4adb15e9204252165f503b8d33d3982e681c52443c49d798f1',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_bm_fable.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_bm_fable.bin',
   ),
   'kokoro_voice_bm_george.bin': RuntimeFile(
     name: 'kokoro_voice_bm_george.bin',
     sha256: 'c4b235a4c1f2cd3b939fed08b899ce9385638b763f7b73a59616c4fc9bd6c9bc',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_bm_george.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_bm_george.bin',
   ),
   'kokoro_voice_bm_lewis.bin': RuntimeFile(
     name: 'kokoro_voice_bm_lewis.bin',
     sha256: 'b8f671cef828c30e66fdf0b0756a76bba58f6bb3398cbbf27058642acbcedb97',
     bytes: 522240,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_bm_lewis.bin',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4322a6e7ef82e0e483ad795466f60e370701cba0/kokoro_voice_bm_lewis.bin',
   ),
   'magika.onnx': RuntimeFile(
     name: 'magika.onnx',
     sha256: '71892ac28ffe028b9512561584970417f8cee1f2fbb7624634f4032cb92a0a5a',
     bytes: 1055295,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/magika.onnx',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/magika.onnx',
   ),
   'miniLmL6V2.onnx': RuntimeFile(
     name: 'miniLmL6V2.onnx',
     sha256: '3a4ae4f8f00d87c93b04aca370ed1c5e94f80a32912f2cf5516291703353bf84',
     bytes: 22887725,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/miniLmL6V2.onnx',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/miniLmL6V2.onnx',
   ),
   'msmarcoMiniLmL6V3.onnx': RuntimeFile(
     name: 'msmarcoMiniLmL6V3.onnx',
     sha256: 'e80318c560513a6dcf32e4404d12ef6676af9f85ffee63e1e8ce249651e4f794',
     bytes: 22913492,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/msmarcoMiniLmL6V3.onnx',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/msmarcoMiniLmL6V3.onnx',
   ),
   'parakeet_tdt_v3_decoder_int8.onnx': RuntimeFile(
     name: 'parakeet_tdt_v3_decoder_int8.onnx',
     sha256: '179e50c43d1a9de79c8a24149a2f9bac6eb5981823f2a2ed88d655b24248db4e',
     bytes: 11845275,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/bbecfb3bf170f508901dba5ae70afb482a3d65ca/parakeet_tdt_v3_decoder_int8.onnx',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/bbecfb3bf170f508901dba5ae70afb482a3d65ca/parakeet_tdt_v3_decoder_int8.onnx',
   ),
   'parakeet_tdt_v3_encoder_int8.onnx': RuntimeFile(
     name: 'parakeet_tdt_v3_encoder_int8.onnx',
     sha256: 'acfc2b4456377e15d04f0243af540b7fe7c992f8d898d751cf134c3a55fd2247',
     bytes: 652184281,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/bbecfb3bf170f508901dba5ae70afb482a3d65ca/parakeet_tdt_v3_encoder_int8.onnx',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/bbecfb3bf170f508901dba5ae70afb482a3d65ca/parakeet_tdt_v3_encoder_int8.onnx',
   ),
   'parakeet_tdt_v3_joiner_int8.onnx': RuntimeFile(
     name: 'parakeet_tdt_v3_joiner_int8.onnx',
     sha256: '3164c13fc2821009440d20fcb5fdc78bff28b4db2f8d0f0b329101719c0948b3',
     bytes: 6355277,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/bbecfb3bf170f508901dba5ae70afb482a3d65ca/parakeet_tdt_v3_joiner_int8.onnx',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/bbecfb3bf170f508901dba5ae70afb482a3d65ca/parakeet_tdt_v3_joiner_int8.onnx',
   ),
   'potion32m.onnx': RuntimeFile(
     name: 'potion32m.onnx',
     sha256: 'e82f46335878dd5d72f9544a2a7c61061659c6273ceb8815e10ff952c2e07457',
     bytes: 129214550,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/potion32m.onnx',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/potion32m.onnx',
   ),
   'potion8m.onnx': RuntimeFile(
     name: 'potion8m.onnx',
     sha256: 'da4c828fe012ec97f053278f363645b52c3815ec9a1d13d695ac901398c10f2e',
     bytes: 30240854,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/potion8m.onnx',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/potion8m.onnx',
   ),
   'pyannote_seg3.onnx': RuntimeFile(
     name: 'pyannote_seg3.onnx',
     sha256: '057ee564753071c0b09b5b611648b50ac188d50846bff5f01e9f7bbf1591ea25',
     bytes: 5986908,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/pyannote_seg3.onnx',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/pyannote_seg3.onnx',
   ),
   'sense_voice_small_int8.onnx': RuntimeFile(
     name: 'sense_voice_small_int8.onnx',
     sha256: 'c71f0ce00bec95b07744e116345e33d8cbbe08cef896382cf907bf4b51a2cd51',
     bytes: 239233841,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/db1f48ed984ac1d6cf6be71226c0343dc29f0cb9/sense_voice_small_int8.onnx',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/db1f48ed984ac1d6cf6be71226c0343dc29f0cb9/sense_voice_small_int8.onnx',
   ),
   'sense_voice_small_tokens.txt': RuntimeFile(
     name: 'sense_voice_small_tokens.txt',
     sha256: 'f449eb28dc567533d7fa59be34e2abca8784f771850c78a47fb731a31429a1dc',
     bytes: 315894,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/db1f48ed984ac1d6cf6be71226c0343dc29f0cb9/sense_voice_small_tokens.txt',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/db1f48ed984ac1d6cf6be71226c0343dc29f0cb9/sense_voice_small_tokens.txt',
   ),
   'silero_vad_v6.2.1.onnx': RuntimeFile(
     name: 'silero_vad_v6.2.1.onnx',
     sha256: '1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3',
     bytes: 2327524,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/silero_vad_v6.2.1.onnx',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/silero_vad_v6.2.1.onnx',
   ),
   'whisper_tiny_decoder.onnx': RuntimeFile(
     name: 'whisper_tiny_decoder.onnx',
     sha256: '8d20f4157407006e871d63ca0a3c54dddd7db33dfc4ee076960f1f8b2763ce3e',
     bytes: 118553827,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/whisper_tiny_decoder.onnx',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/whisper_tiny_decoder.onnx',
   ),
   'whisper_tiny_encoder.onnx': RuntimeFile(
     name: 'whisper_tiny_encoder.onnx',
     sha256: '6642befb640f950d4a8cbbd17834d59e7e75f575b81ccf213e06b050623ab1dd',
     bytes: 32904992,
-    url:
-        'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/whisper_tiny_encoder.onnx',
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/whisper_tiny_encoder.onnx',
   ),
 };
