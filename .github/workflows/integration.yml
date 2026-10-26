@@ -127,7 +127,7 @@ jobs:
   ios:
     name: iOS ARM64 simulator
     runs-on: macos-26
-    timeout-minutes: 45
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -146,6 +146,10 @@ jobs:
         with:
           working-directory: example
           target: integration_test
+          # The Xcode build prints nothing for about 7 minutes, and the app
+          # bundles 1.5 GB of models, so its launch is slow.
+          idle-minutes: '15'
+          connect-seconds: '600'
 
   android:
     name: Android x64 emulator
