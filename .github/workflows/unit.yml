@@ -1,0 +1,37 @@
+name: Unit
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    # ci/** branches run it too: a new workflow cannot be started by hand
+    # before it is on main.
+    branches: [main, 'ci/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: unit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit:
+    name: Unit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@8e94d6a140db5300d9e5329bc8c2e4dc30154a08 # main
+      - run: flutter pub get
+      - run: dart format --output=none --set-exit-if-changed lib test tool
+      - run: flutter analyze
+      - run: dart run tool/verify_artifacts.dart
+      - run: dart run kiln:check
+      - run: dart run kiln:web install-dev
+      - name: ORT Web identity inference (Node)
+        run: node tool/test_web_runtime.mjs
+      - run: dart test test/deterministic_operation_corpus_test.dart -r expanded

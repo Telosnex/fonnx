@@ -1,0 +1,167 @@
+name: Integration
+
+on:
+  push:
+    branches: [main, 'ci/**']
+  schedule:
+    - cron: '17 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: integration-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  # The model tests against the released ONNX Runtime and fonnx libraries of
+  # each platform, then the example's integration tests (Flutter desktop).
+  native:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: Linux x64, runner: ubuntu-24.04, device: linux }
+          - { name: Linux ARM64, runner: ubuntu-24.04-arm, device: linux }
+          - { name: macOS ARM64, runner: macos-26, device: macos }
+          - { name: macOS x64, runner: macos-15-intel, device: macos }
+          - { name: Windows x64, runner: windows-2025, device: windows }
+          - { name: Windows ARM64, runner: windows-11-arm, device: windows }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq clang cmake ninja-build pkg-config libgtk-3-dev xvfb > /dev/null
+      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@8e94d6a140db5300d9e5329bc8c2e4dc30154a08 # main
+      - run: flutter pub get
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: example/assets/models/**/*.onnx
+          key: hf-models-${{ runner.os }}-${{ hashFiles('native_artifacts/manifest.json', 'tool/fetch_hf_models.dart') }}
+      - run: dart run tool/fetch_hf_models.dart
+      # The tests of tool/test_all.sh.
+      - name: Model tests
+        run: |
+          dart test --concurrency=1 -r expanded \
+            test/deterministic_operation_corpus_test.dart \
+            test/models/futo_swipe_api_test.dart \
+            test/models/futo_swipe_converter_test.dart \
+            test/models/futo_swipe_core_test.dart \
+            test/models/futo_swipe_test.dart \
+            test/models/keyword_spotter_core_test.dart \
+            test/models/keyword_spotter_test.dart \
+            test/models/magika_test.dart \
+            test/models/mini_lm_l6_v2_test.dart \
+            test/models/msmarco_mini_lm_l6_v3_test.dart \
+            test/models/nemo_asr_test.dart \
+            test/models/potion32m_test.dart \
+            test/models/potion8m_test.dart \
+            test/models/pyannote_test.dart \
+            test/models/sense_voice_test.dart \
+            test/models/silero_vad_test.dart \
+            test/models/whisper_test.dart \
+            test/ort_native_asset_test.dart \
+            test/tokenizers/wordpiece_tokenizer_test.dart
+          dart test --concurrency=1 -r expanded test/models/ort_memory_smoke_test.dart
+      - if: runner.os != 'Windows'
+        name: Sanitizers (package-owned finalizer boundary)
+        run: tool/test_native_sanitizers.sh
+      - name: Example integration tests
+        working-directory: example
+        env:
+          DEVICE: ${{ matrix.device }}
+        run: |
+          flutter pub get
+          run=(flutter test integration_test -d "$DEVICE" -r expanded)
+          if [[ "$RUNNER_OS" == Linux ]]; then run=(xvfb-run -a "${run[@]}"); fi
+          "${run[@]}"
+
+  web:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: Web Linux x64 Chrome dart2js, runner: ubuntu-24.04, platform: chrome, compiler: dart2js }
+          - { name: Web Linux x64 Chrome dart2wasm, runner: ubuntu-24.04, platform: chrome, compiler: dart2wasm }
+          - { name: Web Linux x64 Firefox dart2js, runner: ubuntu-24.04, platform: firefox, compiler: dart2js }
+          - { name: Web macOS ARM64 Safari dart2js, runner: macos-26, platform: safari, compiler: dart2js }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@8e94d6a140db5300d9e5329bc8c2e4dc30154a08 # main
+      - run: flutter pub get
+      - run: dart run kiln:web install-dev
+      - name: dart test -p ${{ matrix.platform }} -c ${{ matrix.compiler }}
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          COMPILER: ${{ matrix.compiler }}
+        run: |
+          dart test -p "$PLATFORM" -c "$COMPILER" -r expanded \
+            test/deterministic_operation_corpus_test.dart test/web_runtime_test.dart
+
+  ios:
+    name: iOS ARM64 simulator
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@8e94d6a140db5300d9e5329bc8c2e4dc30154a08 # main
+      - run: flutter pub get
+      - uses: Telosnex/telosnex_ci_tools/actions/ios-simulator-boot@8e94d6a140db5300d9e5329bc8c2e4dc30154a08 # main
+      - name: ONNX Runtime session on the simulator
+        run: tool/test_ios_simulator_artifacts.sh
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: example/assets/models/**/*.onnx
+          key: hf-models-${{ runner.os }}-${{ hashFiles('native_artifacts/manifest.json', 'tool/fetch_hf_models.dart') }}
+      - run: dart run tool/fetch_hf_models.dart
+      - uses: Telosnex/telosnex_ci_tools/actions/ios-flutter-test@8e94d6a140db5300d9e5329bc8c2e4dc30154a08 # main
+        with:
+          working-directory: example
+          target: integration_test
+
+  android:
+    name: Android x64 emulator
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@8e94d6a140db5300d9e5329bc8c2e4dc30154a08 # main
+      - run: flutter pub get
+      - uses: Telosnex/telosnex_ci_tools/actions/android-emulator@8e94d6a140db5300d9e5329bc8c2e4dc30154a08 # main
+        id: emulator
+        with:
+          api-level: '36'
+      - name: ONNX Runtime session on the emulator
+        run: tool/test_android_artifacts.sh
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: example/assets/models/**/*.onnx
+          key: hf-models-${{ runner.os }}-${{ hashFiles('native_artifacts/manifest.json', 'tool/fetch_hf_models.dart') }}
+      - run: dart run tool/fetch_hf_models.dart
+      - name: Example integration tests
+        working-directory: example
+        env:
+          SERIAL: ${{ steps.emulator.outputs.serial }}
+        run: |
+          flutter pub get
+          flutter test integration_test -d "$SERIAL" -r expanded
