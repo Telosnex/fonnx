@@ -26,10 +26,13 @@ dependencies:
   collection: ^1.18.0
   ml_linalg: ^13.12.6
   # Microphone capture and playback (was record and audioplayers).
+  # A commit with prebuilt files (release native-4f2669ef5e1899aa): at a
+  # commit without them, the source build fails. Move it after a Kiln
+  # release of telosnex_audio.
   telosnex_audio:
     git:
       url: https://github.com/Telosnex/telosnex_audio.git
-      ref: main
+      ref: 7f1a89adf77acc6b57ab1c85bde7e8312c41a983
   permission_handler: ^12.0.1
 dev_dependencies:
   integration_test:
