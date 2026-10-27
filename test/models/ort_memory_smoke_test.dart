@@ -130,9 +130,12 @@ void main() {
       WhisperBundle.tiny('example/assets/models/whisper'),
     );
 
+    // Three warmups: on Linux ARM64 the second inference grows RSS once by
+    // ~180 MiB (ORT/glibc keep the memory), then RSS stays flat for 30 more
+    // inferences. With one warmup that one-time growth counted as a leak.
     await _runRssSmoke(
       label: 'Whisper',
-      warmupIterations: 1,
+      warmupIterations: 3,
       measuredIterations: 5,
       maxRssGrowthBytes: 30 * 1024 * 1024,
       sampleEvery: 1,

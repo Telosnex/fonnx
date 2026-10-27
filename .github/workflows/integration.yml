@@ -1,0 +1,248 @@
+name: Integration
+
+on:
+  push:
+    branches: [main, 'ci/**']
+  schedule:
+    - cron: '17 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: integration-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  # The model tests against the released ONNX Runtime and fonnx libraries of
+  # each platform, then the example's integration tests (Flutter desktop).
+  # The desktop jobs share the steps of the first (YAML anchor); DEVICE is
+  # the flutter device.
+  desktop-linux-x64:
+    name: Linux x64
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      DEVICE: linux
+      VERIFY_ARTIFACTS: 'true'
+    steps: &desktop_steps
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq clang cmake ninja-build pkg-config libgtk-3-dev xvfb > /dev/null
+      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@a97451e269162fcab6e77b6209a1fdca9847ae40 # v0.5.0
+      - run: flutter pub get
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: example/assets/models/**/*.onnx
+          key: hf-models-${{ runner.os }}-${{ hashFiles('native_artifacts/manifest.json', 'tool/fetch_hf_models.dart') }}
+      - run: dart run tool/fetch_hf_models.dart
+      # Pins, models and the FUTO bundle; needs the models.
+      - if: env.VERIFY_ARTIFACTS == 'true'
+        run: dart run tool/verify_artifacts.dart
+      # The tests of tool/test_all.sh.
+      - name: Model tests
+        run: |
+          dart test --concurrency=1 -r expanded \
+            test/deterministic_operation_corpus_test.dart \
+            test/models/futo_swipe_api_test.dart \
+            test/models/futo_swipe_converter_test.dart \
+            test/models/futo_swipe_core_test.dart \
+            test/models/futo_swipe_test.dart \
+            test/models/keyword_spotter_core_test.dart \
+            test/models/keyword_spotter_test.dart \
+            test/models/magika_test.dart \
+            test/models/mini_lm_l6_v2_test.dart \
+            test/models/msmarco_mini_lm_l6_v3_test.dart \
+            test/models/nemo_asr_test.dart \
+            test/models/potion32m_test.dart \
+            test/models/potion8m_test.dart \
+            test/models/pyannote_test.dart \
+            test/models/sense_voice_test.dart \
+            test/models/silero_vad_test.dart \
+            test/models/whisper_test.dart \
+            test/ort_native_asset_test.dart \
+            test/tokenizers/wordpiece_tokenizer_test.dart
+          dart test --concurrency=1 -r expanded test/models/ort_memory_smoke_test.dart
+      - if: runner.os != 'Windows'
+        name: Sanitizers (package-owned finalizer boundary)
+        run: tool/test_native_sanitizers.sh
+      - name: Example integration tests
+        working-directory: example
+        run: |
+          flutter pub get
+          # One file per flutter test: a second app launch in one run lost
+          # its debug connection on macOS.
+          for f in integration_test/*_test.dart; do
+            run=(flutter test "$f" -d "$DEVICE" -r expanded)
+            if [[ "$RUNNER_OS" == Linux ]]; then run=(xvfb-run -a "${run[@]}"); fi
+            "${run[@]}"
+          done
+
+  desktop-linux-arm64:
+    name: Linux ARM64
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 60
+    env:
+      DEVICE: linux
+    steps: *desktop_steps
+
+  desktop-macos-arm64:
+    name: macOS ARM64
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      DEVICE: macos
+    steps: *desktop_steps
+
+  desktop-windows-x64:
+    name: Windows x64
+    runs-on: windows-2025
+    timeout-minutes: 60
+    env:
+      DEVICE: windows
+    steps: *desktop_steps
+
+  desktop-windows-arm64:
+    name: Windows ARM64
+    runs-on: windows-11-arm
+    timeout-minutes: 60
+    env:
+      DEVICE: windows
+    steps: *desktop_steps
+
+  # The web jobs share the steps of the first.
+  web-linux-chrome-dart2js:
+    name: Web Linux x64 Chrome dart2js
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      BROWSER: chrome
+      COMPILER: dart2js
+    steps: &web_steps
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@a97451e269162fcab6e77b6209a1fdca9847ae40 # v0.5.0
+      - run: flutter pub get
+      - run: dart run kiln:web install-dev
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: example/assets/models/**/*.onnx
+          key: hf-models-${{ runner.os }}-${{ hashFiles('native_artifacts/manifest.json', 'tool/fetch_hf_models.dart') }}
+      # test/web_models links to example/assets/models.
+      - run: dart run tool/fetch_hf_models.dart
+      - uses: Telosnex/telosnex_ci_tools/actions/dart-test-browser@a97451e269162fcab6e77b6209a1fdca9847ae40 # v0.5.0
+        with:
+          platform: ${{ env.BROWSER }}
+          compiler: ${{ env.COMPILER }}
+          args: test/deterministic_operation_corpus_test.dart test/web_runtime_test.dart
+
+  web-linux-chrome-dart2wasm:
+    name: Web Linux x64 Chrome dart2wasm
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      BROWSER: chrome
+      COMPILER: dart2wasm
+    steps: *web_steps
+
+  web-linux-firefox-dart2js:
+    name: Web Linux x64 Firefox dart2js
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      BROWSER: firefox
+      COMPILER: dart2js
+    steps: *web_steps
+
+  web-macos-safari-dart2js:
+    name: Web macOS ARM64 Safari dart2js
+    runs-on: macos-26
+    timeout-minutes: 30
+    env:
+      BROWSER: safari
+      COMPILER: dart2js
+    steps: *web_steps
+
+  ios:
+    name: iOS ARM64 simulator
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@a97451e269162fcab6e77b6209a1fdca9847ae40 # v0.5.0
+      - run: flutter pub get
+      - uses: Telosnex/telosnex_ci_tools/actions/ios-simulator-boot@a97451e269162fcab6e77b6209a1fdca9847ae40 # v0.5.0
+      - name: ONNX Runtime session on the simulator
+        run: tool/test_ios_simulator_artifacts.sh
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: example/assets/models/**/*.onnx
+          key: hf-models-${{ runner.os }}-${{ hashFiles('native_artifacts/manifest.json', 'tool/fetch_hf_models.dart') }}
+      - run: dart run tool/fetch_hf_models.dart
+      # Once, ahead of the test: the Xcode build is silent for minutes, and
+      # the builds of flutter test (each attempt, each file) are incremental.
+      - name: Build the app
+        working-directory: example
+        run: flutter build ios --simulator --debug -t integration_test/plugin_integration_test.dart
+      - uses: Telosnex/telosnex_ci_tools/actions/ios-flutter-test@a97451e269162fcab6e77b6209a1fdca9847ae40 # v0.5.0
+        with:
+          working-directory: example
+          target: integration_test
+          artifact-name: ios-simulator-logs
+          idle-minutes: '15'
+          # The app bundles 1.5 GB of models, so its launch is slow. An app
+          # whose VM service flutter test misses ends 30 s after it logged
+          # it (missed-line-seconds), not after this.
+          connect-seconds: '600'
+
+  android:
+    name: Android x64 emulator
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@a97451e269162fcab6e77b6209a1fdca9847ae40 # v0.5.0
+      - run: flutter pub get
+      - uses: Telosnex/telosnex_ci_tools/actions/android-emulator@a97451e269162fcab6e77b6209a1fdca9847ae40 # v0.5.0
+        id: emulator
+        with:
+          api-level: '36'
+      - name: ONNX Runtime session on the emulator
+        run: tool/test_android_artifacts.sh
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: example/assets/models/**/*.onnx
+          key: hf-models-${{ runner.os }}-${{ hashFiles('native_artifacts/manifest.json', 'tool/fetch_hf_models.dart') }}
+      - run: dart run tool/fetch_hf_models.dart
+      - name: Example integration tests
+        working-directory: example
+        env:
+          SERIAL: ${{ steps.emulator.outputs.serial }}
+        run: |
+          flutter pub get
+          for f in integration_test/*_test.dart; do
+            flutter test "$f" -d "$SERIAL" -r expanded
+          done
+      - name: Upload the emulator logs
+        if: failure() || cancelled()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: android-emulator-logs
+          path: |
+            ${{ steps.emulator.outputs.log }}
+            ${{ steps.emulator.outputs.logcat }}
+          if-no-files-found: ignore

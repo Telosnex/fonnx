@@ -209,7 +209,7 @@ void main() {
           Uri.parse(url.toDart),
       ];
       final loaded = urls.where((u) => u.path.contains('/packages/fonnx/web/'));
-      expect(loaded.map((u) => u.pathSegments.last).toSet(), {
+      _expectLoaded(loaded, {
         'ort.min.mjs',
         'ort-wasm-simd-threaded.mjs',
         'ort-wasm-simd-threaded.wasm',
@@ -238,10 +238,7 @@ void main() {
           Uri.parse(url.toDart),
       ];
       final loaded = urls.where((u) => u.path.contains('/packages/fonnx/web/'));
-      expect(loaded.map((u) => u.pathSegments.last).toSet(), {
-        'ort.min.mjs',
-        'kokoro_engine.dart.js',
-      });
+      _expectLoaded(loaded, {'ort.min.mjs', 'kokoro_engine.dart.js'});
       for (final url in loaded) {
         expect(url.queryParameters['v'], webRuntimeVersion, reason: '$url');
       }
@@ -313,3 +310,26 @@ extension type _Worker._(JSObject _) implements JSObject {
   external void terminate();
   external set onmessage(JSFunction? handler);
 }
+
+/// Safari lists no resource entry for an .mjs module a new worker imports
+/// from its memory cache (an earlier test loaded it), so on Safari only the
+/// other files are required. Chrome and Firefox must list every file.
+void _expectLoaded(Iterable<Uri> loaded, Set<String> all) {
+  final names = loaded.map((u) => u.pathSegments.last).toSet();
+  if (_isSafari) {
+    expect(names, containsAll(all.where((n) => !n.endsWith('.mjs'))));
+    expect(names.difference(all), isEmpty);
+  } else {
+    expect(names, all);
+  }
+}
+
+bool get _isSafari {
+  final ua = _navigatorUserAgent.toDart;
+  return ua.contains('Safari/') &&
+      !ua.contains('Chrome/') &&
+      !ua.contains('Firefox/');
+}
+
+@JS('navigator.userAgent')
+external JSString get _navigatorUserAgent;

@@ -9,7 +9,7 @@ import 'package:fonnx/models/keyword_spotter/keyword_spotter.dart';
 import 'package:fonnx_example/padding.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart' as path_provider;
-import 'package:record/record.dart';
+import 'package:fonnx_example/audio.dart';
 
 class KeywordSpotterWidget extends StatefulWidget {
   const KeywordSpotterWidget({super.key});
@@ -48,7 +48,6 @@ class _KeywordSpotterWidgetState extends State<KeywordSpotterWidget> {
 
   KeywordSpotter? _spotter;
   StreamSubscription<KeywordDetection>? _detectionSubscription;
-  AudioRecorder? _recorder;
   StreamSubscription<Uint8List>? _audioSubscription;
   BytesBuilder? _teachBuffer;
 
@@ -185,20 +184,7 @@ class _KeywordSpotterWidgetState extends State<KeywordSpotterWidget> {
         });
       });
 
-      final recorder = AudioRecorder();
-      if (!await recorder.hasPermission()) {
-        throw 'Denied permission to record audio.';
-      }
-      _recorder = recorder;
-      final audioStream = await recorder.startStream(
-        const RecordConfig(
-          encoder: AudioEncoder.pcm16bits,
-          numChannels: 1,
-          sampleRate: 16000,
-          echoCancel: false,
-          noiseSuppress: false,
-        ),
-      );
+      final audioStream = await microphonePcm16();
       _audioSubscription = audioStream.listen((bytes) {
         final teachBuffer = _teachBuffer;
         if (teachBuffer != null) {
@@ -254,7 +240,6 @@ class _KeywordSpotterWidgetState extends State<KeywordSpotterWidget> {
       _error = null;
     });
     KeywordSpotter? tempSpotter;
-    AudioRecorder? tempRecorder;
     StreamSubscription<Uint8List>? tempSubscription;
     final buffer = BytesBuilder(copy: false);
     try {
@@ -263,26 +248,13 @@ class _KeywordSpotterWidgetState extends State<KeywordSpotterWidget> {
         // Reuse the live mic; divert its audio into the teach buffer.
         _teachBuffer = buffer;
       } else {
-        tempRecorder = AudioRecorder();
-        if (!await tempRecorder.hasPermission()) {
-          throw 'Denied permission to record audio.';
-        }
-        final stream = await tempRecorder.startStream(
-          const RecordConfig(
-            encoder: AudioEncoder.pcm16bits,
-            numChannels: 1,
-            sampleRate: 16000,
-            echoCancel: false,
-            noiseSuppress: false,
-          ),
-        );
+        final stream = await microphonePcm16();
         tempSubscription = stream.listen(buffer.add);
       }
       setState(() => _detectionLog.add('🎙 say it now…'));
       await Future<void>.delayed(const Duration(seconds: 3));
       _teachBuffer = null;
       await tempSubscription?.cancel();
-      await tempRecorder?.stop();
 
       final spotter =
           liveSpotter ??
@@ -317,7 +289,6 @@ class _KeywordSpotterWidgetState extends State<KeywordSpotterWidget> {
     } finally {
       _teachBuffer = null;
       await tempSubscription?.cancel();
-      await tempRecorder?.dispose();
       await tempSpotter?.close();
       setState(() => _busy = false);
     }
@@ -339,9 +310,6 @@ class _KeywordSpotterWidgetState extends State<KeywordSpotterWidget> {
   Future<void> _stopListening() async {
     await _audioSubscription?.cancel();
     _audioSubscription = null;
-    await _recorder?.stop();
-    await _recorder?.dispose();
-    _recorder = null;
     await _detectionSubscription?.cancel();
     _detectionSubscription = null;
     await _spotter?.close();

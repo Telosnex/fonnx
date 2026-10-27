@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fonnx/models/kokoro/kokoro.dart';
 import 'package:fonnx/models/kokoro/kokoro_tokens.dart' show kokoroWav;
+import 'package:fonnx_example/audio.dart';
 import 'package:fonnx_example/kokoro_models.dart';
 
 /// Kokoro preview. It downloads the pinned bundle, or on native platforms
@@ -24,7 +24,7 @@ class _KokoroWidgetState extends State<KokoroWidget> {
         'I read the book yesterday, and I will read it again tomorrow. '
         'Mr. Darcy paid \$5.99 for three tickets.',
   );
-  final _player = AudioPlayer();
+  final _player = WavPlayer();
   Kokoro? _engine;
   StreamIterator<KokoroChunk>? _iterator;
   Completer<void>? _playing;
@@ -89,7 +89,6 @@ class _KokoroWidgetState extends State<KokoroWidget> {
     if (engine == null) return;
     final epoch = ++_epoch;
     setState(() => _busy = true);
-    StreamSubscription<void>? completion;
     final iterator = StreamIterator(engine.speak(_text.text, voice: _voice));
     _iterator = iterator;
     final timer = Stopwatch()..start();
@@ -113,9 +112,6 @@ class _KokoroWidgetState extends State<KokoroWidget> {
         count++;
         final done = Completer<void>();
         _playing = done;
-        completion = _player.onPlayerComplete.listen((_) {
-          if (!done.isCompleted) done.complete();
-        });
         // The next sentence is synthesized while this one plays.
         final next = nextSentence();
         // Attach an error handler now, in case it fails during playback.
@@ -124,12 +120,8 @@ class _KokoroWidgetState extends State<KokoroWidget> {
           onError: (Object e) => e,
         );
         if (count == 1) _update('First audio: ${timer.elapsedMilliseconds} ms');
-        await _player.play(
-          BytesSource(kokoroWav(sentence), mimeType: 'audio/wav'),
-        );
-        await done.future;
-        await completion.cancel();
-        completion = null;
+        await Future.any([_player.play(kokoroWav(sentence)), done.future]);
+        if (!done.isCompleted) done.complete();
         _playing = null;
         final result = await nextResult;
         if (result is Object && result is! Float32List) throw result;
@@ -138,7 +130,6 @@ class _KokoroWidgetState extends State<KokoroWidget> {
     } catch (e) {
       if (epoch == _epoch) _update('$e');
     } finally {
-      await completion?.cancel();
       await iterator.cancel();
       await _player.stop();
       if (epoch == _epoch) {
