@@ -38,7 +38,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq clang cmake ninja-build pkg-config libgtk-3-dev xvfb > /dev/null
-      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@2e2c0056dea41823381dcd503f4834461566cdad # v0.5.1
+      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@6042c18cd940a801f4158918c126bde5520cecc3 # v0.5.2
       - run: flutter pub get
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -131,7 +131,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@2e2c0056dea41823381dcd503f4834461566cdad # v0.5.1
+      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@6042c18cd940a801f4158918c126bde5520cecc3 # v0.5.2
       - run: flutter pub get
       - run: dart run kiln:web install-dev
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -140,7 +140,7 @@ jobs:
           key: hf-models-${{ runner.os }}-${{ hashFiles('native_artifacts/manifest.json', 'tool/fetch_hf_models.dart') }}
       # test/web_models links to example/assets/models.
       - run: dart run tool/fetch_hf_models.dart
-      - uses: Telosnex/telosnex_ci_tools/actions/dart-test-browser@2e2c0056dea41823381dcd503f4834461566cdad # v0.5.1
+      - uses: Telosnex/telosnex_ci_tools/actions/dart-test-browser@6042c18cd940a801f4158918c126bde5520cecc3 # v0.5.2
         with:
           platform: ${{ env.BROWSER }}
           compiler: ${{ env.COMPILER }}
@@ -181,26 +181,26 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@2e2c0056dea41823381dcd503f4834461566cdad # v0.5.1
+      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@6042c18cd940a801f4158918c126bde5520cecc3 # v0.5.2
       - run: flutter pub get
-      - uses: Telosnex/telosnex_ci_tools/actions/ios-simulator-boot@2e2c0056dea41823381dcd503f4834461566cdad # v0.5.1
-      - name: ONNX Runtime session on the simulator
-        run: tool/test_ios_simulator_artifacts.sh
+      - uses: Telosnex/telosnex_ci_tools/actions/ios-simulator-boot@6042c18cd940a801f4158918c126bde5520cecc3 # v0.5.2
+        id: simulator
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: example/assets/models/**/*.onnx
           key: hf-models-${{ runner.os }}-${{ hashFiles('native_artifacts/manifest.json', 'tool/fetch_hf_models.dart') }}
       - run: dart run tool/fetch_hf_models.dart
-      # Once, ahead of the test: the Xcode build is silent for minutes, and
-      # the builds of flutter test (each attempt, each file) are incremental.
-      - name: Build the app
-        working-directory: example
-        run: flutter build ios --simulator --debug -t integration_test/plugin_integration_test.dart
-      - uses: Telosnex/telosnex_ci_tools/actions/ios-flutter-test@2e2c0056dea41823381dcd503f4834461566cdad # v0.5.1
+      # One target, so one Xcode build, install and launch. No build ahead
+      # (flutter build ios --simulator): its generic destination does not
+      # match flutter test's -destination id=<udid>, and Xcode rebuilt all.
+      # plugin_integration_test opens an ONNX Runtime session first.
+      - uses: Telosnex/telosnex_ci_tools/actions/ios-flutter-test@6042c18cd940a801f4158918c126bde5520cecc3 # v0.5.2
         with:
           working-directory: example
-          target: integration_test
+          target: integration_test/ios_all.dart
+          udid: ${{ steps.simulator.outputs.udid }}
           artifact-name: ios-simulator-logs
+          # The Xcode build is silent: 12 minutes on the run of a47735c.
           idle-minutes: '15'
           # The app bundles 1.5 GB of models, so its launch is slow. An app
           # whose VM service flutter test misses ends 30 s after it logged
@@ -215,9 +215,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@2e2c0056dea41823381dcd503f4834461566cdad # v0.5.1
+      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@6042c18cd940a801f4158918c126bde5520cecc3 # v0.5.2
       - run: flutter pub get
-      - uses: Telosnex/telosnex_ci_tools/actions/android-emulator@2e2c0056dea41823381dcd503f4834461566cdad # v0.5.1
+      - uses: Telosnex/telosnex_ci_tools/actions/android-emulator@6042c18cd940a801f4158918c126bde5520cecc3 # v0.5.2
         id: emulator
         with:
           api-level: '36'
