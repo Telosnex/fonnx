@@ -21,7 +21,8 @@ dependencies:
   libmonet:
     git:
       url: https://github.com/Telosnex/libmonet.git
-      ref: main
+      # A commit, not the main branch: a branch can change under consumers.
+      ref: c4c2cc09c5e710e5f6ead53fd6e905bd5d20b854
   file_picker: ^10.1.9
   collection: ^1.18.0
   ml_linalg: ^13.12.6
