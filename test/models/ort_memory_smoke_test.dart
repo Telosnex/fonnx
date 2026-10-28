@@ -116,7 +116,9 @@ void main() {
       label: 'Pyannote',
       warmupIterations: 2,
       measuredIterations: 40,
-      maxRssGrowthBytes: 30 * 1024 * 1024,
+      // 25–32 MiB on Linux CI runners (2026-10-27/28): 30 MiB failed now and
+      // then without a leak. A leak still grows past 35 MiB in 40 runs.
+      maxRssGrowthBytes: 35 * 1024 * 1024,
       sampleEvery: 5,
       body: (_) => pyannote.process(audioData),
     );
