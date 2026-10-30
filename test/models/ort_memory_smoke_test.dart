@@ -116,10 +116,13 @@ void main() {
       label: 'Pyannote',
       warmupIterations: 2,
       measuredIterations: 40,
-      // 25–32 MiB on Linux CI runners (2026-10-27/28): 30 MiB failed now and
-      // then without a leak. A leak still grows past 35 MiB in 40 runs.
-      maxRssGrowthBytes: 35 * 1024 * 1024,
-      sampleEvery: 5,
+      // The total after 40 runs swings between ~8 and ~40 MiB on Linux CI
+      // with no trend (allocator noise), so a cap on it flaked at 30 and at
+      // 35 MiB. The lowest RSS of the early half vs. the late half ignores
+      // those spikes; a leak of 1 MiB/run still lifts it by ~15 MiB.
+      maxRssGrowthBytes: 80 * 1024 * 1024,
+      maxFloorGrowthBytes: 10 * 1024 * 1024,
+      sampleEvery: 1,
       body: (_) => pyannote.process(audioData),
     );
   }, timeout: const Timeout(Duration(minutes: 5)));
@@ -201,6 +204,11 @@ Future<void> _runRssSmoke({
   required int maxRssGrowthBytes,
   required Future<Object?> Function(int iteration) body,
   int sampleEvery = 25,
+  // When set, also fails if the lowest RSS sampled in the second half of the
+  // measured runs is above the lowest in the second quarter by more than
+  // this (the first quarter still settles). Use with a small sampleEvery;
+  // maxRssGrowthBytes then only needs to catch runaway growth.
+  int? maxFloorGrowthBytes,
 }) async {
   Object? lastResult;
   for (var i = 0; i < warmupIterations; i++) {
@@ -211,11 +219,13 @@ Future<void> _runRssSmoke({
   final before = ProcessInfo.currentRss;
   print('$label RSS before: ${_formatBytes(before)}');
 
+  final samples = <int, int>{};
   for (var i = 0; i < measuredIterations; i++) {
     lastResult = await body(i);
     final iteration = i + 1;
     if (iteration % sampleEvery == 0 || iteration == measuredIterations) {
       final current = ProcessInfo.currentRss;
+      samples[iteration] = current;
       print(
         '$label RSS after $iteration iterations: '
         '${_formatBytes(current)} '
@@ -238,6 +248,29 @@ Future<void> _runRssSmoke({
         '$label RSS grew by ${_formatBytes(delta)} after '
         '$measuredIterations repeated inferences.',
   );
+
+  if (maxFloorGrowthBytes != null) {
+    final half = measuredIterations ~/ 2;
+    int floorOf(bool Function(int iteration) inWindow) => samples.entries
+        .where((e) => inWindow(e.key))
+        .map((e) => e.value)
+        .reduce((a, b) => a < b ? a : b);
+    final early = floorOf((i) => i > half ~/ 2 && i <= half);
+    final late = floorOf((i) => i > half);
+    final floorGrowth = late - early;
+    print(
+      '$label RSS floor: early ${_formatBytes(early - before)}, '
+      'late ${_formatBytes(late - before)} '
+      '(growth ${_formatBytes(floorGrowth)})',
+    );
+    expect(
+      floorGrowth,
+      lessThan(maxFloorGrowthBytes),
+      reason:
+          '$label lowest RSS rose by ${_formatBytes(floorGrowth)} between '
+          'the first and second half of $measuredIterations inferences.',
+    );
+  }
 }
 
 String _formatBytes(int bytes) {
