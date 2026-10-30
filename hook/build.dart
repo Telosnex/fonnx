@@ -9,8 +9,8 @@ import 'package:code_assets/code_assets.dart';
 import 'package:hooks/hooks.dart';
 import 'package:kiln/kiln.dart';
 
-import 'apple_compatibility.dart';
-import 'source_build.dart';
+import '../hook_src/apple_compatibility.dart';
+import '../hook_src/source_build.dart';
 
 void main(List<String> args) async {
   final lines = <String>[];

@@ -41,7 +41,7 @@ Windows requires the Microsoft Visual C++ 2015–2022 runtime.
 
 Apple requirements stay at iOS 15.1 and macOS 14. The manifest stores the iOS
 major version 15 because the shared schema uses integer versions. Flutter's
-hook request is fixed at 13. `hook/apple_compatibility.dart` uses FONNX's declared
+hook request is fixed at 13. `hook_src/apple_compatibility.dart` uses FONNX's declared
 floor only for release selection, not for the source-build input. The README
 contains the required iOS deployment target and framework packaging fix.
 

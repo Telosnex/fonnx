@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:kiln/kiln.dart';
 import 'package:kiln/src/release_tool.dart';
-import '../hook/upstream_ort.dart';
+import '../hook_src/upstream_ort.dart';
 import 'futo/bundle.dart';
 import 'hf/models.dart';
 

@@ -8,7 +8,7 @@ import 'package:kiln/src/publisher.dart';
 import 'package:kiln/src/release_tool.dart';
 import 'package:path/path.dart' as p;
 
-import '../../hook/upstream_ort.dart';
+import '../../hook_src/upstream_ort.dart';
 
 /// The shared release command publishes the hook outputs. FONNX retains ORT's
 /// upstream URLs. It also rehosts the existing dynamic iOS ORT base, unchanged,

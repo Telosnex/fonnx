@@ -4,7 +4,7 @@ import 'package:code_assets/code_assets.dart';
 import 'package:test/test.dart';
 import 'package:hooks/hooks.dart';
 
-import '../hook/apple_compatibility.dart';
+import '../hook_src/apple_compatibility.dart';
 
 BuildInput inputFor(String os, int version) => BuildInput({
   'out_dir_shared': '${Directory.systemTemp.path}/fonnx_minimum_os_test/',
