@@ -6,7 +6,7 @@ import 'package:test/test.dart';
 import 'package:kiln/kiln.dart';
 import 'package:kiln/src/publisher.dart';
 
-import '../hook/upstream_ort.dart';
+import '../hook_src/upstream_ort.dart';
 import '../tool/kiln/release.dart';
 
 final class RecordingPublisher implements Publisher {
