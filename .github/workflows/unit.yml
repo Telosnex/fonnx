@@ -25,8 +25,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@cba77fc0d4330f1bef81193c53cd7dd976f0ebcf # v0.5.3
-      - uses: Telosnex/telosnex_ci_tools/actions/lint@cba77fc0d4330f1bef81193c53cd7dd976f0ebcf # v0.5.3
+      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@0554f3662445d678e2effbd838d15968d673f7af # v0.5.6
+      - uses: Telosnex/telosnex_ci_tools/actions/lint@0554f3662445d678e2effbd838d15968d673f7af # v0.5.6
       - run: flutter pub get
       # Not the generated lib/src/kiln.g.dart (its bytes are pinned).
       - run: git ls-files 'lib/*.dart' 'test/*.dart' 'tool/*.dart' | grep -v '\.g\.dart$' | xargs dart format --output=none --set-exit-if-changed
