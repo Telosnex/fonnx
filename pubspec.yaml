@@ -1,8 +1,11 @@
 name: fonnx
-description: Cross-platform ONNX inference for Dart and Flutter using Dart FFI and Web Workers.
-version: 0.0.1
-homepage: https://github.com/Telosnex/fonnx
-publish_to: none
+description: >-
+  ONNX model inference for Dart and Flutter on every platform: ONNX Runtime
+  through FFI on native, Web Workers on the web. Embeddings, Whisper speech
+  to text, Kokoro text to speech, and more.
+version: 0.1.0
+repository: https://github.com/Telosnex/fonnx
+issue_tracker: https://github.com/Telosnex/fonnx/issues
 
 environment:
   # kiln requires Dart 3.10 or newer.

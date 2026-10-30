@@ -16,3 +16,5 @@ example/
 # Local IDE/project debris.
 *.iml
 .DS_Store
+# Text for tool/kokoro golden generation, not used by the package.
+corpus/
