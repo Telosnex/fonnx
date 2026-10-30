@@ -9,7 +9,7 @@ import 'package:fonnx_example/pyannote_widget.dart';
 import 'package:fonnx_example/silero_vad_widget.dart';
 import 'package:fonnx_example/tts_demo_widget.dart';
 import 'package:fonnx_example/stt_widget.dart';
-import 'package:libmonet/libmonet.dart';
+import 'package:monet_ui/monet_ui.dart';
 
 void main() {
   runApp(const MyApp());

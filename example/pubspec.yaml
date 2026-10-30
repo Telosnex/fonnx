@@ -18,22 +18,12 @@ dependencies:
   ffi: ^2.1.0
   path: ^1.8.3
   path_provider: ^2.1.1
-  libmonet:
-    git:
-      url: https://github.com/Telosnex/libmonet.git
-      # A commit, not the main branch: a branch can change under consumers.
-      ref: c4c2cc09c5e710e5f6ead53fd6e905bd5d20b854
+  monet_ui: ^1.0.0
   file_picker: ^10.1.9
   collection: ^1.18.0
   ml_linalg: ^13.12.6
   # Microphone capture and playback (was record and audioplayers).
-  # A commit with prebuilt files (release native-4f2669ef5e1899aa): at a
-  # commit without them, the source build fails. Move it after a Kiln
-  # release of telosnex_audio.
-  telosnex_audio:
-    git:
-      url: https://github.com/Telosnex/telosnex_audio.git
-      ref: 7f1a89adf77acc6b57ab1c85bde7e8312c41a983
+  telosnex_audio: ^0.1.0
   permission_handler: ^12.0.1
 dev_dependencies:
   integration_test:
