@@ -1,3 +1,7 @@
+## 0.1.0
+
+- First release on pub.dev, MIT licensed.
+
 ## 0.0.1
 
 * Use `kiln`, the new name of `native_prebuilt`, from pub.dev.
