@@ -1,3 +1,13 @@
 # Files that the native build does not read (kiln ADR 001 D3).
 # The local test script. The release workflow runs its own test steps.
 tool/test_all.sh
+# Everything in .pubignore: not in the published package, so not in the key
+# (or the published package's key differs from the release's).
+docs/
+build/
+codemagic.yaml
+header.png
+test/
+example/
+fonnx.iml
+corpus/

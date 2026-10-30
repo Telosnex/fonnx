@@ -1,3 +1,9 @@
+## 0.1.1
+
+- The prebuilt native libraries are used again: in 0.1.0, files left out
+  of the package still counted in its source key, so every build compiled
+  from source.
+
 ## 0.1.0
 
 - First release on pub.dev, MIT licensed.
