@@ -358,8 +358,5 @@ single-threaded development and requires no CDN download or browser extension.
 
 # License
 
-FONNX is licensed under a dual-license model.
-
-The code as-is on GitHub is licensed under GPL v2. That requires distribution of the integrating app's source code, and this is unlikely to be desirable for commercial entities. See LICENSE.md.
-
-Commercial licenses are also available. Contact info@telosnex.com. Expect very fair terms: our intent is to charge only entities, with a launched app, making a lot of money, with FONNX as a core dependency. The base agreement is here: https://github.com/lawndoc/dual-license-templates/blob/main/pdf/Basic-Yearly.pdf
+FONNX is licensed under the MIT License. See LICENSE, which also has the
+licenses of the code it bundles (ONNX Runtime and ONNX Runtime Extensions).
