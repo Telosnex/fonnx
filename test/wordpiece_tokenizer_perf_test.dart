@@ -1,89 +1,94 @@
+@Tags(['perf'])
+library;
+
 import 'package:fonnx/third_party/diacritic/diacritic.dart';
 import 'package:fonnx/tokenizers/bert_vocab.dart';
 import 'package:fonnx/tokenizers/embedding.dart';
 import 'package:fonnx/tokenizers/wordpiece_tokenizer.dart';
-
-import 'perf_tester.dart';
+import 'package:perf_tester/perf_tester.dart';
+import 'package:test/test.dart';
 
 void main() {
-  final testCases = [
-    // Basic
-    'The quick brown fox jumps over the lazy dog',
-    'Hello world',
-    '',
-    ' ',
+  test('BERT tokenization: original vs optimized', () async {
+    final testCases = [
+      // Basic
+      'The quick brown fox jumps over the lazy dog',
+      'Hello world',
+      '',
+      ' ',
 
-    // Languages
-    '中国是世界上最大的国家之一', // Chinese
-    'こんにちは世界、元気ですか', // Japanese
-    'Hello 世界 and こんにちは', // Mixed
-    // Length variations
-    'The quick brown fox jumps over the lazy dog ' * 10,
-    'a',
-    'a ' * 100,
+      // Languages
+      '中国是世界上最大的国家之一', // Chinese
+      'こんにちは世界、元気ですか', // Japanese
+      'Hello 世界 and こんにちは', // Mixed
+      // Length variations
+      'The quick brown fox jumps over the lazy dog ' * 10,
+      'a',
+      'a ' * 100,
 
-    // Special characters and whitespace
-    '  Multiple   Spaces  ',
-    'With\tTabs\tand\nNewlines\r\n',
-    'With.punctuation!and?marks',
-    'With-hyphens_and_underscores',
+      // Special characters and whitespace
+      '  Multiple   Spaces  ',
+      'With\tTabs\tand\nNewlines\r\n',
+      'With.punctuation!and?marks',
+      'With-hyphens_and_underscores',
 
-    // Numbers and mixed content
-    '123 456 789',
-    'Mix3d with numb3rs',
-    'URL: https://example.com',
+      // Numbers and mixed content
+      '123 456 789',
+      'Mix3d with numb3rs',
+      'URL: https://example.com',
 
-    // Edge cases
-    'a'.padLeft(1000, 'a'), // Very long input
-    'αβγδ', // Non-ASCII
-    '👨‍👩‍👧‍👦 👾 🤖', // Emojis
-  ];
+      // Edge cases
+      'a'.padLeft(1000, 'a'), // Very long input
+      'αβγδ', // Non-ASCII
+      '👨‍👩‍👧‍👦 👾 🤖', // Emojis
+    ];
 
-  final originalTokenizer = WordpieceTokenizer(
-    encoder: bertEncoder,
-    decoder: bertDecoder,
-    unkString: '[UNK]',
-    startToken: 101,
-    endToken: 102,
-    unkToken: 100,
-    maxInputTokens: 512,
-    maxInputCharsPerWord: 100,
-  );
+    final originalTokenizer = WordpieceTokenizer(
+      encoder: bertEncoder,
+      decoder: bertDecoder,
+      unkString: '[UNK]',
+      startToken: 101,
+      endToken: 102,
+      unkToken: 100,
+      maxInputTokens: 512,
+      maxInputCharsPerWord: 100,
+    );
 
-  final newTokenizer = WordpieceTokenizerNew(
-    encoder: bertEncoder,
-    decoder: bertDecoder,
-    unkString: '[UNK]',
-    startToken: 101,
-    endToken: 102,
-    unkToken: 100,
-    maxInputTokens: 512,
-    maxInputCharsPerWord: 100,
-  );
+    final newTokenizer = WordpieceTokenizerNew(
+      encoder: bertEncoder,
+      decoder: bertDecoder,
+      unkString: '[UNK]',
+      startToken: 101,
+      endToken: 102,
+      unkToken: 100,
+      maxInputTokens: 512,
+      maxInputCharsPerWord: 100,
+    );
 
-  final perfTest = PerfTester<String, List<TextAndTokens>>(
-    testName: 'BERT Tokenization',
-    testCases: testCases,
-    implementation1: (text) => originalTokenizer.tokenize(text),
-    implementation2: (text) => newTokenizer.tokenize(text),
-    impl1Name: 'Original Tokenizer',
-    impl2Name: 'Optimized Tokenizer',
-    equalityCheck: (a, b) {
-      if (a == null || b == null) return a == b;
-      if (a.length != b.length) return false;
+    final perfTest = PerfTester<String, List<TextAndTokens>>(
+      testName: 'BERT Tokenization',
+      testCases: testCases,
+      implementation1: (text) => originalTokenizer.tokenize(text),
+      implementation2: (text) => newTokenizer.tokenize(text),
+      impl1Name: 'Original Tokenizer',
+      impl2Name: 'Optimized Tokenizer',
+      equalityCheck: (a, b) {
+        if (a == null || b == null) return a == b;
+        if (a.length != b.length) return false;
 
-      for (var i = 0; i < a.length; i++) {
-        if (a[i].text != b[i].text) return false;
-        if (a[i].tokens.length != b[i].tokens.length) return false;
-        for (var j = 0; j < a[i].tokens.length; j++) {
-          if (a[i].tokens[j] != b[i].tokens[j]) return false;
+        for (var i = 0; i < a.length; i++) {
+          if (a[i].text != b[i].text) return false;
+          if (a[i].tokens.length != b[i].tokens.length) return false;
+          for (var j = 0; j < a[i].tokens.length; j++) {
+            if (a[i].tokens[j] != b[i].tokens[j]) return false;
+          }
         }
-      }
-      return true;
-    },
-  );
+        return true;
+      },
+    );
 
-  perfTest.run(warmupRuns: 100, benchmarkRuns: 100);
+    await perfTest.run(warmupRuns: 100, benchmarkRuns: 100);
+  }, timeout: Timeout.none);
 }
 
 class WordpieceTokenizerNew {

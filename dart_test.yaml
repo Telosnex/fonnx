@@ -1,0 +1,6 @@
+tags:
+  # Benchmarks that print timings rather than check correctness. CI excludes
+  # them (dart test -x perf in .github/workflows). Run on demand:
+  #   dart test -t perf test/<file>
+  #   dart run perf_tester:aot --dart test/<file>   # AOT
+  perf:

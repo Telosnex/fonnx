@@ -51,7 +51,7 @@ jobs:
       # The tests of tool/test_all.sh.
       - name: Model tests
         run: |
-          dart test --concurrency=1 -r expanded \
+          dart test -x perf --concurrency=1 -r expanded \
             test/deterministic_operation_corpus_test.dart \
             test/models/futo_swipe_api_test.dart \
             test/models/futo_swipe_converter_test.dart \
@@ -71,7 +71,7 @@ jobs:
             test/models/whisper_test.dart \
             test/ort_native_asset_test.dart \
             test/tokenizers/wordpiece_tokenizer_test.dart
-          dart test --concurrency=1 -r expanded test/models/ort_memory_smoke_test.dart
+          dart test -x perf --concurrency=1 -r expanded test/models/ort_memory_smoke_test.dart
       - if: runner.os != 'Windows'
         name: Sanitizers (package-owned finalizer boundary)
         run: tool/test_native_sanitizers.sh
@@ -144,7 +144,7 @@ jobs:
         with:
           platform: ${{ env.BROWSER }}
           compiler: ${{ env.COMPILER }}
-          args: test/deterministic_operation_corpus_test.dart test/web_runtime_test.dart
+          args: -x perf test/deterministic_operation_corpus_test.dart test/web_runtime_test.dart
 
   web-linux-chrome-dart2wasm:
     name: Web Linux x64 Chrome dart2wasm

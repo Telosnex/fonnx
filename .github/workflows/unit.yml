@@ -38,4 +38,4 @@ jobs:
       - run: dart run tool/fetch_hf_models.dart magika
       - name: ORT Web identity inference (Node)
         run: node tool/test_web_runtime.mjs
-      - run: dart test test/deterministic_operation_corpus_test.dart -r expanded
+      - run: dart test -x perf test/deterministic_operation_corpus_test.dart -r expanded

@@ -9,6 +9,9 @@
 //
 // Input rows add one word per token at a fixed rate, then one more sentence,
 // so the first unit ends when the next word arrives (D3 in ADR 014).
+@Tags(['perf'])
+library;
+
 import 'dart:async';
 import 'dart:io';
 import 'package:test/test.dart';
