@@ -11,3 +11,4 @@ test/
 example/
 fonnx.iml
 corpus/
+onnx_runtime/updating.md

@@ -89,7 +89,9 @@ history; leave them.
    `kiln-manifest/<tag>` commit the release pushes. Every later change to
    native sources (including `tool/support/*.c`) needs another release.
    Everything the package publishes counts, so check with `dart run
-   kiln:check` before pushing; `.pubignore` lists what doesn't count.
+   kiln:check` before pushing. `native_artifacts/source_excludes.txt` lists
+   what doesn't count; keep it in step with `.pubignore`, or the published
+   package's key differs from the release's.
 9. **PR and CI.** Integration does not run on pull requests: start it on the
    branch with `gh workflow run integration.yml --ref <branch>`. Merge with
    rebase, not squash, so the manifest commits stay as they are.
