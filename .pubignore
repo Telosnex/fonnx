@@ -16,5 +16,7 @@ example/
 # Local IDE/project debris.
 *.iml
 .DS_Store
+# Maintainer guide, not a package input.
+onnx_runtime/updating.md
 # Text for tool/kokoro golden generation, not used by the package.
 corpus/
