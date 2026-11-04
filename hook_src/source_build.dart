@@ -127,8 +127,10 @@ Future<void> buildFromSource(
       ),
     );
   } else if (Platform.isWindows) {
+    // ProgramFiles(x86) can be missing from the environment (it was in CI's
+    // Git Bash steps), so fall back to its standard location.
     final vswhere = p.join(
-      Platform.environment['ProgramFiles(x86)']!,
+      Platform.environment['ProgramFiles(x86)'] ?? r'C:\Program Files (x86)',
       'Microsoft Visual Studio',
       'Installer',
       'vswhere.exe',
