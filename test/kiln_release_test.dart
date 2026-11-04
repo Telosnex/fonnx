@@ -63,7 +63,7 @@ void main() {
         ).writeAsString(
           jsonEncode({
             'schema': 1,
-            'version': '1.27.0',
+            'version': '1.31.1',
             'targets': {
               platform: {
                 'url': upstreamUrl,

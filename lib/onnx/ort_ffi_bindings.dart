@@ -2785,7 +2785,92 @@ typedef errno_t = ffi.Int;
 typedef Darterrno_t = int;
 typedef ssize_t = __darwin_ssize_t;
 
-/// Copied from TensorProto::DataType
+/// \brief Error codes reported by ONNX Runtime.
+///
+/// The error code associated with an ::OrtStatus.
+enum OrtErrorCode {
+  /// Success. No error occurred.
+  ORT_OK(0),
+
+  /// Generic failure that does not map to a more specific error code. Consult the error message for details.
+  ORT_FAIL(1),
+
+  /// A caller-supplied argument was invalid (e.g. NULL pointer, out-of-range value, mismatched shape/rank, or bad
+  /// configuration).
+  ORT_INVALID_ARGUMENT(2),
+
+  /// A required file (such as a model file) does not exist.
+  ORT_NO_SUCHFILE(3),
+
+  /// Legacy/unused but retained for ABI compatibility. Historically returned when a model could not be found by name in
+  /// the ONNX Runtime Server (removed in 2022).
+  ORT_NO_MODEL(4),
+
+  /// A hardware accelerator or backend engine reported a failure (e.g. a device crash or other device-level error).
+  ORT_ENGINE_ERROR(5),
+
+  /// A generic runtime exception was caught. The error message is the primary source of detail.
+  ORT_RUNTIME_EXCEPTION(6),
+
+  /// Protobuf parsing or serialization failed.
+  ORT_INVALID_PROTOBUF(7),
+
+  /// Invalid session state for the requested operation. Despite the name, this code does not mean "success, model
+  /// loaded"; it is returned when the session is in the wrong state for the requested call (e.g. a model is already
+  /// loaded, the session is already initialized, or no model has been loaded yet). The name is historical and is
+  /// retained for ABI compatibility; consult the error message for the specific condition.
+  ORT_MODEL_LOADED(8),
+
+  /// The requested functionality is not implemented in this build.
+  ORT_NOT_IMPLEMENTED(9),
+
+  /// The model graph is structurally invalid (e.g. recursive function definitions, invalid tensor dimensions, or
+  /// malformed nodes).
+  ORT_INVALID_GRAPH(10),
+
+  /// An execution provider reported a generic failure.
+  ORT_EP_FAIL(11),
+
+  /// Model loading or session initialization was canceled at the caller's request.
+  ORT_MODEL_LOAD_CANCELED(12),
+
+  /// The model requires compilation by an execution provider, but compilation was disabled via session options.
+  ORT_MODEL_REQUIRES_COMPILATION(13),
+
+  /// A requested resource could not be found.
+  ORT_NOT_FOUND(14),
+
+  /// The execution provider's hardware device has been reset.
+  ///
+  /// The caller should stop using the existing session (and release it) and create a new session.
+  ORT_DEVICE_RESET(15);
+
+  final int value;
+  const OrtErrorCode(this.value);
+
+  static OrtErrorCode fromValue(int value) => switch (value) {
+    0 => ORT_OK,
+    1 => ORT_FAIL,
+    2 => ORT_INVALID_ARGUMENT,
+    3 => ORT_NO_SUCHFILE,
+    4 => ORT_NO_MODEL,
+    5 => ORT_ENGINE_ERROR,
+    6 => ORT_RUNTIME_EXCEPTION,
+    7 => ORT_INVALID_PROTOBUF,
+    8 => ORT_MODEL_LOADED,
+    9 => ORT_NOT_IMPLEMENTED,
+    10 => ORT_INVALID_GRAPH,
+    11 => ORT_EP_FAIL,
+    12 => ORT_MODEL_LOAD_CANCELED,
+    13 => ORT_MODEL_REQUIRES_COMPILATION,
+    14 => ORT_NOT_FOUND,
+    15 => ORT_DEVICE_RESET,
+    _ => throw ArgumentError('Unknown value for OrtErrorCode: $value'),
+  };
+}
+
+/// Tensor element types used by the C API.
+/// Numeric values are ABI-stable and are not all identical to TensorProto::DataType.
 /// Currently, Ort doesn't support complex64, complex128
 enum ONNXTensorElementDataType {
   ONNX_TENSOR_ELEMENT_DATA_TYPE_UNDEFINED(0),
@@ -2947,46 +3032,6 @@ enum OrtLoggingLevel {
   };
 }
 
-enum OrtErrorCode {
-  ORT_OK(0),
-  ORT_FAIL(1),
-  ORT_INVALID_ARGUMENT(2),
-  ORT_NO_SUCHFILE(3),
-  ORT_NO_MODEL(4),
-  ORT_ENGINE_ERROR(5),
-  ORT_RUNTIME_EXCEPTION(6),
-  ORT_INVALID_PROTOBUF(7),
-  ORT_MODEL_LOADED(8),
-  ORT_NOT_IMPLEMENTED(9),
-  ORT_INVALID_GRAPH(10),
-  ORT_EP_FAIL(11),
-  ORT_MODEL_LOAD_CANCELED(12),
-  ORT_MODEL_REQUIRES_COMPILATION(13),
-  ORT_NOT_FOUND(14);
-
-  final int value;
-  const OrtErrorCode(this.value);
-
-  static OrtErrorCode fromValue(int value) => switch (value) {
-    0 => ORT_OK,
-    1 => ORT_FAIL,
-    2 => ORT_INVALID_ARGUMENT,
-    3 => ORT_NO_SUCHFILE,
-    4 => ORT_NO_MODEL,
-    5 => ORT_ENGINE_ERROR,
-    6 => ORT_RUNTIME_EXCEPTION,
-    7 => ORT_INVALID_PROTOBUF,
-    8 => ORT_MODEL_LOADED,
-    9 => ORT_NOT_IMPLEMENTED,
-    10 => ORT_INVALID_GRAPH,
-    11 => ORT_EP_FAIL,
-    12 => ORT_MODEL_LOAD_CANCELED,
-    13 => ORT_MODEL_REQUIRES_COMPILATION,
-    14 => ORT_NOT_FOUND,
-    _ => throw ArgumentError('Unknown value for OrtErrorCode: $value'),
-  };
-}
-
 enum OrtOpAttrType {
   ORT_OP_ATTR_UNDEFINED(0),
   ORT_OP_ATTR_INT(1),
@@ -3086,6 +3131,8 @@ final class OrtModel extends ffi.Opaque {}
 
 final class OrtModelCompilationOptions extends ffi.Opaque {}
 
+final class OrtEpContextConfig extends ffi.Opaque {}
+
 final class OrtHardwareDevice extends ffi.Opaque {}
 
 final class OrtEpDevice extends ffi.Opaque {}
@@ -3098,7 +3145,7 @@ final class OrtExternalInitializerInfo extends ffi.Opaque {}
 
 final class OrtExternalResourceImporter extends ffi.Opaque {}
 
-/// \brief External memory handle type for importing GPU resources.
+/// \brief External memory handle type for importing GPU/NPU resources.
 ///
 /// \todo Add Linux DMA-BUF file descriptor for embedded GPU memory sharing
 ///
@@ -3110,11 +3157,18 @@ enum OrtExternalMemoryHandleType {
   /// < Shared HANDLE from ID3D12Device::CreateSharedHandle(heap)
   ORT_EXTERNAL_MEMORY_HANDLE_TYPE_D3D12_HEAP(1),
 
-  /// < Shared HANDLE from vkGetMemoryWin32HandleKHR, non-dedicated allocation
-  ORT_EXTERNAL_MEMORY_HANDLE_TYPE_VK_MEMORY_WIN32(2),
+  /// < Shared HANDLE from vkGetMemoryWin32HandleKHR or
+  /// clGetMemObjectInfo with CL_EXTERNAL_MEMORY_HANDLE_OPAQUE_WIN32_KHR
+  ORT_EXTERNAL_MEMORY_HANDLE_TYPE_MEMORY_WIN32(2),
 
-  /// < File descriptor from vkGetMemoryOpaqueFdKHR, non-dedicated allocation
-  ORT_EXTERNAL_MEMORY_HANDLE_TYPE_VK_MEMORY_OPAQUE_FD(3);
+  /// < File descriptor from vkGetMemoryOpaqueFdKHR or
+  /// clGetMemObjectInfo with CL_EXTERNAL_MEMORY_HANDLE_OPAQUE_FD_KHR
+  ORT_EXTERNAL_MEMORY_HANDLE_TYPE_MEMORY_OPAQUE_FD(3),
+
+  /// < Host-allocated CPU virtual address (pointer). Must be page-aligned.
+  /// Equivalent to VK_EXTERNAL_MEMORY_HANDLE_TYPE_HOST_ALLOCATION_BIT_EXT
+  /// or CL_MEM_USE_HOST_PTR, @since 1.30
+  ORT_EXTERNAL_MEMORY_HANDLE_TYPE_HOST_ALLOCATION(4);
 
   final int value;
   const OrtExternalMemoryHandleType(this.value);
@@ -3122,8 +3176,9 @@ enum OrtExternalMemoryHandleType {
   static OrtExternalMemoryHandleType fromValue(int value) => switch (value) {
     0 => ORT_EXTERNAL_MEMORY_HANDLE_TYPE_D3D12_RESOURCE,
     1 => ORT_EXTERNAL_MEMORY_HANDLE_TYPE_D3D12_HEAP,
-    2 => ORT_EXTERNAL_MEMORY_HANDLE_TYPE_VK_MEMORY_WIN32,
-    3 => ORT_EXTERNAL_MEMORY_HANDLE_TYPE_VK_MEMORY_OPAQUE_FD,
+    2 => ORT_EXTERNAL_MEMORY_HANDLE_TYPE_MEMORY_WIN32,
+    3 => ORT_EXTERNAL_MEMORY_HANDLE_TYPE_MEMORY_OPAQUE_FD,
+    4 => ORT_EXTERNAL_MEMORY_HANDLE_TYPE_HOST_ALLOCATION,
     _ => throw ArgumentError(
       'Unknown value for OrtExternalMemoryHandleType: $value',
     ),
@@ -3289,7 +3344,25 @@ final class OrtEpAssignedSubgraph extends ffi.Opaque {}
 
 final class OrtEpAssignedNode extends ffi.Opaque {}
 
+final class OrtModelPackageOptions extends ffi.Opaque {}
+
+final class OrtModelPackageContext extends ffi.Opaque {}
+
+final class OrtModelPackageComponentContext extends ffi.Opaque {}
+
 typedef OrtStatusPtr = ffi.Pointer<OrtStatus>;
+typedef OrtExperimentalFnPtrFunction = ffi.Void Function();
+typedef DartOrtExperimentalFnPtrFunction = void Function();
+
+/// \brief Generic function pointer type for experimental API lookup.
+///
+/// Returned by OrtApi::GetExperimentalFunction. Cast to the correct function pointer type before calling.
+/// The experimental API function pointer types are defined in onnxruntime_experimental_c_api.h.
+///
+/// This is a function pointer rather than \c void* because casting between function pointers and object
+/// pointers is undefined behavior in C and C++. Using a function pointer type keeps all casts well-defined.
+typedef OrtExperimentalFnPtr =
+    ffi.Pointer<ffi.NativeFunction<OrtExperimentalFnPtrFunction>>;
 
 /// \brief Memory allocation interface
 ///
@@ -4571,6 +4644,36 @@ typedef OrtGetInitializerLocationFuncFunction =
 /// ORT will release the OrtStatus* if not null.
 typedef OrtGetInitializerLocationFunc =
     ffi.Pointer<ffi.NativeFunction<OrtGetInitializerLocationFuncFunction>>;
+typedef OrtWriteNamedBufferFuncFunction =
+    ffi.Pointer<OrtStatus> Function(
+      ffi.Pointer<ffi.Void> state,
+      ffi.Pointer<ffi.Char> name,
+      ffi.Pointer<ffi.Void> buffer,
+      ffi.Size buffer_num_bytes,
+    );
+typedef DartOrtWriteNamedBufferFuncFunction =
+    ffi.Pointer<OrtStatus> Function(
+      ffi.Pointer<ffi.Void> state,
+      ffi.Pointer<ffi.Char> name,
+      ffi.Pointer<ffi.Void> buffer,
+      int buffer_num_bytes,
+    );
+
+/// \brief Function called to write named binary data.
+///
+/// Each invocation represents one complete write operation for `name`. ORT does not retain `buffer` after the callback
+/// returns and does not serialize calls made by different EP instances or worker threads.
+///
+/// \param[in] state Application-owned state. It must remain valid while the callback may be invoked and must be
+/// synchronized by the application if calls can be concurrent.
+/// \param[in] name Null-terminated UTF-8 logical data identifier.
+/// \param[in] buffer Data to write. May be NULL only when `buffer_num_bytes` is zero.
+/// \param[in] buffer_num_bytes Number of bytes in `buffer`.
+/// \return nullptr on success, or an OrtStatus* describing the failure. ORT releases a non-null returned status.
+///
+/// \since Version 1.31.
+typedef OrtWriteNamedBufferFunc =
+    ffi.Pointer<ffi.NativeFunction<OrtWriteNamedBufferFuncFunction>>;
 
 /// \brief The OrtCompileApi struct provides functions to compile ONNX models.
 ///
@@ -4942,6 +5045,127 @@ final class OrtCompileApi extends ffi.Struct {
     >
   >
   ModelCompilationOptions_SetInputModel;
+
+  /// \brief Enable or disable weightless mode for model compilation.
+  ///
+  /// When enabled, the compiled EPContext model will not embed constant initializer data in the EP's
+  /// compiled binary. Instead, the initializer data must be provided when creating a session from the
+  /// compiled model, either from the source model (via the "onnx_model_filename" EPContext node attribute
+  /// or the "ep.context_source_model_path" session option) or from externalized weights.
+  ///
+  /// This enables smaller compiled models and allows sharing initializer data across multiple compiled
+  /// model variants (e.g., multi-platform caches for different hardware generations).
+  ///
+  /// ORT verifies that the target EP supports weightless mode during CompileModel() by calling
+  /// OrtEp::GetWeightlessSupport(). If the EP does not support weightless mode, CompileModel()
+  /// returns an error.
+  ///
+  /// \param[in] model_compile_options The OrtModelCompilationOptions instance.
+  /// \param[in] use_weightless If true, enable weightless mode. If false, disable (default behavior).
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \since Version 1.29.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtModelCompilationOptions> model_compile_options,
+        ffi.Bool use_weightless,
+      )
+    >
+  >
+  ModelCompilationOptions_SetWeightlessEnabled;
+
+  /// \brief Register a callback that receives external EPContext binary data during model compilation.
+  ///
+  /// Execution providers that support external EPContext data retrieve this callback from an OrtEpContextConfig. The
+  /// callback is used only when EPContext data is not embedded in the generated ONNX model. Passing NULL clears the
+  /// callback and its state. If a compiling EP does not advertise WRITE support, compilation fails before that EP's
+  /// Compile() call.
+  ///
+  /// \param[in] model_compile_options Model compilation options.
+  /// \param[in] write_func Write callback, or NULL to clear a previously registered callback.
+  /// \param[in] state Application-owned state passed to `write_func`. Ignored when `write_func` is NULL.
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \since Version 1.31.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtModelCompilationOptions> model_compile_options,
+        OrtWriteNamedBufferFunc write_func,
+        ffi.Pointer<ffi.Void> state,
+      )
+    >
+  >
+  ModelCompilationOptions_SetEpContextDataWriteFunc;
+
+  /// \brief Store external initializers for the compiled model in one caller-owned buffer.
+  ///
+  /// This destination replaces any external-initializer file or callback destination configured previously. The
+  /// logical file name must be a non-empty relative path. Leading current-directory prefixes (`./` or `.\\`) are
+  /// removed before the name is recorded in each externalized TensorProto.
+  /// This setter only configures the destination; CompileModel allocates the buffer using `allocator`.
+  /// The allocator must provide host-accessible memory (CPU or host-accessible/pinned device memory).
+  /// Device-only allocators are rejected with ORT_INVALID_ARGUMENT.
+  /// On successful CompileModel completion, the caller owns the allocated buffer and must release it with `allocator`.
+  /// If no data is externalized, the output buffer is NULL and its size is zero.
+  /// Only main-graph initializers are externalized to this buffer; subgraph initializers remain embedded in the model.
+  /// If CompileModel fails, both outputs are unchanged and temporary allocations are freed.
+  /// The allocator and output pointer locations must remain valid until CompileModel returns.
+  /// If the model also uses an output buffer, its buffer and size output locations must each be distinct from those
+  /// provided here. CompileModel rejects aliased output locations with ORT_INVALID_ARGUMENT.
+  ///
+  /// The output model may be written to a file, buffer, or write callback. When the output model is written to a file,
+  /// the caller is responsible for persisting or otherwise supplying this buffer under `logical_file_name` when the
+  /// model is loaded.
+  ///
+  /// \param[in] model_compile_options The OrtModelCompilationOptions instance.
+  /// \param[in] logical_file_name Logical external-data file name stored in the model.
+  /// \param[in] external_initializers_size_threshold Initializers at least this size are externalized.
+  /// \param[in] allocator Allocator providing host-accessible memory for the output buffer.
+  /// \param[out] output_buffer_ptr Receives the allocated buffer, or NULL when no data is externalized.
+  /// \param[out] output_buffer_size_ptr Receives the allocated buffer size.
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  /// \since Version 1.31.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtModelCompilationOptions> model_compile_options,
+        ffi.Pointer<ffi.Char> logical_file_name,
+        ffi.Size external_initializers_size_threshold,
+        ffi.Pointer<OrtAllocator> allocator,
+        ffi.Pointer<ffi.Pointer<ffi.Void>> output_buffer_ptr,
+        ffi.Pointer<ffi.Size> output_buffer_size_ptr,
+      )
+    >
+  >
+  ModelCompilationOptions_SetOutputModelExternalInitializersBuffer;
+
+  /// \brief Configure additional alignment for externalized initializer offsets.
+  ///
+  /// Applies to file and buffer destinations for initializers at least `minimum_size` bytes. An alignment of zero
+  /// disables the additional policy. Otherwise, alignment must be a power of two.
+  /// By default, offsets for initializers of at least 1 MiB (1048576 bytes) are aligned to 4096 bytes, even if this
+  /// setter is never called. Natural alignment for each tensor's element type is always applied, including when
+  /// the additional policy is disabled. These settings align offsets, not the allocator-provided buffer address.
+  ///
+  /// \param[in] model_compile_options The OrtModelCompilationOptions instance.
+  /// \param[in] alignment Required byte alignment, or zero to disable.
+  /// \param[in] minimum_size Minimum initializer size at which alignment is applied.
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  /// \since Version 1.31.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtModelCompilationOptions> model_compile_options,
+        ffi.Size alignment,
+        ffi.Size minimum_size,
+      )
+    >
+  >
+  ModelCompilationOptions_SetOutputModelExternalInitializersAlignment;
 }
 
 /// \brief These are the default EP selection policies used by ORT when doing automatic EP selection.
@@ -5569,13 +5793,41 @@ final class OrtResourceCount extends ffi.Struct {
   external UnnamedUnion value;
 }
 
+/// \brief Describes the scope of an EP's weightless mode support.
+///
+/// Returned by OrtEp::GetWeightlessSupport() to indicate which types of initializers
+/// the EP can operate on without copying.
+///
+/// \since Version 1.29.
+enum OrtWeightlessSupport {
+  /// EP does not support weightless mode.
+  OrtWeightlessSupport_NONE(0),
+
+  /// EP supports weightless mode for external initializers only.
+  /// Internal initializers are still copied by the EP during compilation.
+  OrtWeightlessSupport_EXTERNAL_ONLY(1),
+
+  /// EP supports weightless mode for all initializers (internal and external).
+  OrtWeightlessSupport_ALL(2);
+
+  final int value;
+  const OrtWeightlessSupport(this.value);
+
+  static OrtWeightlessSupport fromValue(int value) => switch (value) {
+    0 => OrtWeightlessSupport_NONE,
+    1 => OrtWeightlessSupport_EXTERNAL_ONLY,
+    2 => OrtWeightlessSupport_ALL,
+    _ => throw ArgumentError('Unknown value for OrtWeightlessSupport: $value'),
+  };
+}
+
 /// \brief The OrtEp struct provides functions to implement for an execution provider.
 /// \since Version 1.22.
 final class OrtEp extends ffi.Struct {
-  /// \brief The ONNX Runtime version the execution provider was compiled with.
+  /// \brief The ONNX Runtime API version the execution provider was compiled with.
   ///
-  /// Implementation should set to ORT_API_VERSION.
-  /// ORT will use this to ensure it does not call functions that were not available when the library was compiled.
+  /// Implementation should set this to ORT_API_VERSION.
+  /// ORT uses this to avoid calling functions that were not available when the EP was compiled.
   ///
   /// \since Version 1.22.
   @ffi.Uint32()
@@ -5830,11 +6082,14 @@ final class OrtEp extends ffi.Struct {
   /// The OrtMemoryInfo instance will match one of the values set in the OrtEpDevice using EpDevice_AddAllocatorInfo.
   /// Any allocator specific options should be read from the session options.
   ///
-  /// If nullptr OrtEpFactory::CreateAllocator will be used.
+  /// Implementation of this function is optional. If nullptr, OrtEpFactory::CreateAllocator will be used if
+  /// implemented. If neither callback is implemented, the EP does not provide a preferred allocator for the memory
+  /// location. For default CPU memory, this allows ORT to use its default CPU allocator.
   ///
-  /// \param[in] this_ptr The OrtEpFactory instance.
+  /// \param[in] this_ptr The OrtEp instance.
   /// \param[in] memory_info The OrtMemoryInfo to create the allocator for. May be nullptr.
-  /// \param[out] allocator The created OrtAllocator instance. Set to nullptr if the default CPU allocator is used.
+  /// \param[out] allocator The created OrtAllocator instance. Set to nullptr if the EP does not provide a preferred
+  /// allocator for the memory location.
   ///
   /// \snippet{doc} snippets.dox OrtStatus Return Value
   ///
@@ -5881,6 +6136,11 @@ final class OrtEp extends ffi.Struct {
   /// This function gets a compatibility information string that contains details about the execution provider
   /// used to compile a given model. This string can later be used with ValidateCompiledModelCompatibilityInfo
   /// to determine if a compiled model is compatible with the EP.
+  ///
+  /// The format and contents of the string are defined by the EP and are opaque to ORT and applications. The EP should
+  /// include enough information to determine whether the compiled model can run with a future EP configuration. This may
+  /// include the devices used to compile the model, but applications are not expected to parse or otherwise recover that
+  /// information from the string.
   ///
   /// The returned string should be a null-terminated, UTF-8 encoded string. ORT will copy it.
   ///
@@ -6224,6 +6484,77 @@ final class OrtEp extends ffi.Struct {
     >
   >
   ReleaseCapturedGraph;
+
+  /// \brief Query the execution provider's weightless mode support.
+  ///
+  /// When weightless mode is enabled (via the "ep.enable_weightless" session option), ORT calls this function
+  /// to determine the scope of the EP's weightless support. The EP returns an OrtWeightlessSupport value
+  /// indicating whether it supports weightless mode for all initializers, external initializers only, or not
+  /// at all.
+  ///
+  /// The EP's response may depend on the underlying hardware or driver capabilities. For example, an EP may
+  /// support weightless mode for all initializers on newer hardware but only for external initializers on
+  /// older hardware that requires weight transformation.
+  ///
+  /// EPs that support weightless mode should set drop_constant_initializers to false in OrtNodeFusionOptions
+  /// so that ORT provides the initializer data as inputs to the compiled/fused node. The EP can then access
+  /// these initializers at Compute() time via KernelContext_GetInput().
+  ///
+  /// \note Extending the lifetime of initializer data obtained via ValueInfo_GetInitializerValue() during
+  /// Compile() so that the EP can cache and reuse data pointers directly (without going through
+  /// KernelContext) is planned but not yet implemented. Until then, KernelContext_GetInput() is the
+  /// only supported way to access initializer data at Compute() time.
+  ///
+  /// \param[in] this_ptr The OrtEp instance.
+  /// \param[out] support Output parameter set to the EP's weightless support scope.
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \note Implementation of this function is optional. If set to NULL, ORT assumes the EP does not
+  /// support weightless mode (equivalent to OrtWeightlessSupport_NONE).
+  ///
+  /// \since Version 1.29.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtEp> this_ptr,
+        ffi.Pointer<ffi.UnsignedInt> support,
+      )
+    >
+  >
+  GetWeightlessSupport;
+
+  /// \brief Query support for application-managed external EPContext data.
+  ///
+  /// The EP sets `supported_flags` to a bitwise combination of OrtEpContextDataCallbackSupportFlags values.
+  /// READ indicates support for OrtReadNamedBufferFunc, and WRITE indicates support for OrtWriteNamedBufferFunc.
+  ///
+  /// If the EP advertises READ or WRITE support and the corresponding callback is registered, the EP must use the
+  /// callback or return an error. It must not fall back to another method such as filesystem I/O. Callback errors
+  /// must be returned to ORT. The EP is responsible for validating the returned data and imposing deserialization
+  /// limits before consuming it; ORT does not invoke the callback or validate its result.
+  ///
+  /// These flags cover provider-owned EPContext artifacts only. They do not describe temporary files that an EP's
+  /// backend or driver may create internally.
+  ///
+  /// \param[in] this_ptr The OrtEp instance.
+  /// \param[out] supported_flags The supported OrtEpContextDataCallbackSupportFlags values.
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \note Implementation of this function is optional. If set to NULL, ORT assumes the EP does not support
+  /// application-managed external EPContext data.
+  ///
+  /// \since Version 1.31.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtEp> this_ptr,
+        ffi.Pointer<ffi.Uint32> supported_flags,
+      )
+    >
+  >
+  GetEpContextDataCallbackSupport;
 }
 
 enum OrtCompiledModelCompatibility {
@@ -6706,7 +7037,17 @@ final class OrtEpFactory extends ffi.Struct {
   /// \param[in] max_ep_devices The maximum number of OrtEpDevices that can be added to ep_devices.
   /// Current default is 8. This can be increased if needed.
   /// \param[out] num_ep_devices The number of EP devices added to ep_devices.
-  /// \return true if the factory can create an execution provider that uses `device`.
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \remarks Called during execution provider library registration. The OrtEpDevice instances returned are added to
+  /// the environment after this returns. An implementation should not depend on other OrtEpDevices returned by
+  /// OrtApi::GetEpDevices since those depend on the execution provider library registration order.
+  ///
+  /// Environment configuration entries are populated before any library is registered, so
+  /// OrtEpApi::GetEnvConfigEntries may be called from this function, but it must be called synchronously on
+  /// the thread invoking GetSupportedDevices. The implementation must not wait for another thread that calls
+  /// OrtEpApi::GetEnvConfigEntries.
   ///
   /// \since Version 1.22.
   external ffi.Pointer<
@@ -6808,20 +7149,48 @@ final class OrtEpFactory extends ffi.Struct {
   >
   GetVersion;
 
-  /// \brief Validate the compatibility of a compiled model with the execution provider factory for one or more devices.
+  /// \brief Validate a compiled model against an ordered execution provider device configuration.
   ///
-  /// Given a compatibility info string produced during model compilation, the EP factory should determine whether the
-  /// compiled model is compatible with the EP factory when targeting the provided hardware devices. All devices provided
-  /// must belong to the same execution provider instance that this factory creates.
+  /// Given a compatibility info string produced during model compilation, the EP factory determines whether the compiled
+  /// model can run when the EP is created with the provided hardware devices. The string is opaque to ORT and the caller;
+  /// the caller is not expected to know which devices were used to compile the model.
   ///
-  /// The EP factory implementation should consider the set of devices (e.g., multi-adapter or multi-GPU scenarios) when
-  /// evaluating compatibility and set `model_compatibility` accordingly.
+  /// `devices` is the non-empty, ordered device configuration that the caller intends to use. The caller should pass the
+  /// corresponding OrtEpDevice values, in the same order, to OrtApi::SessionOptionsAppendExecutionProvider_V2 if it
+  /// subsequently creates a session for the compiled model. Device order may be significant.
+  ///
+  /// The implementation must interpret the configuration using the same device selection, fallback, and participation
+  /// rules as OrtEpFactory::CreateEp:
+  ///
+  /// - If CreateEp would select one effective device and ignore the remaining entries, validate that effective device.
+  /// - If CreateEp would treat the entries as alternative or fallback devices, determine whether it can select a
+  /// compatible execution plan. An unused device must not make the result less compatible.
+  /// - If CreateEp would use multiple devices together, every device required by the effective execution plan must be
+  /// compatible with its assigned part of the compiled model.
+  ///
+  /// Do not unconditionally validate each device independently and return the worst result. The meaning of a multi-device
+  /// configuration is EP-defined. For example, an artifact compiled for one device can be optimal for an ordered
+  /// configuration in which that device is selected and later entries are ignored. Conversely, an artifact partitioned
+  /// across two devices is unsupported if either required device is absent.
+  ///
+  /// A supported result must mean that creating the EP and loading the compiled model with the equivalent device
+  /// configuration will not fail due to compiled-model incompatibility. OrtCompiledModelCompatibility_EP_NOT_APPLICABLE
+  /// is an overall "no compatibility determination" result; it is not a required identity value for combining
+  /// per-device results.
+  ///
+  /// \note Validation can be performed outside of a session. For example, OrtApi::GetModelCompatibilityForEpDevices
+  /// does not require a session, and model package variant selection calls this function to exclude incompatible
+  /// variants before a session is created. The session options and per-device EP metadata that may later be passed to
+  /// OrtEpFactory::CreateEp may therefore be unknown when this is called, and are not provided to this callback. An EP
+  /// whose compatibility decision depends on configuration not represented by the hardware devices or compatibility
+  /// string should avoid reporting a supported result unless it can make a reliable determination from the available
+  /// information.
   ///
   /// \param[in] this_ptr The OrtEpFactory instance.
-  /// \param[in] devices Array of OrtHardwareDevice pointers that the EP would run on. All must map to this EP.
-  /// \param[in] num_devices Number of entries in `devices`.
+  /// \param[in] devices Ordered array of OrtHardwareDevice pointers for the intended EP configuration.
+  /// \param[in] num_devices Number of entries in `devices`. Must be greater than zero.
   /// \param[in] compatibility_info The compatibility information string produced when the model was compiled.
-  /// \param[out] model_compatibility OrtCompiledModelCompatibility value describing the compatibility of the model with the EP.
+  /// \param[out] model_compatibility Compatibility of the model with the intended EP device configuration.
   ///
   /// \snippet{doc} snippets.dox OrtStatus Return Value
   ///
@@ -6844,10 +7213,15 @@ final class OrtEpFactory extends ffi.Struct {
   /// The factory that creates the EP is responsible for providing the allocators required by the EP.
   /// The OrtMemoryInfo instance will match one of the values set in the OrtEpDevice using EpDevice_AddAllocatorInfo.
   ///
+  /// Implementation of this function is optional. It is required if ORT needs to create a shared allocator for an
+  /// OrtMemoryInfo advertised by the EP.
+  ///
   /// \param[in] this_ptr The OrtEpFactory instance.
   /// \param[in] memory_info The OrtMemoryInfo to create the allocator for. May be nullptr.
   /// \param[in] allocator_options Optional key-value pairs for allocator options, can be nullptr.
-  /// \param[out] allocator The created OrtAllocator instance. Set to nullptr if the default CPU allocator is used.
+  /// \param[out] allocator The created OrtAllocator instance. When called to create an allocator for a session, this
+  /// may be set to nullptr if the EP does not provide a preferred allocator for the memory
+  /// location. When called to create a shared allocator, this must be set to a non-null value.
   ///
   /// \snippet{doc} snippets.dox OrtStatus Return Value
   ///
@@ -6865,6 +7239,9 @@ final class OrtEpFactory extends ffi.Struct {
   CreateAllocator;
 
   /// \brief Release an OrtAllocator created by the factory.
+  ///
+  /// Implementation of this function is required if OrtEpFactory::CreateAllocator or OrtEp::CreateAllocator is
+  /// implemented.
   ///
   /// \since Version 1.23.
   external ffi.Pointer<
@@ -7130,6 +7507,63 @@ final class OrtEpFactory extends ffi.Struct {
     >
   >
   DeinitGraphicsInterop;
+
+  /// \brief Select the best model variant candidate from metadata.
+  ///
+  /// Evaluates each candidate's metadata against the given hardware device and optional session options,
+  /// and returns the index of the best match.
+  ///
+  /// Each candidate is an OrtKeyValuePairs representing one model variant. The KVP uses indexed keys
+  /// so that the EP can inspect each model's metadata independently. A variant always has num_models >= 1.
+  ///
+  /// Required and optional keys:
+  /// - "num_models"                 — number of models in this variant (>= 1) (required)
+  /// - "\<i\>.ep_compatibility_info"  — compatibility string for model i (required per model)
+  /// - "\<i\>.role"                   — role/purpose of model i (e.g., "prefill", "decode") (optional)
+  /// - "\<i\>.future_meaningful_info" — additional EP-meaningful metadata for model i (optional)
+  ///
+  /// where \<i\> is a zero-based index (e.g., "0.ep_compatibility_info", "1.ep_compatibility_info").
+  ///
+  /// The implementer should loop from 0 to num_models - 1 and validate each "\<i\>.ep_compatibility_info" entry.
+  /// An advanced implementation may additionally consider "role" or other metadata when ranking candidates.
+  ///
+  /// **Why this function exists:**
+  ///
+  /// The existing ValidateCompiledModelCompatibilityInfo() alone is not sufficient for some EPs to determine the best
+  /// compatible model when there are multiple candidates. For example, an EP may support multiple compilation modes
+  /// (e.g., "speed optimized" vs "memory optimized") that produce different compatibility strings. The EP can implement
+  /// this function to evaluate the candidate metadata and select the best compatible variant based on its own criteria,
+  /// the target device, and the session options.
+  ///
+  /// If all candidates are unsupported, this function succeeds and sets `selected_index` to SIZE_MAX.
+  ///
+  /// \note The implementer should validate each "\<i\>.ep_compatibility_info" in the candidate (e.g., by calling
+  /// ValidateCompiledModelCompatibilityInfo for each one) before determining the best match.
+  ///
+  /// \param[in] this_ptr The OrtEpFactory instance.
+  /// \param[in] device The target hardware device that the EP would run on. Must map to this EP.
+  /// \param[in] candidates Array of OrtKeyValuePairs pointers (one per model variant).
+  /// \param[in] num_candidates Number of candidates (i.e., number of model variants to evaluate).
+  /// \param[in] session_options Optional session options to consider when selecting the best candidate.
+  /// May be nullptr if no session-level preferences are relevant.
+  /// \param[out] selected_index Selected candidate index, or SIZE_MAX if all unsupported.
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \since Version 1.28.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtEpFactory> this_ptr,
+        ffi.Pointer<OrtHardwareDevice> device,
+        ffi.Pointer<ffi.Pointer<OrtKeyValuePairs>> candidates,
+        ffi.Size num_candidates,
+        ffi.Pointer<OrtSessionOptions> session_options,
+        ffi.Pointer<ffi.Size> selected_index,
+      )
+    >
+  >
+  SelectBestModelCandidate;
 }
 
 /// \brief The OrtNodeFusionOptions struct specifies options for fusing nodes supported by an execution provider.
@@ -7498,6 +7932,32 @@ enum OrtProfilingEventCategory {
     ),
   };
 }
+
+typedef OrtReadNamedBufferFuncFunction =
+    ffi.Pointer<OrtStatus> Function(
+      ffi.Pointer<ffi.Void> state,
+      ffi.Pointer<ffi.Char> name,
+      ffi.Pointer<OrtAllocator> allocator,
+      ffi.Pointer<ffi.Pointer<ffi.Void>> buffer,
+      ffi.Pointer<ffi.Size> data_size,
+    );
+
+/// \brief Function called to read named binary data.
+///
+/// The callback must allocate the returned buffer with `allocator`. The consumer frees it with the same allocator.
+/// ORT does not serialize calls made by different EP instances or worker threads.
+///
+/// \param[in] state Application-owned state. It must remain valid while the callback may be invoked and must be
+/// synchronized by the application if calls can be concurrent.
+/// \param[in] name Null-terminated UTF-8 logical data identifier.
+/// \param[in] allocator Allocator that must be used for the output buffer.
+/// \param[out] buffer Allocated output buffer, or NULL for an empty payload.
+/// \param[out] data_size Number of bytes in `buffer`.
+/// \return nullptr on success, or an OrtStatus* describing the failure. ORT releases a non-null returned status.
+///
+/// \since Version 1.31.
+typedef OrtReadNamedBufferFunc =
+    ffi.Pointer<ffi.NativeFunction<OrtReadNamedBufferFuncFunction>>;
 
 /// \brief The OrtEpApi struct provides functions that are relevant to the implementation of an execution provider.
 ///
@@ -8982,6 +9442,116 @@ final class OrtEpApi extends ffi.Struct {
     >
   >
   ProfilingEventsContainer_AddEvents;
+
+  /// \brief Get the weightless source model byte buffer from session options.
+  ///
+  /// Returns the buffer and size set by SessionOptionsSetWeightlessSourceModelBuffer, or NULL/0 if not set.
+  /// The EP can use this during CreateEp or Compile to access the source model for weightless
+  /// EPContext model sessions.
+  ///
+  /// \note If the source model is provided as a file path, the EP should read the
+  /// "ep.context_source_model_path" (kOrtSessionOptionEpContextSourceModelPath) session config entry
+  /// via GetSessionConfigEntry instead.
+  ///
+  /// \note Recommended EP precedence for locating the source model:
+  /// buffer (this API) > file path ("ep.context_source_model_path") > "onnx_model_filename" EPContext
+  /// node attribute.
+  ///
+  /// \param[in] session_options The OrtSessionOptions instance.
+  /// \param[out] source_model_data Output parameter set to the source model buffer, or NULL if not set.
+  /// \param[out] source_model_data_length Output parameter set to the buffer size, or 0 if not set.
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \since Version 1.29.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtSessionOptions> session_options,
+        ffi.Pointer<ffi.Pointer<ffi.Void>> source_model_data,
+        ffi.Pointer<ffi.Size> source_model_data_length,
+      )
+    >
+  >
+  SessionOptionsGetWeightlessSourceModelBuffer;
+
+  /// \brief Copy the EPContext callback configuration from session options into an owned handle.
+  ///
+  /// An EP should call this during OrtEpFactory::CreateEp and retain the returned handle for as long as its Compile
+  /// implementation may need the callbacks. The handle owns copies of the function and state pointers, but it does
+  /// not own the application-provided state itself. On failure, `*config` is not modified.
+  ///
+  /// \param[in] session_options Session options supplied to OrtEpFactory::CreateEp.
+  /// \param[out] config Non-null handle that must be released with ReleaseEpContextConfig.
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \since Version 1.31.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtSessionOptions> session_options,
+        ffi.Pointer<ffi.Pointer<OrtEpContextConfig>> config,
+      )
+    >
+  >
+  SessionOptionsGetEpContextConfig;
+
+  /// \brief Release an OrtEpContextConfig handle. May be called with NULL.
+  ///
+  /// \since Version 1.31.
+  external ffi.Pointer<
+    ffi.NativeFunction<ffi.Void Function(ffi.Pointer<OrtEpContextConfig> input)>
+  >
+  ReleaseEpContextConfig;
+
+  /// \brief Get the EPContext data read callback and application state.
+  ///
+  /// If no callback is configured, both outputs are set to NULL. On failure, both outputs are unchanged.
+  /// The returned state is application-owned and remains
+  /// subject to the lifetime and synchronization requirements documented by SessionOptionsSetEpContextDataReadFunc.
+  ///
+  /// \param[in] config EPContext configuration handle.
+  /// \param[out] read_func Configured callback, or NULL.
+  /// \param[out] state Configured application state, or NULL.
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \since Version 1.31.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtEpContextConfig> config,
+        ffi.Pointer<OrtReadNamedBufferFunc> read_func,
+        ffi.Pointer<ffi.Pointer<ffi.Void>> state,
+      )
+    >
+  >
+  EpContextConfigGetEpContextDataReadFunc;
+
+  /// \brief Get the EPContext data write callback and application state.
+  ///
+  /// If no callback is configured, both outputs are set to NULL. The returned state is application-owned and remains
+  /// subject to the lifetime and synchronization requirements documented by
+  /// ModelCompilationOptions_SetEpContextDataWriteFunc.
+  ///
+  /// \param[in] config EPContext configuration handle.
+  /// \param[out] write_func Configured callback, or NULL.
+  /// \param[out] state Configured application state, or NULL.
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \since Version 1.31.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtEpContextConfig> config,
+        ffi.Pointer<OrtWriteNamedBufferFunc> write_func,
+        ffi.Pointer<ffi.Pointer<ffi.Void>> state,
+      )
+    >
+  >
+  EpContextConfigGetEpContextDataWriteFunc;
 }
 
 /// \brief The OrtInteropApi struct provides functions for external resource interop with execution providers.
@@ -9475,6 +10045,343 @@ final class OrtThreadPoolCallbacksConfig extends ffi.Struct {
   /// Subject to concurrent invocations from multiple threads
   /// and must be thread-safe. May affect inference performance.
   external ffi.Pointer<ffi.Void> user_context;
+}
+
+/// \brief Stable API table for model package workflows.
+///
+/// A model package contains one or more components, each with variants targeting execution providers and devices.
+/// Obtain this table from OrtApi::GetModelPackageApi().
+///
+/// Typical usage creates model package options from session options, opens a package context, selects a component,
+/// and creates an OrtSession from the selected variant. Objects returned by this API must be released with the
+/// corresponding release function in this table.
+///
+/// \since Version 1.31.
+final class OrtModelPackageApi extends ffi.Struct {
+  /// \brief Create model package options from session options.
+  ///
+  /// Captures the execution provider configuration used to select a component variant.
+  ///
+  /// \param[in] env The ORT environment.
+  /// \param[in] session_options Session options containing the execution provider configuration.
+  /// \param[out] out Receives the created options. Release with ReleaseModelPackageOptions().
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \since Version 1.31.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtEnv> env,
+        ffi.Pointer<OrtSessionOptions> session_options,
+        ffi.Pointer<ffi.Pointer<OrtModelPackageOptions>> out,
+      )
+    >
+  >
+  CreateModelPackageOptionsFromSessionOptions;
+
+  /// \brief Release model package options.
+  ///
+  /// \param[in] input The options to release. May be NULL.
+  ///
+  /// \since Version 1.31.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      ffi.Void Function(ffi.Pointer<OrtModelPackageOptions> input)
+    >
+  >
+  ReleaseModelPackageOptions;
+
+  /// \brief Open a model package.
+  ///
+  /// Parses the package manifest and metadata rooted at `package_root`.
+  ///
+  /// \param[in] package_root Path to the model package root directory.
+  /// \param[out] out Receives the created context. Release with ReleaseModelPackageContext().
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \since Version 1.31.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<ffi.Char> package_root,
+        ffi.Pointer<ffi.Pointer<OrtModelPackageContext>> out,
+      )
+    >
+  >
+  CreateModelPackageContext;
+
+  /// \brief Release a model package context.
+  ///
+  /// \param[in] input The context to release. May be NULL.
+  ///
+  /// \since Version 1.31.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      ffi.Void Function(ffi.Pointer<OrtModelPackageContext> input)
+    >
+  >
+  ReleaseModelPackageContext;
+
+  /// \brief Get the model package schema version.
+  ///
+  /// \param[in] ctx The model package context.
+  /// \param[out] out_version Receives the schema version.
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \since Version 1.31.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtModelPackageContext> ctx,
+        ffi.Pointer<ffi.Int64> out_version,
+      )
+    >
+  >
+  ModelPackage_GetSchemaVersion;
+
+  /// \brief Get the number of components in a model package.
+  ///
+  /// \param[in] ctx The model package context.
+  /// \param[out] out_count Receives the component count.
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \since Version 1.31.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtModelPackageContext> ctx,
+        ffi.Pointer<ffi.Size> out_count,
+      )
+    >
+  >
+  ModelPackage_GetComponentCount;
+
+  /// \brief Get the component names in a model package.
+  ///
+  /// The returned array and UTF-8 strings are owned by `ctx` and remain valid until `ctx` is released.
+  ///
+  /// \param[in] ctx The model package context.
+  /// \param[out] out_names Receives the component name array, or NULL when the package has no components.
+  /// \param[out] out_count Receives the number of names in `out_names`.
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \since Version 1.31.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtModelPackageContext> ctx,
+        ffi.Pointer<ffi.Pointer<ffi.Pointer<ffi.Char>>> out_names,
+        ffi.Pointer<ffi.Size> out_count,
+      )
+    >
+  >
+  ModelPackage_GetComponentNames;
+
+  /// \brief Get the number of variants for a component.
+  ///
+  /// \param[in] ctx The model package context.
+  /// \param[in] component_name UTF-8 component name.
+  /// \param[out] out_count Receives the variant count.
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \since Version 1.31.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtModelPackageContext> ctx,
+        ffi.Pointer<ffi.Char> component_name,
+        ffi.Pointer<ffi.Size> out_count,
+      )
+    >
+  >
+  ModelPackage_GetVariantCount;
+
+  /// \brief Get the variant names for a component.
+  ///
+  /// The returned array and UTF-8 strings are owned by `ctx` and remain valid until `ctx` is released.
+  ///
+  /// \param[in] ctx The model package context.
+  /// \param[in] component_name UTF-8 component name.
+  /// \param[out] out_variant_names Receives the variant name array, or NULL when the component has no variants.
+  /// \param[out] out_count Receives the number of names in `out_variant_names`.
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \since Version 1.31.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtModelPackageContext> ctx,
+        ffi.Pointer<ffi.Char> component_name,
+        ffi.Pointer<ffi.Pointer<ffi.Pointer<ffi.Char>>> out_variant_names,
+        ffi.Pointer<ffi.Size> out_count,
+      )
+    >
+  >
+  ModelPackage_GetVariantNames;
+
+  /// \brief Get the execution provider name declared by a variant.
+  ///
+  /// The returned UTF-8 string is owned by `ctx` and remains valid until `ctx` is released. `out_ep` is set to NULL
+  /// when the variant does not declare an execution provider.
+  ///
+  /// \param[in] ctx The model package context.
+  /// \param[in] component_name UTF-8 component name.
+  /// \param[in] variant_name UTF-8 variant name.
+  /// \param[out] out_ep Receives the execution provider name or NULL.
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \since Version 1.31.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtModelPackageContext> ctx,
+        ffi.Pointer<ffi.Char> component_name,
+        ffi.Pointer<ffi.Char> variant_name,
+        ffi.Pointer<ffi.Pointer<ffi.Char>> out_ep,
+      )
+    >
+  >
+  ModelPackage_GetVariantEpName;
+
+  /// \brief Resolve a package path reference.
+  ///
+  /// Resolves content-addressed `sha256:<hex>[/path]` references and package-relative paths. When `must_exist` is
+  /// nonzero, the resolved path must exist. The returned UTF-8 path is owned by `ctx` and remains valid until the next
+  /// call to this function on the same context or until `ctx` is released.
+  ///
+  /// \param[in] ctx The model package context.
+  /// \param[in] base_dir Base directory for relative references, or NULL to use the package root.
+  /// \param[in] input UTF-8 path reference to resolve.
+  /// \param[in] must_exist Nonzero to require that the resolved path exists.
+  /// \param[out] out_path Receives the resolved UTF-8 path.
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \since Version 1.31.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtModelPackageContext> ctx,
+        ffi.Pointer<ffi.Char> base_dir,
+        ffi.Pointer<ffi.Char> input,
+        ffi.Int must_exist,
+        ffi.Pointer<ffi.Pointer<ffi.Char>> out_path,
+      )
+    >
+  >
+  ModelPackage_ResolveStringRef;
+
+  /// \brief Select a component and resolve its best matching variant.
+  ///
+  /// The returned component context is independent of `context` and must be released with
+  /// ReleaseModelPackageComponentContext().
+  ///
+  /// \param[in] context The model package context.
+  /// \param[in] component_name UTF-8 component name.
+  /// \param[in] options Options that provide the execution provider configuration for variant selection.
+  /// \param[out] out Receives the selected component context.
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \since Version 1.31.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtModelPackageContext> context,
+        ffi.Pointer<ffi.Char> component_name,
+        ffi.Pointer<OrtModelPackageOptions> options,
+        ffi.Pointer<ffi.Pointer<OrtModelPackageComponentContext>> out,
+      )
+    >
+  >
+  SelectComponent;
+
+  /// \brief Release a selected component context.
+  ///
+  /// \param[in] input The component context to release. May be NULL.
+  ///
+  /// \since Version 1.31.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      ffi.Void Function(ffi.Pointer<OrtModelPackageComponentContext> input)
+    >
+  >
+  ReleaseModelPackageComponentContext;
+
+  /// \brief Get the selected variant name.
+  ///
+  /// The returned UTF-8 string is owned by `ctx` and remains valid until `ctx` is released.
+  ///
+  /// \param[in] ctx The selected component context.
+  /// \param[out] out_name Receives the selected variant name.
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \since Version 1.31.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtModelPackageComponentContext> ctx,
+        ffi.Pointer<ffi.Pointer<ffi.Char>> out_name,
+      )
+    >
+  >
+  ModelPackageComponent_GetSelectedVariantName;
+
+  /// \brief Get the selected variant directory.
+  ///
+  /// The returned path is owned by `ctx` and remains valid until `ctx` is released.
+  ///
+  /// \param[in] ctx The selected component context.
+  /// \param[out] folder_path Receives the selected variant directory path.
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \since Version 1.31.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtModelPackageComponentContext> ctx,
+        ffi.Pointer<ffi.Pointer<ffi.Char>> folder_path,
+      )
+    >
+  >
+  ModelPackageComponent_GetSelectedVariantFolderPath;
+
+  /// \brief Create a session for the selected component variant.
+  ///
+  /// When `session_options` is NULL, ONNX Runtime creates fresh session options and applies the selected variant's
+  /// session and provider options. When `session_options` is non-NULL, the caller's options are used and package
+  /// provider options are not applied; package path-valued session options are still added when the caller did not
+  /// provide them.
+  ///
+  /// \param[in] env The ORT environment.
+  /// \param[in] context The selected component context.
+  /// \param[in] session_options Optional caller-provided session options.
+  /// \param[out] session Receives the created session. Release with OrtApi::ReleaseSession().
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \since Version 1.31.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtEnv> env,
+        ffi.Pointer<OrtModelPackageComponentContext> context,
+        ffi.Pointer<OrtSessionOptions> session_options,
+        ffi.Pointer<ffi.Pointer<OrtSession>> session,
+      )
+    >
+  >
+  CreateSession;
 }
 
 /// \brief The C API
@@ -11068,7 +11975,9 @@ final class OrtApi extends ffi.Struct {
   ///
   /// If the `size` parameter is less than the actual string attribute's size and `out`
   /// is not nullptr, the value of `size` is set to the true size of the string attribute
-  /// and a failure status is returned.)
+  /// and a failure status is returned.
+  ///
+  /// The true size of the string attribute includes the trailing null character.
   ///
   /// \param[in] info ::OrtKernelInfo instance
   /// \param[in] name Null terminated string of the name of the attribute
@@ -11949,6 +12858,7 @@ final class OrtApi extends ffi.Struct {
   /// For example, given a tensor with shape of [3,224,224], a pointer to the element at location [2,150,128] can be retrieved
   ///
   /// This function only works for numeric type tensors (No strings, etc).
+  /// This function does not support sub-byte packed types (e.g., int4).
   /// This is a no-copy method whose returned pointer is valid until the passed in ::OrtValue is free'd.
   ///
   /// \param[in] value
@@ -13361,10 +14271,11 @@ final class OrtApi extends ffi.Struct {
 
   /// \brief Replace initialized Tensors with external data with the data provided in initializers.
   ///
-  /// The function will find the initialized TensorProtos with external data in the graph with the provided names and
+  /// The function will find the initialized TensorProtos with external data in the main graph with the provided names and
   /// replace them with the provided tensors. The API verifies that the TensorProto being replaced
   /// has an external data reference and has the same name, dimensions and data type as its replacement. The replacement
-  /// will occur before any of the optimizations take place. The data will be copied into the graph
+  /// does not apply to initializers in subgraphs and will occur before any of the optimizations take place.
+  /// The data will be copied into the graph
   /// since TensorProto can't refer to the user provided buffers.
   ///
   /// Once the model has been loaded, the OrtValue(s) added to SessionOptions instance will be removed
@@ -14943,18 +15854,23 @@ final class OrtApi extends ffi.Struct {
 
   /// \brief Replace initialized Tensors with external data with the provided files in memory
   ///
-  /// The function will find the initialized TensorProtos with external data in the graph with the provided
+  /// The function will find the initialized TensorProtos with external data in the main graph with the provided
   /// external file names and the file content in memory. The API gets the external file name, offset, data length
   /// from TensorProto, and locate the tensor data from the file in memory buffer.
   /// It creates a Tensor to replace the existing Tensor in graph. The replacement
-  /// will occur before any of the optimizations take place. The data will be copied into the graph
-  /// since TensorProto can't refer to the user provided buffers.
+  /// will occur before any of the optimizations take place. By default, the data is copied during session creation.
+  /// Initializers in subgraphs are not replaced by this API.
+  ///
+  /// If the session config `session.use_external_initializer_file_buffers_directly` is set to `"1"`, naturally aligned
+  /// native-endian slices may be used directly. Other slices are copied. Every session created from these options may
+  /// outlive the options, so the application must keep all supplied buffers unchanged and alive until all such sessions
+  /// are released. If session creation fails, the buffers may be released after the call returns.
   ///
   /// \param[in] options
   /// \param[in] external_initializer_file_names Array of null terminated UTF-8 encoded strings of the file names
   /// which holds the external initializers.
   /// \param[in] external_initializer_file_buffer_array Array of pointers to the buffer of the file content.
-  /// The buffer can be freed after session creation.
+  /// The buffer can be freed after session creation unless direct-buffer mode is enabled as described above.
   /// \param[in] external_initializer_file_lengths Array of size_t to indicate the length of file content
   /// \param[in] num_external_initializer_files Number of external files
   ///
@@ -14983,9 +15899,9 @@ final class OrtApi extends ffi.Struct {
   /// the platform does not support memory mapping, in which case the file will be read into memory.
   ///
   /// \param[in] adapter_file_path adapter file path.
-  /// \param[in] allocator optional pointer to a device allocator. If specified
-  /// data is copied to the device at some point before Run() is invoked. If nullptr, data stays on CPU.
-  /// The data would still be copied to device if required by the model at inference time.
+  /// \param[in] allocator optional pointer to a non-CPU device allocator. If specified and a data transfer implementation
+  /// is available during adapter creation, the data is copied to the device before Run() is invoked.
+  /// Otherwise, the data stays on CPU and is copied to the device if required by the model at inference time.
   /// \param[out] out A pointer to a newly created OrtLoraAdapter instance. Must be released with
   /// OrtApi::ReleaseLoraAdapter.
   ///
@@ -15010,9 +15926,9 @@ final class OrtApi extends ffi.Struct {
   ///
   /// \param[in] bytes pointer to a valid Lora Adapter format buffer.
   /// \param[in] num_bytes length of bytes buffer.
-  /// \param[in] allocator optional pointer to a device allocator. If specified
-  /// data is copied to the device at some point before Run() is invoked. If nullptr, data stays on CPU.
-  /// The data would still be copied to device if required by the model at inference time.
+  /// \param[in] allocator optional pointer to a non-CPU device allocator. If specified and a data transfer implementation
+  /// is available during adapter creation, the data is copied to the device before Run() is invoked.
+  /// Otherwise, the data stays on CPU and is copied to the device if required by the model at inference time.
   /// \param[out] out A pointer to a newly created OrtLoraAdapter instance. Must be released with
   /// OrtApi::ReleaseLoraAdapter.
   ///
@@ -15102,7 +16018,6 @@ final class OrtApi extends ffi.Struct {
   ReleaseNode;
 
   /// \brief Release an OrtGraph.
-  /// \snippet{doc} snippets.dox OrtStatus Return Value
   /// \since Version 1.22.
   external ffi.Pointer<
     ffi.NativeFunction<ffi.Void Function(ffi.Pointer<OrtGraph> input)>
@@ -15110,7 +16025,6 @@ final class OrtApi extends ffi.Struct {
   ReleaseGraph;
 
   /// \brief Release an OrtModel.
-  /// \snippet{doc} snippets.dox OrtStatus Return Value
   /// \since Version 1.22.
   external ffi.Pointer<
     ffi.NativeFunction<ffi.Void Function(ffi.Pointer<OrtModel> input)>
@@ -15617,9 +16531,13 @@ final class OrtApi extends ffi.Struct {
 
   /// \brief Compute total size in bytes of the tensor data contained in an OrtValue.
   ///
-  /// Returns the total number of bytes used to store the tensor data. For numeric tensors,
-  /// this is sizeof(element_type) * total_element_count. OrtValues that are not tensors or
-  /// that are tensors that contain strings will cause an error to be returned.
+  /// Returns the total number of bytes used to store the tensor data. For numeric tensors of a
+  /// type that occupies at least one byte per element, this is sizeof(element_type) *
+  /// total_element_count. For packed sub-byte types (e.g. int4/uint4, which store multiple
+  /// elements per byte) it is the actual packed storage size, which is smaller than
+  /// sizeof(element_type) * total_element_count. Use this value (not the element count) when
+  /// copying or bounds-checking the raw tensor buffer. OrtValues that are not tensors or that are
+  /// tensors that contain strings will cause an error to be returned.
   ///
   /// \param[in] ort_value OrtValue instance containing a tensor
   /// \param[out] size The total size of the tensor data in bytes
@@ -17154,11 +18072,20 @@ final class OrtApi extends ffi.Struct {
 
   /// \brief Validate a compiled model's compatibility information for one or more EP devices.
   ///
-  /// \param[in] ep_devices The EP devices to validate against (e.g., from GetEpDevices).
-  /// All devices must belong to the same execution provider.
-  /// \param[in] num_ep_devices The number of EP devices provided.
+  /// Validates an opaque compatibility string against the ordered EP device configuration that the caller intends to
+  /// use. The caller is not expected to know which devices were used to compile the model. Device order may be
+  /// significant, and the EP factory interprets the configuration using the same selection, fallback, and participation
+  /// rules as OrtEpFactory::CreateEp.
+  ///
+  /// If the model is subsequently loaded, the caller should pass the same OrtEpDevice values in the same order to
+  /// SessionOptionsAppendExecutionProvider_V2. This function validates a caller-selected configuration; it does not
+  /// discover or return the device configuration for which an opaque compiled model was produced.
+  ///
+  /// \param[in] ep_devices The ordered EP devices to validate against (e.g., from GetEpDevices).
+  /// All devices must belong to the same execution provider factory.
+  /// \param[in] num_ep_devices The number of EP devices provided. Must be greater than zero.
   /// \param[in] compatibility_info The compatibility info string produced when the model was compiled.
-  /// \param[out] out_status The resulting compatibility status for the EP devices.
+  /// \param[out] out_status The compatibility status for the intended EP device configuration.
   ///
   /// \snippet{doc} snippets.dox OrtStatus Return Value
   ///
@@ -17946,6 +18873,164 @@ final class OrtApi extends ffi.Struct {
     >
   >
   SessionReleaseCapturedGraph;
+
+  /// \brief Retrieve an experimental function pointer by name.
+  ///
+  /// Experimental functions are not part of the stable ABI and may be added or removed between releases without notice.
+  /// Use the companion header onnxruntime_experimental_c_api.h for typedefs, name constants, and (for C++) typed
+  /// accessors.
+  ///
+  /// \param[in] name The null-terminated name of the experimental function to look up.
+  /// Names follow the pattern "<target struct>_<function name>_SinceV<ORT API version added>".
+  /// Name constants are defined in onnxruntime_experimental_c_api.h.
+  /// \return The function pointer cast to ::OrtExperimentalFnPtr, or nullptr if the function is not available in this
+  /// build. The caller must cast the returned pointer to the correct function pointer type before calling.
+  /// Function pointer typedefs are defined in onnxruntime_experimental_c_api.h.
+  ///
+  /// \since Version 1.28.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtExperimentalFnPtr Function(ffi.Pointer<ffi.Char> name)
+    >
+  >
+  GetExperimentalFunction;
+
+  /// \brief Get the framework synchronization stream associated with a kernel context.
+  ///
+  /// This returns the framework stream wrapper for the execution provider stream used by this kernel invocation.
+  /// It is intended for APIs that need a stable framework stream object for stream-aware allocation and
+  /// synchronization bookkeeping. Use KernelContext_GetGPUComputeStream when launching native GPU work.
+  ///
+  /// \param[in] context OrtKernelContext instance.
+  /// \param[out] out Returns the framework synchronization stream, or nullptr if the kernel has no stream.
+  /// Do not free or mutate the returned pointer. It is owned by the underlying session.
+  /// The pointer may be stored and used for stream-aware allocation and synchronization
+  /// bookkeeping beyond the Compute call (e.g. an allocator may persist it in arena
+  /// chunks); it remains valid until the owning Session::Run() completes its teardown.
+  /// Do not retain or dereference it after the run that produced this kernel context ends.
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \since Version 1.28.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtKernelContext> context,
+        ffi.Pointer<ffi.Pointer<OrtSyncStream>> out,
+      )
+    >
+  >
+  KernelContext_GetSyncStream;
+
+  /// \brief Set the source ONNX model as a byte buffer for weightless EPContext sessions.
+  ///
+  /// When creating a session from a weightless EPContext model, the EP may need access to the source model's
+  /// initializer data. This function provides the source model as an in-memory byte buffer, for scenarios
+  /// where the source model is not available as a file on disk (e.g., loaded from a package or downloaded).
+  ///
+  /// The caller retains ownership of the buffer and must ensure it remains valid for the lifetime of the session.
+  ///
+  /// \note If the source model is available as a file on disk, use the session config entry
+  /// "ep.context_source_model_path" (kOrtSessionOptionEpContextSourceModelPath) instead.
+  ///
+  /// \note If both a buffer (via this function) and a file path (via "ep.context_source_model_path") are
+  /// provided, the EP should prefer the buffer. The recommended EP precedence is:
+  /// buffer > file path > "onnx_model_filename" EPContext node attribute.
+  ///
+  /// \param[in] options The OrtSessionOptions instance.
+  /// \param[in] source_model_data Pointer to the source model byte buffer.
+  /// \param[in] source_model_data_length Size of the byte buffer in bytes.
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \since Version 1.29.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtSessionOptions> options,
+        ffi.Pointer<ffi.Void> source_model_data,
+        ffi.Size source_model_data_length,
+      )
+    >
+  >
+  SessionOptionsSetWeightlessSourceModelBuffer;
+
+  /// \brief Get a preallocated output tensor without allocating an output.
+  ///
+  /// Returns a borrowed OrtValue that is already allocated for this output. The
+  /// value may have been supplied by the caller of Run or IoBinding, or
+  /// preallocated by ORT for an internal execution such as a control-flow
+  /// subgraph. The returned value is valid only while the current kernel Compute
+  /// call is executing and must not be released. If the output is unallocated or
+  /// optional, `*output` is set to nullptr. This function never allocates,
+  /// resizes, or replaces an output value.
+  ///
+  /// The caller must validate the returned tensor's shape and element type before
+  /// writing to it, and must not write to an incompatible tensor. ORT generally
+  /// rejects element type, rank, and static-dimension mismatches for top-level
+  /// outputs during pre-run validation. For dynamic output dimensions, however,
+  /// the shape check that KernelContext_GetOutput performs is skipped on this
+  /// path, so a model with dynamic output shapes can yield a buffer smaller than
+  /// the computed output. Calling KernelContext_GetOutput with the computed shape
+  /// does not resize or replace an incompatible preallocated tensor; because the
+  /// output slot is already allocated, ORT returns an error for the mismatch.
+  ///
+  /// \param[in] context OrtKernelContext instance.
+  /// \param[in] output_index Output index in the current kernel.
+  /// \param[out] output Borrowed preallocated output, or nullptr when the
+  /// current output is unallocated or optional.
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \since Version 1.30.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtKernelContext> context,
+        ffi.Size output_index,
+        ffi.Pointer<ffi.Pointer<OrtValue>> output,
+      )
+    >
+  >
+  KernelContext_GetPreallocatedOutput;
+
+  /// \brief Register a callback that supplies external EPContext binary data during session initialization.
+  ///
+  /// Execution providers that support external EPContext data retrieve this callback from an OrtEpContextConfig. The
+  /// callback is not used for EPContext nodes whose data is embedded in the ONNX model. Passing NULL clears the
+  /// callback and its state. If an external EPContext node is assigned to an EP that does not advertise READ support,
+  /// session initialization fails before that EP's Compile() call.
+  ///
+  /// \param[in] options Session options used to create the session and execution providers.
+  /// \param[in] read_func Read callback, or NULL to clear a previously registered callback.
+  /// \param[in] state Application-owned state passed to `read_func`. Ignored when `read_func` is NULL.
+  ///
+  /// \snippet{doc} snippets.dox OrtStatus Return Value
+  ///
+  /// \since Version 1.31.
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      OrtStatusPtr Function(
+        ffi.Pointer<OrtSessionOptions> options,
+        OrtReadNamedBufferFunc read_func,
+        ffi.Pointer<ffi.Void> state,
+      )
+    >
+  >
+  SessionOptionsSetEpContextDataReadFunc;
+
+  /// \brief Get the stable model package API table.
+  ///
+  /// The returned table provides model package inspection, variant selection, and session creation APIs.
+  /// The table is owned by ONNX Runtime and must not be released.
+  ///
+  /// \return Pointer to the ::OrtModelPackageApi table.
+  ///
+  /// \since Version 1.31.
+  external ffi.Pointer<
+    ffi.NativeFunction<ffi.Pointer<OrtModelPackageApi> Function()>
+  >
+  GetModelPackageApi;
 }
 
 enum OrtCustomOpInputOutputCharacteristic {
@@ -18179,6 +19264,33 @@ enum OrtDeviceEpIncompatibilityReason {
         -2147483648 => OrtDeviceEpIncompatibility_UNKNOWN,
         _ => throw ArgumentError(
           'Unknown value for OrtDeviceEpIncompatibilityReason: $value',
+        ),
+      };
+}
+
+/// \brief Flags describing an execution provider's support for application-managed external EPContext data.
+///
+/// \since Version 1.31.
+enum OrtEpContextDataCallbackSupportFlags {
+  /// The EP does not support application-managed external EPContext data.
+  OrtEpContextDataCallbackSupportFlags_NONE(0),
+
+  /// The EP will use the read callback if one is configured.
+  OrtEpContextDataCallbackSupportFlags_READ(1),
+
+  /// The EP will use the write callback if one is configured.
+  OrtEpContextDataCallbackSupportFlags_WRITE(2);
+
+  final int value;
+  const OrtEpContextDataCallbackSupportFlags(this.value);
+
+  static OrtEpContextDataCallbackSupportFlags fromValue(int value) =>
+      switch (value) {
+        0 => OrtEpContextDataCallbackSupportFlags_NONE,
+        1 => OrtEpContextDataCallbackSupportFlags_READ,
+        2 => OrtEpContextDataCallbackSupportFlags_WRITE,
+        _ => throw ArgumentError(
+          'Unknown value for OrtEpContextDataCallbackSupportFlags: $value',
         ),
       };
 }
@@ -19827,7 +20939,11 @@ const int RAND_MAX = 2147483647;
 
 const int _MALLOC_TYPE_MALLOC_BACKDEPLOY_PUBLIC = 1;
 
-const int ORT_API_VERSION = 27;
+const int ORT_API_VERSION = 31;
 
 const String ORT_FILE =
-    '/var/folders/9y/1rq10yr52fs_tnhpj03sv6n40000gn/T/rNoQVX/temp_for_macros.hpp';
+    '/var/folders/9y/1rq10yr52fs_tnhpj03sv6n40000gn/T/Bt8hx1/temp_for_macros.hpp';
+
+const int ORT_EXTERNAL_MEMORY_HANDLE_TYPE_VK_MEMORY_WIN32 = 2;
+
+const int ORT_EXTERNAL_MEMORY_HANDLE_TYPE_VK_MEMORY_OPAQUE_FD = 3;

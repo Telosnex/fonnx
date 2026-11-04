@@ -168,13 +168,12 @@ after detection.
 
 ## Compatibility
 
-ONNX Runtime 1.27.0 produces incorrect encoder output on Apple SME-capable CPUs
-when its KleidiAI convolution path handles the Zipformer frontend's asymmetric
-padding. Inference succeeds silently but emits only blanks. FONNX therefore
-sets `mlas.disable_kleidiai=1` on this encoder session. The workaround can be
-removed after the Native Asset moves to ORT 1.27.1 or newer, which includes the
-fix for [microsoft/onnxruntime#28571](https://github.com/microsoft/onnxruntime/issues/28571).
-The end-to-end fixture must remain mandatory to catch regressions.
+ONNX Runtime 1.27.0 produced incorrect encoder output on Apple SME-capable CPUs
+when its KleidiAI convolution path handled the Zipformer frontend's asymmetric
+padding: inference succeeded but emitted only blanks
+([microsoft/onnxruntime#28571](https://github.com/microsoft/onnxruntime/issues/28571)).
+ORT 1.31.1 has the fix. The end-to-end fixture must remain mandatory to catch
+regressions.
 
 ## Reference result
 

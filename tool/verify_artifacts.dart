@@ -22,11 +22,11 @@ const _nativeTargets = {
 };
 
 const _expectedSources = {
-  'ortVersion': '1.27.0',
-  'ortCommit': '8f0278c77bf44b0cc83c098c6c722b92a36ac4b5',
-  'webVersion': '1.27.0',
+  'ortVersion': '1.31.1',
+  'ortCommit': '6af1a932e2286d5c58166085d24c68783033edee',
+  'webVersion': '1.31.1',
   'webTarballSha256':
-      'b59c9819434a7519f334f77e8d4bf22b69808d531a57724cabc4bb2c0704c835',
+      'bdccdb9fbb9ab537247c0c734e9b1d2b1b338b4f2a09faa58f0dc1cfa27c312c',
 };
 
 /// The number of entries of the models section on Hugging Face.
@@ -141,7 +141,7 @@ void _verifySources(Map<String, Object?> sources) {
       web['version'] != _expectedSources['webVersion'] ||
       web['sha256'] != _expectedSources['webTarballSha256'] ||
       web['npmTarball'] !=
-          'https://registry.npmjs.org/onnxruntime-web/-/onnxruntime-web-1.27.0.tgz') {
+          'https://registry.npmjs.org/onnxruntime-web/-/onnxruntime-web-1.31.1.tgz') {
     throw const FormatException('Unexpected source pins');
   }
 }

@@ -11,14 +11,14 @@
 # Optional:
 #   OUTPUT_DIR           final artifact directory (default: ./dist)
 #   BUILD_ROOT           disposable build root (default: $RUNNER_TEMP/fonnx-ios)
-#   ORT_VERSION          default 1.27.0
+#   ORT_VERSION          default 1.31.1
 #   ORT_COMMIT           provenance when consuming an immutable base
 
 set -euo pipefail
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly FONNX_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-readonly ORT_VERSION="${ORT_VERSION:-1.27.0}"
+readonly ORT_VERSION="${ORT_VERSION:-1.31.1}"
 readonly ORT_COMMIT="${ORT_COMMIT:-8f0278c77bf44b0cc83c098c6c722b92a36ac4b5}"
 readonly ORT_PREBUILT_ARCHIVE_URL="${ORT_PREBUILT_ARCHIVE_URL:-}"
 readonly ORT_PREBUILT_ARCHIVE_SHA256="${ORT_PREBUILT_ARCHIVE_SHA256:-}"

@@ -2,63 +2,63 @@
   "schema": 1,
   "sources": [
     {
-      "name": "onnxruntime-android-1.27.0",
+      "name": "onnxruntime-android-1.31.1",
       "targets": [
         "android-arm",
         "android-arm64",
         "android-x64"
       ],
-      "url": "https://repo.maven.apache.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/1.27.0/onnxruntime-android-1.27.0.aar",
-      "sha256": "077dec5e2d821234c7dc0aba584bec8f999854b546c754cab93a90741c56fbeb"
+      "url": "https://repo.maven.apache.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/1.31.1/onnxruntime-android-1.31.1.aar",
+      "sha256": "d4d50660300ed2c4f38ffdfd5ab5bfa3a22f995f282dda24f42ea3ea55467b49"
     },
     {
-      "name": "fonnx-ios-arm64-ort-1.27.0-ortx-fe4e13f4",
+      "name": "fonnx-ios-arm64-ort-1.31.1",
       "targets": [
         "ios-arm64-iphoneos",
         "ios-arm64-iphonesimulator"
       ],
-      "url": "https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.27.0-ortx-fe4e13f-bpe-only-v2/fonnx-ios-arm64-ort-1.27.0-ortx-fe4e13f4.zip",
-      "sha256": "0ce93d30e305b1331a73c54b4739fde473f28270037a7d908838ff5c8b87a369"
+      "url": "https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.31.1/fonnx-ios-arm64-ort-1.31.1.zip",
+      "sha256": "2c44772076e31e63cd15a111ebcd4fd52a4204469526ad52d5f9dffeb173b85a"
     },
     {
-      "name": "onnxruntime-linux-aarch64-1.27.0",
+      "name": "onnxruntime-linux-aarch64-1.31.1",
       "targets": [
         "linux-arm64"
       ],
-      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.27.0/onnxruntime-linux-aarch64-1.27.0.tgz",
-      "sha256": "3e4d83ac06924a32a07b6d7f91ce6f852876153fc0bbdf931bf517a140bfbe48"
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.31.1/onnxruntime-linux-aarch64-1.31.1.tgz",
+      "sha256": "5317505e2da99be65f8e2775ba3c2afd6d2961fd78aba1bd8f56159f48820c78"
     },
     {
-      "name": "onnxruntime-linux-x64-1.27.0",
+      "name": "onnxruntime-linux-x64-1.31.1",
       "targets": [
         "linux-x64"
       ],
-      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.27.0/onnxruntime-linux-x64-1.27.0.tgz",
-      "sha256": "547e40a48f1fe73e3f812d7c88a948612c23f896b91e4e2ee1e232d7b468246f"
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.31.1/onnxruntime-linux-x64-1.31.1.tgz",
+      "sha256": "c849e36a1ef3e22d4ff217b9d1ce4a3cf5b9467b975610913ae959ad5b16bdc9"
     },
     {
-      "name": "onnxruntime-osx-arm64-1.27.0",
+      "name": "onnxruntime-osx-arm64-1.31.1",
       "targets": [
         "macos-arm64"
       ],
-      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.27.0/onnxruntime-osx-arm64-1.27.0.tgz",
-      "sha256": "545e81c58152353acb0d1e8bd6ce4b62f830c0961f5b3acfedc790ffd76e477a"
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.31.1/onnxruntime-osx-arm64-1.31.1.tgz",
+      "sha256": "2e1344a1926ee50eb25b38153cb6992c3567515aef0e677a1a520a1798896d6f"
     },
     {
-      "name": "onnxruntime-win-arm64-1.27.0",
+      "name": "onnxruntime-win-arm64-1.31.1",
       "targets": [
         "windows-arm64"
       ],
-      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.27.0/onnxruntime-win-arm64-1.27.0.zip",
-      "sha256": "a32f2650575b3c20df462e337519fd1cc4105356130d11dba9771c6f374d952f"
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.31.1/onnxruntime-win-arm64-1.31.1.zip",
+      "sha256": "817f4129073f84f81cde3ff92b1a4e06d007691e7208deed08a8b6d6df143f7f"
     },
     {
-      "name": "onnxruntime-win-x64-1.27.0",
+      "name": "onnxruntime-win-x64-1.31.1",
       "targets": [
         "windows-x64"
       ],
-      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.27.0/onnxruntime-win-x64-1.27.0.zip",
-      "sha256": "c5c81710938e68079ff1a192b04897faabe4b43830d48f39f27ecd4e16138bfc"
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.31.1/onnxruntime-win-x64-1.31.1.zip",
+      "sha256": "5869e26bb25314375f2d5ef1877e3ea06b1543d6c710e6e4a1ec2f7177ab4b2c"
     }
   ]
 }
