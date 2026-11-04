@@ -1,66 +1,66 @@
 {
   "schema": 1,
-  "version": "1.27.0",
+  "version": "1.31.1",
   "targets": {
     "android-arm": {
-      "url": "https://repo.maven.apache.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/1.27.0/onnxruntime-android-1.27.0.aar",
-      "downloadSha256": "077dec5e2d821234c7dc0aba584bec8f999854b546c754cab93a90741c56fbeb",
+      "url": "https://repo.maven.apache.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/1.31.1/onnxruntime-android-1.31.1.aar",
+      "downloadSha256": "d4d50660300ed2c4f38ffdfd5ab5bfa3a22f995f282dda24f42ea3ea55467b49",
       "archiveEntry": "jni/armeabi-v7a/libonnxruntime.so",
-      "sha256": "18b443c4066fe01598e768162d7876729b35c40af3df2f317ca45f87656e0431"
+      "sha256": "6a678a49c21deb5a7598d8cac8e7f0ab52a500e96a712cf22ed9af1bde7b50fd"
     },
     "android-arm64": {
-      "url": "https://repo.maven.apache.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/1.27.0/onnxruntime-android-1.27.0.aar",
-      "downloadSha256": "077dec5e2d821234c7dc0aba584bec8f999854b546c754cab93a90741c56fbeb",
+      "url": "https://repo.maven.apache.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/1.31.1/onnxruntime-android-1.31.1.aar",
+      "downloadSha256": "d4d50660300ed2c4f38ffdfd5ab5bfa3a22f995f282dda24f42ea3ea55467b49",
       "archiveEntry": "jni/arm64-v8a/libonnxruntime.so",
-      "sha256": "12c870ee77349d0e80e0d85eb293849ebe8f56717a81eec62b53ecb1446e7de8"
+      "sha256": "46e0c16cd515c62a1dd6c5994448b5413705478354bc20a756a5a82634c3ca03"
     },
     "android-x64": {
-      "url": "https://repo.maven.apache.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/1.27.0/onnxruntime-android-1.27.0.aar",
-      "downloadSha256": "077dec5e2d821234c7dc0aba584bec8f999854b546c754cab93a90741c56fbeb",
+      "url": "https://repo.maven.apache.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/1.31.1/onnxruntime-android-1.31.1.aar",
+      "downloadSha256": "d4d50660300ed2c4f38ffdfd5ab5bfa3a22f995f282dda24f42ea3ea55467b49",
       "archiveEntry": "jni/x86_64/libonnxruntime.so",
-      "sha256": "a1f59077f0cd6a9105ca13489c3fce9932679d3eb58340e053cdeecb905c847f"
+      "sha256": "cfd9ede9b5a168750af260027a4dd012345bb407933156b9d4738c62d3454607"
     },
     "ios-arm64-iphoneos": {
-      "url": "https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.27.0-ortx-fe4e13f-bpe-only-v2/fonnx-ios-arm64-ort-1.27.0-ortx-fe4e13f4.zip",
-      "downloadSha256": "0ce93d30e305b1331a73c54b4739fde473f28270037a7d908838ff5c8b87a369",
+      "url": "https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.31.1/fonnx-ios-arm64-ort-1.31.1.zip",
+      "downloadSha256": "2c44772076e31e63cd15a111ebcd4fd52a4204469526ad52d5f9dffeb173b85a",
       "archiveEntry": "iphoneos/libonnxruntime.dylib",
-      "sha256": "1f5179684a2b68770db9e0bddc8fe18cf25ffe5fdf1a7b917c6a9a7b3ed1f9e6"
+      "sha256": "9e66a0d431d6056018f443e41c4b7aa7de5a90a5aba1a2debf4c04333ad13a40"
     },
     "ios-arm64-iphonesimulator": {
-      "url": "https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.27.0-ortx-fe4e13f-bpe-only-v2/fonnx-ios-arm64-ort-1.27.0-ortx-fe4e13f4.zip",
-      "downloadSha256": "0ce93d30e305b1331a73c54b4739fde473f28270037a7d908838ff5c8b87a369",
+      "url": "https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.31.1/fonnx-ios-arm64-ort-1.31.1.zip",
+      "downloadSha256": "2c44772076e31e63cd15a111ebcd4fd52a4204469526ad52d5f9dffeb173b85a",
       "archiveEntry": "iphonesimulator/libonnxruntime.dylib",
-      "sha256": "281f12c21165a9ace10ce3897907eee1b186b5acd910aac228052f2cd9e6b7b1"
+      "sha256": "6148d6de942719426f74103d1b68c8390ee9e7fff61f4149699bb75e5cbf146d"
     },
     "linux-arm64": {
-      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.27.0/onnxruntime-linux-aarch64-1.27.0.tgz",
-      "downloadSha256": "3e4d83ac06924a32a07b6d7f91ce6f852876153fc0bbdf931bf517a140bfbe48",
-      "archiveEntry": "onnxruntime-linux-aarch64-1.27.0/lib/libonnxruntime.so.1.27.0",
-      "sha256": "c36bc200e7e6c093b8abb0b34590fbdd8c52fd3fb5e33795b9523ffdde2fce0f"
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.31.1/onnxruntime-linux-aarch64-1.31.1.tgz",
+      "downloadSha256": "5317505e2da99be65f8e2775ba3c2afd6d2961fd78aba1bd8f56159f48820c78",
+      "archiveEntry": "onnxruntime-linux-aarch64-1.31.1/lib/libonnxruntime.so.1.31.1",
+      "sha256": "7e17c55d675be73f67a218dbecb55522395f61dafb3da03ebc7ade56a4c2f813"
     },
     "linux-x64": {
-      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.27.0/onnxruntime-linux-x64-1.27.0.tgz",
-      "downloadSha256": "547e40a48f1fe73e3f812d7c88a948612c23f896b91e4e2ee1e232d7b468246f",
-      "archiveEntry": "onnxruntime-linux-x64-1.27.0/lib/libonnxruntime.so.1.27.0",
-      "sha256": "4061866361d9a8d2872f5f419c5515ce35a830a0c5c77ce1723320ac0dbabfc7"
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.31.1/onnxruntime-linux-x64-1.31.1.tgz",
+      "downloadSha256": "c849e36a1ef3e22d4ff217b9d1ce4a3cf5b9467b975610913ae959ad5b16bdc9",
+      "archiveEntry": "onnxruntime-linux-x64-1.31.1/lib/libonnxruntime.so.1.31.1",
+      "sha256": "a96f132e5eb5ca04e23a7d2fc1078fb95aa591e8d71d0f237702ece3a1e0f4ea"
     },
     "macos-arm64": {
-      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.27.0/onnxruntime-osx-arm64-1.27.0.tgz",
-      "downloadSha256": "545e81c58152353acb0d1e8bd6ce4b62f830c0961f5b3acfedc790ffd76e477a",
-      "archiveEntry": "./onnxruntime-osx-arm64-1.27.0/lib/libonnxruntime.1.27.0.dylib",
-      "sha256": "299e5a2c6ea00531ecd6bf3217e23798c1fcba1698bb386d313c8e16d7317d60"
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.31.1/onnxruntime-osx-arm64-1.31.1.tgz",
+      "downloadSha256": "2e1344a1926ee50eb25b38153cb6992c3567515aef0e677a1a520a1798896d6f",
+      "archiveEntry": "./onnxruntime-osx-arm64-1.31.1/lib/libonnxruntime.1.31.1.dylib",
+      "sha256": "17500d6b1e37e70f43a2c57d94233a1bc29fbcb297be0a5f8c7c13184f3307ba"
     },
     "windows-arm64": {
-      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.27.0/onnxruntime-win-arm64-1.27.0.zip",
-      "downloadSha256": "a32f2650575b3c20df462e337519fd1cc4105356130d11dba9771c6f374d952f",
-      "archiveEntry": "onnxruntime-win-arm64-1.27.0/lib/onnxruntime.dll",
-      "sha256": "1df26c7820f2c46f9922a36bce184bf67c6200cb19995c87bdd8ab6eea111667"
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.31.1/onnxruntime-win-arm64-1.31.1.zip",
+      "downloadSha256": "817f4129073f84f81cde3ff92b1a4e06d007691e7208deed08a8b6d6df143f7f",
+      "archiveEntry": "onnxruntime-win-arm64-1.31.1/lib/onnxruntime.dll",
+      "sha256": "3ec71b45c71ed057096f4914fddb379a38b9ec813794052b96fec7de81e2ea20"
     },
     "windows-x64": {
-      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.27.0/onnxruntime-win-x64-1.27.0.zip",
-      "downloadSha256": "c5c81710938e68079ff1a192b04897faabe4b43830d48f39f27ecd4e16138bfc",
-      "archiveEntry": "onnxruntime-win-x64-1.27.0/lib/onnxruntime.dll",
-      "sha256": "fd6dd0a8b1f5562d642abdcbd36bc54251482d2ebaa3f4f88669bfdad92e7525"
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.31.1/onnxruntime-win-x64-1.31.1.zip",
+      "downloadSha256": "5869e26bb25314375f2d5ef1877e3ea06b1543d6c710e6e4a1ec2f7177ab4b2c",
+      "archiveEntry": "onnxruntime-win-x64-1.31.1/lib/onnxruntime.dll",
+      "sha256": "cb2fa518b18356617f6f9f460c012501da2819ec7e5c1d80bd8f5de20492db0c"
     }
   }
 }

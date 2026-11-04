@@ -17,7 +17,7 @@ Future<Map<String, PrebuiltFile>> loadUpstreamOrt(Uri packageRoot) async {
             ).readAsString(),
           )
           as Map<String, dynamic>;
-  if (json['schema'] != 1 || json['version'] != '1.27.0') {
+  if (json['schema'] != 1 || json['version'] != '1.31.1') {
     throw const FormatException('Unsupported upstream ORT pins');
   }
   return {

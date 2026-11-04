@@ -18,13 +18,10 @@ runtime constraints. Runtime models have their own immutable release and the
 
 ## Source profile 2
 
-- ONNX Runtime 1.27.0:
-  `8f0278c77bf44b0cc83c098c6c722b92a36ac4b5`
-- ONNX Runtime Extensions:
-  `fe4e13f46b19fb490c90b09fe280277308bd5bb7`
-- Selected Extensions inventory: only `ai.onnx.contrib:BpeDecoder`
-- ONNX Runtime Web 1.27.0 npm archive:
-  `b59c9819434a7519f334f77e8d4bf22b69808d531a57724cabc4bb2c0704c835`
+- ONNX Runtime 1.31.1:
+  `6af1a932e2286d5c58166085d24c68783033edee`
+- ONNX Runtime Web 1.31.1 npm archive:
+  `bdccdb9fbb9ab537247c0c734e9b1d2b1b338b4f2a09faa58f0dc1cfa27c312c`
 - Package-owned finalizer ABI: 1
 - Package-owned Web Worker protocol ABI: 1
 

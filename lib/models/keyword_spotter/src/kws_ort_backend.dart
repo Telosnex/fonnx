@@ -8,13 +8,7 @@ import '../keyword_spotter_types.dart';
 
 final class NativeKwsOnnxBackend implements KwsOnnxBackend {
   NativeKwsOnnxBackend(KeywordSpotterBundle bundle)
-    : _encoder = OrtSessionGraph(
-        bundle.encoderPath,
-        // ORT 1.27.0's Apple SME convolution path mishandles the asymmetric
-        // padding in the Zipformer encoder. Remove this after the Native Asset
-        // moves to ORT 1.27.1+, which contains microsoft/onnxruntime#28571.
-        sessionConfigEntries: const {'mlas.disable_kleidiai': '1'},
-      ),
+    : _encoder = OrtSessionGraph(bundle.encoderPath),
       _decoder = OrtSessionGraph(bundle.decoderPath),
       _joiner = OrtSessionGraph(bundle.joinerPath) {
     _resetStates();

@@ -99,7 +99,7 @@ if (!(classification.targetLabel instanceof Float32Array) ||
 }
 magikaRpc.fail(new Error('smoke complete'));
 
-if (ort.env.versions.web !== '1.27.0' || ort.env.versions.common !== '1.27.0') {
+if (ort.env.versions.web !== '1.31.1' || ort.env.versions.common !== '1.31.1') {
   throw new Error(`Unexpected ORT Web versions: ${JSON.stringify(ort.env.versions)}`);
 }
 ort.env.wasm.numThreads = 1;
@@ -120,7 +120,7 @@ try {
 } finally {
   await session.release();
 }
-console.log('PASS: pinned local ONNX Runtime Web 1.27.0 identity inference');
+console.log('PASS: pinned local ONNX Runtime Web 1.31.1 identity inference');
 console.log('PASS: Worker RPC resolves by ID and rejects every fatal pending call');
 console.log('PASS: a Worker that does not load names the COEP header if the page is isolated');
 console.log('PASS: real Magika model executes through the pinned Worker protocol');
