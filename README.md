@@ -318,7 +318,7 @@ copied unchanged into the new immutable release.
 
 ## Web
 
-FONNX ships a local ONNX Runtime Web 1.27.0 reference runtime in `lib/web`
+FONNX ships a local ONNX Runtime Web 1.31.1 reference runtime in `lib/web`
 (mirrored into `example/web` in this repository).
 Every model Worker imports `./ort.min.mjs`; no executable CDN dependency is
 used. The same version backs native and Web inference, and the package manifest

@@ -510,18 +510,18 @@
     },
     "docs/ort-wasm-simd-threaded.mjs": {
       "path": "docs/ort-wasm-simd-threaded.mjs",
-      "sha256": "0a1e718d99c41b22c21f2520ff4f9e883a6b5533856e398d21816ee8eb8185d3",
-      "bytes": 24180
+      "sha256": "30ed0b5cd1182ede931fea448afb567d4dc705ec957af09f108a2be5f770dac3",
+      "bytes": 24738
     },
     "docs/ort-wasm-simd-threaded.wasm": {
       "path": "docs/ort-wasm-simd-threaded.wasm",
-      "sha256": "d1ab1b94b16a65b29d710d0b587b29e7bed336827577623913479b8afe8113e6",
-      "bytes": 13479978
+      "sha256": "4b884c203b0fa48d057be3332c65513ff85aa3c5bddd6946acc0fab7ecda001d",
+      "bytes": 14848852
     },
     "docs/ort.min.mjs": {
       "path": "docs/ort.min.mjs",
-      "sha256": "9608e98a3fba9716f0cbd0bca0c94808b71dae2e9265ca3fe742ddc393a53ebc",
-      "bytes": 50069
+      "sha256": "c21d9c326d453a4a61398270c804d5979e118540597cb0c07f7b3d64e6098234",
+      "bytes": 53725
     }
   },
   "runtimeConstraints": {

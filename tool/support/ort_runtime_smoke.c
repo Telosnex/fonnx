@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
   CHECK(base != NULL && base->GetApi != NULL && base->GetVersionString != NULL);
   ort = base->GetApi(ORT_API_VERSION);
   CHECK(ort != NULL);
-  CHECK(strncmp(base->GetVersionString(), "1.27.", 5) == 0);
+  CHECK(strncmp(base->GetVersionString(), "1.31.", 5) == 0);
 
   OrtEnv *env = NULL;
   check_status(ort->CreateEnv(ORT_LOGGING_LEVEL_ERROR, "fonnx-runtime-smoke", &env),

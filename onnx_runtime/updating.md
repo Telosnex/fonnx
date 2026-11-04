@@ -6,17 +6,12 @@ part of the runtime path.
 
 ## Pinned components
 
-- ONNX Runtime: `1.27.0` (`native_artifacts/manifest.json`).
-- ONNX Runtime Extensions:
-  `fe4e13f46b19fb490c90b09fe280277308bd5bb7`.
-- Extensions selected-op inventory: `ai.onnx.contrib:BpeDecoder`, used only by
-  FONNX's end-to-end Whisper graph.
+- ONNX Runtime: `1.31.1` (`native_artifacts/manifest.json`).
 
 ## Updating ONNX Runtime
 
 1. Check the upstream GitHub release and Maven Central. Pin the newest version
-   available for **every** target. Maven lag is why the current common pin is
-   1.27.0 even though a 1.27.1 GitHub release exists.
+   available for **every** target. Maven can lag behind the GitHub release.
 2. Update every ORT URL/digest in `native_artifacts/manifest.json`. Digests for GitHub release
    assets are available from the GitHub release API. Compute and independently
    verify the Maven AAR's SHA-256.
@@ -92,11 +87,11 @@ cosine scores while preserving model ranking.
 
 Audit outputs:
 
-- every native target includes exactly one ORT and one Extensions code asset;
+- every native target includes exactly one ORT code asset;
 - `grep -R MethodChannel lib/` returns nothing;
 - no `.so`, `.dylib`, or `.dll` is tracked by Git;
 - iOS Runner and Podfile deployment targets are at least the upstream ORT
-  requirement (15.1 for ORT 1.27.0);
+  requirement (15.1 for ORT 1.31.1);
 - after a device Release build, the app and generated native-asset framework
   `MinimumOSVersion` values are not lower than any embedded Mach-O `minos`;
   Flutter 3.44.2 generates native-asset wrapper plists with its iOS 13
