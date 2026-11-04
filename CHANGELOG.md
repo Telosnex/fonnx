@@ -1,3 +1,14 @@
+## 0.1.2
+
+- ONNX Runtime 1.31.1 (from 1.27.0) on every platform, including the iOS
+  build and ONNX Runtime Web. The bindings use C API 31. On an M4 Max,
+  inference is the same speed or faster: NeMo CTC 24%, Whisper tiny 15%,
+  MiniLM 9% and the keyword spotter 6% faster.
+- The keyword spotter no longer turns off KleidiAI: 1.31.1 fixes the
+  convolution bug (microsoft/onnxruntime#28571) that made it emit blanks.
+- Building from source on Windows no longer fails when
+  `ProgramFiles(x86)` is not set.
+
 ## 0.1.1
 
 - The prebuilt native libraries are used again: in 0.1.0, files left out
