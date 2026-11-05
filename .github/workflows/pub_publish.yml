@@ -13,7 +13,6 @@ permissions:
 
 jobs:
   publish:
-    # v0.5.8 is not tagged yet: Telosnex/telosnex_ci_tools#2
     uses: Telosnex/telosnex_ci_tools/.github/workflows/pub_publish.yml@4a798518378fb0c362ebe42940227560e6b4ecde # v0.5.8
     permissions:
       contents: write # the published branch
