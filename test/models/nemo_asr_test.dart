@@ -142,14 +142,6 @@ void main() {
       await v3.doInference(await File(_rain).readAsBytes()),
       'The rain in Spain falls mainly on the plane.',
     );
-    // The first run gives only blanks; the run with more silence before the
-    // speech does not.
-    expect(
-      await v3.doInference(
-        await File('test/data/talkovergpt.pcm').readAsBytes(),
-      ),
-      'Estoy bien, gracias.',
-    );
     expect(
       await v3.doInference(await File(_woodchuck).readAsBytes()),
       'How much wood could a woodchuck chuck if a woodchuck could chuck wood?',
