@@ -127,8 +127,9 @@ Future<void> buildFromSource(
       ),
     );
   } else if (Platform.isWindows) {
-    // ProgramFiles(x86) can be missing from the environment (it was in CI's
-    // Git Bash steps), so fall back to its standard location.
+    // Flutter passes hooks only some environment variables (hooks_runner's
+    // list), and ProgramFiles(x86) is not one, so fall back to its standard
+    // location.
     final vswhere = p.join(
       Platform.environment['ProgramFiles(x86)'] ?? r'C:\Program Files (x86)',
       'Microsoft Visual Studio',
