@@ -1,0 +1,22 @@
+# Publishes fonnx to pub.dev from a release tag
+# (pub-fonnx-v1.2.3), with telosnex_ci_tools' pub_publish.yml. On pub.dev,
+# the package's Admin page allows automated publishing from this repository:
+# tag pattern pub-fonnx-v{{version}}, environment pub.dev.
+name: Pub publish
+
+on:
+  push:
+    tags: ['pub-fonnx-v[0-9]+.[0-9]+.[0-9]+*']
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    # v0.5.8 is not tagged yet: Telosnex/telosnex_ci_tools#2
+    uses: Telosnex/telosnex_ci_tools/.github/workflows/pub_publish.yml@4a798518378fb0c362ebe42940227560e6b4ecde # v0.5.8
+    permissions:
+      contents: write # the published branch
+      id-token: write
+    with:
+      test: dart test -x perf test/deterministic_operation_corpus_test.dart
