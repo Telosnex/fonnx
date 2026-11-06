@@ -3,14 +3,6 @@
 on any edge. Run ONNX model & runtime, with platform-specific acceleration,  inside Flutter, a modern, beautiful, cross-platform development
 framework."
      style="float: left; margin-right: 0px;" />
-| Platform     | Status |
-|--------------|--------|
-| __Android__  | [![Codemagic build status](https://api.codemagic.io/apps/652897766ee3f7af8490a79f/android-build/status_badge.svg)](https://codemagic.io/app/652897766ee3f7af8490a79f/android-build/latest_build) |
-| __iOS__  | [![Codemagic build status](https://api.codemagic.io/apps/652897766ee3f7af8490a79f/ios-build/status_badge.svg)](https://codemagic.io/app/652897766ee3f7af8490a79f/ios-build/latest_build) |
-| __Linux__    | [![Codemagic build status](https://api.codemagic.io/apps/652897766ee3f7af8490a79f/linux-build/status_badge.svg)](https://codemagic.io/app/652897766ee3f7af8490a79f/linux-build/latest_build) |
-| __macOS__ | [![Codemagic build status](https://api.codemagic.io/apps/652897766ee3f7af8490a79f/macos-build/status_badge.svg)](https://codemagic.io/app/652897766ee3f7af8490a79f/macos-build/latest_build) |
-| __Web__  | [![Codemagic build status](https://api.codemagic.io/apps/652897766ee3f7af8490a79f/web-build/status_badge.svg)](https://codemagic.io/app/652897766ee3f7af8490a79f/web-build/latest_build) |
-| __Windows__  | [![Codemagic build status](https://api.codemagic.io/apps/652897766ee3f7af8490a79f/windows-build/status_badge.svg)](https://codemagic.io/app/652897766ee3f7af8490a79f/windows-build/latest_build) |
 
 # Changelog
 

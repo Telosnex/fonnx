@@ -5,7 +5,6 @@ tool/test_all.sh
 # (or the published package's key differs from the release's).
 docs/
 build/
-codemagic.yaml
 header.png
 test/
 example/
