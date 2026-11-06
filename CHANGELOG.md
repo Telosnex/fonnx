@@ -1,3 +1,8 @@
+## 0.2.2
+
+- Requires `code_assets` 2.2, `hooks` 2.2 and `kiln` 0.2. With `code_assets` 1.x, the package could not be installed with current `objective_c` and `shared_preferences_foundation`.
+- The iOS 15 and macOS 14 floors for prebuilt selection compare the complete deployment version.
+
 ## 0.2.1
 
 - The prebuilt native libraries are used again: the 0.2.0 manifest was

@@ -34,8 +34,8 @@ void main() {
     () {
       final original = inputFor('ios', 13);
       final effective = fonnxCompatibilityInput(original);
-      expect(effective.config.code.iOS.targetVersion, 15);
-      expect(original.config.code.iOS.targetVersion, 13);
+      expect(effective.config.code.iOS.deploymentVersion, AppleVersion(15));
+      expect(original.config.code.iOS.deploymentVersion, AppleVersion(13));
     },
   );
 
@@ -44,12 +44,28 @@ void main() {
     () {
       final original = inputFor('macos', 13);
       expect(
-        fonnxCompatibilityInput(original).config.code.macOS.targetVersion,
-        14,
+        fonnxCompatibilityInput(original).config.code.macOS.deploymentVersion,
+        AppleVersion(14),
       );
-      expect(original.config.code.macOS.targetVersion, 13);
+      expect(original.config.code.macOS.deploymentVersion, AppleVersion(13));
     },
   );
+
+  test('a deployment_version with a minor part is compared in full', () {
+    final original = inputFor('ios', 14);
+    final code =
+        (original.json['config'] as Map)['extensions']['code_assets'] as Map;
+    (code['ios'] as Map)['deployment_version'] = {
+      'major': 14,
+      'minor': 9,
+      'patch': 0,
+    };
+    final effective = BuildInput(original.json);
+    expect(
+      fonnxCompatibilityInput(effective).config.code.iOS.deploymentVersion,
+      AppleVersion(15),
+    );
+  });
 
   test('higher Apple versions stay higher', () {
     for (final os in ['ios', 'macos']) {

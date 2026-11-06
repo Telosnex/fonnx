@@ -14,19 +14,23 @@ import 'package:hooks/hooks.dart';
 /// packaging fix described in README.md. Remove this adapter when Flutter
 /// passes the app's real minimum to hooks.
 BuildInput fonnxCompatibilityInput(BuildInput input) {
-  final os = input.config.code.targetOS;
-  final minimum = switch (os) {
-    OS.iOS => 15,
-    OS.macOS => 14,
-    _ => null,
+  final code = input.config.code;
+  final (minimum, current) = switch (code.targetOS) {
+    OS.iOS => (AppleVersion(15), code.iOS.deploymentVersion),
+    OS.macOS => (AppleVersion(14), code.macOS.deploymentVersion),
+    _ => (null, null),
   };
-  if (minimum == null) return input;
+  if (minimum == null || current == null || current >= minimum) return input;
   final json = jsonDecode(jsonEncode(input.json)) as Map<String, dynamic>;
-  final code =
+  final extension =
       json['config']['extensions']['code_assets'] as Map<String, dynamic>;
-  final apple = code[os.name] as Map<String, dynamic>;
-  final version = apple['target_version'] as int;
-  if (version >= minimum) return input;
-  apple['target_version'] = minimum;
+  final apple = extension[code.targetOS.name] as Map<String, dynamic>;
+  // Both keys: deployment_version (code_assets 2.2) and target_version.
+  apple['target_version'] = minimum.major;
+  apple['deployment_version'] = {
+    'major': minimum.major,
+    'minor': minimum.minor,
+    'patch': minimum.patch,
+  };
   return BuildInput(json);
 }
