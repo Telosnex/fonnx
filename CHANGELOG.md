@@ -1,3 +1,9 @@
+## 0.2.0
+
+- The native libraries are rebuilt from the same sources, in release
+  `native-58359725c0fd7164`. The package no longer has a Codemagic
+  configuration, which changed its source key.
+
 ## 0.1.2
 
 - ONNX Runtime 1.31.1 (from 1.27.0) on every platform, including the iOS
