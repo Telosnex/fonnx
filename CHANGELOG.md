@@ -1,3 +1,9 @@
+## 0.2.1
+
+- The prebuilt native libraries are used again: the 0.2.0 manifest was
+  made before its version bump, so its source key did not match and
+  every build compiled from source.
+
 ## 0.2.0
 
 - The native libraries are rebuilt from the same sources, in release
