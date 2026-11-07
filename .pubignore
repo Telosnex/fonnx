@@ -9,8 +9,10 @@ header.png
 test/
 
 # `lib/web` contains the manifest-verified reference Web runtime. Exclude the
-# 280+ MiB example application and model inventory.
-example/
+# 280+ MiB example application and model inventory. example/example.md is
+# the short usage example on pub.dev.
+example/*
+!example/example.md
 
 # Local IDE/project debris.
 *.iml

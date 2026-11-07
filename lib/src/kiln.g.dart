@@ -3,6 +3,8 @@
 
 import 'package:kiln/runtime.dart';
 
+// dart format off
+
 /// Runtime files of this package, by file name.
 const prebuiltRuntimeFiles = <String, RuntimeFile>{
   'decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx': RuntimeFile(
