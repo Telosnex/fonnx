@@ -1,3 +1,7 @@
+## 1.0.0
+
+- First stable release. Requires kiln 1.0.0, whose source key leaves out the pubspec's `version` and `description`, so a release that changes only those needs no new native build.
+
 ## 0.2.2
 
 - Requires `code_assets` 2.2, `hooks` 2.2 and `kiln` 0.2.2. kiln 0.2.0 left a `.lock` file next to each model that it downloaded, and the model catalog of 0.2.1 was not formatted for pub.dev. With `code_assets` 1.x, the package could not be installed with current `objective_c` and `shared_preferences_foundation`.

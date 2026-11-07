@@ -23,7 +23,7 @@ dependencies:
   collection: ^1.18.0
   ml_linalg: ^13.12.6
   # Microphone capture and playback (was record and audioplayers).
-  telosnex_audio: ^0.1.0
+  telosnex_audio: ^1.0.0
   permission_handler: ^12.0.1
 dev_dependencies:
   integration_test:
