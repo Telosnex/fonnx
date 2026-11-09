@@ -251,6 +251,45 @@ jobs:
             ${{ steps.emulator.outputs.logcat }}
           if-no-files-found: ignore
 
+  # The example's integration tests in an arm64 Android 15 app, built on x64
+  # (Google builds no arm64 Linux Android build tools), run in a container.
+  test-apks:
+    name: Test APKs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@c356a8d59e643d5fc8c552950fdd45c7e3bfea7f # v0.5.12
+      - run: flutter pub get
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: example/assets/models/**/*.onnx
+          key: hf-models-${{ runner.os }}-${{ hashFiles('native_artifacts/manifest.json', 'tool/fetch_hf_models.dart') }}
+      - run: dart run tool/fetch_hf_models.dart
+      - uses: Telosnex/telosnex_ci_tools/actions/android-test-apks@c356a8d59e643d5fc8c552950fdd45c7e3bfea7f # v0.5.12
+        with:
+          working-directory: example
+
+  android-arm64-app:
+    name: Android ARM64 container
+    needs: test-apks
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@c356a8d59e643d5fc8c552950fdd45c7e3bfea7f # v0.5.12
+      - uses: Telosnex/telosnex_ci_tools/actions/download-artifact@c356a8d59e643d5fc8c552950fdd45c7e3bfea7f # v0.5.12
+        with:
+          name: android-test-apks
+          path: ${{ runner.temp }}/apks
+      - uses: Telosnex/telosnex_ci_tools/actions/android-arm64-container@c356a8d59e643d5fc8c552950fdd45c7e3bfea7f # v0.5.12
+        with:
+          apks: ${{ runner.temp }}/apks
+
   # The device script on an arm64 CPU: the emulator above runs the x86_64
   # library. android-arm64-chroot gives the script an adb and an NDK.
   android-arm64:
