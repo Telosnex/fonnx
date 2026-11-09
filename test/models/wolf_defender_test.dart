@@ -73,7 +73,9 @@ void main() {
     expect(wolfDefenderPool([benign, benign]), lessThan(0.001));
   });
 
-  group('model', () {
+  // The goldens have 13,000 tokens: about 8 full windows. The macOS CI
+  // runner took more than a minute.
+  group('model', timeout: const Timeout(Duration(minutes: 5)), () {
     final defender = WolfDefenderNative(
       WolfDefenderBundle.inDirectory(_directory),
     );
