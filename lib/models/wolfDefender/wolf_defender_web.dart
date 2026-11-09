@@ -10,11 +10,6 @@ import 'wolf_defender.dart';
 WolfDefender getWolfDefender(WolfDefenderBundle bundle) =>
     WolfDefenderWeb(bundle);
 
-/// ORT Web's WebAssembly int8 kernels behave as on x86: with the dynamic
-/// int8 file, 94% of decisions matched fp32; with the x86 file, 99%.
-WolfDefenderModel wolfDefenderModelForPlatform() =>
-    WolfDefenderModel.int8Int4X86;
-
 @JS('window.fonnxWolfDefenderLoad')
 external JSPromise<JSAny?> _loadJs(JSString engineId, JSString path);
 

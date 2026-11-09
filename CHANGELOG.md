@@ -4,9 +4,11 @@
   Patronus's Wolf Defender Edge (80M parameters, Apache-2.0), on native and
   web. The tokenizer (the 128K-token BPE of mmBERT), the 2048-position
   windows and Patronus's pooling are in shared Dart; the tokenizer gives the
-  same IDs as Hugging Face `tokenizers` on 4,700 texts. Two 58 MB files: the
-  dynamic int8 file on ARM, and the weight-only int8 file on x86 and web,
-  where the dynamic file matched fp32 on only 94% of decisions.
+  same IDs as Hugging Face `tokenizers` on 4,700 texts. One 58 MB model file,
+  Patronus's weight-only int8 export: its decisions match fp32 on 99% of
+  texts on every CPU tested. Patronus's dynamic int8 export is not used: it
+  matched on 94% on x86 and WebAssembly, and reversed a reference decision
+  on the ARM CPUs of CI; only Apple M4 gave fp32's decisions.
 
 ## 1.0.0
 

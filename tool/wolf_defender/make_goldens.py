@@ -10,7 +10,8 @@ a65713895aafa398e71f151f50d33449b477b4c9 in <patronus>:
   uv run --with onnxruntime==1.31.1 --with tokenizers --with numpy \
     --with pyarrow python tool/wolf_defender/make_goldens.py <patronus>
 
-The probabilities depend on the CPU; fonnx's are from an Apple M4 Max.
+The int8 probabilities vary by CPU by up to about 0.04; fonnx's are from an
+Apple M4 Max.
 """
 import base64
 import json
@@ -28,8 +29,7 @@ patronus = Path(sys.argv[1])
 out = Path("test/data/wolf_defender")
 tok = Tokenizer.from_file(str(patronus / "tokenizer.json"))
 FILES = {
-    "int8_int4": "onnx/int8_int4_embeddings/model.onnx",
-    "int8_int4_x86": "onnx/int8_int4_embeddings_x86_weight_only/model.onnx",
+    "int8_weights": "onnx/int8_int4_embeddings_x86_weight_only/model.onnx",
     "fp32": "onnx/onnx_fp32/model.onnx",
 }
 sessions = {}

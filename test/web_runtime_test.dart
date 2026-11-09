@@ -98,7 +98,6 @@ void main() {
     final defender = WolfDefender.load(
       WolfDefenderBundle.inDirectory('web_models/wolfDefender'),
     );
-    expect(defender.bundle.modelPath, endsWith('int8_int4_x86.onnx'));
     final golden =
         (jsonDecode(
                   utf8.decode(
@@ -110,8 +109,8 @@ void main() {
     for (final entry in golden) {
       final result = await defender.classify(entry['text'] as String);
       expect(result.tokens, entry['tokens']);
-      final expected = (entry['int8_int4_x86'] as num).toDouble();
-      // The references are from ARM; WebAssembly rounds differently.
+      final expected = (entry['int8_weights'] as num).toDouble();
+      // The references are from Apple M4; WebAssembly rounds differently.
       expect(result.injectionProbability, closeTo(expected, 0.1));
       expect(result.isInjection, expected > 0.5);
     }

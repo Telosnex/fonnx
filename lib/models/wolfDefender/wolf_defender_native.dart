@@ -1,23 +1,8 @@
-import 'dart:ffi';
-
 import 'wolf_defender.dart';
 import 'wolf_defender_isolate.dart';
 
 WolfDefender getWolfDefender(WolfDefenderBundle bundle) =>
     WolfDefenderNative(bundle);
-
-WolfDefenderModel wolfDefenderModelForPlatform() => switch (Abi.current()) {
-  Abi.androidX64 ||
-  Abi.androidIA32 ||
-  Abi.linuxX64 ||
-  Abi.linuxIA32 ||
-  Abi.macosX64 ||
-  Abi.windowsX64 ||
-  Abi.windowsIA32 ||
-  Abi.iosX64 ||
-  Abi.fuchsiaX64 => WolfDefenderModel.int8Int4X86,
-  _ => WolfDefenderModel.int8Int4,
-};
 
 class WolfDefenderNative implements WolfDefender {
   WolfDefenderNative(this.bundle);

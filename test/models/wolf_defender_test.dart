@@ -73,64 +73,57 @@ void main() {
     expect(wolfDefenderPool([benign, benign]), lessThan(0.001));
   });
 
-  for (final model in WolfDefenderModel.values) {
-    // The x86 file is accurate on every CPU; the dynamic int8 file only on
-    // ARM. On x86, one reference text moves from 0.94 to 0.01.
-    final skip =
-        model == WolfDefenderModel.int8Int4 &&
-            WolfDefenderModel.forCurrentPlatform != model
-        ? 'The dynamic int8 file is not accurate on this CPU'
-        : null;
-    group(model.name, skip: skip, () {
-      final defender = WolfDefenderNative(
-        WolfDefenderBundle.inDirectory(_directory, model: model),
-      );
-      final key = switch (model) {
-        WolfDefenderModel.int8Int4 => 'int8_int4',
-        WolfDefenderModel.int8Int4X86 => 'int8_int4_x86',
-      };
+  group('model', () {
+    final defender = WolfDefenderNative(
+      WolfDefenderBundle.inDirectory(_directory),
+    );
 
-      test('probabilities match the reference', () async {
-        for (final entry in _golden('probability_golden.json')) {
-          final text = entry['text']! as String;
-          final result = await defender.classify(text);
-          final expected = (entry[key]! as num).toDouble();
-          expect(result.tokens, entry['tokens'], reason: jsonEncode(text));
-          // The int8 kernels round differently on each CPU: on the
-          // reference texts, ARM, x86 and WebAssembly differ by up to 0.04.
-          expect(
-            result.injectionProbability,
-            closeTo(expected, 0.1),
-            reason: jsonEncode(text),
-          );
-          expect(result.isInjection, expected > 0.5, reason: jsonEncode(text));
-        }
-      });
-
-      test('a long text has several windows', () async {
-        final golden = _golden('probability_golden.json').last;
-        final result = await defender.classify(golden['text']! as String);
-        expect(result.windows, wolfDefenderWindows(result.tokens).length);
-        expect(result.windows, greaterThan(3));
-        expect(result.isInjection, isTrue);
-      });
-
-      test('performance', tags: ['perf'], () async {
-        final email = _golden('probability_golden.json')
-            .map((e) => e['text']! as String)
-            .firstWhere((t) => t.startsWith('Hi Sam'));
-        await defender.classify(email);
-        final sw = Stopwatch()..start();
-        const iterations = 10;
-        for (var i = 0; i < iterations; i++) {
-          await defender.classify(email);
-        }
-        print(
-          'Wolf Defender ${model.name}: '
-          '${(sw.elapsedMilliseconds / iterations).toStringAsFixed(1)} ms '
-          'for ${(await defender.classify(email)).tokens} tokens',
+    test('probabilities match the reference', () async {
+      for (final entry in _golden('probability_golden.json')) {
+        final text = entry['text']! as String;
+        final result = await defender.classify(text);
+        final expected = (entry['int8_weights']! as num).toDouble();
+        expect(result.tokens, entry['tokens'], reason: jsonEncode(text));
+        // Kernels round differently on each CPU: on the reference texts,
+        // ARM, x86 and WebAssembly differ by up to 0.04.
+        expect(
+          result.injectionProbability,
+          closeTo(expected, 0.1),
+          reason: jsonEncode(text),
         );
-      });
+        expect(result.isInjection, expected > 0.5, reason: jsonEncode(text));
+        // The decision of the fp32 model.
+        expect(
+          result.isInjection,
+          (entry['fp32']! as num) > 0.5,
+          reason: jsonEncode(text),
+        );
+      }
     });
-  }
+
+    test('a long text has several windows', () async {
+      final golden = _golden('probability_golden.json').last;
+      final result = await defender.classify(golden['text']! as String);
+      expect(result.windows, wolfDefenderWindows(result.tokens).length);
+      expect(result.windows, greaterThan(3));
+      expect(result.isInjection, isTrue);
+    });
+
+    test('performance', tags: ['perf'], () async {
+      final email = _golden('probability_golden.json')
+          .map((e) => e['text']! as String)
+          .firstWhere((t) => t.startsWith('Hi Sam'));
+      await defender.classify(email);
+      final sw = Stopwatch()..start();
+      const iterations = 10;
+      for (var i = 0; i < iterations; i++) {
+        await defender.classify(email);
+      }
+      print(
+        'Wolf Defender: '
+        '${(sw.elapsedMilliseconds / iterations).toStringAsFixed(1)} ms '
+        'for ${(await defender.classify(email)).tokens} tokens',
+      );
+    });
+  });
 }

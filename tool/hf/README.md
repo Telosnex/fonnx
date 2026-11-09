@@ -37,7 +37,7 @@ Each file has the license of its source model.
 | `sense_voice_small_int8.onnx`, `sense_voice_small_tokens.txt` | [FunAudioLLM/SenseVoiceSmall](https://huggingface.co/FunAudioLLM/SenseVoiceSmall) (Alibaba), int8 export of [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx/releases/tag/asr-models) (2024-07-17) | [FunASR Model License](https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE) |
 | `silero_vad_v6.2.1.onnx` | [Silero VAD v6.2.1](https://github.com/snakers4/silero-vad/releases/tag/v6.2.1) | MIT |
 | `whisper_tiny_decoder.onnx`, `whisper_tiny_encoder.onnx` | [onnx-community/whisper-tiny](https://huggingface.co/onnx-community/whisper-tiny), from [openai/whisper-tiny](https://huggingface.co/openai/whisper-tiny) | MIT |
-| `wolf_defender_edge_int8_int4.onnx`, `wolf_defender_edge_int8_int4_x86.onnx` | [patronus-studio/wolf-defender-prompt-injection-edge](https://huggingface.co/patronus-studio/wolf-defender-prompt-injection-edge) at `a65713895aafa398e71f151f50d33449b477b4c9`: `onnx/int8_int4_embeddings/model.onnx` and `onnx/int8_int4_embeddings_x86_weight_only/model.onnx`, unchanged | Apache-2.0 |
+| `wolf_defender_edge_int8_weights.onnx` | [patronus-studio/wolf-defender-prompt-injection-edge](https://huggingface.co/patronus-studio/wolf-defender-prompt-injection-edge) at `a65713895aafa398e71f151f50d33449b477b4c9`: `onnx/int8_int4_embeddings_x86_weight_only/model.onnx`, unchanged | Apache-2.0 |
 | `wolf_defender_edge_tokenizer.bin` | `tokenizer.json` of the same revision, converted by fonnx | Apache-2.0 |
 
 ## Other files
@@ -47,6 +47,9 @@ Each file has the license of its source model.
 and [onnx-community/whisper-small](https://huggingface.co/onnx-community/whisper-small)
 (MIT). `bpe_decoder.onnx`, `silero_vad.onnx`, `whisper_{tiny,base,small}.onnx`
 and `whisper_v3_turbo_olive.onnx` are files of earlier fonnx versions.
+`wolf_defender_edge_int8_int4.onnx` and `wolf_defender_edge_int8_int4_x86.onnx`
+(the same bytes as `wolf_defender_edge_int8_weights.onnx`) were never in a
+fonnx release.
 
 ## Attribution
 

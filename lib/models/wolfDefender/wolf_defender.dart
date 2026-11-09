@@ -2,27 +2,6 @@ import 'wolf_defender_none.dart'
     if (dart.library.io) 'wolf_defender_native.dart'
     if (dart.library.js_interop) 'wolf_defender_web.dart';
 
-/// The ONNX files of Wolf Defender Edge. Both have int8 weights and an int4
-/// embedding table.
-enum WolfDefenderModel {
-  /// Dynamic int8 activations. Use it on ARM: there, 98.7% of decisions
-  /// match fp32, and it needs about 80 MB less memory than [int8Int4X86].
-  /// On x86 and web, only 94% match.
-  int8Int4('wolf_defender_edge_int8_int4.onnx'),
-
-  /// Int8 weights only, with float activations. Use it on x86 and web: 99% of
-  /// decisions match fp32 on every CPU.
-  int8Int4X86('wolf_defender_edge_int8_int4_x86.onnx');
-
-  const WolfDefenderModel(this.fileName);
-
-  final String fileName;
-
-  /// The file for the CPU of this platform.
-  static WolfDefenderModel get forCurrentPlatform =>
-      wolfDefenderModelForPlatform();
-}
-
 /// The files of Wolf Defender Edge: one model and the tokenizer.
 final class WolfDefenderBundle {
   const WolfDefenderBundle({
@@ -30,17 +9,12 @@ final class WolfDefenderBundle {
     required this.tokenizerPath,
   });
 
-  /// The [model] file and `wolf_defender_edge_tokenizer.bin` in [directory].
-  /// On web, [directory] is a URL. [model] defaults to
-  /// [WolfDefenderModel.forCurrentPlatform].
-  factory WolfDefenderBundle.inDirectory(
-    String directory, {
-    WolfDefenderModel? model,
-  }) {
+  /// [wolfDefenderModelFileName] and [wolfDefenderTokenizerFileName] in
+  /// [directory]. On web, [directory] is a URL.
+  factory WolfDefenderBundle.inDirectory(String directory) {
     final base = '$directory${directory.endsWith('/') ? '' : '/'}';
     return WolfDefenderBundle(
-      modelPath:
-          '$base${(model ?? WolfDefenderModel.forCurrentPlatform).fileName}',
+      modelPath: '$base$wolfDefenderModelFileName',
       tokenizerPath: '$base$wolfDefenderTokenizerFileName',
     );
   }
@@ -60,6 +34,13 @@ final class WolfDefenderBundle {
   @override
   String toString() => 'WolfDefenderBundle($modelPath, $tokenizerPath)';
 }
+
+/// Patronus's `int8_int4_embeddings_x86_weight_only` file: int8 weights, an
+/// int4 embedding table, and float activations. Its decisions match fp32 on
+/// every CPU that fonnx tested. Patronus's other 58 MB file, with dynamic
+/// int8 activations, does not: on x86 and WebAssembly, 94% matched, and it
+/// reversed a reference decision on the ARM CPUs of CI.
+const wolfDefenderModelFileName = 'wolf_defender_edge_int8_weights.onnx';
 
 const wolfDefenderTokenizerFileName = 'wolf_defender_edge_tokenizer.bin';
 

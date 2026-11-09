@@ -23,7 +23,7 @@ const _models = [
   'senseVoice',
   'sileroVad',
   'whisper',
-  'wolfDefender/wolf_defender_edge_int8_int4_x86.onnx',
+  'wolfDefender/wolf_defender_edge_int8_weights.onnx',
   'wolfDefender/wolf_defender_edge_tokenizer.bin',
 ];
 
