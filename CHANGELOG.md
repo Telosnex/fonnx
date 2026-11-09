@@ -1,4 +1,4 @@
-## Unreleased
+## 1.1.0
 
 - Add `WolfDefender`: prompt injection and jailbreak detection with
   Patronus's Wolf Defender Edge (80M parameters, Apache-2.0), on native and
