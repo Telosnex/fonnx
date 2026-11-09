@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "sourceKey": "11db140e6d037a10d8d7029fac96c608ef33a6e4af2c6a399b4a6c13656d8103",
-  "release": "https://github.com/Telosnex/fonnx/releases/tag/native-11db140e6d037a10",
+  "sourceKey": "4e5bde5282d46f971ffe5745ada2e36c514cb9976b3d6039d1d28450ab893558",
+  "release": "https://github.com/Telosnex/fonnx/releases/tag/native-4e5bde5282d46f97",
   "runner": "ubuntu-24.04",
   "toolchain": "onnxruntime-web 1.31.1 (npm), Dart 3.13.1",
   "webVersion": "cc3e352746a55206",
@@ -29,7 +29,7 @@
       "sha256": "8cb3c3152c75fd3997842432a20f216bba8358b5ec8c225da1a8f185cf817d21",
       "bytes": 211536,
       "source": "release",
-      "url": "https://github.com/Telosnex/fonnx/releases/download/native-11db140e6d037a10/web-kokoro_engine.dart.js.gz",
+      "url": "https://github.com/Telosnex/fonnx/releases/download/native-4e5bde5282d46f97/web-kokoro_engine.dart.js.gz",
       "downloadSha256": "b63b32bec4adbb647ae9ab7f53473ed9840b52b318c40ba21137ec0682ffad18"
     },
     {
@@ -109,7 +109,7 @@
       "sha256": "30ed0b5cd1182ede931fea448afb567d4dc705ec957af09f108a2be5f770dac3",
       "bytes": 24738,
       "source": "release",
-      "url": "https://github.com/Telosnex/fonnx/releases/download/native-11db140e6d037a10/web-ort-wasm-simd-threaded.mjs.gz",
+      "url": "https://github.com/Telosnex/fonnx/releases/download/native-4e5bde5282d46f97/web-ort-wasm-simd-threaded.mjs.gz",
       "downloadSha256": "152daf9922f929f182540ca8215f8d3f00c66dd6ed090950450a4b69058932a0"
     },
     {
@@ -117,7 +117,7 @@
       "sha256": "4b884c203b0fa48d057be3332c65513ff85aa3c5bddd6946acc0fab7ecda001d",
       "bytes": 14848852,
       "source": "release",
-      "url": "https://github.com/Telosnex/fonnx/releases/download/native-11db140e6d037a10/web-ort-wasm-simd-threaded.wasm.gz",
+      "url": "https://github.com/Telosnex/fonnx/releases/download/native-4e5bde5282d46f97/web-ort-wasm-simd-threaded.wasm.gz",
       "downloadSha256": "2e0732a6750e924213588bd80dafd60046625a73101c5fb3bdfdd7263a4efde9"
     },
     {
@@ -125,7 +125,7 @@
       "sha256": "c21d9c326d453a4a61398270c804d5979e118540597cb0c07f7b3d64e6098234",
       "bytes": 53725,
       "source": "release",
-      "url": "https://github.com/Telosnex/fonnx/releases/download/native-11db140e6d037a10/web-ort.min.mjs.gz",
+      "url": "https://github.com/Telosnex/fonnx/releases/download/native-4e5bde5282d46f97/web-ort.min.mjs.gz",
       "downloadSha256": "5c7f912c5287b981581c2b56e03a3808c6ef25f0937c9f2f136587e269dcb366"
     },
     {
