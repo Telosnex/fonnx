@@ -46,7 +46,10 @@ jobs:
           key: hf-models-${{ runner.os }}-${{ hashFiles('native_artifacts/manifest.json', 'tool/fetch_hf_models.dart') }}
       - run: dart run tool/fetch_hf_models.dart
       # Pins, models and the FUTO bundle; needs the models.
+      # The token lifts the API rate limit (60 an hour per runner IP).
       - if: env.VERIFY_ARTIFACTS == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: dart run tool/verify_artifacts.dart
       # The tests of tool/test_all.sh.
       - name: Model tests
