@@ -72,6 +72,7 @@ jobs:
             test/models/sense_voice_test.dart \
             test/models/silero_vad_test.dart \
             test/models/whisper_test.dart \
+            test/models/wolf_defender_test.dart \
             test/ort_native_asset_test.dart \
             test/tokenizers/wordpiece_tokenizer_test.dart
           dart test -x perf --concurrency=1 -r expanded test/models/ort_memory_smoke_test.dart

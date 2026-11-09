@@ -37,6 +37,8 @@ Each file has the license of its source model.
 | `sense_voice_small_int8.onnx`, `sense_voice_small_tokens.txt` | [FunAudioLLM/SenseVoiceSmall](https://huggingface.co/FunAudioLLM/SenseVoiceSmall) (Alibaba), int8 export of [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx/releases/tag/asr-models) (2024-07-17) | [FunASR Model License](https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE) |
 | `silero_vad_v6.2.1.onnx` | [Silero VAD v6.2.1](https://github.com/snakers4/silero-vad/releases/tag/v6.2.1) | MIT |
 | `whisper_tiny_decoder.onnx`, `whisper_tiny_encoder.onnx` | [onnx-community/whisper-tiny](https://huggingface.co/onnx-community/whisper-tiny), from [openai/whisper-tiny](https://huggingface.co/openai/whisper-tiny) | MIT |
+| `wolf_defender_edge_int8_int4.onnx`, `wolf_defender_edge_int8_int4_x86.onnx` | [patronus-studio/wolf-defender-prompt-injection-edge](https://huggingface.co/patronus-studio/wolf-defender-prompt-injection-edge) at `a65713895aafa398e71f151f50d33449b477b4c9`: `onnx/int8_int4_embeddings/model.onnx` and `onnx/int8_int4_embeddings_x86_weight_only/model.onnx`, unchanged | Apache-2.0 |
+| `wolf_defender_edge_tokenizer.bin` | `tokenizer.json` of the same revision, converted by fonnx | Apache-2.0 |
 
 ## Other files
 
@@ -56,6 +58,10 @@ The Kokoro files are from Kokoro-82M by hexgrad, used under Apache-2.0.
 fonnx split the onnx-community export into a prosody model and a decoder
 model; the weights are unchanged. The misaki dictionaries, the fallback
 model and the spaCy data are used under their licenses above.
+
+The Wolf Defender files are Wolf Defender Edge by Patronus, used under
+Apache-2.0. The ONNX files are unchanged. fonnx converted the tokenizer to a
+compact binary form; its tokens and merges are unchanged.
 
 The SenseVoice files are the sherpa-onnx export of SenseVoice Small by
 Tongyi Lab, Alibaba, unchanged, used under the FunASR Model License.

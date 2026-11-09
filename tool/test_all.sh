@@ -23,6 +23,7 @@ tests=(
   test/models/sense_voice_test.dart
   test/models/silero_vad_test.dart
   test/models/whisper_test.dart
+  test/models/wolf_defender_test.dart
   test/ort_native_asset_test.dart
   test/tokenizers/wordpiece_tokenizer_test.dart
   test/wordpiece_tokenizer_perf_test.dart

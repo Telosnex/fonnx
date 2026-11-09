@@ -434,6 +434,27 @@
       "bytes": 32904992,
       "commit": "4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979"
     },
+    "example/assets/models/wolfDefender/wolf_defender_edge_int8_int4.onnx": {
+      "path": "example/assets/models/wolfDefender/wolf_defender_edge_int8_int4.onnx",
+      "name": "wolf_defender_edge_int8_int4.onnx",
+      "sha256": "11b1aeea136fbe6fd638ac7a54afa4566f5dae18776c46d3a1e2db7af36df9cc",
+      "bytes": 58127391,
+      "commit": "2d909058c2e1cc7c525799e6dfc51c0a953f6fcf"
+    },
+    "example/assets/models/wolfDefender/wolf_defender_edge_int8_int4_x86.onnx": {
+      "path": "example/assets/models/wolfDefender/wolf_defender_edge_int8_int4_x86.onnx",
+      "name": "wolf_defender_edge_int8_int4_x86.onnx",
+      "sha256": "a27a07ff31c3338a5ebaefe0710597036393b76b0bc709c0a1a34bdfe4c2b013",
+      "bytes": 57953433,
+      "commit": "2d909058c2e1cc7c525799e6dfc51c0a953f6fcf"
+    },
+    "example/assets/models/wolfDefender/wolf_defender_edge_tokenizer.bin": {
+      "path": "example/assets/models/wolfDefender/wolf_defender_edge_tokenizer.bin",
+      "name": "wolf_defender_edge_tokenizer.bin",
+      "sha256": "c8ad6619877d9ccf6149b6b5c9d3e09c826a74df57efbe18ba23be56ca066aa7",
+      "bytes": 3197774,
+      "commit": "2d909058c2e1cc7c525799e6dfc51c0a953f6fcf"
+    },
     "test/models/identity.onnx": {
       "path": "test/models/identity.onnx",
       "sha256": "9fca192f29834ef3db4a60b1561d616dabb4350ce9ef63ef9d69481ac2bb2236",

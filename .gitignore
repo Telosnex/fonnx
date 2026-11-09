@@ -17,6 +17,7 @@ doc/api/
 # Model files from Hugging Face: dart run tool/fetch_hf_models.dart
 example/assets/models/**/*.onnx
 example/assets/models/senseVoice/*.txt
+example/assets/models/wolfDefender/*.bin
 
 # dsstore
 .DS_Store

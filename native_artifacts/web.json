@@ -4,7 +4,7 @@
   "release": "https://github.com/Telosnex/fonnx/releases/tag/native-11db140e6d037a10",
   "runner": "ubuntu-24.04",
   "toolchain": "onnxruntime-web 1.31.1 (npm), Dart 3.13.1",
-  "webVersion": "9b8139d4e531698e",
+  "webVersion": "cc3e352746a55206",
   "files": [
     {
       "name": "fonnx_worker_rpc.js",
@@ -175,6 +175,18 @@
       "sha256": "1ae0017830dbebcdd5ca893d89c73e7a0ef16863849f01dfbb3226bc53af5730",
       "bytes": 8468,
       "source": "lib/web/whisper_worker.js"
+    },
+    {
+      "name": "wolf_defender_init.js",
+      "sha256": "df0dbd19fd1d99ec49eca8f6a634e777e4e3bdae1dd46c46a05ee1cd05d815fc",
+      "bytes": 745,
+      "source": "lib/web/wolf_defender_init.js"
+    },
+    {
+      "name": "wolf_defender_worker.js",
+      "sha256": "9d70f10bf6699ac42de93f59572e1d4aa47ae05a042d08ef2926eb61d0451948",
+      "bytes": 3543,
+      "source": "lib/web/wolf_defender_worker.js"
     }
   ]
 }

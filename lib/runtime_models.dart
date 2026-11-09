@@ -89,6 +89,12 @@ const runtimeModelNamesByPath = <String, String>{
   'sileroVad/silero_vad_v6.2.1.onnx': 'silero_vad_v6.2.1.onnx',
   'whisper/whisper_tiny_decoder.onnx': 'whisper_tiny_decoder.onnx',
   'whisper/whisper_tiny_encoder.onnx': 'whisper_tiny_encoder.onnx',
+  'wolfDefender/wolf_defender_edge_int8_int4.onnx':
+      'wolf_defender_edge_int8_int4.onnx',
+  'wolfDefender/wolf_defender_edge_int8_int4_x86.onnx':
+      'wolf_defender_edge_int8_int4_x86.onnx',
+  'wolfDefender/wolf_defender_edge_tokenizer.bin':
+      'wolf_defender_edge_tokenizer.bin',
 };
 
 /// Maps a runtime-release file name back to its model source path.

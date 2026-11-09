@@ -367,4 +367,22 @@ const prebuiltRuntimeFiles = <String, RuntimeFile>{
     bytes: 32904992,
     url: 'https://huggingface.co/telosnex/fonnx/resolve/4cd3bbfa3d43d88da1ccdd41ddbf3a03baaf3979/whisper_tiny_encoder.onnx',
   ),
+  'wolf_defender_edge_int8_int4.onnx': RuntimeFile(
+    name: 'wolf_defender_edge_int8_int4.onnx',
+    sha256: '11b1aeea136fbe6fd638ac7a54afa4566f5dae18776c46d3a1e2db7af36df9cc',
+    bytes: 58127391,
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/2d909058c2e1cc7c525799e6dfc51c0a953f6fcf/wolf_defender_edge_int8_int4.onnx',
+  ),
+  'wolf_defender_edge_int8_int4_x86.onnx': RuntimeFile(
+    name: 'wolf_defender_edge_int8_int4_x86.onnx',
+    sha256: 'a27a07ff31c3338a5ebaefe0710597036393b76b0bc709c0a1a34bdfe4c2b013',
+    bytes: 57953433,
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/2d909058c2e1cc7c525799e6dfc51c0a953f6fcf/wolf_defender_edge_int8_int4_x86.onnx',
+  ),
+  'wolf_defender_edge_tokenizer.bin': RuntimeFile(
+    name: 'wolf_defender_edge_tokenizer.bin',
+    sha256: 'c8ad6619877d9ccf6149b6b5c9d3e09c826a74df57efbe18ba23be56ca066aa7',
+    bytes: 3197774,
+    url: 'https://huggingface.co/telosnex/fonnx/resolve/2d909058c2e1cc7c525799e6dfc51c0a953f6fcf/wolf_defender_edge_tokenizer.bin',
+  ),
 };

@@ -14,5 +14,6 @@ export 'models/magika/magika.dart';
 export 'models/nemoAsr/nemo_asr.dart';
 export 'models/pyannote/pyannote.dart';
 export 'models/senseVoice/sense_voice.dart';
+export 'models/wolfDefender/wolf_defender.dart';
 export 'models/whisper/whisper.dart';
 export 'src/web_config.dart';

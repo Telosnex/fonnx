@@ -1,3 +1,13 @@
+## Unreleased
+
+- Add `WolfDefender`: prompt injection and jailbreak detection with
+  Patronus's Wolf Defender Edge (80M parameters, Apache-2.0), on native and
+  web. The tokenizer (the 128K-token BPE of mmBERT), the 2048-position
+  windows and Patronus's pooling are in shared Dart; the tokenizer gives the
+  same IDs as Hugging Face `tokenizers` on 4,700 texts. Two 58 MB files: the
+  dynamic int8 file on ARM, and the weight-only int8 file on x86 and web,
+  where the dynamic file matched fp32 on only 94% of decisions.
+
 ## 1.0.0
 
 - First stable release. Requires kiln 1.0.0, whose source key leaves out the pubspec's `version` and `description`, so a release that changes only those needs no new native build.

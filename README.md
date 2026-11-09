@@ -175,6 +175,33 @@ Avg. ms for 1 Mini LM L6 V2 embedding / 200 words.
 - Average of 100 embeddings, after a warmup of 10.
 - Input is mix of lorem ipsum text from 8 languages.
 
+### Prompt injection detection
+
+`WolfDefender` runs [Wolf Defender Edge](https://huggingface.co/patronus-studio/wolf-defender-prompt-injection-edge)
+by Patronus (80M parameters, Apache-2.0). It gives the probability that a
+text, such as an email, a web page or a tool result, has a prompt injection
+or a jailbreak. It was trained mainly on English and German.
+
+```dart
+final defender = WolfDefender.load(
+  WolfDefenderBundle.inDirectory(modelDirectory),
+);
+final result = await defender.classify(emailText);
+if (result.isInjection) { /* ... */ }
+```
+
+`inDirectory` picks the model file for the CPU: the dynamic int8 file on ARM,
+and the weight-only int8 file on x86 and web. On 691 texts, the dynamic file
+matched the fp32 decision on 98.7% on ARM but on only 94% on x86 and web;
+the weight-only file matched on 99% everywhere. Each needs
+`wolf_defender_edge_tokenizer.bin` next to it. All three are runtime
+downloads (`wolfDefender/` in `runtimeModelNamesByPath`).
+
+A text of any length is split into windows of 2046 tokens that overlap by 64.
+On an M4 Max, a 72-token email takes 8 ms, and a full window takes 300 ms
+(dynamic file) or 370 ms (weight-only file). A full window needs about
+600 MB of memory for the attention activations.
+
 # Integrating FONNX
 
 ## Open-vocabulary keyword spotting
@@ -265,7 +292,7 @@ and the example Xcode project shows the required phase ordering.
 
 The model files are on Hugging Face in
 [`telosnex/fonnx`](https://huggingface.co/telosnex/fonnx), not in Git. The
-generated `prebuiltRuntimeFiles` catalog pins the 23 model files: each URL
+generated `prebuiltRuntimeFiles` catalog pins the 63 model files: each URL
 names a Hugging Face commit, and the catalog has each file's size and SHA-256.
 Apps download a model after install:
 
@@ -288,7 +315,7 @@ The tests and the example app read the models in `example/assets/models`.
 To download them there, run:
 
 ```bash
-dart run tool/fetch_hf_models.dart            # all models, 1.5 GB
+dart run tool/fetch_hf_models.dart            # all models, 1.8 GB
 dart run tool/fetch_hf_models.dart whisper    # one directory
 ```
 
