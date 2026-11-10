@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   publish:
-    uses: Telosnex/telosnex_ci_tools/.github/workflows/pub_publish.yml@fd2f9876ef2384fc7841cccd64049f7f5c387c18 # v0.5.13
+    uses: Telosnex/telosnex_ci_tools/.github/workflows/pub_publish.yml@bba81d85dab7716cc288df9877812dd3299ff11e # v0.5.14
     permissions:
       contents: write # the published branch
       id-token: write
