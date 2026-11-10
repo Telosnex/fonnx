@@ -51,14 +51,29 @@ final class WolfDefenderIsolateManager {
     }
   }
 
+  /// Records cross the isolate boundary; the result class is rebuilt here.
   Future<WolfDefenderResult> classify(String text) async {
-    final (probability, tokens, windows) = await _request<(double, int, int)>(
+    final (
+      probability,
+      tokens,
+      windows,
+      scores,
+    ) = await _request<(double, int, int, List<(double, double, int, int)>)>(
       _ClassifyMessage(text),
     );
     return WolfDefenderResult(
       injectionProbability: probability,
       tokens: tokens,
       windows: windows,
+      windowScores: [
+        for (final (benign, injection, start, end) in scores)
+          WolfDefenderWindowScore(
+            benignLogit: benign,
+            injectionLogit: injection,
+            start: start,
+            end: end,
+          ),
+      ],
     );
   }
 
@@ -118,6 +133,10 @@ void _entryPoint(SendPort handshake) {
             result.injectionProbability,
             result.tokens,
             result.windows,
+            [
+              for (final w in result.windowScores)
+                (w.benignLogit, w.injectionLogit, w.start, w.end),
+            ],
           ));
         case _CloseMessage():
           await engine?.close();

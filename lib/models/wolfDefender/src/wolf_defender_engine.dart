@@ -37,7 +37,8 @@ final class WolfDefenderEngine {
   Future<void> close() => _backend.close();
 
   Future<WolfDefenderResult> classify(String text) async {
-    final tokens = _tokenizer.encode(text);
+    final starts = <int>[];
+    final tokens = _tokenizer.encode(text, starts: starts);
     final windows = wolfDefenderWindows(tokens.length);
     final logits = <Float32List>[];
     for (final (start, end) in windows) {
@@ -57,8 +58,35 @@ final class WolfDefenderEngine {
       injectionProbability: wolfDefenderPool(logits),
       tokens: tokens.length,
       windows: windows.length,
+      windowScores: [
+        for (var w = 0; w < windows.length; w++)
+          WolfDefenderWindowScore(
+            benignLogit: logits[w][0],
+            injectionLogit: logits[w][1],
+            start: wolfDefenderWindowStart(starts, windows[w].$1, text.length),
+            end: wolfDefenderWindowEnd(starts, windows[w].$2, text.length),
+          ),
+      ],
     );
   }
+}
+
+/// The text offset where the window that starts at token [token] starts:
+/// the start of the word of that token. [starts] holds the word offset of
+/// each token, as [WolfDefenderTokenizer.encode] gives it.
+int wolfDefenderWindowStart(List<int> starts, int token, int textLength) =>
+    token < starts.length ? starts[token] : textLength;
+
+/// The text offset where the window that ends before token [token] ends:
+/// the end of the word of its last token. A window can end inside a word;
+/// its text then includes the whole word.
+int wolfDefenderWindowEnd(List<int> starts, int token, int textLength) {
+  if (token <= 0) return 0;
+  final last = starts[token - 1];
+  for (var k = token; k < starts.length; k++) {
+    if (starts[k] > last) return starts[k];
+  }
+  return textLength;
 }
 
 /// The token ranges of the windows of [tokens] tokens. Each has at most 2046

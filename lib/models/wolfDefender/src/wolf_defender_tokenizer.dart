@@ -150,7 +150,11 @@ final class WolfDefenderTokenizer {
   String token(int id) => _tokens[id];
 
   /// The IDs of [text], without special tokens at the ends.
-  List<int> encode(String text) {
+  ///
+  /// If [starts] is given, it gets one entry for each ID: the UTF-16 offset
+  /// in [text] of the word or added token that the ID is part of. Tokens of
+  /// one word share its offset, so the offsets do not decrease.
+  List<int> encode(String text, {List<int>? starts}) {
     final out = <int>[];
     var start = 0;
     var i = 0;
@@ -158,8 +162,9 @@ final class WolfDefenderTokenizer {
       if (_addedFirstUnits.contains(text.codeUnitAt(i))) {
         final match = _addedAt(text, i);
         if (match != null) {
-          _encodePart(text.substring(start, i), out);
+          _encodePart(text.substring(start, i), out, start, starts);
           out.add(match.$1);
+          starts?.add(i);
           i += match.$2;
           start = i;
           continue;
@@ -167,7 +172,7 @@ final class WolfDefenderTokenizer {
       }
       i++;
     }
-    _encodePart(text.substring(start), out);
+    _encodePart(text.substring(start), out, start, starts);
     return out;
   }
 
@@ -183,18 +188,34 @@ final class WolfDefenderTokenizer {
     return null;
   }
 
-  void _encodePart(String part, List<int> out) {
+  /// [part] starts at [offset] in the text.
+  void _encodePart(String part, List<int> out, int offset, List<int>? starts) {
     if (part.isEmpty) return;
     var normalized = part.replaceAll(' ', metaspace);
-    if (!normalized.startsWith(metaspace)) normalized = '$metaspace$normalized';
+    // A prepended metaspace has no character in the text.
+    var shift = 0;
+    if (!normalized.startsWith(metaspace)) {
+      normalized = '$metaspace$normalized';
+      shift = 1;
+    }
+    void word(int start, int end) {
+      final before = out.length;
+      _encodeWord(normalized.substring(start, end), out);
+      if (starts == null) return;
+      final at = offset + (start - shift < 0 ? 0 : start - shift);
+      for (var k = before; k < out.length; k++) {
+        starts.add(at);
+      }
+    }
+
     var start = 0;
     for (var i = 1; i < normalized.length; i++) {
       if (normalized.codeUnitAt(i) == 0x2581) {
-        _encodeWord(normalized.substring(start, i), out);
+        word(start, i);
         start = i;
       }
     }
-    _encodeWord(normalized.substring(start), out);
+    word(start, normalized.length);
   }
 
   void _encodeWord(String word, List<int> out) {

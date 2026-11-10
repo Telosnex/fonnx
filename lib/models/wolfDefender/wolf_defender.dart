@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'wolf_defender_none.dart'
     if (dart.library.io) 'wolf_defender_native.dart'
     if (dart.library.js_interop) 'wolf_defender_web.dart';
@@ -44,12 +46,41 @@ const wolfDefenderModelFileName = 'wolf_defender_edge_int8_weights.onnx';
 
 const wolfDefenderTokenizerFileName = 'wolf_defender_edge_tokenizer.bin';
 
+/// The model's output for one window of a text.
+final class WolfDefenderWindowScore {
+  const WolfDefenderWindowScore({
+    required this.benignLogit,
+    required this.injectionLogit,
+    required this.start,
+    required this.end,
+  });
+
+  final double benignLogit;
+  final double injectionLogit;
+
+  /// The UTF-16 range of the window in the text: `text.substring(start,
+  /// end)`. It is extended to whole words, so adjacent windows overlap by
+  /// their 64 shared tokens and up to one word more.
+  final int start;
+  final int end;
+
+  /// The probability of this window alone: the softmax of its logits.
+  double get injectionProbability =>
+      1 / (1 + math.exp(benignLogit - injectionLogit));
+
+  @override
+  String toString() =>
+      'WolfDefenderWindowScore(${injectionProbability.toStringAsFixed(6)}, '
+      '$start-$end)';
+}
+
 /// The classification of one text.
 final class WolfDefenderResult {
   const WolfDefenderResult({
     required this.injectionProbability,
     required this.tokens,
     required this.windows,
+    this.windowScores = const [],
   });
 
   /// The probability, 0 to 1, that the text contains a prompt injection or
@@ -64,6 +95,10 @@ final class WolfDefenderResult {
 
   /// The model runs: one per 2046 tokens, with an overlap of 64.
   final int windows;
+
+  /// The output of each window, in text order. [injectionProbability]
+  /// combines them. Its length is [windows].
+  final List<WolfDefenderWindowScore> windowScores;
 
   @override
   String toString() =>
