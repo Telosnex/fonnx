@@ -38,7 +38,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq clang cmake ninja-build pkg-config libgtk-3-dev xvfb > /dev/null
-      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@c356a8d59e643d5fc8c552950fdd45c7e3bfea7f # v0.5.12
+      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@fd2f9876ef2384fc7841cccd64049f7f5c387c18 # v0.5.13
       - run: flutter pub get
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -135,7 +135,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@c356a8d59e643d5fc8c552950fdd45c7e3bfea7f # v0.5.12
+      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@fd2f9876ef2384fc7841cccd64049f7f5c387c18 # v0.5.13
       - run: flutter pub get
       - run: dart run kiln:web install-dev
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -144,7 +144,7 @@ jobs:
           key: hf-models-${{ runner.os }}-${{ hashFiles('native_artifacts/manifest.json', 'tool/fetch_hf_models.dart') }}
       # test/web_models links to example/assets/models.
       - run: dart run tool/fetch_hf_models.dart
-      - uses: Telosnex/telosnex_ci_tools/actions/dart-test-browser@c356a8d59e643d5fc8c552950fdd45c7e3bfea7f # v0.5.12
+      - uses: Telosnex/telosnex_ci_tools/actions/dart-test-browser@fd2f9876ef2384fc7841cccd64049f7f5c387c18 # v0.5.13
         with:
           platform: ${{ env.BROWSER }}
           compiler: ${{ env.COMPILER }}
@@ -185,9 +185,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@c356a8d59e643d5fc8c552950fdd45c7e3bfea7f # v0.5.12
+      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@fd2f9876ef2384fc7841cccd64049f7f5c387c18 # v0.5.13
       - run: flutter pub get
-      - uses: Telosnex/telosnex_ci_tools/actions/ios-simulator-boot@c356a8d59e643d5fc8c552950fdd45c7e3bfea7f # v0.5.12
+      - uses: Telosnex/telosnex_ci_tools/actions/ios-simulator-boot@fd2f9876ef2384fc7841cccd64049f7f5c387c18 # v0.5.13
         id: simulator
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -198,7 +198,7 @@ jobs:
       # (flutter build ios --simulator): its generic destination does not
       # match flutter test's -destination id=<udid>, and Xcode rebuilt all.
       # plugin_integration_test opens an ONNX Runtime session first.
-      - uses: Telosnex/telosnex_ci_tools/actions/ios-flutter-test@c356a8d59e643d5fc8c552950fdd45c7e3bfea7f # v0.5.12
+      - uses: Telosnex/telosnex_ci_tools/actions/ios-flutter-test@fd2f9876ef2384fc7841cccd64049f7f5c387c18 # v0.5.13
         with:
           working-directory: example
           target: integration_test/ios_all.dart
@@ -219,9 +219,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@c356a8d59e643d5fc8c552950fdd45c7e3bfea7f # v0.5.12
+      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@fd2f9876ef2384fc7841cccd64049f7f5c387c18 # v0.5.13
       - run: flutter pub get
-      - uses: Telosnex/telosnex_ci_tools/actions/android-emulator@c356a8d59e643d5fc8c552950fdd45c7e3bfea7f # v0.5.12
+      - uses: Telosnex/telosnex_ci_tools/actions/android-emulator@fd2f9876ef2384fc7841cccd64049f7f5c387c18 # v0.5.13
         id: emulator
         with:
           api-level: '36'
@@ -261,14 +261,14 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@c356a8d59e643d5fc8c552950fdd45c7e3bfea7f # v0.5.12
+      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@fd2f9876ef2384fc7841cccd64049f7f5c387c18 # v0.5.13
       - run: flutter pub get
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: example/assets/models/**/*.onnx
           key: hf-models-${{ runner.os }}-${{ hashFiles('native_artifacts/manifest.json', 'tool/fetch_hf_models.dart') }}
       - run: dart run tool/fetch_hf_models.dart
-      - uses: Telosnex/telosnex_ci_tools/actions/android-test-apks@c356a8d59e643d5fc8c552950fdd45c7e3bfea7f # v0.5.12
+      - uses: Telosnex/telosnex_ci_tools/actions/android-test-apks@fd2f9876ef2384fc7841cccd64049f7f5c387c18 # v0.5.13
         with:
           working-directory: example
 
@@ -281,12 +281,12 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@c356a8d59e643d5fc8c552950fdd45c7e3bfea7f # v0.5.12
-      - uses: Telosnex/telosnex_ci_tools/actions/download-artifact@c356a8d59e643d5fc8c552950fdd45c7e3bfea7f # v0.5.12
+      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@fd2f9876ef2384fc7841cccd64049f7f5c387c18 # v0.5.13
+      - uses: Telosnex/telosnex_ci_tools/actions/download-artifact@fd2f9876ef2384fc7841cccd64049f7f5c387c18 # v0.5.13
         with:
           name: android-test-apks
           path: ${{ runner.temp }}/apks
-      - uses: Telosnex/telosnex_ci_tools/actions/android-arm64-container@c356a8d59e643d5fc8c552950fdd45c7e3bfea7f # v0.5.12
+      - uses: Telosnex/telosnex_ci_tools/actions/android-arm64-container@fd2f9876ef2384fc7841cccd64049f7f5c387c18 # v0.5.13
         with:
           apks: ${{ runner.temp }}/apks
 
@@ -300,8 +300,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@c356a8d59e643d5fc8c552950fdd45c7e3bfea7f # v0.5.12
+      - uses: Telosnex/telosnex_ci_tools/actions/setup-flutter@fd2f9876ef2384fc7841cccd64049f7f5c387c18 # v0.5.13
       - run: flutter pub get
-      - uses: Telosnex/telosnex_ci_tools/actions/android-arm64-chroot@c356a8d59e643d5fc8c552950fdd45c7e3bfea7f # v0.5.12
+      - uses: Telosnex/telosnex_ci_tools/actions/android-arm64-chroot@fd2f9876ef2384fc7841cccd64049f7f5c387c18 # v0.5.13
       - name: ONNX Runtime session on arm64
         run: tool/test_android_artifacts.sh
