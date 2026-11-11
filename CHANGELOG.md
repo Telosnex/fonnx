@@ -1,3 +1,9 @@
+## 1.2.0
+
+- `WolfDefenderResult.windowScores`: the logits, probability, and UTF-16
+  text range of each window, in text order. An app can show the part of a
+  long text that has the highest score.
+
 ## 1.1.0
 
 - Add `WolfDefender`: prompt injection and jailbreak detection with
