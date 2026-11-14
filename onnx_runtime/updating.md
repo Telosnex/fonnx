@@ -1,7 +1,9 @@
 # Updating ONNX Runtime
 
 FONNX ships ONNX Runtime (ORT) through `hook/build.dart`. No ORT binaries are
-tracked in Git. The `Upstream watch` workflow alerts when a newer ORT is out.
+tracked in Git. The `Upstream watch` workflow alerts when a newer minor ORT release is on
+GitHub, Maven and npm (`.github/ort_watch.dart`). It also alerts when a
+release has waited more than 14 days for Maven or npm.
 
 The 1.27.0 → 1.31.1 update ([#34](https://github.com/Telosnex/fonnx/pull/34))
 is a worked example of everything below.

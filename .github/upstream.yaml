@@ -1,6 +1,7 @@
 # Upstream sources, checked daily by the Upstream watch workflow
 # (telosnex_ci_tools, lib/src/upstream.dart). Set `seen` to skip an update.
 sources:
+  # An update is a release on GitHub, Maven and npm, as updating.md needs;
+  # see the script.
   - name: microsoft/onnxruntime
-    tags: https://github.com/microsoft/onnxruntime.git
-    pin: {file: native_artifacts/upstream_ort.json, pattern: '"version":\s*"([0-9.]+)"'}
+    run: dart .github/ort_watch.dart
