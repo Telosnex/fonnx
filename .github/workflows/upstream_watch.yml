@@ -8,7 +8,12 @@ on:
     - cron: '23 7 * * *'
   push:
     branches: [main]
-    paths: [.github/upstream.yaml]
+    # Also the files that set the pin, so an ORT update re-checks it.
+    paths:
+      - .github/ort_watch.dart
+      - .github/upstream.yaml
+      - .github/workflows/upstream_watch.yml
+      - native_artifacts/upstream_ort.json
   workflow_dispatch:
 
 permissions:
