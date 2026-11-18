@@ -21,44 +21,44 @@
       "sha256": "2c44772076e31e63cd15a111ebcd4fd52a4204469526ad52d5f9dffeb173b85a"
     },
     {
-      "name": "onnxruntime-linux-aarch64-1.31.1",
+      "name": "onnxruntime-1.31.1-linux-arm64-libonnxruntime.so",
       "targets": [
         "linux-arm64"
       ],
-      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.31.1/onnxruntime-linux-aarch64-1.31.1.tgz",
-      "sha256": "5317505e2da99be65f8e2775ba3c2afd6d2961fd78aba1bd8f56159f48820c78"
+      "url": "https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.31.1-desktop/onnxruntime-1.31.1-linux-arm64-libonnxruntime.so.gz",
+      "sha256": "15944c5844097b59c0268a9f1b941ffa00f3e1632ad74e9cc0ea54ba61c16fb8"
     },
     {
-      "name": "onnxruntime-linux-x64-1.31.1",
+      "name": "onnxruntime-1.31.1-linux-x64-libonnxruntime.so",
       "targets": [
         "linux-x64"
       ],
-      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.31.1/onnxruntime-linux-x64-1.31.1.tgz",
-      "sha256": "c849e36a1ef3e22d4ff217b9d1ce4a3cf5b9467b975610913ae959ad5b16bdc9"
+      "url": "https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.31.1-desktop/onnxruntime-1.31.1-linux-x64-libonnxruntime.so.gz",
+      "sha256": "db343ca7bd53afb62a86258edbed680a3eed5245091c00772ac3014ab39bd7c6"
+    },
+    {
+      "name": "onnxruntime-1.31.1-windows-arm64-onnxruntime.dll",
+      "targets": [
+        "windows-arm64"
+      ],
+      "url": "https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.31.1-desktop/onnxruntime-1.31.1-windows-arm64-onnxruntime.dll.gz",
+      "sha256": "54a5d90910d45ab3e476bbf69a947fdb8b76b26d8493b7bbff17c74f89675eb4"
+    },
+    {
+      "name": "onnxruntime-1.31.1-windows-x64-onnxruntime.dll",
+      "targets": [
+        "windows-x64"
+      ],
+      "url": "https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.31.1-desktop/onnxruntime-1.31.1-windows-x64-onnxruntime.dll.gz",
+      "sha256": "51c7105ce4fa752f26bbaa947ecae3a9e889ca46e022504a1dcca02310df458a"
     },
     {
       "name": "onnxruntime-osx-arm64-1.31.1",
       "targets": [
         "macos-arm64"
       ],
-      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.31.1/onnxruntime-osx-arm64-1.31.1.tgz",
+      "url": "https://github.com/Telosnex/fonnx/releases/download/native-assets-ort-1.31.1-desktop/onnxruntime-osx-arm64-1.31.1.tgz",
       "sha256": "2e1344a1926ee50eb25b38153cb6992c3567515aef0e677a1a520a1798896d6f"
-    },
-    {
-      "name": "onnxruntime-win-arm64-1.31.1",
-      "targets": [
-        "windows-arm64"
-      ],
-      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.31.1/onnxruntime-win-arm64-1.31.1.zip",
-      "sha256": "817f4129073f84f81cde3ff92b1a4e06d007691e7208deed08a8b6d6df143f7f"
-    },
-    {
-      "name": "onnxruntime-win-x64-1.31.1",
-      "targets": [
-        "windows-x64"
-      ],
-      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.31.1/onnxruntime-win-x64-1.31.1.zip",
-      "sha256": "5869e26bb25314375f2d5ef1877e3ea06b1543d6c710e6e4a1ec2f7177ab4b2c"
     }
   ]
 }

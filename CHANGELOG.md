@@ -1,3 +1,11 @@
+## 1.2.1
+
+- Linux, macOS and Windows download ONNX Runtime 1.31.1 from a Telosnex/fonnx
+  release. Microsoft's onnxruntime repository left GitHub on 2026-11-18, and
+  its release downloads stopped working. The libraries are the same files
+  (same SHA-256): the original macOS archive, and the Linux and Windows
+  libraries from Microsoft's NuGet package.
+
 ## 1.2.0
 
 - `WolfDefenderResult.windowScores`: the logits, probability, and UTF-16
