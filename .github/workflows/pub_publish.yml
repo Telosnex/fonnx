@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   publish:
-    uses: Telosnex/telosnex_ci_tools/.github/workflows/pub_publish.yml@34a964be5b5185323eabfd20292dc6104c3284eb # flutter-3.50 canary
+    uses: Telosnex/telosnex_ci_tools/.github/workflows/pub_publish.yml@34a964be5b5185323eabfd20292dc6104c3284eb # v0.5.24-rc.1
     permissions:
       contents: write # the published branch
       id-token: write
