@@ -32,7 +32,10 @@ jobs:
       - run: git ls-files 'lib/*.dart' 'test/*.dart' 'tool/*.dart' | grep -v '\.g\.dart$' | xargs dart format --output=none --set-exit-if-changed
       # The package only: the example's assets are the models (Integration).
       - run: dart analyze --fatal-warnings lib test tool
+      # Authenticated: anonymous GitHub API calls share a small rate limit.
       - run: dart run kiln:check
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - run: dart run kiln:web install-dev
       # The Node test runs the magika model (8 MB).
       - run: dart run tool/fetch_hf_models.dart magika
